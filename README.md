@@ -6,7 +6,7 @@ http://www.textangular.com
 ##How to Use:
 
 1. Include ```textAngular.js``` in your project, alternatively grab all this code and throw it in your "```directives.js```" module file.
-2. Create a div or something, and add the text-angular directive to it. ALSO add a ```text-angular-name="<YOUR TEXT EDITOR NAME>"```
+2. Create a div or something, and add the text-angular directive to it. **Also** add a ```text-angular-name="<YOUR TEXT EDITOR NAME>"```
 3. Create a textAngularOpts object and bind it to your local scope in the controller you want controlling textAngular
 It should look something like:
 
@@ -16,8 +16,8 @@ $scope.textAngularOpts = {
 }
 ```
 4. **If you want all editors to have individual settings**: Proceed to 6. Otherwise go to 7.
-5. Create the textAngularEditors property manually (it will get created regardless). Then add to it, a new property with the name of your editor you chose earlier,
-if it was "coolMonkeyMan" it will look like this:
+5. Create the ```textAngularEditors``` property manually (it will get created regardless, if you choose not to apply individual settings).
+6. Then add to it, a new property with the name of your editor you chose earlier. For instance, if it was "coolMonkeyMan" it will look like this:
 
 ```javascript
 $scope.textAngularOpts = {
