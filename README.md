@@ -59,6 +59,7 @@ toolbar : [
 title ```<STRING>``` Can be an angular express, html, or text. Use this to add icons to each tool i,e ```<i class='icon-code'></i>```
 name ```<STRING>``` the command, the tool name, has to be one of the following:
 ```
+html <- this one is used to toggle the html view, so i'd probably keep it ;-)
 h1
 h2
 h3
