@@ -15,9 +15,9 @@ $scope.textAngularOpts = {
 ..options go here..
 }
 ```
-4. **If you want all editors to have individual settings**: Proceed to 6. Otherwise go to 7.
-5. Create the ```textAngularEditors``` property manually (it will get created regardless, if you choose not to apply individual settings).
-6. Then add to it, a new property with the name of your editor you chose earlier. For instance, if it was "coolMonkeyMan" it will look like this:
+1. **If you want all editors to have individual settings**: Proceed to 2. Otherwise go to 3.
+2. Create the ```textAngularEditors``` property manually (it will get created regardless, if you choose not to apply individual settings).
+3. Then add to it, a new property with the name of your editor you chose earlier. For instance, if it was "coolMonkeyMan" it will look like this:
 
 ```javascript
 $scope.textAngularOpts = {
