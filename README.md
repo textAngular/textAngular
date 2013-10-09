@@ -31,7 +31,7 @@ coolMonkeyMan : {
 ```
 7. Globally inherited settings for each editor or individual settings? Either way you'll need to supply some options!
 
-**OPTIONS
+**Global Options
 **html** <STRING> the default html to show in the editor on load (also will be the property to watch for HTML changes!!!)
 **toolbar** <ARRAY of OBJECTS> holds the toolbar items to configure, more on that later
 **disableStyle** <BOOLEAN> disable all styles on this editor
@@ -51,7 +51,7 @@ toolbar : [
 ]
 ```
 
-###OPTIONS
+###Toolbar Options
 title ```<STRING>``` Can be an angular express, html, or text. Use this to add icons to each tool i,e ```<i class='icon-code'></i>```
 name ```<STRING>``` the command, the tool name, has to be one of the following:
 ```
@@ -103,7 +103,7 @@ toolbarItems : {
 }
 ```
 
-####OPTIONS
+####Theme Options
 
 **editor** ```<OBJECT>``` the actual editor element
 
@@ -116,7 +116,7 @@ toolbarItems : {
 **insertFormBtn** ```<OBJECT>``` the button that submits the insert stuff
 
 
-####HOW TO GET THE HTML
+####How to get the Editor Html
 
 To actually get the model (watch or bind),
 simply follow this model:
@@ -136,3 +136,11 @@ $scope.$watch('textAngularOpts.textAngularEditors.<YOUR EDITORS NAME>.html', fun
 console.log("My new html is: "+newHTML);
 });
 ```
+
+####Issues?
+
+textAngular uses ```execCommand``` for the rich-text functionalty. 
+That being said, its still a fairly experimental browser feature-set, and may not behave the same in all browsers.
+I've tested in FF, chrome and IE10 and its works as expected. 
+If you find something, please let me know.
+Throw me a message, or submit a issue request!
