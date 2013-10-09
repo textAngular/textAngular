@@ -5,8 +5,8 @@ http://www.textangular.com
 
 ##How to Use:
 
-1. Include textAngular.js in your project, alternatively grab all this code and throw it in your "directives.js" module file.
-2. Create a div or something, and add the text-angular directive to it. ALSO add a text-angular-name="<YOUR TEXT EDITOR NAME>"
+1. Include ```textAngular.js``` in your project, alternatively grab all this code and throw it in your "```directives.js```" module file.
+2. Create a div or something, and add the text-angular directive to it. ALSO add a ```text-angular-name="<YOUR TEXT EDITOR NAME>"```
 3. Create a textAngularOpts object and bind it to your local scope in the controller you want controlling textAngular
 It should look something like:
 
@@ -52,8 +52,8 @@ toolbar : [
 ```
 
 ###OPTIONS
-title <STRING> Can be an angular express, html, or text. Use this to add icons to each tool i,e "<i class='icon-code'></i>"
-name <STRING> the command, the tool name, has to be one of the following:
+title ```<STRING>``` Can be an angular express, html, or text. Use this to add icons to each tool i,e ```<i class='icon-code'></i>```
+name ```<STRING>``` the command, the tool name, has to be one of the following:
 ```
 h1
 h2
@@ -105,11 +105,15 @@ toolbarItems : {
 
 ####OPTIONS
 
-**editor** -> the actual editor element
-**toolbar** -> the toolbar wrapper
-**toolbarItems** -> each toolbar item
-**insertForm** -> the form that holds the insert stuff
-**insertFormBtn** -> the button that submits the insert stuff
+**editor** ```<OBJECT>``` the actual editor element
+
+**toolbar** ```<OBJECT>``` the toolbar wrapper
+
+**toolbarItems** ```<OBJECT>``` each toolbar item
+
+**insertForm** ```<OBJECT>``` the form that holds the insert stuff
+
+**insertFormBtn** ```<OBJECT>``` the button that submits the insert stuff
 
 
 ####HOW TO GET THE HTML
@@ -117,7 +121,7 @@ toolbarItems : {
 To actually get the model (watch or bind),
 simply follow this model:
 
-textAngularOpts.textAngularEditors.<YOUR EDITORS NAME>.html
+```textAngularOpts.textAngularEditors.<YOUR EDITORS NAME>.html```
 
 so to bind the expression:
 
@@ -125,7 +129,7 @@ so to bind the expression:
 {{textAngularOpts.textAngularEditors.<YOUR EDITORS NAME>.html}}
 ```
 
-or to $watch for changes:
+or to ```$watch``` for changes:
 
 ```javascript
 $scope.$watch('textAngularOpts.textAngularEditors.<YOUR EDITORS NAME>.html', function(oldHTML, newHTML){
