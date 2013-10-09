@@ -9,7 +9,7 @@ http://www.textangular.com
 2. Include ``textAngular`` in your main app module.
 4. Create an element of some kind. (div, whatever, doesn't matter)
 5. Add the ```text-angular``` directive to it.
-6. Add a ```text-angular-name="<YOUR TEXT EDITOR NAME>"```
+6. Add a ```text-angular-name="<YOUR TEXT EDITOR NAME>"``` directive to the element, as well.
 5. Create a textAngularOpts object and bind it to your local scope in the controller you want controlling textAngular
 It should look something like:
 
@@ -65,6 +65,14 @@ toolbar : [
 ..and more
 ]
 ```
+####Note
+
+If you want to use ultra-sweet icons in the menu (like I did in the example) 
+make sure to include fontAwesome!
+
+And then use the proper syntax for the titles i,e ```<i class='icon-<icon name>'></i>```
+
+Get it at: www.bootstrapcdn.com/#fontawesome
 
 
 ###Toolbar Options
