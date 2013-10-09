@@ -15,7 +15,7 @@ $scope.textAngularOpts = {
 ..options go here..
 }
 ```
-4. *If you want all editors to have individual settings*: Proceed to 6. Otherwise go to 7.
+4. **If you want all editors to have individual settings**: Proceed to 6. Otherwise go to 7.
 5. Create the textAngularEditors property manually (it will get created regardless). Then add to it, a new property with the name of your editor you chose earlier,
 if it was "coolMonkeyMan" it will look like this:
 
@@ -32,10 +32,10 @@ coolMonkeyMan : {
 7. Globally inherited settings for each editor or individual settings? Either way you'll need to supply some options!
 
 **OPTIONS
-*html* <STRING> the default html to show in the editor on load (also will be the property to watch for HTML changes!!!)
-*toolbar* <ARRAY of OBJECTS> holds the toolbar items to configure, more on that later
-*disableStyle* <BOOLEAN> disable all styles on this editor
-*theme* <OBJECT of OBJECTS> holds the theme objects, more on that later
+**html** <STRING> the default html to show in the editor on load (also will be the property to watch for HTML changes!!!)
+**toolbar** <ARRAY of OBJECTS> holds the toolbar items to configure, more on that later
+**disableStyle** <BOOLEAN> disable all styles on this editor
+**theme** <OBJECT of OBJECTS> holds the theme objects, more on that later
 
 ###Toolbar Settings
 The list of available tools in textAngular is large.
@@ -105,11 +105,11 @@ toolbarItems : {
 
 ####OPTIONS
 
-*editor* -> the actual editor element
-*toolbar* -> the toolbar wrapper
-*toolbarItems* -> each toolbar item
-*insertForm* -> the form that holds the insert stuff
-*insertFormBtn* -> the button that submits the insert stuff
+**editor** -> the actual editor element
+**toolbar** -> the toolbar wrapper
+**toolbarItems** -> each toolbar item
+**insertForm** -> the form that holds the insert stuff
+**insertFormBtn** -> the button that submits the insert stuff
 
 
 ####HOW TO GET THE HTML
