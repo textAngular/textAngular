@@ -6,8 +6,11 @@ http://www.textangular.com
 ##How to Use:
 
 1. Include ```textAngular.js``` in your project, alternatively grab all this code and throw it in your "```directives.js```" module file.
-2. Include ``textAngular`` in your main app module, then Create a div or something, and add the text-angular directive to it. **Also** add a ```text-angular-name="<YOUR TEXT EDITOR NAME>"```
-3. Create a textAngularOpts object and bind it to your local scope in the controller you want controlling textAngular
+2. Include ``textAngular`` in your main app module.
+4. Create a div or something
+5. Add the text-angular directive to it.
+6. Add a ```text-angular-name="<YOUR TEXT EDITOR NAME>"```
+5. Create a textAngularOpts object and bind it to your local scope in the controller you want controlling textAngular
 It should look something like:
 
 ```javascript
