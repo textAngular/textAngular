@@ -22,13 +22,13 @@ $scope.textAngularOpts = {
 ```javascript
 $scope.textAngularOpts = {
 
-..options for ALL editors, unless they have their own property...
+<global options go here>
 
 textAngularEditors :
 {
   **coolMonkeyMan** : {
 
-  ..options for this editor ALONE ...
+  <editor specific options go here>
 
 }
 }
@@ -85,7 +85,7 @@ insertHtml
 createLink
 ```
 
-####Theming the textAngular
+####Theming textAngular
 Every piece of textAngular has a specific class you can grab and style in CSS.
 However, you can also use the theme object to specify styling.
 Each property takes a normal, jQuery-like CSS property object.
