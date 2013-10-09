@@ -31,11 +31,15 @@ coolMonkeyMan : {
 ```
 7. Globally inherited settings for each editor or individual settings? Either way you'll need to supply some options!
 
-**Global Options
-**html** <STRING> the default html to show in the editor on load (also will be the property to watch for HTML changes!!!)
-**toolbar** <ARRAY of OBJECTS> holds the toolbar items to configure, more on that later
-**disableStyle** <BOOLEAN> disable all styles on this editor
-**theme** <OBJECT of OBJECTS> holds the theme objects, more on that later
+###Global Options
+
+**html** ```<STRING>``` the default html to show in the editor on load (also will be the property to watch for HTML changes!!!)
+
+**toolbar** ```<ARRAY of OBJECTS>``` holds the toolbar items to configure, more on that later
+
+**disableStyle** ```<BOOLEAN>``` disable all styles on this editor
+
+**theme** ```<OBJECT of OBJECTS>``` holds the theme objects, more on that later
 
 ###Toolbar Settings
 The list of available tools in textAngular is large.
