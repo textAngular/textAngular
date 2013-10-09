@@ -1,7 +1,7 @@
 textAngular
 ===========
 
-A radically powerful Text-Editor/Wysiwyg editor for Angular.js! Create multiple editor instances, two-way-bind HTML content, watch editors for changes and more!
+http://www.textangular.com
 
 ##How to Use:
 
@@ -10,7 +10,7 @@ A radically powerful Text-Editor/Wysiwyg editor for Angular.js! Create multiple 
 3.Create a textAngularOpts object and bind it to your local scope in the controller you want controlling textAngular
 It should look something like:
 
-```
+```java-script
 $scope.textAngularOpts = {
 ..options go here..
 }
@@ -19,7 +19,7 @@ $scope.textAngularOpts = {
 5. Create the textAngularEditors property manually (it will get created regardless). Then add to it, a new property with the name of your editor you chose earlier,
 if it was "coolMonkeyMan" it will look like this:
 
-```
+```java-script
 $scope.textAngularOpts = {
 ..options for ALL editors, unless they have their own property...
 textAngularEditors : {
@@ -31,7 +31,7 @@ coolMonkeyMan : {
 ```
 7. Globally inherited settings for each editor or individual settings? Either way you'll need to supply some options!
 
-**OPTIONS**
+**OPTIONS
 *html* <STRING> the default html to show in the editor on load (also will be the property to watch for HTML changes!!!)
 *toolbar* <ARRAY of OBJECTS> holds the toolbar items to configure, more on that later
 *disableStyle* <BOOLEAN> disable all styles on this editor
@@ -42,16 +42,19 @@ The list of available tools in textAngular is large.
 
 Add tools to the toolbar like:
 
+```java-script
 toolbar : [
 {title : "<i class='icon-code'></i>", name : "html"},
 {title : "h1", name : "h1"},
 {title : "h2", name : "h2"}
 ..and more
 ]
-###OPTIONS**
+```
+
+###OPTIONS
 title <STRING> Can be an angular express, html, or text. Use this to add icons to each tool i,e "<i class='icon-code'></i>"
 name <STRING> the command, the tool name, has to be one of the following:
-
+```
 h1
 h2
 h3
@@ -71,13 +74,15 @@ clear
 insertImage
 insertHtml
 createLink
+```
 
-
-####Theme settings**
+####Theme settings
 Every piece of textAngular has a specific class you can grab and style in CSS.
 However, you can also use the theme object to specify styling.
 Each property takes a normal, jQuery-like CSS property object.
 Heres an example :
+
+```java-script
 theme : {
 editor : {
 "background" : "white",
@@ -96,8 +101,9 @@ toolbarItems : {
 }
 }
 }
+```
 
-####OPTIONS**
+####OPTIONS
 
 editor -> the actual editor element
 toolbar -> the toolbar wrapper
@@ -106,7 +112,7 @@ insertForm -> the form that holds the insert stuff
 insertFormBtn -> the button that submits the insert stuff
 
 
-####HOW TO GET THE HTML**
+####HOW TO GET THE HTML
 
 To actually get the model (watch or bind),
 simply follow this model:
@@ -115,11 +121,14 @@ textAngularOpts.textAngularEditors.<YOUR EDITORS NAME>.html
 
 so to bind the expression:
 
+```java-script
 {{textAngularOpts.textAngularEditors.<YOUR EDITORS NAME>.html}}
+```
 
 or to $watch for changes:
 
+```java-script
 $scope.$watch('textAngularOpts.textAngularEditors.<YOUR EDITORS NAME>.html', function(oldHTML, newHTML){
 console.log("My new html is: "+newHTML);
 });
-
+```
