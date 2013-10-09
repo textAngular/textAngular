@@ -10,7 +10,7 @@ http://www.textangular.com
 3.Create a textAngularOpts object and bind it to your local scope in the controller you want controlling textAngular
 It should look something like:
 
-```java-script
+```javascript
 $scope.textAngularOpts = {
 ..options go here..
 }
@@ -19,7 +19,7 @@ $scope.textAngularOpts = {
 5. Create the textAngularEditors property manually (it will get created regardless). Then add to it, a new property with the name of your editor you chose earlier,
 if it was "coolMonkeyMan" it will look like this:
 
-```java-script
+```javascript
 $scope.textAngularOpts = {
 ..options for ALL editors, unless they have their own property...
 textAngularEditors : {
@@ -42,7 +42,7 @@ The list of available tools in textAngular is large.
 
 Add tools to the toolbar like:
 
-```java-script
+```javascript
 toolbar : [
 {title : "<i class='icon-code'></i>", name : "html"},
 {title : "h1", name : "h1"},
@@ -82,7 +82,7 @@ However, you can also use the theme object to specify styling.
 Each property takes a normal, jQuery-like CSS property object.
 Heres an example :
 
-```java-script
+```javascript
 theme : {
 editor : {
 "background" : "white",
@@ -105,11 +105,11 @@ toolbarItems : {
 
 ####OPTIONS
 
-editor -> the actual editor element
-toolbar -> the toolbar wrapper
-toolbarItems -> each toolbar item
-insertForm -> the form that holds the insert stuff
-insertFormBtn -> the button that submits the insert stuff
+*editor* -> the actual editor element
+*toolbar* -> the toolbar wrapper
+*toolbarItems* -> each toolbar item
+*insertForm* -> the form that holds the insert stuff
+*insertFormBtn* -> the button that submits the insert stuff
 
 
 ####HOW TO GET THE HTML
@@ -121,13 +121,13 @@ textAngularOpts.textAngularEditors.<YOUR EDITORS NAME>.html
 
 so to bind the expression:
 
-```java-script
+```javascript
 {{textAngularOpts.textAngularEditors.<YOUR EDITORS NAME>.html}}
 ```
 
 or to $watch for changes:
 
-```java-script
+```javascript
 $scope.$watch('textAngularOpts.textAngularEditors.<YOUR EDITORS NAME>.html', function(oldHTML, newHTML){
 console.log("My new html is: "+newHTML);
 });
