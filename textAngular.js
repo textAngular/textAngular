@@ -128,7 +128,9 @@ $scope.$watch('textAngularOpts.textAngularEditors.<YOUR EDITORS NAME>.html', fun
 
  */
 
-directives.directive('compile', function ($compile) {
+var textAngular = angular.module('textAngular',[]);
+
+textAngular.directive('compile', function ($compile) {
             // directive factory creates a link function
             return function (scope, element, attrs) {
                 scope.$watch(
@@ -144,7 +146,7 @@ directives.directive('compile', function ($compile) {
         });
 	
 
-directives.directive('textAngular', function ($compile, $sce, $window, $timeout) {
+textAngular.directive('textAngular', function ($compile, $sce, $window, $timeout) {
         var methods = {
             theme: function (scope, opts) {
                 if (opts.disableStyle) {
