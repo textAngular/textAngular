@@ -39,6 +39,8 @@ textAngularEditors :
 ```
 7. Globally inherited settings for each editor or individual settings? Either way you'll need to supply some options!
 
+
+
 ###Global Options
 
 **html** ```<STRING>``` the default html to show in the editor on load (also will be the property to watch for HTML changes!!!)
@@ -48,6 +50,8 @@ textAngularEditors :
 **disableStyle** ```<BOOLEAN>``` disable all styles on this editor
 
 **theme** ```<OBJECT of OBJECTS>``` holds the theme objects, more on that later
+
+
 
 ###Setting up the Toolbar
 
@@ -62,9 +66,12 @@ toolbar : [
 ]
 ```
 
+
 ###Toolbar Options
-title ```<STRING>``` Can be an angular express, html, or text. Use this to add icons to each tool i,e ```<i class='icon-code'></i>```
-name ```<STRING>``` the command, the tool name, has to be one of the following:
+
+**title** ```<STRING>``` Can be an angular express, html, or text. Use this to add icons to each tool i,e ```<i class='icon-code'></i>```
+
+**name** ```<STRING>``` the command, the tool name, has to be one of the following:
 ```
 html <- this one is used to toggle the html view, so i'd probably keep it ;-)
 h1
@@ -115,6 +122,7 @@ toolbarItems : {
 }
 ```
 
+
 ####Theme Options
 
 **editor** ```<OBJECT>``` the actual editor element
@@ -126,6 +134,7 @@ toolbarItems : {
 **insertForm** ```<OBJECT>``` the form that holds the insert stuff
 
 **insertFormBtn** ```<OBJECT>``` the button that submits the insert stuff
+
 
 
 ####How to get the Editor Html
@@ -148,6 +157,7 @@ $scope.$watch('textAngularOpts.textAngularEditors.<YOUR EDITORS NAME>.html', fun
 console.log("My new html is: "+newHTML);
 });
 ```
+
 
 ####Issues?
 
