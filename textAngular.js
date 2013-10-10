@@ -330,7 +330,7 @@ textAngular.directive('textAngular', function ($compile, $sce, $window, $timeout
       
     return {
 	template : "<div class='textAngular-root' style='text-align:right;'>\
-	<div class='textAngular-toolbar' ng-style='theme.toolbar'><span ng-repeat='toolbarItem in toolbar' class='textAngular-toolbar-item' ng-style='theme.toolbarItems' ng-mousedown='runToolbar(toolbarItem.name,$event)' unselectable='on' compile='toolbarItem.title' name='toolbarItem.name'></span></div>\
+	<div class='textAngular-toolbar' ng-style='theme.toolbar'><span ng-repeat='toolbarItem in toolbar' title='toolbarItem.title' class='textAngular-toolbar-item' ng-style='theme.toolbarItems' ng-mousedown='runToolbar(toolbarItem.name,$event)' unselectable='on' compile='toolbarItem.title' name='toolbarItem.name'></span></div>\
 	<form class='textAngular-insert' ng-show='inserting' ng-style='theme.insertForm'><input type='text' ng-model='insert.model' required><div class='textAngular-insert-submit'><button ng-style='theme.insertFormBtn' ng-mousedown='finishInsert();'>{{insert.text}}</button></div></form>\
 	<pre contentEditable='true' ng-show='showHtml' class='textAngular-html' ng-style='theme.editor' ng-bind-html='textAngularModel.html' ></pre>\
 	<div contentEditable='true' ng-hide='showHtml' class='textAngular-text' ng-style='theme.editor' ng-bind-html='textAngularModel.text' ></div>\
