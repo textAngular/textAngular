@@ -2,8 +2,8 @@ textAngular
 ===========
 
 v1.0.1 
-
-**Added Tooltip Option**
+###Changelog
+**Added Tooltip Option, title has been renamed icon, and title is now the tooltip **
 
 http://www.textangular.com
 
@@ -63,9 +63,9 @@ Add tools to the toolbar like:
 
 ```javascript
 toolbar : [
-{title : "<i class='icon-code'></i>", name : "html"},
-{title : "h1", name : "h1"},
-{title : "h2", name : "h2"}
+{icon : "<i class='icon-code'></i>", name : "html", title='Toggle Html'},
+{icon  : "h1", name : "h1", title='H1'}},
+{icon : "h2", name : "h2", title='H2'}}
 ..and more
 ]
 ```
@@ -82,9 +82,9 @@ Get it at: www.bootstrapcdn.com/#fontawesome
 
 ###Toolbar Options
 
-**tooltip** ```<STRING>``` A string for the title attribute per tooltip item
+**title** ```<STRING>``` A string for the title attribute per tooltip item
 
-**title** ```<STRING>``` Can be an angular express, html, or text. Use this to add icons to each tool i,e ```<i class='icon-code'></i>```
+**icon** ```<STRING>``` Can be an angular express, html, or text. Use this to add icons to each tool i,e ```<i class='icon-code'></i>```
 
 **name** ```<STRING>``` the command, the tool name, has to be one of the following:
 ```
