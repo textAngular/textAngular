@@ -1,6 +1,10 @@
 textAngular
 ===========
 
+v1.0.1 
+
+**Added Tooltip Option**
+
 http://www.textangular.com
 
 ##How to Use:
@@ -65,6 +69,7 @@ toolbar : [
 ..and more
 ]
 ```
+
 ####Note
 
 If you want to use ultra-sweet icons in the menu (like I did in the example) 
@@ -76,6 +81,8 @@ Get it at: www.bootstrapcdn.com/#fontawesome
 
 
 ###Toolbar Options
+
+**tooltip** ```<STRING>``` A string for the title attribute per tooltip item
 
 **title** ```<STRING>``` Can be an angular express, html, or text. Use this to add icons to each tool i,e ```<i class='icon-code'></i>```
 
