@@ -2,7 +2,7 @@
 textAngular
 Author : Austin Anderson
 License : 2013 MIT
-Version 1.0.0
+Version 1.0.2
 How to Use:
 1.Include textAngular.js in your project, alternatively grab all this code and throw it in your "directives.js" module file.
 2.Create a div or something, and add the text-angular directive to it. ALSO add a text-angular-name="<YOUR TEXT EDITOR NAME>"
