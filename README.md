@@ -1,9 +1,15 @@
 textAngular
 ===========
 
+###Requirements
+1. jQuery
+2. $sce service for icon HTML (Included by default with Angular 1.2.x)
+
 v1.0.1 
 ###Changelog
+
 **Added Tooltip Option, title has been renamed icon, and title is now the tooltip **
+**The minified version actually works now**
 
 http://www.textangular.com
 
