@@ -174,6 +174,15 @@ console.log("My new html is: "+newHTML);
 });
 ```
 
+####How to get the Editor Html (new in 1.0.2)
+
+Seeting the model is very similar to getting it, 
+simple grab your model html object and do:
+
+```javascript
+$scope.textAngularOpts.textAngularEditors.<YOUR EDITORS NAME>.html = "new stuff";
+```
+
 
 ####Issues?
 
