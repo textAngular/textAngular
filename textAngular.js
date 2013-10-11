@@ -200,7 +200,7 @@ textAngular.directive('textAngular', function ($compile, $sce, $window, $timeout
                 } : scope.theme.insertFormBtn;
             },
             compileHtml: function (scope, html) {
-                var compHtml = $("<div>").append(html).html().replace(/(class="(.*?)")|(class='(.*?)')/g, "").replace(/&lt;/g, "<").replace(/&gt;/g, ">");
+                var compHtml = $("<div>").append(html).html().replace(/(class="(.*?)")|(class='(.*?)')/g, "").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/style=("|')(.*?)("|')/g,"");
                 if (scope.showHtml == "load") {
                     scope.textAngularModel.text = $sce.trustAsHtml(compHtml);
                     scope.textAngularModel.html = $sce.trustAsHtml(compHtml.replace(/</g, "&lt;"));
