@@ -190,3 +190,7 @@ That being said, its still a fairly experimental browser feature-set, and may no
 I've tested in FF, chrome and IE10 and its works as expected. 
 If you find something, please let me know.
 Throw me a message, or submit a issue request!
+
+
+## License
+This project is licensed under the [MIT license](http://opensource.org/licenses/MIT).
