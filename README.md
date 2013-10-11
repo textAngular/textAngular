@@ -8,14 +8,6 @@ http://www.textangular.com
 1. jQuery
 2. $sce service for icon HTML ("on" by default with Angular 1.2.x)
 
-v1.0.1 
-###Changelog
-
-*Added Tooltip Option, title has been renamed icon, and title is now the tooltip*
-
-*The minified version actually works now*
-
-
 ##How to Use:
 
 1. Include ```textAngular.js``` in your project, alternatively grab all this code and throw it in your "```directives.js```" module file.
