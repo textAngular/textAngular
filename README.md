@@ -15,7 +15,7 @@ http://www.textangular.com
 4. Create an element of some kind. (div, whatever, doesn't matter)
 5. Add the ```text-angular``` attribute (directive) to it.
 6. Add a ```text-angular-name="<YOUR TEXT EDITOR NAME>"``` attribute  to the element, as well.
-5. Create a textAngularOpts object and bind it to your local scope in the controller you want controlling textAngular
+7. Create a textAngularOpts object and bind it to your local scope in the controller you want controlling textAngular
 It should look something like:
 
 ```javascript
@@ -23,9 +23,9 @@ $scope.textAngularOpts = {
 ..options go here..
 }
 ```
-1. **If you want all editors to have individual settings**: Proceed to 2. Otherwise go to 3.
-2. Create the ```textAngularEditors``` property manually (it will get created regardless, if you choose not to apply individual settings).
-3. Then add to it, a new property with the name of your editor you chose earlier. For instance, if it was "coolMonkeyMan" it will look like this:
+8.**If you want all editors to have individual settings**: Proceed to 9. Otherwise go to 11.
+9.Create the ```textAngularEditors``` property manually (it will get created regardless, if you choose not to apply individual settings).
+10.Then add to it, a new property with the name of your editor you chose earlier. For instance, if it was "coolMonkeyMan" it will look like this:
 
 ```javascript
 $scope.textAngularOpts = {
@@ -42,7 +42,7 @@ textAngularEditors :
 }
 }
 ```
-7. Globally inherited settings for each editor or individual settings? Either way you'll need to supply some options!
+11.Globally inherited settings for each editor or individual settings? Either way you'll need to supply some options!
 
 
 
