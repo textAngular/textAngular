@@ -23,9 +23,11 @@ $scope.textAngularOpts = {
 ..options go here..
 }
 ```
-8.**If you want all editors to have individual settings**: Proceed to 9. Otherwise go to 11.
-9.Create the ```textAngularEditors``` property manually (it will get created regardless, if you choose not to apply individual settings).
-10.Then add to it, a new property with the name of your editor you chose earlier. For instance, if it was "coolMonkeyMan" it will look like this:
+7.**If you want all editors to share settings**: skip to 10
+
+8.Create the ```textAngularEditors``` property manually (it will get created regardless, if you choose not to apply individual settings).
+
+9.Then add to it, a new property with the name of your editor you chose earlier. For instance, if it was "coolMonkeyMan" it will look like this:
 
 ```javascript
 $scope.textAngularOpts = {
@@ -42,7 +44,7 @@ textAngularEditors :
 }
 }
 ```
-11.Globally inherited settings for each editor or individual settings? Either way you'll need to supply some options!
+10.Globally inherited settings for each editor or individual settings? Either way you'll need to supply some options!
 
 
 
