@@ -36,7 +36,7 @@ $scope.textAngularOpts = {
 
 textAngularEditors :
 {
-  **coolMonkeyMan** : {
+  coolMonkeyMan : {
 
   <editor specific options go here>
 
