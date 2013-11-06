@@ -136,6 +136,20 @@ textAngular.directive('compile', function ($compile) {
 
 
 textAngular.directive('textAngular', function ($compile, $sce, $window, $timeout) {
+
+    var sanitizationWrapper = function (html) {
+        return $sce.trustAsHtml(html);
+    };
+    
+    try {
+        angular.isDefined(angular.module('ngSanitize'))
+    }
+    catch {
+        sanitizationWrapper = function (html) {
+            return html;
+        }
+    }
+
     var methods = {
         theme: function (scope, opts) {
             if (opts.disableStyle) {
@@ -201,13 +215,13 @@ textAngular.directive('textAngular', function ($compile, $sce, $window, $timeout
         compileHtml: function (scope, html) {
             var compHtml = $("<div>").append(html).html().replace(/(class="(.*?)")|(class='(.*?)')/g, "").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/style=("|')(.*?)("|')/g, "");
             if (scope.showHtml == "load") {
-                scope.textAngularModel.text = $sce.trustAsHtml(compHtml);
-                scope.textAngularModel.html = $sce.trustAsHtml(compHtml.replace(/</g, "&lt;"));
+                scope.textAngularModel.text = sanitizationWrapper(compHtml);
+                scope.textAngularModel.html = sanitizationWrapper(compHtml.replace(/</g, "&lt;"));
                 scope.showHtml = (scope.showHtmlDefault || false);
             } else if (scope.showHtml) {
-                scope.textAngularModel.text = $sce.trustAsHtml(compHtml);
+                scope.textAngularModel.text = sanitizationWrapper(compHtml);
             } else {
-                scope.textAngularModel.html = $sce.trustAsHtml(compHtml.replace(/</g, "&lt;"));
+                scope.textAngularModel.html = sanitizationWrapper(compHtml.replace(/</g, "&lt;"));
             }
             scope.$parent.textAngularOpts.textAngularEditors[scope.name]["html"] = compHtml;
         },
@@ -375,8 +389,8 @@ textAngular.directive('textAngular', function ($compile, $sce, $window, $timeout
                 }
                 scope.$parent.$watch('textAngularOpts.textAngularEditors["' + name + '"].html', function (oldVal, newVal) {
                     if ( !! !$(':focus').parents('.textAngular-root')[0]) { //if our root isn't focused, we need to update the model. 
-                        scope.textAngularModel.text = $sce.trustAsHtml(newVal);
-                        scope.textAngularModel.html = $sce.trustAsHtml(newVal.replace(/</g, "&lt;"));
+                        scope.textAngularModel.text = sanitizationWrapper(newVal);
+                        scope.textAngularModel.html = sanitizationWrapper(newVal.replace(/</g, "&lt;"));
                     }
                 }, true);
                 methods.theme(scope, opts);
