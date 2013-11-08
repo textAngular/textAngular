@@ -144,7 +144,7 @@ textAngular.directive('textAngular', function ($compile, $sce, $window, $timeout
     try {
         angular.isDefined(angular.module('ngSanitize'))
     }
-    catch {
+    catch(e) {
         sanitizationWrapper = function (html) {
             return html;
         }
