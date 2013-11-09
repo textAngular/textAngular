@@ -5,194 +5,91 @@ http://www.textangular.com
 
 ###Requirements
 
-1. jQuery
-2. $sce service for icon HTML ("on" by default with Angular 1.2.x)
+1. Angular 1.2.x
+2. Angular Sanitize 1.2.x
 
-##How to Use:
+###Optional requirements
 
-1. Include ```textAngular.js``` in your project, alternatively grab all this code and throw it in your "```directives.js```" module file.
-2. Include ``textAngular`` in your main app module.
-4. Create an element of some kind. (div, whatever, doesn't matter)
-5. Add the ```text-angular``` attribute (directive) to it.
-6. Add a ```text-angular-name="<YOUR TEXT EDITOR NAME>"``` attribute  to the element, as well.
-7. Create a textAngularOpts object and bind it to your local scope in the controller you want controlling textAngular
-It should look something like:
+1. Bootstrap 3.0 only for the default styles
+2. Font-Awesome 4.0 for the default icons on the toolbar
 
-```javascript
-$scope.textAngularOpts = {
-..options go here..
-}
-```
-7.**If you want all editors to share settings**: skip to 10
+###How to Use
 
-8.Create the ```textAngularEditors``` property manually (it will get created regardless, if you choose not to apply individual settings).
-
-9.Then add to it, a new property with the name of your editor you chose earlier. For instance, if it was "coolMonkeyMan" it will look like this:
-
-```javascript
-$scope.textAngularOpts = {
-
-<global options go here>
-
-textAngularEditors :
-{
-  coolMonkeyMan : {
-
-  <editor specific options go here>
-
-}
-}
-}
-```
-10.Globally inherited settings for each editor or individual settings? Either way you'll need to supply some options!
-
-
-
-###Global Options
-
-**html** ```<STRING>``` the default html to show in the editor on load (also will be the property to watch for HTML changes!!!)
-
-**toolbar** ```<ARRAY of OBJECTS>``` holds the toolbar items to configure, more on that later
-
-**disableStyle** ```<BOOLEAN>``` disable all styles on this editor
-
-**theme** ```<OBJECT of OBJECTS>``` holds the theme objects, more on that later
-
-
-
-###Setting up the Toolbar
-
-Add tools to the toolbar like:
-
-```javascript
-toolbar : [
-{icon : "<i class='icon-code'></i>", name : "html", title='Toggle Html'},
-{icon  : "h1", name : "h1", title='H1'}},
-{icon : "h2", name : "h2", title='H2'}}
-..and more
-]
-```
-
-####Note
-
-If you want to use ultra-sweet icons in the menu (like I did in the example) 
-make sure to include fontAwesome!
-
-And then use the proper syntax for the titles i,e ```<i class='icon-<icon name>'></i>```
-
-Get it at: www.bootstrapcdn.com/#fontawesome
-
-
-###Toolbar Options
-
-**title** ```<STRING>``` A string for the title attribute per tooltip item
-
-**icon** ```<STRING>``` Can be an angular express, html, or text. Use this to add icons to each tool i,e ```<i class='icon-code'></i>```
-
-**name** ```<STRING>``` the command, the tool name, has to be one of the following:
-```
-html <- this one is used to toggle the html view, so i'd probably keep it ;-)
-h1
-h2
-h3
-p
-pre
-ul
-ol
-quote
-undo
-redo
-b
-justifyLeft
-justifyRight
-justifyCenter
-i
-clear
-insertImage
-insertHtml
-createLink
-```
-
-####Theming textAngular
-Every piece of textAngular has a specific class you can grab and style in CSS.
-However, you can also use the theme object to specify styling.
-Each property takes a normal, jQuery-like CSS property object.
-Heres an example :
-
-```javascript
-theme : {
-editor : {
-"background" : "white",
-"color" : "gray",
-"text-align" : "left",
-"border" : "3px solid rgba(2,2,2,0.2)",
-"border-radius" : "5px",
-"font-size" : "1.3em",
-"font-family" : "Tahoma"
-},
-toolbar : {
-..some styling...
-},
-toolbarItems : {
-..some more styling...
-}
-}
+1. Include textAngular.js in your project, alternatively grab all this code and throw it in your directives.js module file.
+2. In your HTML instantiate textAngular as an attribute or element, the only required attribute is the ta-model which is the variable to bind the content of the editor to.
+3. I reccommend using the following CSS in your stylesheet or a variant of to display the text box nicely:
+4.  ```
+.ta-editor{
+    min-height: 300px;
+    height: auto;
+    overflow: auto;
+    font-family: inherit;
+    font-size: 100%;
 }
 ```
 
+4. Have fun!
 
-####Theme Options
+###Setting Options
 
-**editor** ```<OBJECT>``` the actual editor element
+Several options can be set through attributes on the HTML tag, these are;
 
-**toolbar** ```<OBJECT>``` the toolbar wrapper
+- ta-toolbar: this should evaluate to an array of arrays. Each element is the name of one of the toolbar tools. The default is: ```[['h1', 'h2', 'h3', 'p', 'pre', 'bold', 'italics', 'ul', 'ol', 'redo', 'undo', 'clear'],['html', 'insertImage', 'insertLink']]```
+- ta-toolbar-class: this is the class to apply to the overall div of the toolbar, defaults to "btn-toolbar". Note that the class "ta-toolbar" is also added to the toolbar.
+- ta-toolbar-group-class: this is the class to apply to the nested groups in the toolbar, a div with this class is created for each nested array in the ta-toolbar array and then the tool buttons are nested inside the group, defaults to "btn-group".
+- ta-toolbar-button-class: this is the class to apply to each tool button in the toolbar, defaults to: "btn btn-default"
+- ta-toolbar-active-button-class: this is the class to apply to each tool button in the toolbar if it's activeState function returns true ie when a tool function is applied to the selected text, defaults to: "active".
+- ta-text-editor-class: this is the class to apply to the text editor pre tag, defaults to "form-control". Note that the classes: ta-editor and ta-text are also added.
+- ta-html-editor-class: this is the class to apply to the html editor div tag, defaults to "form-control". Note that the classes: ta-editor and ta-html are also added.
 
-**toolbarItems** ```<OBJECT>``` each toolbar item
+The defaults can be changed by altering/overwriting the variable: $rootScope.textAngularOpts which acts like global defaults for the classes and toolbar.
+The default value for this is:
 
-**insertForm** ```<OBJECT>``` the form that holds the insert stuff
-
-**insertFormBtn** ```<OBJECT>``` the button that submits the insert stuff
-
-
-
-####How to get the Editor Html
-
-To actually get the model (watch or bind),
-simply follow this model:
-
-```textAngularOpts.textAngularEditors.<YOUR EDITORS NAME>.html```
-
-so to bind the expression:
-
-```javascript
-{{textAngularOpts.textAngularEditors.<YOUR EDITORS NAME>.html}}
+```
+$rootScope.textAngularOpts = {
+	toolbar: [['h1', 'h2', 'h3', 'p', 'pre', 'bold', 'italics', 'ul', 'ol', 'redo', 'undo', 'clear'],['html', 'insertImage', 'insertLink']],
+	classes: {
+		toolbar: "btn-toolbar",
+		toolbarGroup: "btn-group",
+		toolbarButton: "btn btn-default",
+		toolbarButtonActive: "active",
+		textEditor: 'form-control',
+		htmlEditor: 'form-control'
+	}
+}
 ```
 
-or to ```$watch``` for changes:
+The toolbar buttons are defined in the object variable $rootScope.textAngularTools.
+The following is an example of how to add a button to make the selected text red:
 
-```javascript
-$scope.$watch('textAngularOpts.textAngularEditors.<YOUR EDITORS NAME>.html', function(oldHTML, newHTML){
-console.log("My new html is: "+newHTML);
-});
+```
+$rootScope.textAngularTools.colourRed = {
+	display: "<button ng-click='action()' ng-class='displayActiveToolClass(active)'><i class='fa fa-square' style='color: red;'></i></button>",
+	action: function(){
+		this.$parent.wrapSelection('formatBlock', '<span style="color: red">');
+	},
+	activeState: function(){return false;} //This isn't required, and currently doesn't work reliably except for the html tag that doesn't rely on the cursor position.
+};
+//the following adds it to the toolbar to be displayed and used.
+$rootScope.textAngularOpts.toolbar = [['h1', 'h2', 'h3', 'p', 'pre', 'bold', 'colourRed', 'italics', 'ul', 'ol', 'redo', 'undo', 'clear'],['html', 'insertImage', 'insertLink']];
 ```
 
-####How to set the Editor Html (new in 1.0.2)
+To explain how this works, when we create a button we create an isolated child scope of the textAngular scope and extend it with the values in the tools object, we then compile the HTML in the display value with the newly created scope.
+Note that the way any functions are called in the plugins the 'this' variable will allways point to the scope of the button ensuring that this.$parent will allways 
+Here's the code we run for every tool:
 
-Seeting the model is very similar to getting it, 
-simple grab your model html object and do:
-
-```javascript
-$scope.textAngularOpts.textAngularEditors.<YOUR EDITORS NAME>.html = "new stuff";
 ```
-
+toolElement = angular.element($rootScope.textAngularTools[tool].display);
+toolElement.addClass(scope.classes.toolbarButton);
+groupElement.append($compile(toolElement)(angular.extend scope.$new(true), $rootScope.textAngularTools[tool]));
+```
 
 ####Issues?
 
 textAngular uses ```execCommand``` for the rich-text functionalty. 
-That being said, its still a fairly experimental browser feature-set, and may not behave the same in all browsers.
-I've tested in FF, chrome and IE10 and its works as expected. 
-If you find something, please let me know.
-Throw me a message, or submit a issue request!
+That being said, its still a fairly experimental browser feature-set, and may not behave the same in all browsers - see http://tifftiff.de/contenteditable/compliance_test.html for a full compliance list.
+It has been tested to work on Chrome, Safari, FF and IE8+.
+If you find something, please let me know - throw me a message, or submit a issue request!
 
 
 ## License
