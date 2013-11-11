@@ -74,319 +74,330 @@ groupElement.append($compile(toolElement)(angular.extend scope.$new(true), $root
 */
 
 
-(function() {
-  var textAngular;
+var textAngular = angular.module("textAngular", ['ngSanitize']); //This makes ngSanitize required
 
-  textAngular = angular.module("textAngular", ['ngSanitize']);
-
-  textAngular.directive("textAngular", function($compile, $sce, $window, $document, $rootScope, $timeout) {
-    var sanitizationWrapper;
-    console.log("Thank you for using textAngular! http://www.textangular.com");
-    $rootScope.textAngularOpts = angular.extend({
-      toolbar: [['h1', 'h2', 'h3', 'p', 'pre', 'bold', 'italics', 'ul', 'ol', 'redo', 'undo', 'clear'], ['html', 'insertImage', 'insertLink']],
-      classes: {
-        toolbar: "btn-toolbar",
-        toolbarGroup: "btn-group",
-        toolbarButton: "btn btn-default",
-        toolbarButtonActive: "active",
-        textEditor: 'form-control',
-        htmlEditor: 'form-control'
-      }
-    }, $rootScope.textAngularOpts != null ? $rootScope.textAngularOpts : {});
-    $rootScope.textAngularTools = angular.extend({
-      html: {
-        display: "<button ng-click='action()' ng-class='displayActiveToolClass(active)'>Toggle HTML</button>",
-        action: function() {
-          var ht,
-            _this = this;
-          this.$parent.showHtml = !this.$parent.showHtml;
-          if (this.$parent.showHtml) {
-            ht = this.$parent.displayElements.text.html();
-            $timeout((function() {
-              return _this.$parent.displayElements.html[0].focus();
-            }), 100);
-          } else {
-            ht = this.$parent.displayElements.html.html();
-            $timeout((function() {
-              return _this.$parent.displayElements.text[0].focus();
-            }), 100);
-          }
-          return this.$parent.compileHtml(ht);
-        },
-        activeState: function() {
-          return !this.showHtml;
-        }
-      },
-      h1: {
-        display: "<button ng-click='action()' ng-class='displayActiveToolClass(active)'>H1</button>",
-        action: function() {
-          return this.$parent.wrapSelection("formatBlock", "<H1>");
-        }
-      },
-      h2: {
-        display: "<button ng-click='action()' ng-class='displayActiveToolClass(active)'>H2</button>",
-        action: function() {
-          return this.$parent.wrapSelection("formatBlock", "<H2>");
-        }
-      },
-      h3: {
-        display: "<button ng-click='action()' ng-class='displayActiveToolClass(active)'>H3</button>",
-        action: function() {
-          return this.$parent.wrapSelection("formatBlock", "<H3>");
-        }
-      },
-      p: {
-        display: "<button ng-click='action()' ng-class='displayActiveToolClass(active)'>P</button>",
-        action: function() {
-          return this.$parent.wrapSelection("formatBlock", "<P>");
-        }
-      },
-      pre: {
-        display: "<button ng-click='action()' ng-class='displayActiveToolClass(active)'>pre</button>",
-        action: function() {
-          return this.$parent.wrapSelection("formatBlock", "<PRE>");
-        }
-      },
-      ul: {
-        display: "<button ng-click='action()' ng-class='displayActiveToolClass(active)'><i class='fa fa-list-ul'></i></button>",
-        action: function() {
-          return this.$parent.wrapSelection("insertUnorderedList", null);
-        }
-      },
-      ol: {
-        display: "<button ng-click='action()' ng-class='displayActiveToolClass(active)'><i class='fa fa-list-ol'></i></button>",
-        action: function() {
-          return this.$parent.wrapSelection("insertOrderedList", null);
-        }
-      },
-      quote: {
-        display: "<button ng-click='action()' ng-class='displayActiveToolClass(active)'><i class='fa fa-quote-right'></i></button>",
-        action: function() {
-          return this.$parent.wrapSelection("formatBlock", "<BLOCKQUOTE>");
-        }
-      },
-      undo: {
-        display: "<button ng-click='action()' ng-class='displayActiveToolClass(active)'><i class='fa fa-undo'></i></button>",
-        action: function() {
-          return this.$parent.wrapSelection("undo", null);
-        }
-      },
-      redo: {
-        display: "<button ng-click='action()' ng-class='displayActiveToolClass(active)'><i class='fa fa-repeat'></i></button>",
-        action: function() {
-          return this.$parent.wrapSelection("redo", null);
-        }
-      },
-      bold: {
-        display: "<button ng-click='action()' ng-class='displayActiveToolClass(active)'><i class='fa fa-bold'></i></button>",
-        action: function() {
-          return this.$parent.wrapSelection("bold", null);
-        },
-        activeState: function() {
-          return $document[0].queryCommandState('bold');
-        }
-      },
-      justifyLeft: {
-        display: "<button ng-click='action()' ng-class='displayActiveToolClass(active)'><i class='fa fa-align-left'></i></button>",
-        action: function() {
-          return this.$parent.wrapSelection("justifyLeft", null);
-        },
-        activeState: function() {
-          return $document[0].queryCommandState('justifyLeft');
-        }
-      },
-      justifyRight: {
-        display: "<button ng-click='action()' ng-class='displayActiveToolClass(active)'><i class='fa fa-align-right'></i></button>",
-        action: function() {
-          return this.$parent.wrapSelection("justifyRight", null);
-        },
-        activeState: function() {
-          return $document[0].queryCommandState('justifyRight');
-        }
-      },
-      justifyCenter: {
-        display: "<button ng-click='action()' ng-class='displayActiveToolClass(active)'><i class='fa fa-align-center'></i></button>",
-        action: function() {
-          return this.$parent.wrapSelection("justifyCenter", null);
-        },
-        activeState: function() {
-          return $document[0].queryCommandState('justifyCenter');
-        }
-      },
-      italics: {
-        display: "<button ng-click='action()' ng-class='displayActiveToolClass(active)'><i class='fa fa-italic'></i></button>",
-        action: function() {
-          return this.$parent.wrapSelection("italic", null);
-        },
-        activeState: function() {
-          return $document[0].queryCommandState('italic');
-        }
-      },
-      clear: {
-        display: "<button ng-click='action()' ng-class='displayActiveToolClass(active)'><i class='fa fa-ban'></i></button>",
-        action: function() {
-          return this.$parent.wrapSelection("FormatBlock", "<div>");
-        }
-      },
-      insertImage: {
-        display: "<button ng-click='action()' ng-class='displayActiveToolClass(active)'><i class='fa fa-picture-o'></i></button>",
-        action: function() {
-          var imageLink;
-          imageLink = prompt("Please enter an image URL to insert", 'http://');
-          if (imageLink !== '') {
-            return this.$parent.wrapSelection('insertImage', imageLink);
-          }
-        }
-      },
-      insertLink: {
-        display: "<button ng-click='action()' ng-class='displayActiveToolClass(active)'><i class='fa fa-chain'></i></button>",
-        action: function() {
-          var urlLink;
-          urlLink = prompt("Please enter an URL to insert", 'http://');
-          if (urlLink !== '') {
-            return this.$parent.wrapSelection('createLink', urlLink);
-          }
-        }
-      }
-    }, $rootScope.textAngularTools != null ? $rootScope.textAngularTools : {});
-    sanitizationWrapper = function(html) {
-      return $sce.trustAsHtml(html);
-    };
-    return {
-      scope: {
-        model: "=taModel"
-      },
-      restrict: "EA",
-      link: function(scope, element, attrs) {
-        var group, groupElement, keydown, keyup, tool, toolElement, _i, _j, _len, _len1, _ref;
-        angular.extend(scope, $rootScope.textAngularOpts, {
-          compileHtml: function(html) {
-            var compHtml;
-            compHtml = angular.element("<div>").append(html).html().replace(/(class="(.*?)")|(class='(.*?)')/g, "").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/style=("|')(.*?)("|')/g, "");
-            if (this.showHtml === "load") {
-              this.text = sanitizationWrapper(compHtml);
-              this.html = sanitizationWrapper(compHtml.replace(/</g, "&lt;"));
-              this.showHtml = this.showHtmlDefault || false;
-            } else if (this.showHtml) {
-              this.text = sanitizationWrapper(compHtml);
-            } else {
-              this.html = sanitizationWrapper(compHtml.replace(/</g, "&lt;"));
-            }
-            return this.model = compHtml;
-          },
-          wrapSelection: function(command, opt, updateDisplay) {
-            if (updateDisplay == null) {
-              updateDisplay = true;
-            }
-            document.execCommand(command, false, opt);
-            if (this.showHtml) {
-              this.displayElements.text[0].focus();
-            } else {
-              this.displayElements.html[0].focus();
-            }
-            if (updateDisplay) {
-              return this.updateDisplay();
-            }
-          },
-          updateDisplay: function() {
-            return this.compileHtml(!this.showHtml ? this.displayElements.html.html() : this.displayElements.text.html());
-          },
-          showHtml: false,
-          displayActiveToolClass: function(active) {
-            if (active) {
-              return this.classes.toolbarButtonActive;
-            } else {
-              return '';
-            }
-          }
-        });
-        if (!!attrs.taToolbar) {
-          scope.toolbar = scope.$eval(attrs.taToolbar);
-        }
-        if (!!attrs.taToolbarClass) {
-          scope.classes.toolbar = attrs.taToolbarClass;
-        }
-        if (!!attrs.taToolbarGroupClass) {
-          scope.classes.toolbarGroup = attrs.taToolbarGroupClass;
-        }
-        if (!!attrs.taToolbarButtonClass) {
-          scope.classes.toolbarButton = attrs.taToolbarButtonClass;
-        }
-        if (!!attrs.taToolbarActiveButtonClass) {
-          scope.classes.toolbarButtonActive = attrs.taToolbarActiveButtonClass;
-        }
-        if (!!attrs.taTextEditorClass) {
-          scope.classes.textEditor = attrs.taTextEditorClass;
-        }
-        if (!!attrs.taHtmlEditorClass) {
-          scope.classes.htmlEditor = attrs.taHtmlEditorClass;
-        }
-        scope.displayElements = {
-          toolbar: angular.element("<div></div>"),
-          text: angular.element("<pre contentEditable='true' ng-show='showHtml' ng-bind-html='html' ></pre>"),
-          html: angular.element("<div contentEditable='true' ng-hide='showHtml' ng-bind-html='text' ></div>")
-        };
-        element.append(scope.displayElements.toolbar);
-        element.append(scope.displayElements.text);
-        element.append(scope.displayElements.html);
-        $compile(scope.displayElements.text)(scope);
-        $compile(scope.displayElements.html)(scope);
-        element.addClass("ta-root");
-        scope.displayElements.toolbar.addClass("ta-toolbar " + scope.classes.toolbar);
-        scope.displayElements.text.addClass("ta-text ta-editor " + scope.classes.textEditor);
-        scope.displayElements.html.addClass("ta-html ta-editor " + scope.classes.textEditor);
-        _ref = scope.toolbar;
-        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-          group = _ref[_i];
-          groupElement = angular.element("<div></div>");
-          groupElement.addClass(scope.classes.toolbarGroup);
-          for (_j = 0, _len1 = group.length; _j < _len1; _j++) {
-            tool = group[_j];
-            toolElement = angular.element($rootScope.textAngularTools[tool].display);
-            toolElement.addClass(scope.classes.toolbarButton);
-            toolElement.attr('unselectable', 'on');
-            groupElement.append($compile(toolElement)(angular.extend(scope.$new(true), $rootScope.textAngularTools[tool])));
-          }
-          scope.displayElements.toolbar.append(groupElement);
-        }
-        scope.$watch("model", (function(newVal, oldVal) {
-          if (!($document[0].activeElement === scope.displayElements.html[0]) && !($document[0].activeElement === scope.displayElements.text[0])) {
-            scope.text = sanitizationWrapper(newVal);
-            return scope.html = sanitizationWrapper(newVal.replace(/</g, "&lt;"));
-          }
-        }), true);
-        scope.compileHtml(scope.model);
-        scope.bUpdateSelectedStyles = false;
-        scope.updateSelectedStyles = function() {
-          var groups, _k, _l, _len2, _len3, _ref1;
-          _ref1 = scope.toolbar;
-          for (_k = 0, _len2 = _ref1.length; _k < _len2; _k++) {
-            groups = _ref1[_k];
-            for (_l = 0, _len3 = groups.length; _l < _len3; _l++) {
-              tool = groups[_l];
-              $rootScope.textAngularTools[tool].active = $rootScope.textAngularTools[tool].activeState != null ? $rootScope.textAngularTools[tool].activeState.apply(scope) : false;
-            }
-          }
-          if (this.bUpdateSelectedStyles) {
-            return $timeout(this.updateSelectedStyles, 200);
-          }
-        };
-        keydown = function(e) {
-          scope.bUpdateSelectedStyles = true;
-          return scope.updateSelectedStyles();
-        };
-        scope.displayElements.html.on('keydown', keydown);
-        scope.displayElements.text.on('keydown', keydown);
-        keyup = function(e) {
-          scope.bUpdateSelectedStyles = false;
-          return scope.$apply(function() {
-            return scope.updateDisplay();
-          });
-        };
-        scope.displayElements.html.on('keyup', keyup);
-        return scope.displayElements.text.on('keyup', keyup);
-      }
-    };
-  });
-
-}).call(this);
+textAngular.directive("textAngular", function($compile, $sce, $window, $document, $rootScope, $timeout) {
+	console.log("Thank you for using textAngular! http://www.textangular.com");
+	// Here we set up the global display defaults, make sure we don't overwrite any that the user may have already set.
+	$rootScope.textAngularOpts = angular.extend({
+		toolbar: [['h1', 'h2', 'h3', 'p', 'pre', 'bold', 'italics', 'ul', 'ol', 'redo', 'undo', 'clear'], ['html', 'insertImage', 'insertLink']],
+		classes: {
+			toolbar: "btn-toolbar",
+			toolbarGroup: "btn-group",
+			toolbarButton: "btn btn-default",
+			toolbarButtonActive: "active",
+			textEditor: 'form-control',
+			htmlEditor: 'form-control'
+		}
+	}, ($rootScope.textAngularOpts != null)? $rootScope.textAngularOpts : {});
+	// Setup the default toolbar tools, this way allows the user to add new tools like plugins
+		$rootScope.textAngularTools = angular.extend({
+		html: {
+			display: "<button ng-click='action()' ng-class='displayActiveToolClass(active)'>Toggle HTML</button>",
+			action: function() {
+				// this variable in an action function referrs to the angular scope of the tool
+				var ht;
+				this.$parent.showHtml = !this.$parent.showHtml;
+				if (this.$parent.showHtml) { //Show the HTML view
+					ht = this.$parent.displayElements.text.html();
+					$timeout((function() { //defer until the element is visible
+						return this.$parent.displayElements.html[0].focus(); //dereference the DOM object from the angular.element
+					}), 100);
+				} else { //Show the WYSIWYG view
+					ht = this.$parent.displayElements.html.html();
+					$timeout((function() { //defer until the element is visible
+						return this.$parent.displayElements.text[0].focus(); //dereference the DOM object from the angular.element
+					}), 100);
+				}
+				this.$parent.compileHtml(ht);
+				this.active = this.$parent.showHtml;
+			}
+		},
+		h1: {
+			display: "<button ng-click='action()' ng-class='displayActiveToolClass(active)'>H1</button>",
+			action: function() {
+				return this.$parent.wrapSelection("formatBlock", "<H1>");
+			}
+		},
+		h2: {
+			display: "<button ng-click='action()' ng-class='displayActiveToolClass(active)'>H2</button>",
+			action: function() {
+				return this.$parent.wrapSelection("formatBlock", "<H2>");
+			}
+		},
+		h3: {
+			display: "<button ng-click='action()' ng-class='displayActiveToolClass(active)'>H3</button>",
+			action: function() {
+				return this.$parent.wrapSelection("formatBlock", "<H3>");
+			}
+		},
+		p: {
+			display: "<button ng-click='action()' ng-class='displayActiveToolClass(active)'>P</button>",
+			action: function() {
+				return this.$parent.wrapSelection("formatBlock", "<P>");
+			}
+		},
+		pre: {
+			display: "<button ng-click='action()' ng-class='displayActiveToolClass(active)'>pre</button>",
+			action: function() {
+				return this.$parent.wrapSelection("formatBlock", "<PRE>");
+			}
+		},
+		ul: {
+			display: "<button ng-click='action()' ng-class='displayActiveToolClass(active)'><i class='fa fa-list-ul'></i></button>",
+			action: function() {
+				return this.$parent.wrapSelection("insertUnorderedList", null);
+			}
+		},
+		ol: {
+			display: "<button ng-click='action()' ng-class='displayActiveToolClass(active)'><i class='fa fa-list-ol'></i></button>",
+			action: function() {
+				return this.$parent.wrapSelection("insertOrderedList", null);
+			}
+		},
+		quote: {
+			display: "<button ng-click='action()' ng-class='displayActiveToolClass(active)'><i class='fa fa-quote-right'></i></button>",
+			action: function() {
+				return this.$parent.wrapSelection("formatBlock", "<BLOCKQUOTE>");
+			}
+		},
+		undo: {
+			display: "<button ng-click='action()' ng-class='displayActiveToolClass(active)'><i class='fa fa-undo'></i></button>",
+			action: function() {
+				return this.$parent.wrapSelection("undo", null);
+			}
+		},
+		redo: {
+			display: "<button ng-click='action()' ng-class='displayActiveToolClass(active)'><i class='fa fa-repeat'></i></button>",
+			action: function() {
+				return this.$parent.wrapSelection("redo", null);
+			}
+		},
+		bold: {
+			display: "<button ng-click='action()' ng-class='displayActiveToolClass(active)'><i class='fa fa-bold'></i></button>",
+			action: function() {
+				return this.$parent.wrapSelection("bold", null);
+			},
+			activeState: function() {
+				return $document[0].queryCommandState('bold');
+			}
+		},
+		justifyLeft: {
+			display: "<button ng-click='action()' ng-class='displayActiveToolClass(active)'><i class='fa fa-align-left'></i></button>",
+			action: function() {
+				return this.$parent.wrapSelection("justifyLeft", null);
+			},
+			activeState: function() {
+				return $document[0].queryCommandState('justifyLeft');
+			}
+		},
+		justifyRight: {
+			display: "<button ng-click='action()' ng-class='displayActiveToolClass(active)'><i class='fa fa-align-right'></i></button>",
+			action: function() {
+				return this.$parent.wrapSelection("justifyRight", null);
+			},
+			activeState: function() {
+				return $document[0].queryCommandState('justifyRight');
+			}
+		},
+		justifyCenter: {
+			display: "<button ng-click='action()' ng-class='displayActiveToolClass(active)'><i class='fa fa-align-center'></i></button>",
+			action: function() {
+				return this.$parent.wrapSelection("justifyCenter", null);
+			},
+			activeState: function() {
+				return $document[0].queryCommandState('justifyCenter');
+			}
+		},
+		italics: {
+			display: "<button ng-click='action()' ng-class='displayActiveToolClass(active)'><i class='fa fa-italic'></i></button>",
+			action: function() {
+				return this.$parent.wrapSelection("italic", null);
+			},
+			activeState: function() {
+				return $document[0].queryCommandState('italic');
+			}
+		},
+		clear: {
+			display: "<button ng-click='action()' ng-class='displayActiveToolClass(active)'><i class='fa fa-ban'></i></button>",
+			action: function() {
+				return this.$parent.wrapSelection("FormatBlock", "<div>");
+			}
+		},
+		insertImage: {
+			display: "<button ng-click='action()' ng-class='displayActiveToolClass(active)'><i class='fa fa-picture-o'></i></button>",
+			action: function() {
+				var imageLink;
+				imageLink = prompt("Please enter an image URL to insert", 'http://');
+				if (imageLink !== '') {
+					return this.$parent.wrapSelection('insertImage', imageLink);
+				}
+			}
+		},
+		insertLink: {
+			display: "<button ng-click='action()' ng-class='displayActiveToolClass(active)'><i class='fa fa-chain'></i></button>",
+			action: function() {
+				var urlLink;
+				urlLink = prompt("Please enter an URL to insert", 'http://');
+				if (urlLink !== '') {
+					return this.$parent.wrapSelection('createLink', urlLink);
+				}
+			}
+		}
+	}, ($rootScope.textAngularTools != null)? $rootScope.textAngularTools : {});
+	
+	// ngSanitize is a requirement for the module so this shouldn't cause any trouble
+	var sanitizationWrapper = function(html) {
+		return $sce.trustAsHtml(html);
+	};
+	
+	return {
+		scope: {
+			model: "=taModel"
+		},
+		restrict: "EA",
+		link: function(scope, element, attrs) {
+			var group, groupElement, keydown, keyup, tool, toolElement; //all these vars should not be accessable outside this directive
+			// get the settings from the defaults and add our specific functions that need to be on the scope
+			angular.extend(scope, $rootScope.textAngularOpts, {
+				compileHtml: function(html) {
+					// this refers to the scope
+					var compHtml = angular.element("<div>").append(html).html().replace(/(class="(.*?)")|(class='(.*?)')/g, "").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/style=("|')(.*?)("|')/g, "");
+					if (this.showHtml === "load") {
+						this.text = sanitizationWrapper(compHtml);
+						this.html = sanitizationWrapper(compHtml.replace(/</g, "&lt;"));
+						this.showHtml = this.showHtmlDefault || false;
+					} else if (this.showHtml) { // update the raw HTML view
+						this.text = sanitizationWrapper(compHtml);
+					} else { // update the WYSIWYG view
+						this.html = sanitizationWrapper(compHtml.replace(/</g, "&lt;"));
+					}
+					this.model = compHtml;
+				},
+				// wraps the selection in the provided tag / execCommand function.
+				wrapSelection: function(command, opt, updateDisplay) {
+					// the default value for updateDisplay is true
+					if (updateDisplay == null) updateDisplay = true;
+					document.execCommand(command, false, opt);
+					// refocus on the shown display element, this fixes a display bug when using :focus styles to outline the box. You still have focus on the text/html input it just doesn't show up
+					if (this.showHtml)
+						this.displayElements.text[0].focus();
+					else
+						this.displayElements.html[0].focus();
+					if (updateDisplay) this.updateDisplay();
+				},
+				updateDisplay: function() {
+					this.compileHtml((!this.showHtml)? this.displayElements.html.html() : this.displayElements.text.html());
+				},
+				showHtml: false
+			});
+			// setup the options from the optional attributes
+			if (!!attrs.taToolbar)					scope.toolbar = scope.$eval(attrs.taToolbar);
+			if (!!attrs.taToolbarClass)				scope.classes.toolbar = attrs.taToolbarClass;
+			if (!!attrs.taToolbarGroupClass)		scope.classes.toolbarGroup = attrs.taToolbarGroupClass;
+			if (!!attrs.taToolbarButtonClass)		scope.classes.toolbarButton = attrs.taToolbarButtonClass;
+			if (!!attrs.taToolbarActiveButtonClass)	scope.classes.toolbarButtonActive = attrs.taToolbarActiveButtonClass;
+			if (!!attrs.taTextEditorClass)			scope.classes.textEditor = attrs.taTextEditorClass;
+			if (!!attrs.taHtmlEditorClass)			scope.classes.htmlEditor = attrs.taHtmlEditorClass;
+			
+			// Setup the HTML elements as variable references for use later
+			scope.displayElements = {
+				toolbar: angular.element("<div></div>"),
+				text: angular.element("<pre contentEditable='true' ng-show='showHtml' ng-bind-html='html' ></pre>"),
+				html: angular.element("<div contentEditable='true' ng-hide='showHtml' ng-bind-html='text' ></div>")
+			};
+			// add the main elements to the origional element
+			element.append(scope.displayElements.toolbar);
+			element.append(scope.displayElements.text);
+			element.append(scope.displayElements.html);
+			
+			// compile the scope with the text and html elements only - if we do this with the main element it causes a compile loop
+			$compile(scope.displayElements.text)(scope);
+			$compile(scope.displayElements.html)(scope);
+			
+			// add the classes manually last
+			element.addClass("ta-root");
+			scope.displayElements.toolbar.addClass("ta-toolbar " + scope.classes.toolbar);
+			scope.displayElements.text.addClass("ta-text ta-editor " + scope.classes.textEditor);
+			scope.displayElements.html.addClass("ta-html ta-editor " + scope.classes.textEditor);
+			
+			scope.tools = {}; // Keep a reference for updating the active states later
+			// create the tools in the toolbar
+			for (var _i = 0; _i < scope.toolbar.length; _i++) {
+				// setup the toolbar group
+				group = scope.toolbar[_i];
+				groupElement = angular.element("<div></div>");
+				groupElement.addClass(scope.classes.toolbarGroup);
+				for (var _j = 0; _j < group.length; _j++) {
+					// init and add the tools to the group
+					tool = group[_j]; // a tool name (key name from textAngularTools struct)
+					toolElement = angular.element($rootScope.textAngularTools[tool].display);
+					toolElement.addClass(scope.classes.toolbarButton);
+					toolElement.attr('unselectable', 'on'); // important to not take focus from the main text/html entry
+					var childScope = angular.extend(scope.$new(true), $rootScope.textAngularTools[tool], { // add the tool specific functions
+						displayActiveToolClass: function(active){
+							return (active)? this.$parent.classes.toolbarButtonActive : '';
+						}
+					}); //creates a child scope of the main angularText scope and then extends the childScope with the functions of this particular tool
+					scope.tools[tool] = childScope; // reference to the scope kept
+					groupElement.append($compile(toolElement)(childScope)); // append the tool compiled with the childScope to the group element
+				}
+				scope.displayElements.toolbar.append(groupElement); // append the group to the toolbar
+			}
+			
+			// watch for changes to the model variable from outside the html/text inputs
+			scope.$watch("model", (function(newVal, oldVal) {
+				// if the editors aren't focussed they need to be updated, otherwise they are doing the updating
+				if (!($document[0].activeElement === scope.displayElements.html[0]) && !($document[0].activeElement === scope.displayElements.text[0])) {
+					scope.text = sanitizationWrapper(newVal);
+					scope.html = sanitizationWrapper(newVal.replace(/</g, "&lt;"));
+				}
+			}), true);
+			
+			// populate the text and html fields
+			scope.compileHtml(scope.model);
+			
+			// the following is for applying the active states to the tools that support it
+			scope.bUpdateSelectedStyles = false;
+			// loop through all the tools polling their activeState function if it exists
+			scope.updateSelectedStyles = function() {
+				for (var _k = 0; _k < scope.toolbar.length; _k++) {
+					var groups = scope.toolbar[_k];
+					for (var _l = 0; _l < groups.length; _l++) {
+						tool = groups[_l];
+						if (scope.tools[tool].activeState != null) {
+							scope.tools[tool].active = scope.tools[tool].activeState.apply(scope);
+						}
+					}
+				}
+				if (this.bUpdateSelectedStyles) $timeout(this.updateSelectedStyles, 200); // used to update the active state when a key is held down, ie the left arrow
+			};
+			// start updating on keydown
+			keydown = function(e) {
+				scope.bUpdateSelectedStyles = true;
+				scope.$apply(function() {
+					scope.updateSelectedStyles();
+				});
+			};
+			scope.displayElements.html.on('keydown', keydown);
+			scope.displayElements.text.on('keydown', keydown);
+			// stop updating on key up and update the display/model
+			keyup = function(e) {
+				scope.bUpdateSelectedStyles = false;
+				scope.$apply(function() {
+					scope.updateDisplay();
+				});
+			};
+			scope.displayElements.html.on('keyup', keyup);
+			scope.displayElements.text.on('keyup', keyup);
+			// update the toolbar active states when we click somewhere in the text/html boxed
+			mouseup = function(e) {
+				scope.$apply(function() {
+					scope.updateSelectedStyles();
+				});
+			};
+			scope.displayElements.html.on('mouseup', mouseup);
+			scope.displayElements.text.on('mouseup', mouseup);
+		}
+	};
+});
