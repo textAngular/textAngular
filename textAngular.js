@@ -96,17 +96,17 @@ textAngular.directive("textAngular", function($compile, $sce, $window, $document
 			display: "<button ng-click='action()' ng-class='displayActiveToolClass(active)'>Toggle HTML</button>",
 			action: function() {
 				// this variable in an action function referrs to the angular scope of the tool
-				var ht;
+				var ht, _this = this;
 				this.$parent.showHtml = !this.$parent.showHtml;
 				if (this.$parent.showHtml) { //Show the HTML view
 					ht = this.$parent.displayElements.text.html();
 					$timeout((function() { //defer until the element is visible
-						return this.$parent.displayElements.html[0].focus(); //dereference the DOM object from the angular.element
+						return _this.$parent.displayElements.html[0].focus(); //dereference the DOM object from the angular.element
 					}), 100);
 				} else { //Show the WYSIWYG view
 					ht = this.$parent.displayElements.html.html();
 					$timeout((function() { //defer until the element is visible
-						return this.$parent.displayElements.text[0].focus(); //dereference the DOM object from the angular.element
+						return _this.$parent.displayElements.text[0].focus(); //dereference the DOM object from the angular.element
 					}), 100);
 				}
 				this.$parent.compileHtml(ht);
