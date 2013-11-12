@@ -11,7 +11,7 @@ Optional Requirements: Bootstrap 3.0.0 and font-awesome for styling if you are u
 How to Use:
 
 1. Include textAngular.js in your project, alternatively grab all this code and throw it in your directives.js module file.
-2. In your HTML instantiate textAngular as an attribute or element, the only required attribute is the ta-model which is the variable to bind the content of the editor to.
+2. In your HTML instantiate textAngular as an attribute or element, the only required attribute is the ng-model which is the variable to bind the content of the editor to, this is the standard ng-model allowing you to use validating filters on it.
 3. I reccommend using the following CSS in your stylesheet or a variant of to display the text box nicely:
 	
 .ta-editor{
@@ -109,6 +109,7 @@ textAngular.directive("textAngular", function($compile, $sce, $window, $document
 						return _this.$parent.displayElements.text[0].focus(); //dereference the DOM object from the angular.element
 					}), 100);
 				}
+				// don't need to wrap in $apply as this is called within the ng-click which is in an $apply anyway
 				this.$parent.compileHtml(ht);
 				this.active = this.$parent.showHtml;
 			}
@@ -252,27 +253,27 @@ textAngular.directive("textAngular", function($compile, $sce, $window, $document
 	};
 	
 	return {
-		scope: {
-			model: "=taModel"
-		},
+		require: 'ngModel',
+		scope: {},
 		restrict: "EA",
-		link: function(scope, element, attrs) {
+		link: function(scope, element, attrs, ngModel) {
 			var group, groupElement, keydown, keyup, tool, toolElement; //all these vars should not be accessable outside this directive
 			// get the settings from the defaults and add our specific functions that need to be on the scope
 			angular.extend(scope, $rootScope.textAngularOpts, {
+				// This must be called within a $apply or the ngModel value will not be updated correctly
 				compileHtml: function(html) {
 					// this refers to the scope
 					var compHtml = angular.element("<div>").append(html).html().replace(/(class="(.*?)")|(class='(.*?)')/g, "").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/style=("|')(.*?)("|')/g, "");
-					if (this.showHtml === "load") {
-						this.text = sanitizationWrapper(compHtml);
-						this.html = sanitizationWrapper(compHtml.replace(/</g, "&lt;"));
-						this.showHtml = this.showHtmlDefault || false;
-					} else if (this.showHtml) { // update the raw HTML view
-						this.text = sanitizationWrapper(compHtml);
+					if (scope.showHtml === "load") {
+						scope.text = sanitizationWrapper(compHtml);
+						scope.html = sanitizationWrapper(compHtml.replace(/</g, "&lt;"));
+						scope.showHtml = scope.showHtmlDefault || false;
+					} else if (scope.showHtml) { // update the raw HTML view
+						scope.text = sanitizationWrapper(compHtml);
 					} else { // update the WYSIWYG view
-						this.html = sanitizationWrapper(compHtml.replace(/</g, "&lt;"));
+						scope.html = sanitizationWrapper(compHtml.replace(/</g, "&lt;"));
 					}
-					this.model = compHtml;
+					ngModel.$setViewValue(compHtml);
 				},
 				// wraps the selection in the provided tag / execCommand function.
 				wrapSelection: function(command, opt, updateDisplay) {
@@ -280,14 +281,16 @@ textAngular.directive("textAngular", function($compile, $sce, $window, $document
 					if (updateDisplay == null) updateDisplay = true;
 					document.execCommand(command, false, opt);
 					// refocus on the shown display element, this fixes a display bug when using :focus styles to outline the box. You still have focus on the text/html input it just doesn't show up
-					if (this.showHtml)
-						this.displayElements.text[0].focus();
+					if (scope.showHtml)
+						scope.displayElements.text[0].focus();
 					else
-						this.displayElements.html[0].focus();
-					if (updateDisplay) this.updateDisplay();
+						scope.displayElements.html[0].focus();
+					// note that wrapSelection is called via ng-click in the tool plugins so we are already within a $apply
+					if (updateDisplay) scope.updateDisplay();
 				},
+				// due to restritions on compileHtml this must also be called in a scope.$apply - this is really a convenience function for compileHtml anyway.
 				updateDisplay: function() {
-					this.compileHtml((!this.showHtml)? this.displayElements.html.html() : this.displayElements.text.html());
+					scope.compileHtml((!scope.showHtml)? scope.displayElements.html.html() : scope.displayElements.text.html());
 				},
 				showHtml: false
 			});
@@ -345,17 +348,15 @@ textAngular.directive("textAngular", function($compile, $sce, $window, $document
 				scope.displayElements.toolbar.append(groupElement); // append the group to the toolbar
 			}
 			
-			// watch for changes to the model variable from outside the html/text inputs
-			scope.$watch("model", (function(newVal, oldVal) {
-				// if the editors aren't focussed they need to be updated, otherwise they are doing the updating
+			// changes to the model variable from outside the html/text inputs
+			ngModel.$render = function() {
+				if(ngModel.$viewValue === undefined) return;
+				// if the editors aren't focused they need to be updated, otherwise they are doing the updating
 				if (!($document[0].activeElement === scope.displayElements.html[0]) && !($document[0].activeElement === scope.displayElements.text[0])) {
-					scope.text = sanitizationWrapper(newVal);
-					scope.html = sanitizationWrapper(newVal.replace(/</g, "&lt;"));
+					scope.text = sanitizationWrapper(ngModel.$viewValue);
+					scope.html = sanitizationWrapper(ngModel.$viewValue.replace(/</g, "&lt;"));
 				}
-			}), true);
-			
-			// populate the text and html fields
-			scope.compileHtml(scope.model);
+			};
 			
 			// the following is for applying the active states to the tools that support it
 			scope.bUpdateSelectedStyles = false;
@@ -384,9 +385,7 @@ textAngular.directive("textAngular", function($compile, $sce, $window, $document
 			// stop updating on key up and update the display/model
 			keyup = function(e) {
 				scope.bUpdateSelectedStyles = false;
-				scope.$apply(function() {
-					scope.updateDisplay();
-				});
+				scope.$apply(scope.updateDisplay);
 			};
 			scope.displayElements.html.on('keyup', keyup);
 			scope.displayElements.text.on('keyup', keyup);
