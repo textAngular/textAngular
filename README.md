@@ -28,6 +28,8 @@ http://www.textangular.com
 }
 ```
 4. Have fun!
+ 
+**Important Note:** In it's current state textAngular does not support the use of class or style attributes in the RAW html or in plugins.
 
 ###Setting Options
 
