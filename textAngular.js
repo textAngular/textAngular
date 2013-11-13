@@ -5,7 +5,7 @@ Author : Austin Anderson
 License : 2013 MIT
 Version 1.1.0
 
-Requirements: Angular 1.2.0
+Requirements: Angular 1.2.0, Angular ngSanitize module
 Optional Requirements: Bootstrap 3.0.0 and font-awesome for styling if you are using the default classes and icons.
 
 How to Use:
@@ -74,7 +74,7 @@ groupElement.append($compile(toolElement)(angular.extend scope.$new(true), $root
 */
 
 
-var textAngular = angular.module("textAngular", []);
+var textAngular = angular.module("textAngular", ['ngSanitize']); //This makes ngSanitize required
 
 textAngular.directive("textAngular", function($compile, $sce, $window, $document, $rootScope, $timeout) {
 	console.log("Thank you for using textAngular! http://www.textangular.com");
@@ -247,7 +247,7 @@ textAngular.directive("textAngular", function($compile, $sce, $window, $document
 		}
 	}, ($rootScope.textAngularTools != null)? $rootScope.textAngularTools : {});
 	
-	// Convenience wrapper
+	// ngSanitize is a requirement for the module so this shouldn't cause any trouble
 	var sanitizationWrapper = function(html) {
 		return $sce.trustAsHtml(html);
 	};

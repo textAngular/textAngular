@@ -2,11 +2,11 @@
 
 2013-11-9 v1.1.0
 
-- Re-written to only depend on Angular 1.2.0+. No More jQuery and no need for ngSanitize as $sce is inherantly included in the 1.2.0 version.
+- Included coffeescript version
+- Re-written to only depend on Angular and Angular-Sanitize. No More jQuery.
 - Re-worked to be more angular-esq in it's initiation and use. Less reliance on global variables except for defaults and more use of bindings on attributes.
 - Default styles are Bootstrap 3 classes, options to change these classes.
 - Restructured the Toolbar to make it more plugin friendly, all tool buttons are encapsulated in their own scope that is a child of the individual textAngular bound scope.
-- Added in ngModel support, this allows for validation in forms when the name attribute is used.
 
 2013-11-6 v1.0.3
 
