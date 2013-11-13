@@ -10,8 +10,8 @@
     "jquery"
   ],
   "dependencies": {
-    "angular": "~1.2.0-rc.2",
-    "angular-sanitize": "~1.2.0-rc.2"
+    "angular": "~1.2.0",
+    "angular-sanitize": "~1.2.0"
   },
   "license": "MIT",
   "homepage": "https://github.com/fraywing/textAngular",
