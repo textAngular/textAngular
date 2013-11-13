@@ -6,7 +6,6 @@ http://www.textangular.com
 ###Requirements
 
 1. Angular 1.2.x
-2. Angular Sanitize 1.2.x
 
 ###Optional requirements
 
@@ -16,9 +15,9 @@ http://www.textangular.com
 ###How to Use
 
 1. Include textAngular.js in your project, alternatively grab all this code and throw it in your directives.js module file.
-2. In your HTML instantiate textAngular as an attribute or element, the only required attribute is the ta-model which is the variable to bind the content of the editor to.
-3. I reccommend using the following CSS in your stylesheet or a variant of to display the text box nicely:
-4.  ```
+2. In your HTML instantiate textAngular as an attribute or element, the only required attribute is the ng-model which is the variable to bind the content of the editor to, like so: ```<div text-angular ng-model="html"></div>``` or ```<text-angular ng-model="html"/>``` this acts in a similar fashion to the input directive of angular so if you define a name attribute you can use form validation as if it was a regular input.
+3. I recommend using the following CSS in your stylesheet or a variant of to display the text box nicely: 
+ ```
 .ta-editor{
     min-height: 300px;
     height: auto;
@@ -27,7 +26,6 @@ http://www.textangular.com
     font-size: 100%;
 }
 ```
-
 4. Have fun!
 
 ###Setting Options
@@ -86,7 +84,7 @@ groupElement.append($compile(toolElement)(angular.extend scope.$new(true), $root
 
 ####Issues?
 
-textAngular uses ```execCommand``` for the rich-text functionalty. 
+textAngular uses ```execCommand``` for the rich-text functionality. 
 That being said, its still a fairly experimental browser feature-set, and may not behave the same in all browsers - see http://tifftiff.de/contenteditable/compliance_test.html for a full compliance list.
 It has been tested to work on Chrome, Safari, FF and IE8+.
 If you find something, please let me know - throw me a message, or submit a issue request!
