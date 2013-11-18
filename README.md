@@ -105,6 +105,9 @@ Special thanks to all the contributions thus far!
 Including those from:
 
 [SimeonC](https://github.com/SimeonC)
+
 [edouard-lopez](https://github.com/edouard-lopez)
+
 [108ium](https://github.com/108ium)
+
 [nadeeshacabral](https://github.com/nadeeshacabral) 
