@@ -95,3 +95,16 @@ If you find something, please let me know - throw me a message, or submit a issu
 
 ## License
 This project is licensed under the [MIT license](http://opensource.org/licenses/MIT).
+
+
+
+####Contributers
+
+Special thanks to all the contributions thus far! 
+
+Including those from:
+
+@SimeonC
+@edouard-lopez 
+@108ium
+@nadeeshacabral 
