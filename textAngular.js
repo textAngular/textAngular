@@ -353,8 +353,12 @@ textAngular.directive("textAngular", function($compile, $sce, $window, $document
 				if(ngModel.$viewValue === undefined) return;
 				// if the editors aren't focused they need to be updated, otherwise they are doing the updating
 				if (!($document[0].activeElement === scope.displayElements.html[0]) && !($document[0].activeElement === scope.displayElements.text[0])) {
-					scope.text = sanitizationWrapper(ngModel.$viewValue);
-					scope.html = sanitizationWrapper(ngModel.$viewValue.replace(/</g, "&lt;"));
+					if (ngModel.$viewValue != null) {
+						scope.text = sanitizationWrapper(ngModel.$viewValue);
+						scope.html = ngModel.$viewValue ? sanitizationWrapper(ngModel.$viewValue.replace(/</g, "&lt;")) : '';
+					} else {
+						scope.text = scope.html = '';
+					}
 				}
 			};
 			
