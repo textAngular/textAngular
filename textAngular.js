@@ -90,8 +90,22 @@ textAngular.directive("textAngular", function($compile, $sce, $window, $document
 			htmlEditor: 'form-control'
 		}
 	}, ($rootScope.textAngularOpts != null)? $rootScope.textAngularOpts : {});
+	// deepExtend instead of angular.extend in order to allow easy customization of "display" for default buttons
+	// snatched from: http://stackoverflow.com/a/15311794/2966847
+	function deepExtend(destination, source) {
+		for (var property in source) {
+			if (source[property] && source[property].constructor &&
+				source[property].constructor === Object) {
+				destination[property] = destination[property] || {};
+				arguments.callee(destination[property], source[property]);
+			} else {
+				destination[property] = source[property];
+			}
+		}
+		return destination;
+	}
 	// Setup the default toolbar tools, this way allows the user to add new tools like plugins
-		$rootScope.textAngularTools = angular.extend({
+		$rootScope.textAngularTools = deepExtend({
 		html: {
 			display: "<button ng-click='action()' ng-class='displayActiveToolClass(active)'>Toggle HTML</button>",
 			action: function() {
