@@ -107,7 +107,7 @@ textAngular.directive("textAngular", function($compile, $sce, $window, $document
 	// Setup the default toolbar tools, this way allows the user to add new tools like plugins
 		$rootScope.textAngularTools = deepExtend({
 		html: {
-			display: "<button ng-click='action()' ng-class='displayActiveToolClass(active)'>Toggle HTML</button>",
+			display: "<button type='button' ng-click='action()' ng-class='displayActiveToolClass(active)'>Toggle HTML</button>",
 			action: function() {
 				// this variable in an action function referrs to the angular scope of the tool
 				var ht, _this = this;
@@ -129,67 +129,67 @@ textAngular.directive("textAngular", function($compile, $sce, $window, $document
 			}
 		},
 		h1: {
-			display: "<button ng-click='action()' ng-class='displayActiveToolClass(active)'>H1</button>",
+			display: "<button type='button' ng-click='action()' ng-class='displayActiveToolClass(active)'>H1</button>",
 			action: function() {
 				return this.$parent.wrapSelection("formatBlock", "<H1>");
 			}
 		},
 		h2: {
-			display: "<button ng-click='action()' ng-class='displayActiveToolClass(active)'>H2</button>",
+			display: "<button type='button' ng-click='action()' ng-class='displayActiveToolClass(active)'>H2</button>",
 			action: function() {
 				return this.$parent.wrapSelection("formatBlock", "<H2>");
 			}
 		},
 		h3: {
-			display: "<button ng-click='action()' ng-class='displayActiveToolClass(active)'>H3</button>",
+			display: "<button type='button' ng-click='action()' ng-class='displayActiveToolClass(active)'>H3</button>",
 			action: function() {
 				return this.$parent.wrapSelection("formatBlock", "<H3>");
 			}
 		},
 		p: {
-			display: "<button ng-click='action()' ng-class='displayActiveToolClass(active)'>P</button>",
+			display: "<button type='button' ng-click='action()' ng-class='displayActiveToolClass(active)'>P</button>",
 			action: function() {
 				return this.$parent.wrapSelection("formatBlock", "<P>");
 			}
 		},
 		pre: {
-			display: "<button ng-click='action()' ng-class='displayActiveToolClass(active)'>pre</button>",
+			display: "<button type='button' ng-click='action()' ng-class='displayActiveToolClass(active)'>pre</button>",
 			action: function() {
 				return this.$parent.wrapSelection("formatBlock", "<PRE>");
 			}
 		},
 		ul: {
-			display: "<button ng-click='action()' ng-class='displayActiveToolClass(active)'><i class='fa fa-list-ul'></i></button>",
+			display: "<button type='button' ng-click='action()' ng-class='displayActiveToolClass(active)'><i class='fa fa-list-ul'></i></button>",
 			action: function() {
 				return this.$parent.wrapSelection("insertUnorderedList", null);
 			}
 		},
 		ol: {
-			display: "<button ng-click='action()' ng-class='displayActiveToolClass(active)'><i class='fa fa-list-ol'></i></button>",
+			display: "<button type='button' ng-click='action()' ng-class='displayActiveToolClass(active)'><i class='fa fa-list-ol'></i></button>",
 			action: function() {
 				return this.$parent.wrapSelection("insertOrderedList", null);
 			}
 		},
 		quote: {
-			display: "<button ng-click='action()' ng-class='displayActiveToolClass(active)'><i class='fa fa-quote-right'></i></button>",
+			display: "<button type='button' ng-click='action()' ng-class='displayActiveToolClass(active)'><i class='fa fa-quote-right'></i></button>",
 			action: function() {
 				return this.$parent.wrapSelection("formatBlock", "<BLOCKQUOTE>");
 			}
 		},
 		undo: {
-			display: "<button ng-click='action()' ng-class='displayActiveToolClass(active)'><i class='fa fa-undo'></i></button>",
+			display: "<button type='button' ng-click='action()' ng-class='displayActiveToolClass(active)'><i class='fa fa-undo'></i></button>",
 			action: function() {
 				return this.$parent.wrapSelection("undo", null);
 			}
 		},
 		redo: {
-			display: "<button ng-click='action()' ng-class='displayActiveToolClass(active)'><i class='fa fa-repeat'></i></button>",
+			display: "<button type='button' ng-click='action()' ng-class='displayActiveToolClass(active)'><i class='fa fa-repeat'></i></button>",
 			action: function() {
 				return this.$parent.wrapSelection("redo", null);
 			}
 		},
 		bold: {
-			display: "<button ng-click='action()' ng-class='displayActiveToolClass(active)'><i class='fa fa-bold'></i></button>",
+			display: "<button type='button' ng-click='action()' ng-class='displayActiveToolClass(active)'><i class='fa fa-bold'></i></button>",
 			action: function() {
 				return this.$parent.wrapSelection("bold", null);
 			},
@@ -198,7 +198,7 @@ textAngular.directive("textAngular", function($compile, $sce, $window, $document
 			}
 		},
 		justifyLeft: {
-			display: "<button ng-click='action()' ng-class='displayActiveToolClass(active)'><i class='fa fa-align-left'></i></button>",
+			display: "<button type='button' ng-click='action()' ng-class='displayActiveToolClass(active)'><i class='fa fa-align-left'></i></button>",
 			action: function() {
 				return this.$parent.wrapSelection("justifyLeft", null);
 			},
@@ -207,7 +207,7 @@ textAngular.directive("textAngular", function($compile, $sce, $window, $document
 			}
 		},
 		justifyRight: {
-			display: "<button ng-click='action()' ng-class='displayActiveToolClass(active)'><i class='fa fa-align-right'></i></button>",
+			display: "<button type='button' ng-click='action()' ng-class='displayActiveToolClass(active)'><i class='fa fa-align-right'></i></button>",
 			action: function() {
 				return this.$parent.wrapSelection("justifyRight", null);
 			},
@@ -216,7 +216,7 @@ textAngular.directive("textAngular", function($compile, $sce, $window, $document
 			}
 		},
 		justifyCenter: {
-			display: "<button ng-click='action()' ng-class='displayActiveToolClass(active)'><i class='fa fa-align-center'></i></button>",
+			display: "<button type='button' ng-click='action()' ng-class='displayActiveToolClass(active)'><i class='fa fa-align-center'></i></button>",
 			action: function() {
 				return this.$parent.wrapSelection("justifyCenter", null);
 			},
@@ -225,7 +225,7 @@ textAngular.directive("textAngular", function($compile, $sce, $window, $document
 			}
 		},
 		italics: {
-			display: "<button ng-click='action()' ng-class='displayActiveToolClass(active)'><i class='fa fa-italic'></i></button>",
+			display: "<button type='button' ng-click='action()' ng-class='displayActiveToolClass(active)'><i class='fa fa-italic'></i></button>",
 			action: function() {
 				return this.$parent.wrapSelection("italic", null);
 			},
@@ -234,13 +234,13 @@ textAngular.directive("textAngular", function($compile, $sce, $window, $document
 			}
 		},
 		clear: {
-			display: "<button ng-click='action()' ng-class='displayActiveToolClass(active)'><i class='fa fa-ban'></i></button>",
+			display: "<button type='button' ng-click='action()' ng-class='displayActiveToolClass(active)'><i class='fa fa-ban'></i></button>",
 			action: function() {
 				return this.$parent.wrapSelection("FormatBlock", "<div>");
 			}
 		},
 		insertImage: {
-			display: "<button ng-click='action()' ng-class='displayActiveToolClass(active)'><i class='fa fa-picture-o'></i></button>",
+			display: "<button type='button' ng-click='action()' ng-class='displayActiveToolClass(active)'><i class='fa fa-picture-o'></i></button>",
 			action: function() {
 				var imageLink;
 				imageLink = prompt("Please enter an image URL to insert", 'http://');
@@ -250,7 +250,7 @@ textAngular.directive("textAngular", function($compile, $sce, $window, $document
 			}
 		},
 		insertLink: {
-			display: "<button ng-click='action()' ng-class='displayActiveToolClass(active)'><i class='fa fa-chain'></i></button>",
+			display: "<button type='button' ng-click='action()' ng-class='displayActiveToolClass(active)'><i class='fa fa-chain'></i></button>",
 			action: function() {
 				var urlLink;
 				urlLink = prompt("Please enter an URL to insert", 'http://');
