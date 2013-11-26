@@ -93,7 +93,7 @@ textAngular.directive("textAngular", function($compile, $sce, $window, $document
 	// Setup the default toolbar tools, this way allows the user to add new tools like plugins
 		$rootScope.textAngularTools = angular.extend({
 		html: {
-			display: "<button ng-click='action()' ng-class='displayActiveToolClass(active)'>Toggle HTML</button>",
+			display: "<button type='button' ng-click='action()' ng-class='displayActiveToolClass(active)'>Toggle HTML</button>",
 			action: function() {
 				// this variable in an action function referrs to the angular scope of the tool
 				var ht, _this = this;
@@ -115,67 +115,67 @@ textAngular.directive("textAngular", function($compile, $sce, $window, $document
 			}
 		},
 		h1: {
-			display: "<button ng-click='action()' ng-class='displayActiveToolClass(active)'>H1</button>",
+			display: "<button type='button' ng-click='action()' ng-class='displayActiveToolClass(active)'>H1</button>",
 			action: function() {
 				return this.$parent.wrapSelection("formatBlock", "<H1>");
 			}
 		},
 		h2: {
-			display: "<button ng-click='action()' ng-class='displayActiveToolClass(active)'>H2</button>",
+			display: "<button type='button' ng-click='action()' ng-class='displayActiveToolClass(active)'>H2</button>",
 			action: function() {
 				return this.$parent.wrapSelection("formatBlock", "<H2>");
 			}
 		},
 		h3: {
-			display: "<button ng-click='action()' ng-class='displayActiveToolClass(active)'>H3</button>",
+			display: "<button type='button' ng-click='action()' ng-class='displayActiveToolClass(active)'>H3</button>",
 			action: function() {
 				return this.$parent.wrapSelection("formatBlock", "<H3>");
 			}
 		},
 		p: {
-			display: "<button ng-click='action()' ng-class='displayActiveToolClass(active)'>P</button>",
+			display: "<button type='button' ng-click='action()' ng-class='displayActiveToolClass(active)'>P</button>",
 			action: function() {
 				return this.$parent.wrapSelection("formatBlock", "<P>");
 			}
 		},
 		pre: {
-			display: "<button ng-click='action()' ng-class='displayActiveToolClass(active)'>pre</button>",
+			display: "<button type='button' ng-click='action()' ng-class='displayActiveToolClass(active)'>pre</button>",
 			action: function() {
 				return this.$parent.wrapSelection("formatBlock", "<PRE>");
 			}
 		},
 		ul: {
-			display: "<button ng-click='action()' ng-class='displayActiveToolClass(active)'><i class='fa fa-list-ul'></i></button>",
+			display: "<button type='button' ng-click='action()' ng-class='displayActiveToolClass(active)'><i class='fa fa-list-ul'></i></button>",
 			action: function() {
 				return this.$parent.wrapSelection("insertUnorderedList", null);
 			}
 		},
 		ol: {
-			display: "<button ng-click='action()' ng-class='displayActiveToolClass(active)'><i class='fa fa-list-ol'></i></button>",
+			display: "<button type='button' ng-click='action()' ng-class='displayActiveToolClass(active)'><i class='fa fa-list-ol'></i></button>",
 			action: function() {
 				return this.$parent.wrapSelection("insertOrderedList", null);
 			}
 		},
 		quote: {
-			display: "<button ng-click='action()' ng-class='displayActiveToolClass(active)'><i class='fa fa-quote-right'></i></button>",
+			display: "<button type='button' ng-click='action()' ng-class='displayActiveToolClass(active)'><i class='fa fa-quote-right'></i></button>",
 			action: function() {
 				return this.$parent.wrapSelection("formatBlock", "<BLOCKQUOTE>");
 			}
 		},
 		undo: {
-			display: "<button ng-click='action()' ng-class='displayActiveToolClass(active)'><i class='fa fa-undo'></i></button>",
+			display: "<button type='button' ng-click='action()' ng-class='displayActiveToolClass(active)'><i class='fa fa-undo'></i></button>",
 			action: function() {
 				return this.$parent.wrapSelection("undo", null);
 			}
 		},
 		redo: {
-			display: "<button ng-click='action()' ng-class='displayActiveToolClass(active)'><i class='fa fa-repeat'></i></button>",
+			display: "<button type='button' ng-click='action()' ng-class='displayActiveToolClass(active)'><i class='fa fa-repeat'></i></button>",
 			action: function() {
 				return this.$parent.wrapSelection("redo", null);
 			}
 		},
 		bold: {
-			display: "<button ng-click='action()' ng-class='displayActiveToolClass(active)'><i class='fa fa-bold'></i></button>",
+			display: "<button type='button' ng-click='action()' ng-class='displayActiveToolClass(active)'><i class='fa fa-bold'></i></button>",
 			action: function() {
 				return this.$parent.wrapSelection("bold", null);
 			},
@@ -184,7 +184,7 @@ textAngular.directive("textAngular", function($compile, $sce, $window, $document
 			}
 		},
 		justifyLeft: {
-			display: "<button ng-click='action()' ng-class='displayActiveToolClass(active)'><i class='fa fa-align-left'></i></button>",
+			display: "<button type='button' ng-click='action()' ng-class='displayActiveToolClass(active)'><i class='fa fa-align-left'></i></button>",
 			action: function() {
 				return this.$parent.wrapSelection("justifyLeft", null);
 			},
@@ -193,7 +193,7 @@ textAngular.directive("textAngular", function($compile, $sce, $window, $document
 			}
 		},
 		justifyRight: {
-			display: "<button ng-click='action()' ng-class='displayActiveToolClass(active)'><i class='fa fa-align-right'></i></button>",
+			display: "<button type='button' ng-click='action()' ng-class='displayActiveToolClass(active)'><i class='fa fa-align-right'></i></button>",
 			action: function() {
 				return this.$parent.wrapSelection("justifyRight", null);
 			},
@@ -202,7 +202,7 @@ textAngular.directive("textAngular", function($compile, $sce, $window, $document
 			}
 		},
 		justifyCenter: {
-			display: "<button ng-click='action()' ng-class='displayActiveToolClass(active)'><i class='fa fa-align-center'></i></button>",
+			display: "<button type='button' ng-click='action()' ng-class='displayActiveToolClass(active)'><i class='fa fa-align-center'></i></button>",
 			action: function() {
 				return this.$parent.wrapSelection("justifyCenter", null);
 			},
@@ -211,7 +211,7 @@ textAngular.directive("textAngular", function($compile, $sce, $window, $document
 			}
 		},
 		italics: {
-			display: "<button ng-click='action()' ng-class='displayActiveToolClass(active)'><i class='fa fa-italic'></i></button>",
+			display: "<button type='button' ng-click='action()' ng-class='displayActiveToolClass(active)'><i class='fa fa-italic'></i></button>",
 			action: function() {
 				return this.$parent.wrapSelection("italic", null);
 			},
@@ -220,13 +220,13 @@ textAngular.directive("textAngular", function($compile, $sce, $window, $document
 			}
 		},
 		clear: {
-			display: "<button ng-click='action()' ng-class='displayActiveToolClass(active)'><i class='fa fa-ban'></i></button>",
+			display: "<button type='button' ng-click='action()' ng-class='displayActiveToolClass(active)'><i class='fa fa-ban'></i></button>",
 			action: function() {
 				return this.$parent.wrapSelection("FormatBlock", "<div>");
 			}
 		},
 		insertImage: {
-			display: "<button ng-click='action()' ng-class='displayActiveToolClass(active)'><i class='fa fa-picture-o'></i></button>",
+			display: "<button type='button' ng-click='action()' ng-class='displayActiveToolClass(active)'><i class='fa fa-picture-o'></i></button>",
 			action: function() {
 				var imageLink;
 				imageLink = prompt("Please enter an image URL to insert", 'http://');
@@ -236,7 +236,7 @@ textAngular.directive("textAngular", function($compile, $sce, $window, $document
 			}
 		},
 		insertLink: {
-			display: "<button ng-click='action()' ng-class='displayActiveToolClass(active)'><i class='fa fa-chain'></i></button>",
+			display: "<button type='button' ng-click='action()' ng-class='displayActiveToolClass(active)'><i class='fa fa-chain'></i></button>",
 			action: function() {
 				var urlLink;
 				urlLink = prompt("Please enter an URL to insert", 'http://');
@@ -263,7 +263,7 @@ textAngular.directive("textAngular", function($compile, $sce, $window, $document
 				// This must be called within a $apply or the ngModel value will not be updated correctly
 				compileHtml: function(html) {
 					// this refers to the scope
-					var compHtml = angular.element("<div>").append(html).html().replace(/(class="(.*?)")|(class='(.*?)')/g, "").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/style=("|')(.*?)("|')/g, "");
+					var compHtml = angular.element("<div>").append(html).html().replace(/&lt;/g, "<").replace(/&gt;/g, ">");
 					if (scope.showHtml === "load") {
 						scope.text = sanitizationWrapper(compHtml);
 						scope.html = sanitizationWrapper(compHtml.replace(/</g, "&lt;"));
@@ -280,6 +280,23 @@ textAngular.directive("textAngular", function($compile, $sce, $window, $document
 					// the default value for updateDisplay is true
 					if (updateDisplay == null) updateDisplay = true;
 					document.execCommand(command, false, opt);
+					// strip out the chrome specific rubbish that gets put in when using lists
+					if(command === 'insertUnorderedList' || command === 'insertOrderedList'){
+						var currentNode = angular.element(window.getSelection().focusNode.parentNode);
+						while(currentNode.attr('style') !== 'font-family: inherit; line-height: 1.428571429;' && !currentNode.attr('contenteditable')) currentNode = currentNode.parent();
+						if(currentNode.attr('style') === 'font-family: inherit; line-height: 1.428571429;' && !currentNode.attr('contenteditable')){
+							// chrome wraps the origional line, if not wrapped already, in the following code: <span style="font-family: inherit; line-height: 1.428571429;">...</span><br>
+							// this code will strip the above out if it has been added
+							if(currentNode[0].tagName === 'SPAN')
+								currentNode.parent().html(angular.element(currentNode).html());
+							// if the text was already wrapped in a b or i or similar then chrome adds the offending style and appends a <br>. This catches that case.
+							else{
+								currentNode.removeAttr('style');
+								var nextNode = currentNode.next();
+								if(nextNode[0].tagName === 'BR') nextNode.remove();
+							}
+						}
+					}
 					// refocus on the shown display element, this fixes a display bug when using :focus styles to outline the box. You still have focus on the text/html input it just doesn't show up
 					if (scope.showHtml)
 						scope.displayElements.text[0].focus();
