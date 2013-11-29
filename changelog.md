@@ -5,8 +5,9 @@
 - Fixed buttons still submitting form
 - Fix for Null ngModel value. Thanks to @slobo #22
 - Added Ability to override just "display" for default button set. Thanks to @slobo #27
-- Added Tests
-- Updated Readme.md
+- Fixed parsing issues see Issues: #35 #30
+- Updated Readme.md and consolidated the readme out of the textAngular.js file.
+- Added basic demo to the repository.
 
 2013-11-9 v1.1.0
 

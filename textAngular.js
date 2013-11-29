@@ -2,93 +2,16 @@
 textAngular
 Author : Austin Anderson
 License : 2013 MIT
-Version 1.1.0
+Version 1.1.1
 
-Requirements: Angular 1.2.0, Angular ngSanitize module
-Optional Requirements: Bootstrap 3.0.0 and font-awesome for styling if you are using the default classes and icons.
-
-How to Use:
-
-1. Include textAngular.js in your project, alternatively grab all this code and throw it in your directives.js module file.
-2. In your HTML instantiate textAngular as an attribute or element, the only required attribute is the ng-model which is the variable to bind the content of the editor to, this is the standard ng-model allowing you to use validating filters on it.
-3. I reccommend using the following CSS in your stylesheet or a variant of to display the text box nicely:
-	
-.ta-editor{
-	min-height: 300px;
-	height: auto;
-	overflow: auto;
-	font-family: inherit;
-	font-size: 100%;
-}
-
-4. Have fun!
-
-Setting Options:
-
-Several options can be set through attributes on the HTML tag, these are;
-	- ta-toolbar: this should evaluate to an array of arrays. Each element is the name of one of the toolbar tools. The default is: [['h1', 'h2', 'h3', 'p', 'pre', 'bold', 'italics', 'ul', 'ol', 'redo', 'undo', 'clear'],['html', 'insertImage', 'insertLink']]
-	- ta-toolbar-class: this is the class to apply to the overall div of the toolbar, defaults to "btn-toolbar". Note that the class "ta-toolbar" is also added to the toolbar.
-	- ta-toolbar-group-class: this is the class to apply to the nested groups in the toolbar, a div with this class is created for each nested array in the ta-toolbar array and then the tool buttons are nested inside the group, defaults to "btn-group".
-	- ta-toolbar-button-class: this is the class to apply to each tool button in the toolbar, defaults to: "btn btn-default"
-	- ta-toolbar-active-button-class: this is the class to apply to each tool button in the toolbar if it's activeState function returns true ie when a tool function is applied to the selected text, defaults to: "active".
-	- ta-text-editor-class: this is the class to apply to the text editor <pre>, defaults to "form-control". Note that the classes: ta-editor and ta-text are also added.
-	- ta-html-editor-class: this is the class to apply to the html editor <div>, defaults to "form-control". Note that the classes: ta-editor and ta-html are also added.
-
-The defaults can be changed by altering/overwriting the variable: $rootScope.textAngularOpts which acts like global defaults for the classes and toolbar.
-The default value for this is: 
-	$rootScope.textAngularOpts = {
-		toolbar: [['h1', 'h2', 'h3', 'p', 'pre', 'bold', 'italics', 'ul', 'ol', 'redo', 'undo', 'clear'],['html', 'insertImage', 'insertLink']],
-		classes: {
-			toolbar: "btn-toolbar",
-			toolbarGroup: "btn-group",
-			toolbarButton: "btn btn-default",
-			toolbarButtonActive: "active",
-			textEditor: 'form-control',
-			htmlEditor: 'form-control'
-		}
-	}
-
-The toolbar buttons are defined in the object variable $rootScope.textAngularTools.
-The following is an example of how to add a button to make the selected text red:
-`
-$rootScope.textAngularTools.colourRed = {
-	display: "<button ng-click='action()' ng-class='displayActiveToolClass(active)'><i class='fa fa-square' style='color: red;'></i></button>",
-	action: function(){
-		this.$parent.wrapSelection('formatBlock', '<span style="color: red">');
-	},
-	activeState: function(){return false;} //This isn't required, and currently doesn't work reliably except for the html tag that doesn't rely on the cursor position.
-};
-//the following adds it to the toolbar to be displayed and used.
-$rootScope.textAngularOpts.toolbar = [['h1', 'h2', 'h3', 'p', 'pre', 'bold', 'colourRed', 'italics', 'ul', 'ol', 'redo', 'undo', 'clear'],['html', 'insertImage', 'insertLink']];
-`
-To explain how this works, when we create a button we create an isolated child scope of the textAngular scope and extend it with the values in the tools object, we then compile the HTML in the display value with the newly created scope.
-Note that the way any functions are called in the plugins the 'this' variable will allways point to the scope of the button ensuring that this.$parent will allways 
-Here's the code we run for every tool:
-
-`
-toolElement = angular.element($rootScope.textAngularTools[tool].display);
-toolElement.addClass(scope.classes.toolbarButton);
-groupElement.append($compile(toolElement)(angular.extend scope.$new(true), $rootScope.textAngularTools[tool]));
-`
+See README.md or http://github.com/fraywing/textangular for requirements and use.
 */
 
 
 var textAngular = angular.module("textAngular", ['ngSanitize']); //This makes ngSanitize required
 
 textAngular.directive("textAngular", function($compile, $sce, $window, $document, $rootScope, $timeout, taFixSelection) {
-	console.log("Thank you for using textAngular! http://www.textangular.com");
-	// Here we set up the global display defaults, make sure we don't overwrite any that the user may have already set.
-	$rootScope.textAngularOpts = angular.extend({
-		toolbar: [['h1', 'h2', 'h3', 'p', 'pre', 'bold', 'italics', 'ul', 'ol', 'redo', 'undo', 'clear'], ['html', 'insertImage', 'insertLink']],
-		classes: {
-			toolbar: "btn-toolbar",
-			toolbarGroup: "btn-group",
-			toolbarButton: "btn btn-default",
-			toolbarButtonActive: "active",
-			textEditor: 'form-control',
-			htmlEditor: 'form-control'
-		}
-	}, ($rootScope.textAngularOpts != null)? $rootScope.textAngularOpts : {});
+	console.log("Thank you for using textAngular! http://www.textangular.com")
 	// deepExtend instead of angular.extend in order to allow easy customization of "display" for default buttons
 	// snatched from: http://stackoverflow.com/a/15311794/2966847
 	function deepExtend(destination, source) {
@@ -102,9 +25,21 @@ textAngular.directive("textAngular", function($compile, $sce, $window, $document
 			}
 		}
 		return destination;
-	}
+	};
+	// Here we set up the global display defaults, make sure we don't overwrite any that the user may have already set.
+	$rootScope.textAngularOpts = deepExtend({
+		toolbar: [['h1', 'h2', 'h3', 'p', 'pre', 'bold', 'italics', 'ul', 'ol', 'redo', 'undo', 'clear'], ['html', 'insertImage', 'insertLink']],
+		classes: {
+			toolbar: "btn-toolbar",
+			toolbarGroup: "btn-group",
+			toolbarButton: "btn btn-default",
+			toolbarButtonActive: "active",
+			textEditor: 'form-control',
+			htmlEditor: 'form-control'
+		}
+	}, ($rootScope.textAngularOpts != null)? $rootScope.textAngularOpts : {});
 	// Setup the default toolbar tools, this way allows the user to add new tools like plugins
-		$rootScope.textAngularTools = deepExtend({
+	$rootScope.textAngularTools = deepExtend({
 		html: {
 			display: "<button type='button' ng-click='action()' ng-class='displayActiveToolClass(active)'>Toggle HTML</button>",
 			action: function() {

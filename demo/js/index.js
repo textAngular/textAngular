@@ -3,7 +3,7 @@
 
   angular.module("textAngularTest", ['textAngular']);
 
-  wysiwygeditor = function($scope, $sce) {
+  wysiwygeditor = function($scope) {
     return $scope.htmlcontent = '<p>Hello World!</p>';
   };
 
