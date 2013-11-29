@@ -1,7 +1,7 @@
-textAngular
+textAngular v1.1.0
 ===========
 
-http://www.textangular.com
+Demo: http://www.textangular.com
 
 ###Requirements
 
@@ -15,9 +15,10 @@ http://www.textangular.com
 
 ###How to Use
 
-1. Include textAngular.js or textAngular.min.js in your project then include it in your module: ```angular.module('myModule', ['textAngular'])```, alternatively grab all this code and throw it in your directives.js module file.
-2. In your HTML instantiate textAngular as an attribute or element, the only required attribute is the ng-model which is the variable to bind the content of the editor to, like so: ```<div text-angular ng-model="html"></div>``` or ```<text-angular ng-model="html"/>``` this acts in a similar fashion to the input directive of angular so if you define a name attribute you can use form validation as if it was a regular input.
-3. I recommend using the following CSS in your stylesheet or a variant of to display the text box nicely: 
+1. Get textAngular via `bower install textAngular`, using the cdn at http://cdnjs.cloudflare.com/ajax/libs/textAngular/1.1.0/text-angular.min.js or from the github page https://github.com/fraywing/textAngular
+2. Include textAngular.js or textAngular.min.js in your project then include it in your module: ```angular.module('myModule', ['textAngular'])```, alternatively grab all this code and throw it in your directives.js module file.
+3. In your HTML instantiate textAngular as an attribute or element, the only required attribute is the ng-model which is the variable to bind the content of the editor to, like so: ```<div text-angular ng-model="html"></div>``` or ```<text-angular ng-model="html"/>``` this acts in a similar fashion to the input directive of angular so if you define a name attribute you can use form validation as if it was a regular input.
+4. I recommend using the following CSS in your stylesheet or a variant of to display the text box nicely: 
  ```
 .ta-editor{
     min-height: 300px;
@@ -27,7 +28,7 @@ http://www.textangular.com
     font-size: 100%;
 }
 ```
-4. Have fun!
+Have fun!
  
 **Important Note:** In it's current state textAngular does not support the use of class or style attributes in the RAW html or in plugins.
 

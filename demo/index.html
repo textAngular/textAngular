@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+  <meta charset="UTF-8">
+
+  <title>textAngular 1.1.0 Demo</title>
+
+  <meta name="robots" content="noindex">
+
+  <link rel='stylesheet prefetch' href='http://netdna.bootstrapcdn.com/bootstrap/3.0.1/css/bootstrap.min.css'>
+<link rel='stylesheet prefetch' href='http://netdna.bootstrapcdn.com/font-awesome/4.0.0/css/font-awesome.min.css'>
+
+    <style>
+.ta-editor {
+  min-height: 300px;
+  height: auto;
+  overflow: auto;
+  font-family: inherit;
+  font-size: 100%;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div ng-app="textAngularTest" ng-controller="wysiwygeditor" class="container app">
+  <div text-angular="text-angular" ng-model="htmlcontent"></div>
+  <textarea ng-model="htmlcontent" style="width: 100%"></textarea>
+  <div ng-bind-html="htmlcontent"></div>
+  <p>Note: although we support classes and styles, angularjs' ng-bind-html directive will strip out all style attributes.</p>
+</div>
+
+  <script src='https://ajax.googleapis.com/ajax/libs/angularjs/1.2.0/angular.min.js'></script>
+  <script src='https://ajax.googleapis.com/ajax/libs/angularjs/1.2.0/angular-sanitize.min.js'></script>
+  <script src='../textAngular.js'></script>
+
+  <script src="js/index.js"></script>
+
+</body>
+
+</html>
