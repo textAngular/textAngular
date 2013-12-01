@@ -105,6 +105,8 @@ Special thanks to all the contributions thus far!
 
 Including those from:
 
+[Slobodan Mišković](https://github.com/slobo)
+
 [SimeonC](https://github.com/SimeonC)
 
 [edouard-lopez](https://github.com/edouard-lopez)
