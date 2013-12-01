@@ -1,8 +1,13 @@
 ###Changelog
 
+2013-12-2 v1.1.1
+
+- Fixed buttons still submitting form. #29
+- Fix for Null ngModel value. Thanks to @slobo #22
+- Added Ability to override just "display" for default button set. Thanks to @slobo #27
+
 2013-11-9 v1.1.0
 
-- Included coffeescript version
 - Re-written to only depend on Angular and Angular-Sanitize. No More jQuery.
 - Re-worked to be more angular-esq in it's initiation and use. Less reliance on global variables except for defaults and more use of bindings on attributes.
 - Default styles are Bootstrap 3 classes, options to change these classes.
