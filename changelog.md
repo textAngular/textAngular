@@ -4,17 +4,15 @@
 
 - Added bundled demo pages.
 - Fixed Escaping of < and > #30
-- Fixed stripping of style and class attributes whilt maintaining the chrome fixes. #35 #5
+- Fixed stripping of style and class attributes and other parsing issues whilst maintaining the chrome fixes. #35 #30 #5
 - Fixed two-way-binding not working #38
+- Updated Readme.md and consolidated the readme out of the textAngular.js file.
 
-2013-11-27 v1.1.1
+2013-12-2 v1.1.1
 
-- Fixed buttons still submitting form
+- Fixed buttons still submitting form. #29
 - Fix for Null ngModel value. Thanks to @slobo #22
 - Added Ability to override just "display" for default button set. Thanks to @slobo #27
-- Fixed parsing issues see Issues: #35 #30
-- Updated Readme.md and consolidated the readme out of the textAngular.js file.
-- Added basic demo to the repository.
 
 2013-11-9 v1.1.0
 
