@@ -10,7 +10,7 @@ See README.md or http://github.com/fraywing/textangular for requirements and use
 
 var textAngular = angular.module("textAngular", ['ngSanitize']); //This makes ngSanitize required
 
-textAngular.directive("textAngular", function($compile, $sce, $window, $document, $rootScope, $timeout, taFixSelection) {
+textAngular.directive("textAngular", function($compile, $sce, $window, $document, $rootScope, $timeout, taFixChrome) {
 	console.log("Thank you for using textAngular! http://www.textangular.com")
 	// deepExtend instead of angular.extend in order to allow easy customization of "display" for default buttons
 	// snatched from: http://stackoverflow.com/a/15311794/2966847
@@ -200,19 +200,17 @@ textAngular.directive("textAngular", function($compile, $sce, $window, $document
 			// get the settings from the defaults and add our specific functions that need to be on the scope
 			angular.extend(scope, $rootScope.textAngularOpts, {
 				// wraps the selection in the provided tag / execCommand function.
-				wrapSelection: function(command, opt, updateDisplay) {
-					// the default value for updateDisplay is true
-					if (updateDisplay == null) updateDisplay = true;
+				wrapSelection: function(command, opt) {
 					document.execCommand(command, false, opt);
 					// strip out the chrome specific rubbish that gets put in when using lists
-					if(command === 'insertUnorderedList' || command === 'insertOrderedList') taFixSelection();
+					if(command === 'insertUnorderedList' || command === 'insertOrderedList') taFixChrome(scope.displayElements.text);
 					// refocus on the shown display element, this fixes a display bug when using :focus styles to outline the box. You still have focus on the text/html input it just doesn't show up
 					if (scope.showHtml)
 						scope.displayElements.html[0].focus();
 					else
 						scope.displayElements.text[0].focus();
 					// note that wrapSelection is called via ng-click in the tool plugins so we are already within a $apply
-					if (updateDisplay && !scope.showHtml) scope.updateTaBindtext(); // only update if NOT in html mode
+					if (!scope.showHtml) scope.updateTaBindtext(); // only update if NOT in html mode
 				},
 				showHtml: false
 			});
@@ -336,7 +334,7 @@ textAngular.directive("textAngular", function($compile, $sce, $window, $document
 			scope.displayElements.text.on('mouseup', mouseup);
 		}
 	};
-}).directive('taBind', function($sce, $sanitize, $document, taFixSelection){
+}).directive('taBind', function($sce, $sanitize, $document, taFixChrome){
 	// ngSanitize is a requirement for the module so this shouldn't cause any trouble
 	var sanitizationWrapper = function(html) {
 		return $sce.trustAsHtml(html);
@@ -346,49 +344,60 @@ textAngular.directive("textAngular", function($compile, $sce, $window, $document
 		require: 'ngModel',
 		scope: {'taBind': '@'},
 		link: function(scope,element,attrs,ngModel){
+			// in here we are undoing the converts used elsewhere to prevent the < > and & being displayed when they shouldn't in the code.
+			var compileHtml = function(){
+				var result = taFixChrome(angular.element("<div>").append(element.html())).html();
+				if(scope.taBind !== 'text') result = result.replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&amp;/g, '&');
+				return result;
+			};
+			
 			scope.$parent['updateTaBind' + scope.taBind] = function(){//used for updating when inserting wrapped elements
-				console.log(element.html());
+				var compHtml = compileHtml();
 				var tempParsers = ngModel.$parsers;
 				ngModel.$parsers = []; // temp disable of the parsers
-				ngModel.$oldViewValue = element.html();
-				ngModel.$setViewValue(element.html());
+				ngModel.$oldViewValue = compHtml;
+				ngModel.$setViewValue(compHtml);
 				ngModel.$parsers = tempParsers;
 			};
+			
+			//this code is used to update the models when data is entered/deleted
 			element.on('keyup', function(e){
-				if(e.which === 8 || e.which === 46) taFixSelection();//catch backspace/delete and remove the chrome rubbish if any
-				// in here we are undoing the converts used elsewhere to prevent the < > and & being displayed when they shouldn't in the code.
-				var compHtml = angular.element("<div>").append(element.html()).html().replace(/&lt;/g, "<").replace(/&gt;/g, ">");
-				if(scope.taBind !== 'text') compHtml = compHtml.replace(/&amp;/g, '&');
-				
-				if(e.which === 13){ // bypass the parsers for inserting the linebreak text or whatever it happens to be
-					scope.$apply(function(){
-						var tempParsers = ngModel.$parsers;
-						ngModel.$parsers = []; // temp disable of the parsers
-						ngModel.$oldViewValue = compHtml;
-						ngModel.$setViewValue(compHtml);
-						ngModel.$parsers = tempParsers;
-					});
-				}else{
-					ngModel.$setViewValue(compHtml);
-				}
+				ngModel.$setViewValue(compileHtml());
 			});
 			
 			ngModel.$parsers.push(function(value){
 				// all the code here takes the information from the above keyup function or any other time that the viewValue is updated and parses it for storage in the ngModel
 				if(ngModel.$oldViewValue === undefined) ngModel.$oldViewValue = value;
 				if(scope.taBind === 'text' && value !== ngModel.$oldViewValue){//WYSIWYG Mode and view is changed
+					if(value === undefined || value === '') return value;
 					//this code is specifically to catch the insertion of < and > which need to be converted to &lt; and &gt; respectively
-					// finds the first difference from the start of the text.
-					var start;
-					for(start = 0; start < Math.max(value.length, ngModel.$oldViewValue.length); start++)
-						if(value.charAt(start) !== ngModel.$oldViewValue.charAt(start)) break;
 					// finds the end of the difference
 					var end;
-					for(end = 0; Math.max(value.length, ngModel.$oldViewValue.length); end++)
-						if(value.charAt(value.length - end) !== ngModel.$oldViewValue.charAt(ngModel.$oldViewValue.length - end)) break;
+					for(end = 0; end < Math.min(value.length, ngModel.$oldViewValue.length); end++){
+						var oldViewEnd = ngModel.$oldViewValue.length - end;
+						if(value.charAt(value.length - end) !== ngModel.$oldViewValue.charAt(oldViewEnd)){
+							// note: value never has &gt; or &lt;, oldViewValue ALLWAYS has them. This code dynamically equates < to &lt; and > to &gt;
+							if((value.charAt(value.length - end) === '<' && ngModel.$oldViewValue.substring(oldViewEnd - 4, oldViewEnd) === '&lt;') || ( value.charAt(value.length - end) === '>' && ngModel.$oldViewValue.substring(oldViewEnd - 4, oldViewEnd) === '&gt;')){
+								value = value.substring(0,value.length - end) + ngModel.$oldViewValue.substring(oldViewEnd - 4, oldViewEnd) + value.substring(value.length - end + 1);
+								end += 3;
+							}else break;
+						}else if(value.charAt(value.length - end) === '>' && value.substring(value.length - end - 1, value.length - end + 1) === '>>') break; //specific catch for inserting a '<' just before an invisible html tag
+					}
+					// finds the first difference from the start of the text.
+					var start;
+					for(start = 0; start < Math.min(value.length, ngModel.$oldViewValue.length) && Math.min(value.length, ngModel.$oldViewValue.length) - end > start; start++){
+						if(value.charAt(start) !== ngModel.$oldViewValue.charAt(start)){
+							// note: value never has &gt; or &lt;, oldViewValue ALLWAYS has them. This code dynamically equates < to &lt; and > to &gt;
+							if((value.charAt(start) === '<' && ngModel.$oldViewValue.substring(start, start + 4) === '&lt;') || ( value.charAt(start) === '>' && ngModel.$oldViewValue.substring(start, start + 4) === '&gt;')){
+								value = value.substring(0,start) + ngModel.$oldViewValue.substring(start, start + 4) + value.substring(start + 1);
+								start += 3;
+							}else break;
+						}else if(value.charAt(start) === '<' && value.substring(start, start + 2) === '<<') break; //specific catch for inserting a '<' just before an invisible html tag
+					}
 					// get the inserted text
 					var insert = value.substring(start, value.length - end + 1);
-					if(insert.match(/[<>]/gi)){// doesn't match on deletes, but this code is for when we are INSERTING < or >
+					// doesn't match on deletes, but this code is for when we are INSERTING < or >. The <= 3 is a catch so for when deleting lines - so a large difference as it's 1+ html tags, the normal human won't hit more than 2 keys at the same time by accident that usually includes a < or >.
+					if((insert.match(/[<>]/gi) && insert.length <= 3) || insert.match(/^[<>]+$/gi)){
 						value = value.substring(0,start) + insert.replace(/</g, "&lt;").replace(/>/g, "&gt;") + value.substring(value.length - end + 1);
 						ngModel.$oldViewValue = value;
 						ngModel.$setViewValue(value); // don't forget to update the view
@@ -400,7 +409,7 @@ textAngular.directive("textAngular", function($compile, $sce, $window, $document
 						return ngModel.$oldViewValue; //prevents the errors occuring when we are typing in html code
 					}
 				}
-				ngModel.$oldViewValue = ngModel.$viewValue;
+				ngModel.$oldViewValue = value;
 				return value;
 			});
 			
@@ -419,31 +428,20 @@ textAngular.directive("textAngular", function($compile, $sce, $window, $document
 			};
 		}
 	};
-}).factory('taFixSelection', function(){
-	return function(){
-		var currentNode = angular.element(window.getSelection().focusNode.parentNode);
-		if(currentNode.html().match(/style="font-family: inherit; line-height: 1.428571429;"/i)){
-			for(i in currentNode[0].childNodes){
-				if(angular.element(currentNode[0].childNodes[i])[0].tagName === 'SPAN'){
-					currentNode = angular.element(currentNode[0].childNodes[i]);
-					break
-				}
-			}
-		}else{
-			while(currentNode.attr('style') !== 'font-family: inherit; line-height: 1.428571429;' && !currentNode.attr('contenteditable')) currentNode = currentNode.parent();
-		}
-		if(currentNode.attr('style') === 'font-family: inherit; line-height: 1.428571429;' && !currentNode.attr('contenteditable')){
-			// chrome wraps the origional line, if not wrapped already, in the following code: <span style="font-family: inherit; line-height: 1.428571429;">...</span><br>
-			// this code will strip the above out if it has been added
-			if(currentNode[0].tagName === 'SPAN'){
-				currentNode = angular.element(currentNode);
-				currentNode.replaceWith(currentNode.html());
-			// if the text was already wrapped in a b or i or similar then chrome adds the offending style and appends a <br>. This catches that case.
-			}else{
-				currentNode.removeAttr('style');
-				var nextNode = currentNode.next();
-				if(nextNode[0].tagName === 'BR') nextNode.remove();
+}).factory('taFixChrome', function(){
+	var taFixChrome = function($html){ // should be an angular.element object, returns object for chaining convenience
+		// fix the chrome trash that gets inserted sometimes
+		var spans = angular.element($html).find('span'); // default wrapper is a span so find all of them
+		for(var s = 0; s < spans.length; s++){
+			var span = angular.element(spans[s]);
+			if(span.attr('style') && span.attr('style').match(/line-height: 1.428571429;/i)){ // chrome specific string that gets inserted into the style attribute, other parts may vary.
+				if(span.next().length > 0 && span.next()[0].tagName === 'BR') span.next().remove()
+				span.replaceWith(span.html());
 			}
 		}
+		var result = $html.html().replace(/style="[^"]*?line-height: 1.428571429;[^"]*"/ig, ''); // regex to replace ONLY offending styles - these can be inserted into various other tags on delete
+		$html.html(result);
+		return $html;
 	};
+	return taFixChrome;
 });

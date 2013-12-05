@@ -1,4 +1,4 @@
-textAngular v1.1.1
+textAngular v1.1.2
 ===========
 
 Demo: http://www.textangular.com

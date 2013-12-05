@@ -1,5 +1,12 @@
 ###Changelog
 
+2013-12-05 v1.1.2
+
+- Added bundled demo pages.
+- Fixed Escaping of < and > #30
+- Fixed stripping of style and class attributes whilt maintaining the chrome fixes. #35 #5
+- Fixed two-way-binding not working #38
+
 2013-11-27 v1.1.1
 
 - Fixed buttons still submitting form
