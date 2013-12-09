@@ -2,7 +2,7 @@
 textAngular
 Author : Austin Anderson
 License : 2013 MIT
-Version 1.1.1
+Version 1.1.2
 
 See README.md or http://github.com/fraywing/textangular for requirements and use.
 */
@@ -226,6 +226,7 @@ textAngular.directive("textAngular", function($compile, $sce, $window, $document
 			// Setup the HTML elements as variable references for use later
 			scope.displayElements = {
 				toolbar: angular.element("<div></div>"),
+				forminput: angular.element("<input type='hidden' style='display: none;'>"),
 				html: angular.element("<pre contentEditable='true' ng-show='showHtml' ta-bind='html' ng-model='html' ></pre>"),
 				text: angular.element("<div contentEditable='true' ng-hide='showHtml' ta-bind='text' ng-model='text' ></div>")
 			};
@@ -233,6 +234,11 @@ textAngular.directive("textAngular", function($compile, $sce, $window, $document
 			element.append(scope.displayElements.toolbar);
 			element.append(scope.displayElements.text);
 			element.append(scope.displayElements.html);
+			
+			if(!!attrs.name){
+				scope.displayElements.forminput.attr('name', attrs.name);
+				element.append(scope.displayElements.forminput);
+			}
 			
 			// compile the scope with the text and html elements only - if we do this with the main element it causes a compile loop
 			$compile(scope.displayElements.text)(scope);
@@ -276,6 +282,7 @@ textAngular.directive("textAngular", function($compile, $sce, $window, $document
 			
 			// changes to the model variable from outside the html/text inputs
 			ngModel.$render = function() {
+				scope.displayElements.forminput.val(ngModel.$viewValue);
 				if(ngModel.$viewValue === undefined) return;
 				// if the editors aren't focused they need to be updated, otherwise they are doing the updating
 				if (!($document[0].activeElement === scope.displayElements.html[0]) && !($document[0].activeElement === scope.displayElements.text[0])) {
@@ -288,10 +295,12 @@ textAngular.directive("textAngular", function($compile, $sce, $window, $document
 			scope.$watch('text', function(newValue, oldValue){
 				scope.html = newValue;
 				ngModel.$setViewValue(newValue);
+				scope.displayElements.forminput.val(newValue);
 			});
 			scope.$watch('html', function(newValue, oldValue){
 				scope.text = newValue;
 				ngModel.$setViewValue(newValue);
+				scope.displayElements.forminput.val(newValue);
 			});
 			
 			// the following is for applying the active states to the tools that support it

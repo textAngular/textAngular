@@ -1,6 +1,13 @@
 ###Changelog
 
-2013-12-05 v1.1.2
+2013-12-09 v1.1.2-pre2
+
+- Added input for form submission. #43
+- Slight restructure and update into of /demo.
+- Moved a lot of the README.md to the online Wiki. #34
+- Changed pre-release tag names to -preX as we aren't really doing alpha - beta - RC format.
+
+2013-12-05 v1.1.2-alpha (v1.1.2-pre1)
 
 - Added bundled demo pages.
 - Fixed Escaping of < and > #30

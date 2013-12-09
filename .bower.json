@@ -1,6 +1,6 @@
 {
   "name": "textAngular",
-  "version": "1.1.2-alpha",
+  "version": "1.1.2-pre2",
   "main": "./textAngular.js",
   "description": "A radically powerful Text-Editor/Wysiwyg editor for Angular.js",
   "keywords": [
@@ -15,14 +15,13 @@
   },
   "license": "MIT",
   "homepage": "https://github.com/fraywing/textAngular",
-  "_release": "9a6d865940",
+  "_release": "1.1.2-pre2",
   "_resolution": {
-    "type": "branch",
-    "branch": "master",
-    "commit": "9a6d865940492cdf996c0006f75df3fafb87bfdb"
+    "type": "version",
+    "tag": "v1.1.2-pre2"
   },
-  "_source": "git@github.com:fraywing/textAngular.git",
+  "_source": "https://github.com/fraywing/textAngular.git",
   "_target": "*",
-  "_originalSource": "git@github.com:fraywing/textAngular.git",
+  "_originalSource": "https://github.com/fraywing/textAngular.git",
   "_direct": true
 }
