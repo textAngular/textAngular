@@ -53,8 +53,8 @@ Special thanks to all the contributions thus far!
 
 Including those from:
 
-[SimeonC](https://github.com/SimeonC)
-[Slobodan Mišković](https://github.com/slobo)
-[edouard-lopez](https://github.com/edouard-lopez)
-[108ium](https://github.com/108ium)
-[nadeeshacabral](https://github.com/nadeeshacabral) 
+* [SimeonC](https://github.com/SimeonC)
+* [Slobodan Mišković](https://github.com/slobo)
+* [edouard-lopez](https://github.com/edouard-lopez)
+* [108ium](https://github.com/108ium)
+* [nadeeshacabral](https://github.com/nadeeshacabral) 
