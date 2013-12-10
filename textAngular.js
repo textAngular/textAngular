@@ -221,7 +221,9 @@ textAngular.directive("textAngular", function($compile, $sce, $window, $document
 		
 	return {
 		require: 'ngModel',
-		scope: {},
+		scope: {
+      ngFocus: '&'
+    },
 		restrict: "EA",
 		link: function(scope, element, attrs, ngModel) {
 			var group, groupElement, keydown, keyup, tool, toolElement; //all these vars should not be accessable outside this directive
@@ -256,8 +258,8 @@ textAngular.directive("textAngular", function($compile, $sce, $window, $document
 			scope.displayElements = {
 				toolbar: angular.element("<div></div>"),
 				forminput: angular.element("<input type='hidden' style='display: none;'>"),
-				html: angular.element("<pre contentEditable='true' ng-show='showHtml' ta-bind='html' ng-model='html' ></pre>"),
-				text: angular.element("<div contentEditable='true' ng-hide='showHtml' ta-bind='text' ng-model='text' ></div>")
+				html: angular.element("<pre contentEditable='true' ng-show='showHtml' ta-bind='html' ng-model='html' ng-focus='ngFocus()'></pre>"),
+				text: angular.element("<div contentEditable='true' ng-hide='showHtml' ta-bind='text' ng-model='text' ng-focus='ngFocus()'></div>")
 			};
 			// add the main elements to the origional element
 			element.append(scope.displayElements.toolbar);
