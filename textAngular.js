@@ -222,8 +222,8 @@ textAngular.directive("textAngular", function($compile, $sce, $window, $document
 	return {
 		require: 'ngModel',
 		scope: {
-            ngFocus: '&'
-        },
+        ngFocus: '&'
+      },
 		restrict: "EA",
 		link: function(scope, element, attrs, ngModel) {
 			var group, groupElement, keydown, keyup, tool, toolElement; //all these vars should not be accessable outside this directive
