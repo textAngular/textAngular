@@ -41,6 +41,10 @@ That being said, its still a fairly experimental browser feature-set, and may no
 It has been tested to work on Chrome, Safari, FF and IE8+.
 If you find something, please let me know - throw me a message, or submit a issue request!
 
+## Developer Notes
+
+I generate the minified file using `uglify-js2`, to install run `npm install -g uglifyjs`. Then to minify the file run (on UNIX based command prompt): `uglifyjs -m -v textAngular.js > textAngular.min.js`
+Any pull request must have the new version of the minified file.
 
 ## License
 

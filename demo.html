@@ -33,29 +33,21 @@
   <textarea ng-model="htmlcontent" style="width: 100%"></textarea>
   <h1>Bound with ng-bind-html</h1>
   <div ng-bind-html="htmlcontent"></div>
+  <h1>Bound with ta-bind, our internal html-binding directive</h1>
+  <div ta-bind="text" ng-model="htmlcontent"></div>
   <button type="button" ng-click="htmlcontent = orightml">Reset</button>
   <p>Note: although we support classes and styles, angularjs' ng-bind-html directive will strip out all style attributes.</p>
 </div>
-
-  <script src='https://ajax.googleapis.com/ajax/libs/angularjs/1.2.2/angular.min.js'></script>
-  <script src='https://ajax.googleapis.com/ajax/libs/angularjs/1.2.2/angular-sanitize.min.js'></script>
+  <script src='https://ajax.googleapis.com/ajax/libs/angularjs/1.2.4/angular.min.js'></script>
+  <script src='https://ajax.googleapis.com/ajax/libs/angularjs/1.2.4/angular-sanitize.min.js'></script>
   <script src='textAngular.js'></script>
 
   <script type="text/javascript">
-	(function() {
-		var wysiwygeditor;
-		
-		angular.module("textAngularTest", ['textAngular']);
-		
-		wysiwygeditor = function($scope) {
-			$scope.orightml = '<h2>Try me!</h2><p>textAngular is a super cool WYSIWYG Text Editor directive for AngularJS</p><p><b>Features:</b></p><ol><li>Automatic Seamless Two-Way-Binding</li><li>Super Easy <b>Theming</b> Options</li><li style="color: green;">Simple Editor Instance Creation</li><li>Safely Parses Html for Custom Toolbar Icons</li><li class="text-danger">Doesn&apos;t Use an iFrame</li><li>Works with Firefox, Chrome, and IE8+</li></ol><p><b>Code at GitHub:</b> <a href="https://github.com/fraywing/textAngular">Here</a> </p>';
-			$scope.htmlcontent = $scope.orightml;
-		};
-		
-		this.wysiwygeditor = wysiwygeditor;
-		
-	}).call(this);
-
+	angular.module("textAngularTest", ['textAngular']);
+	function wysiwygeditor($scope) {
+		$scope.orightml = '<h2>Try me!</h2><p>textAngular is a super cool WYSIWYG Text Editor directive for AngularJS</p><p><b>Features:</b></p><ol><li>Automatic Seamless Two-Way-Binding</li><li>Super Easy <b>Theming</b> Options</li><li style="color: green;">Simple Editor Instance Creation</li><li>Safely Parses Html for Custom Toolbar Icons</li><li class="text-danger">Doesn&apos;t Use an iFrame</li><li>Works with Firefox, Chrome, and IE8+</li></ol><p><b>Code at GitHub:</b> <a href="https://github.com/fraywing/textAngular">Here</a> </p>';
+		$scope.htmlcontent = $scope.orightml;
+	};
   </script>
 
 </body>

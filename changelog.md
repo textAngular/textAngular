@@ -1,5 +1,15 @@
 ###Changelog
 
+2013-12-11 v1.1.2-pre3
+
+- Added support for .focussed class and ng-focus to allow dynamic styling on focus events. #47
+- Updates to fix Angular.JS breaking with parameter renaming minification. #49
+- Minor bug fix to disable links from being 'clickable' in the editor.
+- Updated the default toolbar to include ALL default tools.
+- Update the tools to use activeState better.
+- Small update to allow use of ta-bind outside of textAngular.
+- Changed the raw html view to use a text-area for better compatability.
+
 2013-12-09 v1.1.2-pre2
 
 - Added input for form submission. #43

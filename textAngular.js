@@ -10,7 +10,7 @@ See README.md or http://github.com/fraywing/textangular for requirements and use
 
 var textAngular = angular.module("textAngular", ['ngSanitize']); //This makes ngSanitize required
 
-textAngular.directive("textAngular", function($compile, $sce, $window, $document, $rootScope, $timeout, taFixChrome) {
+textAngular.directive("textAngular", ['$compile', '$window', '$document', '$rootScope', '$timeout', 'taFixChrome', function($compile, $window, $document, $rootScope, $timeout, taFixChrome) {
 	console.log("Thank you for using textAngular! http://www.textangular.com")
 	// deepExtend instead of angular.extend in order to allow easy customization of "display" for default buttons
 	// snatched from: http://stackoverflow.com/a/15311794/2966847
@@ -30,6 +30,7 @@ textAngular.directive("textAngular", function($compile, $sce, $window, $document
 	$rootScope.textAngularOpts = deepExtend({
 		toolbar: [['h1', 'h2', 'h3', 'p', 'pre', 'quote'], ['bold', 'italics', 'underline', 'ul', 'ol', 'redo', 'undo', 'clear'], ['justifyLeft','justifyCenter','justifyRight'],['html', 'insertImage', 'insertLink', 'unlink']],
 		classes: {
+			focussed: "focussed",
 			toolbar: "btn-toolbar",
 			toolbarGroup: "btn-group",
 			toolbarButton: "btn btn-default",
@@ -245,6 +246,7 @@ textAngular.directive("textAngular", function($compile, $sce, $window, $document
 			});
 			// setup the options from the optional attributes
 			if (!!attrs.taToolbar)					scope.toolbar = scope.$eval(attrs.taToolbar);
+			if (!!attrs.taFocussedClass)			scope.classes.focussed = scope.$eval(attrs.taFocussedClass);
 			if (!!attrs.taToolbarClass)				scope.classes.toolbar = attrs.taToolbarClass;
 			if (!!attrs.taToolbarGroupClass)		scope.classes.toolbarGroup = attrs.taToolbarGroupClass;
 			if (!!attrs.taToolbarButtonClass)		scope.classes.toolbarButton = attrs.taToolbarButtonClass;
@@ -256,7 +258,7 @@ textAngular.directive("textAngular", function($compile, $sce, $window, $document
 			scope.displayElements = {
 				toolbar: angular.element("<div></div>"),
 				forminput: angular.element("<input type='hidden' style='display: none;'>"),
-				html: angular.element("<pre contentEditable='true' ng-show='showHtml' ta-bind='html' ng-model='html' ></pre>"),
+				html: angular.element("<textarea ng-show='showHtml' ta-bind='html' ng-model='html' ></textarea>"),
 				text: angular.element("<div contentEditable='true' ng-hide='showHtml' ta-bind='text' ng-model='text' ></div>")
 			};
 			// add the main elements to the origional element
@@ -278,6 +280,21 @@ textAngular.directive("textAngular", function($compile, $sce, $window, $document
 			scope.displayElements.toolbar.addClass("ta-toolbar " + scope.classes.toolbar);
 			scope.displayElements.text.addClass("ta-text ta-editor " + scope.classes.textEditor);
 			scope.displayElements.html.addClass("ta-html ta-editor " + scope.classes.textEditor);
+			
+			// note that focusout > focusin is called everytime we click a button
+			element.on('focusin', function(){ // cascades to displayElements.text and displayElements.html automatically.
+				element.addClass(scope.classes.focussed);
+				$timeout(function(){ element.triggerHandler('focus'); }, 0); // to prevent multiple apply error defer to next seems to work.
+			});
+			element.on('focusout', function(){
+				$timeout(function(){
+					// if we have NOT focussed again on the text etc then fire the blur events
+					if(!($document[0].activeElement === scope.displayElements.html[0]) && !($document[0].activeElement === scope.displayElements.text[0])){
+						element.removeClass(scope.classes.focussed);
+						$timeout(function(){ element.triggerHandler('blur'); }, 0); // to prevent multiple apply error defer to next seems to work.
+					}
+				}, 0);
+			});
 			
 			scope.tools = {}; // Keep a reference for updating the active states later
 			// create the tools in the toolbar
@@ -372,20 +389,17 @@ textAngular.directive("textAngular", function($compile, $sce, $window, $document
 			scope.displayElements.text.on('mouseup', mouseup);
 		}
 	};
-}).directive('taBind', function($sce, $sanitize, $document, taFixChrome){
-	// ngSanitize is a requirement for the module so this shouldn't cause any trouble
-	var sanitizationWrapper = function(html) {
-		return $sce.trustAsHtml(html);
-	};
-	
+}]).directive('taBind', ['$sanitize', '$document', 'taFixChrome', function($sanitize, $document, taFixChrome){
+	// Uses for this are textarea or input with ng-model and ta-bind='text' OR any non-form element with contenteditable="contenteditable" ta-bind="html|text" ng-model
 	return {
 		require: 'ngModel',
 		scope: {'taBind': '@'},
-		link: function(scope,element,attrs,ngModel){
+		link: function(scope, element, attrs, ngModel){
+			var isContentEditable = element[0].tagName.toLowerCase() !== 'textarea' && element[0].tagName.toLowerCase() !== 'input' && element.attr('contenteditable') !== undefined;
 			// in here we are undoing the converts used elsewhere to prevent the < > and & being displayed when they shouldn't in the code.
 			var compileHtml = function(){
 				var result = taFixChrome(angular.element("<div>").append(element.html())).html();
-				if(scope.taBind !== 'text') result = result.replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&amp;/g, '&');
+				if(scope.taBind === 'html' && isContentEditable) result = result.replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&amp;/g, '&');
 				return result;
 			};
 			
@@ -399,53 +413,19 @@ textAngular.directive("textAngular", function($compile, $sce, $window, $document
 			};
 			
 			//this code is used to update the models when data is entered/deleted
-			element.on('keyup', function(e){
-				ngModel.$setViewValue(compileHtml());
-			});
+			if(isContentEditable){
+				element.on('keyup', function(e){
+					ngModel.$setViewValue(compileHtml());
+				});
+			}
 			
 			ngModel.$parsers.push(function(value){
 				// all the code here takes the information from the above keyup function or any other time that the viewValue is updated and parses it for storage in the ngModel
 				if(ngModel.$oldViewValue === undefined) ngModel.$oldViewValue = value;
-				if(scope.taBind === 'text' && value !== ngModel.$oldViewValue){//WYSIWYG Mode and view is changed
-					if(value === undefined || value === '') return value;
-					//this code is specifically to catch the insertion of < and > which need to be converted to &lt; and &gt; respectively
-					// finds the end of the difference
-					var end;
-					for(end = 0; end < Math.min(value.length, ngModel.$oldViewValue.length); end++){
-						var oldViewEnd = ngModel.$oldViewValue.length - end;
-						if(value.charAt(value.length - end) !== ngModel.$oldViewValue.charAt(oldViewEnd)){
-							// note: value never has &gt; or &lt;, oldViewValue ALLWAYS has them. This code dynamically equates < to &lt; and > to &gt;
-							if((value.charAt(value.length - end) === '<' && ngModel.$oldViewValue.substring(oldViewEnd - 4, oldViewEnd) === '&lt;') || ( value.charAt(value.length - end) === '>' && ngModel.$oldViewValue.substring(oldViewEnd - 4, oldViewEnd) === '&gt;')){
-								value = value.substring(0,value.length - end) + ngModel.$oldViewValue.substring(oldViewEnd - 4, oldViewEnd) + value.substring(value.length - end + 1);
-								end += 3;
-							}else break;
-						}else if(value.charAt(value.length - end) === '>' && value.substring(value.length - end - 1, value.length - end + 1) === '>>') break; //specific catch for inserting a '<' just before an invisible html tag
-					}
-					// finds the first difference from the start of the text.
-					var start;
-					for(start = 0; start < Math.min(value.length, ngModel.$oldViewValue.length) && Math.min(value.length, ngModel.$oldViewValue.length) - end > start; start++){
-						if(value.charAt(start) !== ngModel.$oldViewValue.charAt(start)){
-							// note: value never has &gt; or &lt;, oldViewValue ALLWAYS has them. This code dynamically equates < to &lt; and > to &gt;
-							if((value.charAt(start) === '<' && ngModel.$oldViewValue.substring(start, start + 4) === '&lt;') || ( value.charAt(start) === '>' && ngModel.$oldViewValue.substring(start, start + 4) === '&gt;')){
-								value = value.substring(0,start) + ngModel.$oldViewValue.substring(start, start + 4) + value.substring(start + 1);
-								start += 3;
-							}else break;
-						}else if(value.charAt(start) === '<' && value.substring(start, start + 2) === '<<') break; //specific catch for inserting a '<' just before an invisible html tag
-					}
-					// get the inserted text
-					var insert = value.substring(start, value.length - end + 1);
-					// doesn't match on deletes, but this code is for when we are INSERTING < or >. The <= 3 is a catch so for when deleting lines - so a large difference as it's 1+ html tags, the normal human won't hit more than 2 keys at the same time by accident that usually includes a < or >.
-					if((insert.match(/[<>]/gi) && insert.length <= 3) || insert.match(/^[<>]+$/gi)){
-						value = value.substring(0,start) + insert.replace(/</g, "&lt;").replace(/>/g, "&gt;") + value.substring(value.length - end + 1);
-						ngModel.$oldViewValue = value;
-						ngModel.$setViewValue(value); // don't forget to update the view
-					}
-				}else{// don't need to do much when updating in RAW Html mode, but this catches some errors.
-					try{
-						$sanitize(value); // this is what runs when ng-bind-html is used on the variable
-					}catch(e){
-						return ngModel.$oldViewValue; //prevents the errors occuring when we are typing in html code
-					}
+				try{
+					$sanitize(value); // this is what runs when ng-bind-html is used on the variable
+				}catch(e){
+					return ngModel.$oldViewValue; //prevents the errors occuring when we are typing in html code
 				}
 				ngModel.$oldViewValue = value;
 				return value;
@@ -459,29 +439,31 @@ textAngular.directive("textAngular", function($compile, $sce, $window, $document
 					var val = ngModel.$viewValue || ''; // in case model is null
 					ngModel.$oldViewValue = val;
 					if(scope.taBind == 'text'){ //WYSIWYG Mode
-						element.html(sanitizationWrapper(val));
+						element.html(val);
 						element.find('a').on('click', function(e){
 							e.preventDefault();
 							return false;
 						});
-					}else
-						element.html(sanitizationWrapper(val.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, '&gt;')));
-				}
+					}else if(isContentEditable || (element[0].tagName.toLowerCase() !== 'textarea' && element[0].tagName.toLowerCase() !== 'input')) // make sure the end user can SEE the html code.
+						element.html(val.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, '&gt;'));
+					else element.val(val); // only for input and textarea inputs
+				}else if(!isContentEditable) element.val(val); // only for input and textarea inputs
 			};
 		}
 	};
-}).factory('taFixChrome', function(){
+}]).factory('taFixChrome', function(){
+	// get whaterever rubbish is inserted in chrome
 	var taFixChrome = function($html){ // should be an angular.element object, returns object for chaining convenience
 		// fix the chrome trash that gets inserted sometimes
 		var spans = angular.element($html).find('span'); // default wrapper is a span so find all of them
 		for(var s = 0; s < spans.length; s++){
 			var span = angular.element(spans[s]);
-			if(span.attr('style') && span.attr('style').match(/line-height: 1.428571429;/i)){ // chrome specific string that gets inserted into the style attribute, other parts may vary.
+			if(span.attr('style') && span.attr('style').match(/line-height: 1.428571429;|color: inherit; line-height: 1.1;/i)){ // chrome specific string that gets inserted into the style attribute, other parts may vary. Second part is specific ONLY to hitting backspace in Headers
 				if(span.next().length > 0 && span.next()[0].tagName === 'BR') span.next().remove()
 				span.replaceWith(span.html());
 			}
 		}
-		var result = $html.html().replace(/style="[^"]*?line-height: 1.428571429;[^"]*"/ig, ''); // regex to replace ONLY offending styles - these can be inserted into various other tags on delete
+		var result = $html.html().replace(/style="[^"]*?(line-height: 1.428571429;|color: inherit; line-height: 1.1;)[^"]*"/ig, ''); // regex to replace ONLY offending styles - these can be inserted into various other tags on delete
 		$html.html(result);
 		return $html;
 	};
