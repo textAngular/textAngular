@@ -2,11 +2,12 @@
 textAngular
 Author : Austin Anderson
 License : 2013 MIT
-Version 1.1.2-pre3
+Version 1.1.2
 
-See README.md or http://github.com/fraywing/textangular for requirements and use.
+See README.md or https://github.com/fraywing/textAngular/wiki for requirements and use.
 */
 
+if(!window.console) console = {log: function() {}}; // fixes IE console undefined errors
 
 var textAngular = angular.module("textAngular", ['ngSanitize']); //This makes ngSanitize required
 
@@ -438,7 +439,7 @@ textAngular.directive("textAngular", ['$compile', '$window', '$document', '$root
 				if ($document[0].activeElement !== element[0]) {
 					var val = ngModel.$viewValue || ''; // in case model is null
 					ngModel.$oldViewValue = val;
-					if(scope.taBind == 'text'){ //WYSIWYG Mode
+					if(scope.taBind === 'text'){ //WYSIWYG Mode
 						element.html(val);
 						element.find('a').on('click', function(e){
 							e.preventDefault();

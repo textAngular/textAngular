@@ -38,12 +38,12 @@ For Additional options see the [github Wiki](https://github.com/fraywing/textAng
 
 textAngular uses ```execCommand``` for the rich-text functionality. 
 That being said, its still a fairly experimental browser feature-set, and may not behave the same in all browsers - see http://tifftiff.de/contenteditable/compliance_test.html for a full compliance list.
-It has been tested to work on Chrome, Safari, FF and IE8+.
+It has been tested to work on Chrome, Safari, Opera, Firefox and Internet Explorer 8+.
 If you find something, please let me know - throw me a message, or submit a issue request!
 
 ## Developer Notes
 
-I generate the minified file using `uglify-js2`, to install run `npm install -g uglifyjs`. Then to minify the file run (on UNIX based command prompt): `uglifyjs -m -v textAngular.js > textAngular.min.js`
+I generate the minified file using `uglify-js2`, to install run `npm install -g uglifyjs`. Then to minify the file run (on UNIX based command prompt, this may differ for windows computers): `uglifyjs -m -v textAngular.js > textAngular.min.js`
 Any pull request must have the new version of the minified file.
 
 ## License
