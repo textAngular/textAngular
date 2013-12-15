@@ -336,9 +336,9 @@ textAngular.directive("textAngular", ['$compile', '$window', '$document', '$root
 						displayActiveToolClass: function(active){
 							return (active)? this.$parent.classes.toolbarButtonActive : '';
 						},
-            					getIcon: function() {
+            getIcon: function() {
 							return !!this.$parent.icons[this.name] ? this.$parent.icons[this.name] : '';
-	            				}
+            }
 					}); //creates a child scope of the main angularText scope and then extends the childScope with the functions of this particular tool
 					scope.tools[tool] = childScope; // reference to the scope kept
 					groupElement.append($compile(toolElement)(childScope)); // append the tool compiled with the childScope to the group element
