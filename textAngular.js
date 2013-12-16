@@ -275,6 +275,22 @@ textAngular.directive("textAngular", ['$compile', '$window', '$document', '$root
 				element.append(scope.displayElements.forminput);
 			}
 			
+			if(!!attrs.taDisabled){
+				scope.displayElements.text.attr('ta-readonly', 'disabled');
+				scope.displayElements.html.attr('ta-readonly', 'disabled');
+				scope.disabled = scope.$parent.$eval(attrs.taDisabled);
+				scope.$parent.$watch(attrs.taDisabled, function(newVal){
+					scope.disabled = newVal;
+					if(scope.disabled){
+						angular.element(scope.displayElements.text).blur();
+						angular.element(scope.displayElements.html).blur();
+						element.addClass('disabled');
+					}else{
+						element.removeClass('disabled');
+					}
+				});
+			}
+			
 			// compile the scope with the text and html elements only - if we do this with the main element it causes a compile loop
 			$compile(scope.displayElements.text)(scope);
 			$compile(scope.displayElements.html)(scope);
@@ -317,8 +333,8 @@ textAngular.directive("textAngular", ['$compile', '$window', '$document', '$root
 					var childScope = angular.extend(scope.$new(true), $rootScope.textAngularTools[tool], { // add the tool specific functions
 						name: tool,
 						showHtml: function(){
-							if(this.name !== 'html') return this.$parent.showHtml;
-							return false;
+							if(this.name !== 'html') return this.$parent.disabled || this.$parent.showHtml;
+							return this.$parent.disabled;
 						},
 						displayActiveToolClass: function(active){
 							return (active)? this.$parent.classes.toolbarButtonActive : '';
@@ -405,7 +421,8 @@ textAngular.directive("textAngular", ['$compile', '$window', '$document', '$root
 		require: 'ngModel',
 		scope: {'taBind': '@'},
 		link: function(scope, element, attrs, ngModel){
-			var isContentEditable = element[0].tagName.toLowerCase() !== 'textarea' && element[0].tagName.toLowerCase() !== 'input' && element.attr('contenteditable') !== undefined;
+			var isContentEditable = element[0].tagName.toLowerCase() !== 'textarea' && element[0].tagName.toLowerCase() !== 'input' && element.attr('contenteditable') !== undefined && element.attr('contenteditable');
+			var isReadonly = false;
 			// in here we are undoing the converts used elsewhere to prevent the < > and & being displayed when they shouldn't in the code.
 			var compileHtml = function(){
 				var result = taFixChrome(angular.element("<div>").append(element.html())).html();
@@ -425,7 +442,7 @@ textAngular.directive("textAngular", ['$compile', '$window', '$document', '$root
 			//this code is used to update the models when data is entered/deleted
 			if(isContentEditable){
 				element.on('keyup', function(e){
-					ngModel.$setViewValue(compileHtml());
+					if(!isReadonly) ngModel.$setViewValue(compileHtml());
 				});
 			}
 			
@@ -459,6 +476,20 @@ textAngular.directive("textAngular", ['$compile', '$window', '$document', '$root
 					else element.val(val); // only for input and textarea inputs
 				}else if(!isContentEditable) element.val(val); // only for input and textarea inputs
 			};
+			
+			if(!!attrs.taReadonly){
+				scope.$parent.$watch(attrs.taReadonly, function(newVal, oldVal){ // taReadonly only has an effect if the taBind element is an input or textarea or has contenteditable='true' on it. Otherwise it is readonly by default
+					if(oldVal === newVal) return;
+					if(newVal){ // we changed to readOnly mode (taReadonly='true')
+						if(element[0].tagName.toLowerCase() === 'textarea' || element[0].tagName.toLowerCase() === 'input') element.attr('disabled', 'disabled');
+						if(element.attr('contenteditable') !== undefined && element.attr('contenteditable')) element.removeAttr('contenteditable');
+					}else{ // we changed to NOT readOnly mode (taReadonly='false')
+						if(element[0].tagName.toLowerCase() === 'textarea' || element[0].tagName.toLowerCase() === 'input') element.removeAttr('disabled');
+						else if(isContentEditable) element.attr('contenteditable', 'true');
+					}
+					isReadonly = newVal;
+				});
+			}
 		}
 	};
 }]).factory('taFixChrome', function(){
