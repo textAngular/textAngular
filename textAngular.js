@@ -222,7 +222,7 @@ textAngular.directive("textAngular", ['$compile', '$window', '$document', '$root
 	}, ($rootScope.textAngularTools != null)? $rootScope.textAngularTools : {});
 		
 	return {
-		require: 'ngModel',
+		require: '?ngModel',
 		scope: {},
 		restrict: "EA",
 		link: function(scope, element, attrs, ngModel) {
@@ -255,10 +255,13 @@ textAngular.directive("textAngular", ['$compile', '$window', '$document', '$root
 			if (!!attrs.taTextEditorClass)			scope.classes.textEditor = attrs.taTextEditorClass;
 			if (!!attrs.taHtmlEditorClass)			scope.classes.htmlEditor = attrs.taHtmlEditorClass;
 			
+			var originalContents = element.html();
+			element.html(''); // clear the original content
+			
 			// Setup the HTML elements as variable references for use later
 			scope.displayElements = {
 				toolbar: angular.element("<div></div>"),
-				forminput: angular.element("<input type='hidden' style='display: none;'>"),
+				forminput: angular.element("<input type='hidden' style='display: none;'>"), // we still need the hidden input even with a textarea as the textarea may have invalid/old input in it, wheras the input will ALLWAYS have the correct value.
 				html: angular.element("<textarea ng-show='showHtml' ta-bind='html' ng-model='html' ></textarea>"),
 				text: angular.element("<div contentEditable='true' ng-hide='showHtml' ta-bind='text' ng-model='text' ></div>")
 			};
@@ -328,25 +331,31 @@ textAngular.directive("textAngular", ['$compile', '$window', '$document', '$root
 			}
 			
 			// changes to the model variable from outside the html/text inputs
-			ngModel.$render = function() {
-				scope.displayElements.forminput.val(ngModel.$viewValue);
-				if(ngModel.$viewValue === undefined) return;
-				// if the editors aren't focused they need to be updated, otherwise they are doing the updating
-				if (!($document[0].activeElement === scope.displayElements.html[0]) && !($document[0].activeElement === scope.displayElements.text[0])) {
-					var val = ngModel.$viewValue || ''; // in case model is null
-					scope.text = val;
-					scope.html = val;
-				}
-			};
+			if(attrs.ngModel){ // if no ngModel, then the only input is from inside text-angular
+				ngModel.$render = function() {
+					scope.displayElements.forminput.val(ngModel.$viewValue);
+					if(ngModel.$viewValue === undefined) return;
+					// if the editors aren't focused they need to be updated, otherwise they are doing the updating
+					if (!($document[0].activeElement === scope.displayElements.html[0]) && !($document[0].activeElement === scope.displayElements.text[0])) {
+						var val = ngModel.$viewValue || ''; // in case model is null
+						scope.text = val;
+						scope.html = val;
+					}
+				};
+			}else{ // if no ngModel then update from the contents of the origional html.
+				scope.displayElements.forminput.val(originalContents);
+				scope.text = originalContents;
+				scope.html = originalContents;
+			}
 			
 			scope.$watch('text', function(newValue, oldValue){
 				scope.html = newValue;
-				ngModel.$setViewValue(newValue);
+				if(attrs.ngModel) ngModel.$setViewValue(newValue);
 				scope.displayElements.forminput.val(newValue);
 			});
 			scope.$watch('html', function(newValue, oldValue){
 				scope.text = newValue;
-				ngModel.$setViewValue(newValue);
+				if(attrs.ngModel) ngModel.$setViewValue(newValue);
 				scope.displayElements.forminput.val(newValue);
 			});
 			
