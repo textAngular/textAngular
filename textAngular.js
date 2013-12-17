@@ -81,162 +81,162 @@ textAngular.directive("textAngular", ['$compile', '$window', '$document', '$root
 				this.active = this.$parent.showHtml;
 			}
 		},
-		h1: {
-			display: "<button type='button' ng-click='action()' ng-class='displayActiveToolClass(active)'>H1</button>",
-			action: function() {
-				return this.$parent.wrapSelection("formatBlock", "<H1>");
-			},
-			activeState: function() { return queryFormatBlockState('h1'); }
-		},
-		h2: {
-			display: "<button type='button' ng-click='action()' ng-class='displayActiveToolClass(active)'>H2</button>",
-			action: function() {
-				return this.$parent.wrapSelection("formatBlock", "<H2>");
-			},
-			activeState: function() { return queryFormatBlockState('h2'); }
-		},
-		h3: {
-			display: "<button type='button' ng-click='action()' ng-class='displayActiveToolClass(active)'>H3</button>",
-			action: function() {
-				return this.$parent.wrapSelection("formatBlock", "<H3>");
-			},
-			activeState: function() { return queryFormatBlockState('h3'); }
-		},
-		p: {
-			display: "<button type='button' ng-click='action()' ng-class='displayActiveToolClass(active)'>P</button>",
-			action: function() {
-				return this.$parent.wrapSelection("formatBlock", "<P>");
-			},
-			activeState: function() { return queryFormatBlockState('p'); }
-		},
-		pre: {
-			display: "<button type='button' ng-click='action()' ng-class='displayActiveToolClass(active)'>pre</button>",
-			action: function() {
-				return this.$parent.wrapSelection("formatBlock", "<PRE>");
-			},
-			activeState: function() { return queryFormatBlockState('pre'); }
-		},
-		ul: {
-      display: "<button type='button' ng-click='action()' ng-class='displayActiveToolClass(active)'><i class='{{getIcon()}}'></i></button>",
-			action: function() {
-				return this.$parent.wrapSelection("insertUnorderedList", null);
-			},
-			activeState: function() { return $document[0].queryCommandState('insertUnorderedList'); }
-		},
-		ol: {
-      display: "<button type='button' ng-click='action()' ng-class='displayActiveToolClass(active)'><i class='{{getIcon()}}'></i></button>",
-			action: function() {
-				return this.$parent.wrapSelection("insertOrderedList", null);
-			},
-			activeState: function() { return $document[0].queryCommandState('insertOrderedList'); }
-		},
-		quote: {
-      display: "<button type='button' ng-click='action()' ng-class='displayActiveToolClass(active)'><i class='{{getIcon()}}'></i></button>",
-			action: function() {
-				return this.$parent.wrapSelection("formatBlock", "<BLOCKQUOTE>");
-			},
-			activeState: function() { return queryFormatBlockState('blockquote'); }
-		},
-		undo: {
-      display: "<button type='button' ng-click='action()' ng-class='displayActiveToolClass(active)'><i class='{{getIcon()}}'></i></button>",
-			action: function() {
-				return this.$parent.wrapSelection("undo", null);
-			}
-		},
-		redo: {
-      display: "<button type='button' ng-click='action()' ng-class='displayActiveToolClass(active)'><i class='{{getIcon()}}'></i></button>",
-			action: function() {
-				return this.$parent.wrapSelection("redo", null);
-			}
-		},
-		bold: {
-      display: "<button type='button' ng-click='action()' ng-class='displayActiveToolClass(active)'><i class='{{getIcon()}}'></i></button>",
-			action: function() {
-				return this.$parent.wrapSelection("bold", null);
-			},
-			activeState: function() {
-				return $document[0].queryCommandState('bold');
-			}
-		},
-		justifyLeft: {
-      display: "<button type='button' ng-click='action()' ng-class='displayActiveToolClass(active)'><i class='{{getIcon()}}'></i></button>",
-			action: function() {
-				return this.$parent.wrapSelection("justifyLeft", null);
-			},
-			activeState: function() {
-				return $document[0].queryCommandState('justifyLeft');
-			}
-		},
-		justifyRight: {
-      display: "<button type='button' ng-click='action()' ng-class='displayActiveToolClass(active)'><i class='{{getIcon()}}'></i></button>",
-			action: function() {
-				return this.$parent.wrapSelection("justifyRight", null);
-			},
-			activeState: function() {
-				return $document[0].queryCommandState('justifyRight');
-			}
-		},
-		justifyCenter: {
-      display: "<button type='button' ng-click='action()' ng-class='displayActiveToolClass(active)'><i class='{{getIcon()}}'></i></button>",
-			action: function() {
-				return this.$parent.wrapSelection("justifyCenter", null);
-			},
-			activeState: function() {
-				return $document[0].queryCommandState('justifyCenter');
-			}
-		},
-		italics: {
-      display: "<button type='button' ng-click='action()' ng-class='displayActiveToolClass(active)'><i class='{{getIcon()}}'></i></button>",
-			action: function() {
-				return this.$parent.wrapSelection("italic", null);
-			},
-			activeState: function() {
-				return $document[0].queryCommandState('italic');
-			}
-		},
-		underline: {
-      display: "<button type='button' ng-click='action()' ng-class='displayActiveToolClass(active)'><i class='{{getIcon()}}'></i></button>",
-			action: function() {
-				return this.$parent.wrapSelection("underline", null);
-			},
-			activeState: function() {
-				return $document[0].queryCommandState('underline');
-			}
-		},
-		clear: {
-      display: "<button type='button' ng-click='action()' ng-class='displayActiveToolClass(active)'><i class='{{getIcon()}}'></i></button>",
-			action: function() {
-				return this.$parent.wrapSelection("removeFormat", null);
-			}
-		},
-		insertImage: {
-      display: "<button type='button' ng-click='action()' ng-class='displayActiveToolClass(active)'><i class='{{getIcon()}}'></i></button>",
-			action: function() {
-				var imageLink;
-				imageLink = prompt("Please enter an image URL to insert", 'http://');
-				if (imageLink !== '') {
-					return this.$parent.wrapSelection('insertImage', imageLink);
-				}
-			}
-		},
-		insertLink: {
-      display: "<button type='button' ng-click='action()' ng-class='displayActiveToolClass(active)'><i class='{{getIcon()}}'></i></button>",
-			action: function() {
-				var urlLink;
-				urlLink = prompt("Please enter an URL to insert", 'http://');
-				if (urlLink !== '') {
-					return this.$parent.wrapSelection('createLink', urlLink);
-				}
-			}
-		},
-		unlink: {
-      display: "<button type='button' ng-click='action()' ng-class='displayActiveToolClass(active)'><i class='{{getIcon()}}'></i></button>",
-			action: function() {
-				return this.$parent.wrapSelection('unlink', null);
-			}
-		}
-	}, ($rootScope.textAngularTools != null)? $rootScope.textAngularTools : {});
-		
+    h1: {
+      display: "<button type='button' ng-click='action()' ng-class='displayActiveToolClass(active)'>H1</button>",
+      action: function() {
+        return this.$parent.wrapSelection("formatBlock", "<H1>");
+      },
+      activeState: function() { return queryFormatBlockState('h1'); }
+    },
+    h2: {
+      display: "<button type='button' ng-click='action()' ng-class='displayActiveToolClass(active)'>H2</button>",
+      action: function() {
+        return this.$parent.wrapSelection("formatBlock", "<H2>");
+      },
+      activeState: function() { return queryFormatBlockState('h2'); }
+    },
+    h3: {
+      display: "<button type='button' ng-click='action()' ng-class='displayActiveToolClass(active)'>H3</button>",
+      action: function() {
+        return this.$parent.wrapSelection("formatBlock", "<H3>");
+      },
+      activeState: function() { return queryFormatBlockState('h3'); }
+    },
+    p: {
+      display: "<button type='button' ng-click='action()' ng-class='displayActiveToolClass(active)'>P</button>",
+      action: function() {
+        return this.$parent.wrapSelection("formatBlock", "<P>");
+      },
+      activeState: function() { return queryFormatBlockState('p'); }
+    },
+    pre: {
+      display: "<button type='button' ng-click='action()' ng-class='displayActiveToolClass(active)'>pre</button>",
+      action: function() {
+        return this.$parent.wrapSelection("formatBlock", "<PRE>");
+      },
+      activeState: function() { return queryFormatBlockState('pre'); }
+    },
+    ul: {
+      display: "<button type='button' ng-click='action()' ng-class='displayActiveToolClass(active)'></button>",
+      action: function() {
+        return this.$parent.wrapSelection("insertUnorderedList", null);
+      },
+      activeState: function() { return $document[0].queryCommandState('insertUnorderedList'); }
+    },
+    ol: {
+      display: "<button type='button' ng-click='action()' ng-class='displayActiveToolClass(active)'></button>",
+      action: function() {
+        return this.$parent.wrapSelection("insertOrderedList", null);
+      },
+      activeState: function() { return $document[0].queryCommandState('insertOrderedList'); }
+    },
+    quote: {
+      display: "<button type='button' ng-click='action()' ng-class='displayActiveToolClass(active)'></button>",
+      action: function() {
+        return this.$parent.wrapSelection("formatBlock", "<BLOCKQUOTE>");
+      },
+      activeState: function() { return queryFormatBlockState('blockquote'); }
+    },
+    undo: {
+      display: "<button type='button' ng-click='action()' ng-class='displayActiveToolClass(active)'></button>",
+      action: function() {
+        return this.$parent.wrapSelection("undo", null);
+      }
+    },
+    redo: {
+      display: "<button type='button' ng-click='action()' ng-class='displayActiveToolClass(active)'></button>",
+      action: function() {
+        return this.$parent.wrapSelection("redo", null);
+      }
+    },
+    bold: {
+      display: "<button type='button' ng-click='action()' ng-class='displayActiveToolClass(active)'></button>",
+      action: function() {
+        return this.$parent.wrapSelection("bold", null);
+      },
+      activeState: function() {
+        return $document[0].queryCommandState('bold');
+      }
+    },
+    justifyLeft: {
+      display: "<button type='button' ng-click='action()' ng-class='displayActiveToolClass(active)'></button>",
+      action: function() {
+        return this.$parent.wrapSelection("justifyLeft", null);
+      },
+      activeState: function() {
+        return $document[0].queryCommandState('justifyLeft');
+      }
+    },
+    justifyRight: {
+      display: "<button type='button' ng-click='action()' ng-class='displayActiveToolClass(active)'></button>",
+      action: function() {
+        return this.$parent.wrapSelection("justifyRight", null);
+      },
+      activeState: function() {
+        return $document[0].queryCommandState('justifyRight');
+      }
+    },
+    justifyCenter: {
+      display: "<button type='button' ng-click='action()' ng-class='displayActiveToolClass(active)'></button>",
+      action: function() {
+        return this.$parent.wrapSelection("justifyCenter", null);
+      },
+      activeState: function() {
+        return $document[0].queryCommandState('justifyCenter');
+      }
+    },
+    italics: {
+      display: "<button type='button' ng-click='action()' ng-class='displayActiveToolClass(active)'></button>",
+      action: function() {
+        return this.$parent.wrapSelection("italic", null);
+      },
+      activeState: function() {
+        return $document[0].queryCommandState('italic');
+      }
+    },
+    underline: {
+      display: "<button type='button' ng-click='action()' ng-class='displayActiveToolClass(active)'></button>",
+      action: function() {
+        return this.$parent.wrapSelection("underline", null);
+      },
+      activeState: function() {
+        return $document[0].queryCommandState('underline');
+      }
+    },
+    clear: {
+      display: "<button type='button' ng-click='action()' ng-class='displayActiveToolClass(active)'></button>",
+      action: function() {
+        return this.$parent.wrapSelection("removeFormat", null);
+      }
+    },
+    insertImage: {
+      display: "<button type='button' ng-click='action()' ng-class='displayActiveToolClass(active)'></button>",
+      action: function() {
+        var imageLink;
+        imageLink = prompt("Please enter an image URL to insert", 'http://');
+        if (imageLink !== '') {
+          return this.$parent.wrapSelection('insertImage', imageLink);
+        }
+      }
+    },
+    insertLink: {
+      display: "<button type='button' ng-click='action()' ng-class='displayActiveToolClass(active)'></button>",
+      action: function() {
+        var urlLink;
+        urlLink = prompt("Please enter an URL to insert", 'http://');
+        if (urlLink !== '') {
+          return this.$parent.wrapSelection('createLink', urlLink);
+        }
+      }
+    },
+    unlink: {
+      display: "<button type='button' ng-click='action()' ng-class='displayActiveToolClass(active)'></button>",
+      action: function() {
+        return this.$parent.wrapSelection('unlink', null);
+      }
+    }
+  }, ($rootScope.textAngularTools != null)? $rootScope.textAngularTools : {});
+
 	return {
 		require: 'ngModel',
 		scope: {},
@@ -314,38 +314,47 @@ textAngular.directive("textAngular", ['$compile', '$window', '$document', '$root
 			});
 			
 			scope.tools = {}; // Keep a reference for updating the active states later
-			// create the tools in the toolbar
-			for (var _i = 0; _i < scope.toolbar.length; _i++) {
-				// setup the toolbar group
-				group = scope.toolbar[_i];
-				groupElement = angular.element("<div></div>");
-				groupElement.addClass(scope.classes.toolbarGroup);
-				for (var _j = 0; _j < group.length; _j++) {
-					// init and add the tools to the group
-					tool = group[_j]; // a tool name (key name from textAngularTools struct)
-					toolElement = angular.element($rootScope.textAngularTools[tool].display);
-					toolElement.addClass(scope.classes.toolbarButton);
-					toolElement.attr('unselectable', 'on'); // important to not take focus from the main text/html entry
-					toolElement.attr('ng-disabled', 'showHtml()');
-					var childScope = angular.extend(scope.$new(true), $rootScope.textAngularTools[tool], { // add the tool specific functions
-						name: tool,
-						showHtml: function(){
-							if(this.name !== 'html') return this.$parent.showHtml;
-							return false;
-						},
-						displayActiveToolClass: function(active){
-							return (active)? this.$parent.classes.toolbarButtonActive : '';
-						},
-            getIcon: function() {
-							return !!this.$parent.icons[this.name] ? this.$parent.icons[this.name] : '';
+      scope.buildTools = function() {
+        // create the tools in the toolbar
+        for (var _i = 0; _i < scope.toolbar.length; _i++) {
+          // setup the toolbar group
+          group = scope.toolbar[_i];
+          groupElement = angular.element("<div></div>");
+          groupElement.addClass(scope.classes.toolbarGroup);
+          for (var _j = 0; _j < group.length; _j++) {
+            // init and add the tools to the group
+            tool = group[_j]; // a tool name (key name from textAngularTools struct)
+            toolElement = angular.element($rootScope.textAngularTools[tool].display);
+            toolElement.addClass(scope.classes.toolbarButton);
+            toolElement.attr('unselectable', 'on'); // important to not take focus from the main text/html entry
+            toolElement.attr('ng-disabled', 'showHtml()');
+            if (!!scope.icons[tool]) {
+              toolElement.append("<i class='"+ scope.icons[tool] + "'></i>");
             }
-					}); //creates a child scope of the main angularText scope and then extends the childScope with the functions of this particular tool
-					scope.tools[tool] = childScope; // reference to the scope kept
-					groupElement.append($compile(toolElement)(childScope)); // append the tool compiled with the childScope to the group element
-				}
-				scope.displayElements.toolbar.append(groupElement); // append the group to the toolbar
-			}
-			
+            var childScope = angular.extend(scope.$new(true), $rootScope.textAngularTools[tool], { // add the tool specific functions
+              name: tool,
+              showHtml: function(){
+                if(this.name !== 'html') return this.$parent.showHtml;
+                return false;
+              },
+              displayActiveToolClass: function(active){
+                return (active)? this.$parent.classes.toolbarButtonActive : '';
+              }
+            }); //creates a child scope of the main angularText scope and then extends the childScope with the functions of this particular tool
+            scope.tools[tool] = childScope; // reference to the scope kept
+            groupElement.append($compile(toolElement)(childScope)); // append the tool compiled with the childScope to the group element
+          }
+          scope.displayElements.toolbar.append(groupElement); // append the group to the toolbar
+        }
+      }
+      scope.buildTools();
+
+      // Allow toolbar full rebuild
+      scope.$on('tools:rebuild', function() {
+        scope.displayElements.toolbar.empty();
+        scope.buildTools();
+      })
+
 			// changes to the model variable from outside the html/text inputs
 			ngModel.$render = function() {
 				scope.displayElements.forminput.val(ngModel.$viewValue);
