@@ -282,8 +282,6 @@ textAngular.directive("textAngular", ['$compile', '$window', '$document', '$root
 				scope.$parent.$watch(attrs.taDisabled, function(newVal){
 					scope.disabled = newVal;
 					if(scope.disabled){
-						angular.element(scope.displayElements.text).blur();
-						angular.element(scope.displayElements.html).blur();
 						element.addClass('disabled');
 					}else{
 						element.removeClass('disabled');
