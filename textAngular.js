@@ -51,7 +51,7 @@ textAngular.directive("textAngular", ['$compile', '$window', '$document', '$root
 			display: "<button type='button' ng-click='action()' ng-class='displayActiveToolClass(active)'>Toggle HTML</button>",
 			action: function() {
 				// this variable in an action function referrs to the angular scope of the tool
-				var ht, _this = this;
+				var _this = this;
 				this.$parent.showHtml = !this.$parent.showHtml;
 				if (this.$parent.showHtml) { //Show the HTML view
 					$timeout((function() { //defer until the element is visible
@@ -226,7 +226,7 @@ textAngular.directive("textAngular", ['$compile', '$window', '$document', '$root
 		scope: {},
 		restrict: "EA",
 		link: function(scope, element, attrs, ngModel) {
-			var group, groupElement, keydown, keyup, tool, toolElement; //all these vars should not be accessable outside this directive
+			var group, groupElement, keydown, keyup, mouseup, tool, toolElement; //all these vars should not be accessable outside this directive
 			// get the settings from the defaults and add our specific functions that need to be on the scope
 			angular.extend(scope, $rootScope.textAngularOpts, {
 				// wraps the selection in the provided tag / execCommand function.
@@ -460,8 +460,8 @@ textAngular.directive("textAngular", ['$compile', '$window', '$document', '$root
 			ngModel.$render = function() {
 				if(ngModel.$viewValue === undefined) return;
 				// if the editor isn't focused it needs to be updated, otherwise it's receiving user input
+				var val = ngModel.$viewValue || ''; // in case model is null
 				if ($document[0].activeElement !== element[0]) {
-					var val = ngModel.$viewValue || ''; // in case model is null
 					ngModel.$oldViewValue = val;
 					if(scope.taBind === 'text'){ //WYSIWYG Mode
 						element.html(val);
