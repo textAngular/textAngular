@@ -12,7 +12,7 @@ if(!window.console) console = {log: function() {}}; // fixes IE console undefine
 var textAngular = angular.module("textAngular", ['ngSanitize']); //This makes ngSanitize required
 
 textAngular.directive("textAngular", ['$compile', '$window', '$document', '$rootScope', '$timeout', 'taFixChrome', function($compile, $window, $document, $rootScope, $timeout, taFixChrome) {
-	console.log("Thank you for using textAngular! http://www.textangular.com")
+	console.log("Thank you for using textAngular! http://www.textangular.com");
 	// deepExtend instead of angular.extend in order to allow easy customization of "display" for default buttons
 	// snatched from: http://stackoverflow.com/a/15311794/2966847
 	function deepExtend(destination, source) {
@@ -45,7 +45,7 @@ textAngular.directive("textAngular", ['$compile', '$window', '$document', '$root
 		command = command.toLowerCase();
 		var val = $document[0].queryCommandValue('formatBlock').toLowerCase();
 		return val === command || val === command;
-	}
+	};
 	$rootScope.textAngularTools = deepExtend({
 		html: {
 			display: "<button type='button' ng-click='action()' ng-class='displayActiveToolClass(active)'>Toggle HTML</button>",
@@ -498,7 +498,7 @@ textAngular.directive("textAngular", ['$compile', '$window', '$document', '$root
 		for(var s = 0; s < spans.length; s++){
 			var span = angular.element(spans[s]);
 			if(span.attr('style') && span.attr('style').match(/line-height: 1.428571429;|color: inherit; line-height: 1.1;/i)){ // chrome specific string that gets inserted into the style attribute, other parts may vary. Second part is specific ONLY to hitting backspace in Headers
-				if(span.next().length > 0 && span.next()[0].tagName === 'BR') span.next().remove()
+				if(span.next().length > 0 && span.next()[0].tagName === 'BR') span.next().remove();
 				span.replaceWith(span.html());
 			}
 		}
