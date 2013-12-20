@@ -386,7 +386,7 @@ textAngular.directive("textAngular", ['$compile', '$window', '$document', '$root
 						}
 					}
 				}
-				if (this.bUpdateSelectedStyles) $timeout(this.updateSelectedStyles, 200); // used to update the active state when a key is held down, ie the left arrow
+				if (scope.bUpdateSelectedStyles) $timeout(scope.updateSelectedStyles, 200); // used to update the active state when a key is held down, ie the left arrow
 			};
 			// start updating on keydown
 			keydown = function(e) {
