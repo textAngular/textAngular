@@ -7,9 +7,11 @@ Version 1.1.2
 See README.md or https://github.com/fraywing/textAngular/wiki for requirements and use.
 */
 
-var textAngular = angular.module("textAngular", ['ngSanitize']); //This makes ngSanitize required
+(function(window, angular, undefined) { 'use strict'; angular
 
-textAngular.directive("textAngular", ['$compile', '$window', '$document', '$rootScope', '$timeout', '$log', 'taFixChrome', function($compile, $window, $document, $rootScope, $timeout, $log, taFixChrome) {
+.module("textAngular", ['ngSanitize']) //This makes ngSanitize required
+
+.directive("textAngular", ['$compile', '$window', '$document', '$rootScope', '$timeout', '$log', 'taFixChrome', function($compile, $window, $document, $rootScope, $timeout, $log, taFixChrome) {
 	$log.log("Thank you for using textAngular! http://www.textangular.com");
 	// deepExtend instead of angular.extend in order to allow easy customization of "display" for default buttons
 	// snatched from: http://stackoverflow.com/a/15311794/2966847
@@ -411,7 +413,9 @@ textAngular.directive("textAngular", ['$compile', '$window', '$document', '$root
 			scope.displayElements.text.on('mouseup', mouseup);
 		}
 	};
-}]).directive('taBind', ['$sanitize', '$document', 'taFixChrome', function($sanitize, $document, taFixChrome){
+}])
+
+.directive('taBind', ['$sanitize', '$document', 'taFixChrome', function($sanitize, $document, taFixChrome){
 	// Uses for this are textarea or input with ng-model and ta-bind='text' OR any non-form element with contenteditable="contenteditable" ta-bind="html|text" ng-model
 	return {
 		require: 'ngModel',
@@ -488,7 +492,9 @@ textAngular.directive("textAngular", ['$compile', '$window', '$document', '$root
 			}
 		}
 	};
-}]).factory('taFixChrome', function(){
+}])
+
+.factory('taFixChrome', function(){
 	// get whaterever rubbish is inserted in chrome
 	var taFixChrome = function($html){ // should be an angular.element object, returns object for chaining convenience
 		// fix the chrome trash that gets inserted sometimes
@@ -505,4 +511,6 @@ textAngular.directive("textAngular", ['$compile', '$window', '$document', '$root
 		return $html;
 	};
 	return taFixChrome;
-});
+})
+
+;}) (window, window.angular);
