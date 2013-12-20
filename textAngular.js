@@ -7,12 +7,10 @@ Version 1.1.2
 See README.md or https://github.com/fraywing/textAngular/wiki for requirements and use.
 */
 
-if(!window.console) console = {log: function() {}}; // fixes IE console undefined errors
-
 var textAngular = angular.module("textAngular", ['ngSanitize']); //This makes ngSanitize required
 
-textAngular.directive("textAngular", ['$compile', '$window', '$document', '$rootScope', '$timeout', 'taFixChrome', function($compile, $window, $document, $rootScope, $timeout, taFixChrome) {
-	console.log("Thank you for using textAngular! http://www.textangular.com");
+textAngular.directive("textAngular", ['$compile', '$window', '$document', '$rootScope', '$timeout', '$log', 'taFixChrome', function($compile, $window, $document, $rootScope, $timeout, $log, taFixChrome) {
+	$log.log("Thank you for using textAngular! http://www.textangular.com");
 	// deepExtend instead of angular.extend in order to allow easy customization of "display" for default buttons
 	// snatched from: http://stackoverflow.com/a/15311794/2966847
 	function deepExtend(destination, source) {
