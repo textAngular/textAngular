@@ -29,7 +29,12 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 	};
 	// Here we set up the global display defaults, make sure we don't overwrite any that the user may have already set.
 	$rootScope.textAngularOpts = deepExtend({
-		toolbar: [['h1', 'h2', 'h3', 'p', 'pre', 'quote'], ['bold', 'italics', 'underline', 'ul', 'ol', 'redo', 'undo', 'clear'], ['justifyLeft','justifyCenter','justifyRight'],['html', 'insertImage', 'insertLink', 'unlink']],
+		toolbar: [
+			['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'pre', 'quote'],
+			['bold', 'italics', 'underline', 'ul', 'ol', 'redo', 'undo', 'clear'],
+			['justifyLeft', 'justifyCenter', 'justifyRight'],
+			['html', 'insertImage', 'insertLink', 'unlink']
+		],
 		classes: {
 			focussed: "focussed",
 			toolbar: "btn-toolbar",
@@ -85,6 +90,27 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 				return this.$parent.wrapSelection("formatBlock", "<H3>");
 			},
 			activeState: function() { return queryFormatBlockState('h3'); }
+		},
+		h4: {
+			display: "<button type='button' ng-click='action()' ng-class='displayActiveToolClass(active)'>H4</button>",
+			action: function() {
+				return this.$parent.wrapSelection("formatBlock", "<H4>");
+			},
+			activeState: function() { return queryFormatBlockState('h4'); }
+		},
+		h5: {
+			display: "<button type='button' ng-click='action()' ng-class='displayActiveToolClass(active)'>H5</button>",
+			action: function() {
+				return this.$parent.wrapSelection("formatBlock", "<H5>");
+			},
+			activeState: function() { return queryFormatBlockState('h5'); }
+		},
+		h6: {
+			display: "<button type='button' ng-click='action()' ng-class='displayActiveToolClass(active)'>H6</button>",
+			action: function() {
+				return this.$parent.wrapSelection("formatBlock", "<H6>");
+			},
+			activeState: function() { return queryFormatBlockState('h6'); }
 		},
 		p: {
 			display: "<button type='button' ng-click='action()' ng-class='displayActiveToolClass(active)'>P</button>",
