@@ -7,12 +7,12 @@ Version 1.1.2
 See README.md or https://github.com/fraywing/textAngular/wiki for requirements and use.
 */
 
-if(!window.console) console = {log: function() {}}; // fixes IE console undefined errors
+(function(window, angular, undefined) { 'use strict'; angular
 
-var textAngular = angular.module("textAngular", ['ngSanitize']); //This makes ngSanitize required
+.module("textAngular", ['ngSanitize']) //This makes ngSanitize required
 
-textAngular.directive("textAngular", ['$compile', '$window', '$document', '$rootScope', '$timeout', 'taFixChrome', function($compile, $window, $document, $rootScope, $timeout, taFixChrome) {
-	console.log("Thank you for using textAngular! http://www.textangular.com")
+.directive("textAngular", ['$compile', '$window', '$document', '$rootScope', '$timeout', '$log', 'taFixChrome', function($compile, $window, $document, $rootScope, $timeout, $log, taFixChrome) {
+	$log.log("Thank you for using textAngular! http://www.textangular.com");
 	// deepExtend instead of angular.extend in order to allow easy customization of "display" for default buttons
 	// snatched from: http://stackoverflow.com/a/15311794/2966847
 	function deepExtend(destination, source) {
@@ -29,7 +29,12 @@ textAngular.directive("textAngular", ['$compile', '$window', '$document', '$root
 	};
 	// Here we set up the global display defaults, make sure we don't overwrite any that the user may have already set.
 	$rootScope.textAngularOpts = deepExtend({
-		toolbar: [['h1', 'h2', 'h3', 'p', 'pre', 'quote'], ['bold', 'italics', 'underline', 'ul', 'ol', 'redo', 'undo', 'clear'], ['justifyLeft','justifyCenter','justifyRight'],['html', 'insertImage', 'insertLink', 'unlink']],
+		toolbar: [
+			['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'pre', 'quote'],
+			['bold', 'italics', 'underline', 'ul', 'ol', 'redo', 'undo', 'clear'],
+			['justifyLeft', 'justifyCenter', 'justifyRight'],
+			['html', 'insertImage', 'insertLink', 'unlink']
+		],
 		classes: {
 			focussed: "focussed",
 			toolbar: "btn-toolbar",
@@ -45,180 +50,96 @@ textAngular.directive("textAngular", ['$compile', '$window', '$document', '$root
 		command = command.toLowerCase();
 		var val = $document[0].queryCommandValue('formatBlock').toLowerCase();
 		return val === command || val === command;
-	}
+	};
+	var buildDisplay = function(name) {
+		// Provided name can be either the actual label or a Font Awesome class name 
+		var label = (name.substring(0, 2) === "fa" ? "<i class='fa " + name + "'></i>" : name);
+		return "<button type='button' ng-click='action()' ng-class='displayActiveToolClass(active)'>" + label + "</button>";
+	};
+	var buildAction = function(command, opt, promptText, promptDefaultText) {
+		return function() {
+			// If a prompt is needed show the popup, otherwise use provided opt
+			var optLink = (promptText && prompt(promptText, promptDefaultText) || opt);
+			if (optLink !== '' || optLink === opt) {
+				return this.$parent.wrapSelection(command, optLink);
+			}
+		};
+	};
+	var buildActiveState = function(command, formatBlock) {
+		return function() {
+			return (formatBlock
+				? queryFormatBlockState(command)
+				: $document[0].queryCommandState(command)
+			);
+		};
+	};
+	var buildTool = function(display, action, activeState) {
+		return {
+			display: display,
+			action: action,
+			activeState: activeState
+		};
+	};
+	var buildBlockTool = function(name, opt, state) {
+		return buildTool(
+			buildDisplay(name),
+			buildAction("formatBlock", opt),
+			buildActiveState(state, true)
+		);
+	};
+	var buildInlineTool = function(name, command, state) {
+		return buildTool(
+			buildDisplay(name),
+			buildAction(command, null),
+			buildActiveState(state)
+		);
+	};
+	var buildStatelessTool = function(name, command, promptText, promptDefaultText) {
+		return buildTool(
+			buildDisplay(name),
+			buildAction(command, null, promptText, promptDefaultText)
+		);
+	};
+	var buildHtmlTool = function(name) {
+		return buildTool(
+			buildDisplay(name),
+			function() {
+				var _parent = this.$parent;
+				_parent.showHtml = !_parent.showHtml;
+				//Show the HTML view or the WYSIWYG view
+				var el = (_parent.showHtml ? _parent.displayElements.html[0] : _parent.displayElements.text[0]);
+				$timeout(function() { //defer until the element is visible
+					return el.focus(); //dereference the DOM object from the angular.element
+				}, 100);
+				this.active = _parent.showHtml;
+			}
+		);
+	};
 	$rootScope.textAngularTools = deepExtend({
-		html: {
-			display: "<button type='button' ng-click='action()' ng-class='displayActiveToolClass(active)'>Toggle HTML</button>",
-			action: function() {
-				// this variable in an action function referrs to the angular scope of the tool
-				var ht, _this = this;
-				this.$parent.showHtml = !this.$parent.showHtml;
-				if (this.$parent.showHtml) { //Show the HTML view
-					$timeout((function() { //defer until the element is visible
-						return _this.$parent.displayElements.html[0].focus(); //dereference the DOM object from the angular.element
-					}), 100);
-				} else { //Show the WYSIWYG view
-					$timeout((function() { //defer until the element is visible
-						return _this.$parent.displayElements.text[0].focus(); //dereference the DOM object from the angular.element
-					}), 100);
-				}
-				this.active = this.$parent.showHtml;
-			}
-		},
-		h1: {
-			display: "<button type='button' ng-click='action()' ng-class='displayActiveToolClass(active)'>H1</button>",
-			action: function() {
-				return this.$parent.wrapSelection("formatBlock", "<H1>");
-			},
-			activeState: function() { return queryFormatBlockState('h1'); }
-		},
-		h2: {
-			display: "<button type='button' ng-click='action()' ng-class='displayActiveToolClass(active)'>H2</button>",
-			action: function() {
-				return this.$parent.wrapSelection("formatBlock", "<H2>");
-			},
-			activeState: function() { return queryFormatBlockState('h2'); }
-		},
-		h3: {
-			display: "<button type='button' ng-click='action()' ng-class='displayActiveToolClass(active)'>H3</button>",
-			action: function() {
-				return this.$parent.wrapSelection("formatBlock", "<H3>");
-			},
-			activeState: function() { return queryFormatBlockState('h3'); }
-		},
-		p: {
-			display: "<button type='button' ng-click='action()' ng-class='displayActiveToolClass(active)'>P</button>",
-			action: function() {
-				return this.$parent.wrapSelection("formatBlock", "<P>");
-			},
-			activeState: function() { return queryFormatBlockState('p'); }
-		},
-		pre: {
-			display: "<button type='button' ng-click='action()' ng-class='displayActiveToolClass(active)'>pre</button>",
-			action: function() {
-				return this.$parent.wrapSelection("formatBlock", "<PRE>");
-			},
-			activeState: function() { return queryFormatBlockState('pre'); }
-		},
-		ul: {
-			display: "<button type='button' ng-click='action()' ng-class='displayActiveToolClass(active)'><i class='fa fa-list-ul'></i></button>",
-			action: function() {
-				return this.$parent.wrapSelection("insertUnorderedList", null);
-			},
-			activeState: function() { return $document[0].queryCommandState('insertUnorderedList'); }
-		},
-		ol: {
-			display: "<button type='button' ng-click='action()' ng-class='displayActiveToolClass(active)'><i class='fa fa-list-ol'></i></button>",
-			action: function() {
-				return this.$parent.wrapSelection("insertOrderedList", null);
-			},
-			activeState: function() { return $document[0].queryCommandState('insertOrderedList'); }
-		},
-		quote: {
-			display: "<button type='button' ng-click='action()' ng-class='displayActiveToolClass(active)'><i class='fa fa-quote-right'></i></button>",
-			action: function() {
-				return this.$parent.wrapSelection("formatBlock", "<BLOCKQUOTE>");
-			},
-			activeState: function() { return queryFormatBlockState('blockquote'); }
-		},
-		undo: {
-			display: "<button type='button' ng-click='action()' ng-class='displayActiveToolClass(active)'><i class='fa fa-undo'></i></button>",
-			action: function() {
-				return this.$parent.wrapSelection("undo", null);
-			}
-		},
-		redo: {
-			display: "<button type='button' ng-click='action()' ng-class='displayActiveToolClass(active)'><i class='fa fa-repeat'></i></button>",
-			action: function() {
-				return this.$parent.wrapSelection("redo", null);
-			}
-		},
-		bold: {
-			display: "<button type='button' ng-click='action()' ng-class='displayActiveToolClass(active)'><i class='fa fa-bold'></i></button>",
-			action: function() {
-				return this.$parent.wrapSelection("bold", null);
-			},
-			activeState: function() {
-				return $document[0].queryCommandState('bold');
-			}
-		},
-		justifyLeft: {
-			display: "<button type='button' ng-click='action()' ng-class='displayActiveToolClass(active)'><i class='fa fa-align-left'></i></button>",
-			action: function() {
-				return this.$parent.wrapSelection("justifyLeft", null);
-			},
-			activeState: function() {
-				return $document[0].queryCommandState('justifyLeft');
-			}
-		},
-		justifyRight: {
-			display: "<button type='button' ng-click='action()' ng-class='displayActiveToolClass(active)'><i class='fa fa-align-right'></i></button>",
-			action: function() {
-				return this.$parent.wrapSelection("justifyRight", null);
-			},
-			activeState: function() {
-				return $document[0].queryCommandState('justifyRight');
-			}
-		},
-		justifyCenter: {
-			display: "<button type='button' ng-click='action()' ng-class='displayActiveToolClass(active)'><i class='fa fa-align-center'></i></button>",
-			action: function() {
-				return this.$parent.wrapSelection("justifyCenter", null);
-			},
-			activeState: function() {
-				return $document[0].queryCommandState('justifyCenter');
-			}
-		},
-		italics: {
-			display: "<button type='button' ng-click='action()' ng-class='displayActiveToolClass(active)'><i class='fa fa-italic'></i></button>",
-			action: function() {
-				return this.$parent.wrapSelection("italic", null);
-			},
-			activeState: function() {
-				return $document[0].queryCommandState('italic');
-			}
-		},
-		underline: {
-			display: "<button type='button' ng-click='action()' ng-class='displayActiveToolClass(active)'><i class='fa fa-underline'></i></button>",
-			action: function() {
-				return this.$parent.wrapSelection("underline", null);
-			},
-			activeState: function() {
-				return $document[0].queryCommandState('underline');
-			}
-		},
-		clear: {
-			display: "<button type='button' ng-click='action()' ng-class='displayActiveToolClass(active)'><i class='fa fa-ban'></i></button>",
-			action: function() {
-				return this.$parent.wrapSelection("removeFormat", null);
-			}
-		},
-		insertImage: {
-			display: "<button type='button' ng-click='action()' ng-class='displayActiveToolClass(active)'><i class='fa fa-picture-o'></i></button>",
-			action: function() {
-				var imageLink;
-				imageLink = prompt("Please enter an image URL to insert", 'http://');
-				if (imageLink !== '') {
-					return this.$parent.wrapSelection('insertImage', imageLink);
-				}
-			}
-		},
-		insertLink: {
-			display: "<button type='button' ng-click='action()' ng-class='displayActiveToolClass(active)'><i class='fa fa-link'></i></button>",
-			action: function() {
-				var urlLink;
-				urlLink = prompt("Please enter an URL to insert", 'http://');
-				if (urlLink !== '') {
-					return this.$parent.wrapSelection('createLink', urlLink);
-				}
-			}
-		},
-		unlink: {
-			display: "<button type='button' ng-click='action()' ng-class='displayActiveToolClass(active)'><i class='fa fa-unlink'></i></button>",
-			action: function() {
-				return this.$parent.wrapSelection('unlink', null);
-			}
-		}
+		html: buildHtmlTool("Toggle HTML"),
+		h1: buildBlockTool("H1", "<H1>", "h1"),
+		h2: buildBlockTool("H2", "<H2>", "h2"),
+		h3: buildBlockTool("H3", "<H3>", "h3"),
+		h4: buildBlockTool("H4", "<H4>", "h4"),
+		h5: buildBlockTool("H5", "<H5>", "h5"),
+		h6: buildBlockTool("H6", "<H6>", "h6"),
+		p: buildBlockTool("P", "<P>", "p"),
+		pre: buildBlockTool("pre", "<PRE>", "pre"),
+		quote: buildBlockTool("fa-quote-right", "<BLOCKQUOTE>", "blockquote"),
+		ul: buildInlineTool("fa-list-ul", "insertUnorderedList", "insertUnorderedList"),
+		ol: buildInlineTool("fa-list-ol", "insertOrderedList", "insertOrderedList"),
+		bold: buildInlineTool("fa-bold", "bold", null, "bold"),
+		justifyLeft: buildInlineTool("fa-align-left", "justifyLeft", "justifyLeft"),
+		justifyRight: buildInlineTool("fa-align-right", "justifyRight", "justifyRight"),
+		justifyCenter: buildInlineTool("fa-align-center", "justifyCenter", "justifyCenter"),
+		italics: buildInlineTool("fa-italic", "italic", "italic"),
+		underline: buildInlineTool("fa-underline", "underline", "underline"),
+		undo: buildStatelessTool("fa-undo", "undo"),
+		redo: buildStatelessTool("fa-repeat", "redo"),
+		clear: buildStatelessTool("fa-ban", "removeFormat"),
+		unlink: buildStatelessTool("fa-unlink", "unlink"),
+		insertImage: buildStatelessTool("fa-picture-o", "insertImage", "Please enter an image URL to insert", "http://"),
+		insertLink: buildStatelessTool("fa-link", "createLink", "Please enter an URL to insert", "http://")
 	}, ($rootScope.textAngularTools != null)? $rootScope.textAngularTools : {});
 		
 	return {
@@ -226,7 +147,7 @@ textAngular.directive("textAngular", ['$compile', '$window', '$document', '$root
 		scope: {},
 		restrict: "EA",
 		link: function(scope, element, attrs, ngModel) {
-			var group, groupElement, keydown, keyup, tool, toolElement; //all these vars should not be accessable outside this directive
+			var group, groupElement, keydown, keyup, mouseup, tool, toolElement; //all these vars should not be accessable outside this directive
 			// get the settings from the defaults and add our specific functions that need to be on the scope
 			angular.extend(scope, $rootScope.textAngularOpts, {
 				// wraps the selection in the provided tag / execCommand function.
@@ -386,7 +307,7 @@ textAngular.directive("textAngular", ['$compile', '$window', '$document', '$root
 						}
 					}
 				}
-				if (this.bUpdateSelectedStyles) $timeout(this.updateSelectedStyles, 200); // used to update the active state when a key is held down, ie the left arrow
+				if (scope.bUpdateSelectedStyles) $timeout(scope.updateSelectedStyles, 200); // used to update the active state when a key is held down, ie the left arrow
 			};
 			// start updating on keydown
 			keydown = function(e) {
@@ -413,7 +334,9 @@ textAngular.directive("textAngular", ['$compile', '$window', '$document', '$root
 			scope.displayElements.text.on('mouseup', mouseup);
 		}
 	};
-}]).directive('taBind', ['$sanitize', '$document', 'taFixChrome', function($sanitize, $document, taFixChrome){
+}])
+
+.directive('taBind', ['$sanitize', '$document', 'taFixChrome', function($sanitize, $document, taFixChrome){
 	// Uses for this are textarea or input with ng-model and ta-bind='text' OR any non-form element with contenteditable="contenteditable" ta-bind="html|text" ng-model
 	return {
 		require: 'ngModel',
@@ -460,8 +383,8 @@ textAngular.directive("textAngular", ['$compile', '$window', '$document', '$root
 			ngModel.$render = function() {
 				if(ngModel.$viewValue === undefined) return;
 				// if the editor isn't focused it needs to be updated, otherwise it's receiving user input
+				var val = ngModel.$viewValue || ''; // in case model is null
 				if ($document[0].activeElement !== element[0]) {
-					var val = ngModel.$viewValue || ''; // in case model is null
 					ngModel.$oldViewValue = val;
 					if(scope.taBind === 'text'){ //WYSIWYG Mode
 						element.html(val);
@@ -490,7 +413,9 @@ textAngular.directive("textAngular", ['$compile', '$window', '$document', '$root
 			}
 		}
 	};
-}]).factory('taFixChrome', function(){
+}])
+
+.factory('taFixChrome', function(){
 	// get whaterever rubbish is inserted in chrome
 	var taFixChrome = function($html){ // should be an angular.element object, returns object for chaining convenience
 		// fix the chrome trash that gets inserted sometimes
@@ -498,7 +423,7 @@ textAngular.directive("textAngular", ['$compile', '$window', '$document', '$root
 		for(var s = 0; s < spans.length; s++){
 			var span = angular.element(spans[s]);
 			if(span.attr('style') && span.attr('style').match(/line-height: 1.428571429;|color: inherit; line-height: 1.1;/i)){ // chrome specific string that gets inserted into the style attribute, other parts may vary. Second part is specific ONLY to hitting backspace in Headers
-				if(span.next().length > 0 && span.next()[0].tagName === 'BR') span.next().remove()
+				if(span.next().length > 0 && span.next()[0].tagName === 'BR') span.next().remove();
 				span.replaceWith(span.html());
 			}
 		}
@@ -507,4 +432,6 @@ textAngular.directive("textAngular", ['$compile', '$window', '$document', '$root
 		return $html;
 	};
 	return taFixChrome;
-});
+})
+
+;}) (window, window.angular);
