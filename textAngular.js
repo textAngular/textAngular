@@ -80,10 +80,10 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 			activeState: activeState
 		};
 	};
-	var buildBlockTool = function(name, command, opt, state) {
+	var buildBlockTool = function(name, opt, state) {
 		return buildTool(
 			buildDisplay(name),
-			buildAction(command, opt),
+			buildAction("formatBlock", opt),
 			buildActiveState(state, true)
 		);
 	};
@@ -117,15 +117,15 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 	};
 	$rootScope.textAngularTools = deepExtend({
 		html: buildHtmlTool("Toggle HTML"),
-		h1: buildBlockTool("H1", "formatBlock", "<H1>", "h1"),
-		h2: buildBlockTool("H2", "formatBlock", "<H2>", "h2"),
-		h3: buildBlockTool("H3", "formatBlock", "<H3>", "h3"),
-		h4: buildBlockTool("H4", "formatBlock", "<H4>", "h4"),
-		h5: buildBlockTool("H5", "formatBlock", "<H5>", "h5"),
-		h6: buildBlockTool("H6", "formatBlock", "<H6>", "h6"),
-		p: buildBlockTool("P", "formatBlock", "<P>", "p"),
-		pre: buildBlockTool("pre", "formatBlock", "<PRE>", "pre"),
-		quote: buildBlockTool("fa-quote-right", "formatBlock", "<BLOCKQUOTE>", "blockquote"),
+		h1: buildBlockTool("H1", "<H1>", "h1"),
+		h2: buildBlockTool("H2", "<H2>", "h2"),
+		h3: buildBlockTool("H3", "<H3>", "h3"),
+		h4: buildBlockTool("H4", "<H4>", "h4"),
+		h5: buildBlockTool("H5", "<H5>", "h5"),
+		h6: buildBlockTool("H6", "<H6>", "h6"),
+		p: buildBlockTool("P", "<P>", "p"),
+		pre: buildBlockTool("pre", "<PRE>", "pre"),
+		quote: buildBlockTool("fa-quote-right", "<BLOCKQUOTE>", "blockquote"),
 		ul: buildInlineTool("fa-list-ul", "insertUnorderedList", "insertUnorderedList"),
 		ol: buildInlineTool("fa-list-ol", "insertOrderedList", "insertOrderedList"),
 		bold: buildInlineTool("fa-bold", "bold", null, "bold"),
