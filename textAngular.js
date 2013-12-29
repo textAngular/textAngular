@@ -364,12 +364,12 @@ textAngular.directive("textAngular", ['$compile', '$window', '$document', '$root
 			
 			scope.$watch('text', function(newValue, oldValue){
 				scope.html = newValue;
-				if(attrs.ngModel) ngModel.$setViewValue(newValue);
+				if(attrs.ngModel && newValue !== oldValue) ngModel.$setViewValue(newValue);
 				scope.displayElements.forminput.val(newValue);
 			});
 			scope.$watch('html', function(newValue, oldValue){
 				scope.text = newValue;
-				if(attrs.ngModel) ngModel.$setViewValue(newValue);
+				if(attrs.ngModel && newValue !== oldValue) ngModel.$setViewValue(newValue);
 				scope.displayElements.forminput.val(newValue);
 			});
 			
