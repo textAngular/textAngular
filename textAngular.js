@@ -476,6 +476,14 @@ textAngular.directive("textAngular", ['$compile', '$window', '$document', '$root
 			};
 			
 			if(!!attrs.taReadonly){
+				//set initial value
+				if(scope.$parent.$eval(attrs.taReadonly)){ // we changed to readOnly mode (taReadonly='true')
+					if(element[0].tagName.toLowerCase() === 'textarea' || element[0].tagName.toLowerCase() === 'input') element.attr('disabled', 'disabled');
+					if(element.attr('contenteditable') !== undefined && element.attr('contenteditable')) element.removeAttr('contenteditable');
+				}else{ // we changed to NOT readOnly mode (taReadonly='false')
+					if(element[0].tagName.toLowerCase() === 'textarea' || element[0].tagName.toLowerCase() === 'input') element.removeAttr('disabled');
+					else if(isContentEditable) element.attr('contenteditable', 'true');
+				}
 				scope.$parent.$watch(attrs.taReadonly, function(newVal, oldVal){ // taReadonly only has an effect if the taBind element is an input or textarea or has contenteditable='true' on it. Otherwise it is readonly by default
 					if(oldVal === newVal) return;
 					if(newVal){ // we changed to readOnly mode (taReadonly='true')
