@@ -464,6 +464,7 @@ textAngular.directive("textAngular", ['$compile', '$window', '$document', '$root
 					var val = ngModel.$viewValue || ''; // in case model is null
 					ngModel.$oldViewValue = val;
 					if(scope.taBind === 'text'){ //WYSIWYG Mode
+						angular.element(val).find('script').remove();
 						element.html(val);
 						element.find('a').on('click', function(e){
 							e.preventDefault();
