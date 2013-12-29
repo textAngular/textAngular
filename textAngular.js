@@ -11,7 +11,7 @@ if(!window.console) console = {log: function() {}}; // fixes IE console undefine
 
 var textAngular = angular.module("textAngular", ['ngSanitize']); //This makes ngSanitize required
 
-textAngular.directive("textAngular", ['$compile', '$window', '$document', '$rootScope', '$timeout', 'taFixChrome', function($compile, $window, $document, $rootScope, $timeout, taFixChrome) {
+textAngular.directive("textAngular", ['$compile', '$window', '$document', '$rootScope', '$timeout', function($compile, $window, $document, $rootScope, $timeout) {
 	console.log("Thank you for using textAngular! http://www.textangular.com")
 	// deepExtend instead of angular.extend in order to allow easy customization of "display" for default buttons
 	// snatched from: http://stackoverflow.com/a/15311794/2966847
@@ -232,8 +232,6 @@ textAngular.directive("textAngular", ['$compile', '$window', '$document', '$root
 				// wraps the selection in the provided tag / execCommand function.
 				wrapSelection: function(command, opt) {
 					document.execCommand(command, false, opt);
-					// strip out the chrome specific rubbish that gets put in when using lists
-					if(command === 'insertUnorderedList' || command === 'insertOrderedList') taFixChrome(scope.displayElements.text);
 					// refocus on the shown display element, this fixes a display bug when using :focus styles to outline the box. You still have focus on the text/html input it just doesn't show up
 					if (scope.showHtml)
 						scope.displayElements.html[0].focus();
@@ -241,7 +239,7 @@ textAngular.directive("textAngular", ['$compile', '$window', '$document', '$root
 						scope.displayElements.text[0].focus();
 					// note that wrapSelection is called via ng-click in the tool plugins so we are already within a $apply
 					scope.updateSelectedStyles();
-					if (!scope.showHtml) scope.updateTaBindtext(); // only update if NOT in html mode
+					if (!scope.showHtml) scope.updateTaBindtext(); // only update if in text or WYSIWYG mode
 				},
 				showHtml: false
 			});
@@ -423,7 +421,7 @@ textAngular.directive("textAngular", ['$compile', '$window', '$document', '$root
 			var isReadonly = false;
 			// in here we are undoing the converts used elsewhere to prevent the < > and & being displayed when they shouldn't in the code.
 			var compileHtml = function(){
-				var result = taFixChrome(angular.element("<div>").append(element.html())).html();
+				var result = taFixChrome(element).html();
 				if(scope.taBind === 'html' && isContentEditable) result = result.replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&amp;/g, '&');
 				return result;
 			};
@@ -464,7 +462,7 @@ textAngular.directive("textAngular", ['$compile', '$window', '$document', '$root
 					var val = ngModel.$viewValue || ''; // in case model is null
 					ngModel.$oldViewValue = val;
 					if(scope.taBind === 'text'){ //WYSIWYG Mode
-						angular.element(val).find('script').remove();
+						angular.element(val).find('script').remove(); // to prevent JS XSS insertion executing arbritrary code
 						element.html(val);
 						element.find('a').on('click', function(e){
 							e.preventDefault();
@@ -512,7 +510,7 @@ textAngular.directive("textAngular", ['$compile', '$window', '$document', '$root
 			}
 		}
 		var result = $html.html().replace(/style="[^"]*?(line-height: 1.428571429;|color: inherit; line-height: 1.1;)[^"]*"/ig, ''); // regex to replace ONLY offending styles - these can be inserted into various other tags on delete
-		$html.html(result);
+		if(result !== $html.html()) $html.html(result); // only replace when something has changed, else we get focus problems on inserting lists
 		return $html;
 	};
 	return taFixChrome;
