@@ -346,7 +346,6 @@ textAngular.directive("textAngular", ['$compile', '$window', '$document', '$root
 			if(attrs.ngModel){ // if no ngModel, then the only input is from inside text-angular
 				ngModel.$render = function() {
 					scope.displayElements.forminput.val(ngModel.$viewValue);
-					if(ngModel.$viewValue === undefined) return;
 					// if the editors aren't focused they need to be updated, otherwise they are doing the updating
 					if (!($document[0].activeElement === scope.displayElements.html[0]) && !($document[0].activeElement === scope.displayElements.text[0])) {
 						var val = ngModel.$viewValue || ''; // in case model is null
@@ -456,13 +455,14 @@ textAngular.directive("textAngular", ['$compile', '$window', '$document', '$root
 			
 			// changes to the model variable from outside the html/text inputs
 			ngModel.$render = function() {
-				if(ngModel.$viewValue === undefined) return;
 				// if the editor isn't focused it needs to be updated, otherwise it's receiving user input
 				if ($document[0].activeElement !== element[0]) {
 					var val = ngModel.$viewValue || ''; // in case model is null
 					ngModel.$oldViewValue = val;
 					if(scope.taBind === 'text'){ //WYSIWYG Mode
-						angular.element(val).find('script').remove(); // to prevent JS XSS insertion executing arbritrary code
+						try{
+							angular.element(val).find('script').remove(); // to prevent JS XSS insertion executing arbritrary code
+						}catch(e){}; // catches when no HTML tags are present errors.
 						element.html(val);
 						element.find('a').on('click', function(e){
 							e.preventDefault();
