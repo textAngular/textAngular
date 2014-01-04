@@ -43,7 +43,7 @@ If you find something, please let me know - throw me a message, or submit a issu
 
 ## Developer Notes
 
-I generate the minified file using `uglify-js2`, to install run `npm install -g uglifyjs`. Then to minify the file run (on UNIX based command prompt, this may differ for windows computers): `uglifyjs -m -v textAngular.js > textAngular.min.js`
+I generate the minified file using `uglify-js2`, to install run `npm install -g uglifyjs`. Then to minify the file run (on UNIX based command prompt, this may differ for windows computers): `uglifyjs -m -c unsafe:true textAngular.js > textAngular.min.js`
 Any pull request must have the new version of the minified file.
 
 ## License
