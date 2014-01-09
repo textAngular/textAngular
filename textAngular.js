@@ -44,8 +44,10 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 	*/
 	// name and toolDefinition to add into the tools available to be added on the toolbar
 	function registerTextAngularTool(name, toolDefinition){
+		if(!toolDefinition.display || toolDefinition.display === '') throw('textAngular Error: Tool Definition for "' + name + '" does not have a valid display value');
 		taTools[name] = toolDefinition;
-	};
+	}
+	
 	textAngular.constant('taRegisterTool', registerTextAngularTool);
 	
 	// The activeState function is invoked on the textAngular scope, not the tool scope. All the other functions are called on the tool scope, a child scope of the main textAngular scope.
@@ -65,13 +67,14 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 		var _retActiveStateFunction = function(q){ // convenience function so that the loop works correctly
 			return function() { return this.$editor().queryFormatBlockState(q); };
 		};
+		var headerAction = function() {
+			return this.$editor().wrapSelection("formatBlock", "<" + this.name.toUpperCase() +">");
+		};
 		for(var h = 1; h <= 6; h++){
 			taRegisterTool('h' + h, {
 				display: "<button type='button' ng-click='action()' ng-class='displayActiveToolClass(active)'>",
 				buttontext: 'H' + h,
-				action: function() {
-					return this.$editor().wrapSelection("formatBlock", "<" + this.name.toUpperCase() +">");
-				},
+				action: headerAction,
 				activeState: _retActiveStateFunction('h' + h)
 			});
 		}
@@ -253,29 +256,35 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 					showHtml: false
 				});
 				// setup the options from the optional attributes
-				if (!!attrs.taFocussedClass)			scope.classes.focussed = scope.$eval(attrs.taFocussedClass);
-				if (!!attrs.taTextEditorClass)			scope.classes.textEditor = attrs.taTextEditorClass;
-				if (!!attrs.taHtmlEditorClass)			scope.classes.htmlEditor = attrs.taHtmlEditorClass;
+				if(attrs.taFocussedClass)			scope.classes.focussed = scope.$eval(attrs.taFocussedClass);
+				if(attrs.taTextEditorClass)			scope.classes.textEditor = attrs.taTextEditorClass;
+				if(attrs.taHtmlEditorClass)			scope.classes.htmlEditor = attrs.taHtmlEditorClass;
 				
 				originalContents = element.html();
 				element.html(''); // clear the original content
 				
 				// Setup the HTML elements as variable references for use later
 				scope.displayElements = {
-					forminput: angular.element("<input type='hidden' style='display: none;'>"), // we still need the hidden input even with a textarea as the textarea may have invalid/old input in it, wheras the input will ALLWAYS have the correct value.
+					forminput: angular.element("<input type='hidden' tabindex='-1' style='display: none;'>"), // we still need the hidden input even with a textarea as the textarea may have invalid/old input in it, wheras the input will ALLWAYS have the correct value.
 					html: angular.element("<textarea ng-show='showHtml' ta-bind='html' ng-model='html' ></textarea>"),
-					text: angular.element("<div contentEditable='true' ng-hide='showHtml' ta-bind='text' ng-model='text' ></div>")
+					text: angular.element("<div contentEditable='true' ng-hide='showHtml' ta-bind='text' ng-model='html' ></div>")
 				};
+				
 				// add the main elements to the origional element
 				element.append(scope.displayElements.text);
 				element.append(scope.displayElements.html);
 				
-				if(!!attrs.name){
+				if(attrs.name){
 					scope.displayElements.forminput.attr('name', attrs.name);
 					element.append(scope.displayElements.forminput);
 				}
 				
-				if(!!attrs.taDisabled){
+				if(attrs.tabindex){
+					scope.displayElements.text.attr('tabindex', attrs.tabindex);
+					scope.displayElements.html.attr('tabindex', attrs.tabindex);
+				}
+				
+				if(attrs.taDisabled){
 					scope.displayElements.text.attr('ta-readonly', 'disabled');
 					scope.displayElements.html.attr('ta-readonly', 'disabled');
 					scope.disabled = scope.$parent.$eval(attrs.taDisabled);
@@ -307,7 +316,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 				element.on('focusout', function(e){
 					$timeout(function(){
 						// if we have NOT focussed again on the text etc then fire the blur events
-						if(!(document.activeElement === scope.displayElements.html[0]) && !(document.activeElement === scope.displayElements.text[0])){
+						if(document.activeElement !== scope.displayElements.html[0] && document.activeElement !== scope.displayElements.text[0]){
 							element.removeClass(scope.classes.focussed);
 							_toolbars.unfocus();
 							$timeout(function(){ element.triggerHandler('blur'); }, 0); // to prevent multiple apply error defer to next seems to work.
@@ -326,13 +335,13 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 				scope.switchView = function(){
 					scope.showHtml = !scope.showHtml;
 					if (scope.showHtml) { //Show the HTML view
-						$timeout((function() { //defer until the element is visible
+						$timeout(function() { //defer until the element is visible
 							return scope.displayElements.html[0].focus(); //dereference the DOM object from the angular.element
-						}), 100);
+						}, 100);
 					} else { //Show the WYSIWYG view
-						$timeout((function() { //defer until the element is visible
+						$timeout(function() { //defer until the element is visible
 							return scope.displayElements.text[0].focus(); //dereference the DOM object from the angular.element
-						}), 100);
+						}, 100);
 					}
 				};
 				
@@ -341,27 +350,21 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 					ngModel.$render = function() {
 						scope.displayElements.forminput.val(ngModel.$viewValue);
 						// if the editors aren't focused they need to be updated, otherwise they are doing the updating
-						if (!(document.activeElement === scope.displayElements.html[0]) && !(document.activeElement === scope.displayElements.text[0])) {
+						if (document.activeElement !== scope.displayElements.html[0] && document.activeElement !== scope.displayElements.text[0]) {
 							var val = ngModel.$viewValue || ''; // in case model is null
-							scope.text = val;
 							scope.html = val;
 						}
 					};
 				}else{ // if no ngModel then update from the contents of the origional html.
 					scope.displayElements.forminput.val(originalContents);
-					scope.text = originalContents;
 					scope.html = originalContents;
 				}
 				
-				scope.$watch('text', function(newValue, oldValue){
-					scope.html = newValue;
-					if(attrs.ngModel && newValue !== oldValue) ngModel.$setViewValue(newValue);
-					scope.displayElements.forminput.val(newValue);
-				});
 				scope.$watch('html', function(newValue, oldValue){
-					scope.text = newValue;
-					if(attrs.ngModel && newValue !== oldValue) ngModel.$setViewValue(newValue);
-					scope.displayElements.forminput.val(newValue);
+					if(attrs.ngModel && newValue !== oldValue){
+						ngModel.$setViewValue(newValue);
+						scope.displayElements.forminput.val(newValue);
+					}
 				});
 				
 				if(attrs.taTargetToolbars) _toolbars = taToolbarEditorLinker.registerEditor(name, scope, attrs.taTargetToolbars.split(','));
@@ -370,7 +373,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 					element.prepend(_toolbar);
 					$compile(_toolbar)(scope.$parent);
 					_toolbars = taToolbarEditorLinker.registerEditor(_name, scope, ['textAngularToolbar' + _serial]);
-				};
+				}
 				
 				// the following is for applying the active states to the tools that support it
 				scope.bUpdateSelectedStyles = false;
@@ -396,6 +399,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 				scope.displayElements.text.on('keyup', keyup);
 				// update the toolbar active states when we click somewhere in the text/html boxed
 				mouseup = function() {
+					scope.bUpdateSelectedStyles = false; // ensure only one execution of updateSelectedStyles()
 					scope.$apply(function() {
 						scope.updateSelectedStyles();
 					});
@@ -448,8 +452,8 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 				// changes to the model variable from outside the html/text inputs
 				ngModel.$render = function() {
 					// if the editor isn't focused it needs to be updated, otherwise it's receiving user input
+					var val = ngModel.$viewValue || ''; // in case model is null
 					if (document.activeElement !== element[0]) {
-						var val = ngModel.$viewValue || ''; // in case model is null
 						ngModel.$oldViewValue = val;
 						if(scope.taBind === 'text'){ //WYSIWYG Mode
 							var e = angular.element('<div>' + val + '</div>'); // wrap in div for DOM manipulation
@@ -465,7 +469,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 					}else if(!isContentEditable) element.val(val); // only for input and textarea inputs
 				};
 				
-				if(!!attrs.taReadonly){
+				if(attrs.taReadonly){
 					//set initial value
 					if(scope.$parent.$eval(attrs.taReadonly)){ // we changed to readOnly mode (taReadonly='true')
 						if(element[0].tagName.toLowerCase() === 'textarea' || element[0].tagName.toLowerCase() === 'input') element.attr('disabled', 'disabled');
@@ -496,7 +500,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 			for(var s = 0; s < spans.length; s++){
 				var span = angular.element(spans[s]);
 				if(span.attr('style') && span.attr('style').match(/line-height: 1.428571429;|color: inherit; line-height: 1.1;/i)){ // chrome specific string that gets inserted into the style attribute, other parts may vary. Second part is specific ONLY to hitting backspace in Headers
-					if(span.next().length > 0 && span.next()[0].tagName === 'BR') span.next().remove()
+					if(span.next().length > 0 && span.next()[0].tagName === 'BR') span.next().remove();
 					span.replaceWith(span.html());
 				}
 			}
@@ -513,19 +517,50 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 			restrict: "EA",
 			link: function(scope, element, attrs) {
 				angular.extend(scope, taOptions);
-				if (!!attrs.taToolbar)					scope.toolbar = scope.$eval(attrs.taToolbar);
-				if (!!attrs.taToolbarClass)				scope.classes.toolbar = attrs.taToolbarClass;
-				if (!!attrs.taToolbarGroupClass)		scope.classes.toolbarGroup = attrs.taToolbarGroupClass;
-				if (!!attrs.taToolbarButtonClass)		scope.classes.toolbarButton = attrs.taToolbarButtonClass;
-				if (!!attrs.taToolbarActiveButtonClass)	scope.classes.toolbarButtonActive = attrs.taToolbarActiveButtonClass;
+				if(attrs.taToolbar)						scope.toolbar = scope.$eval(attrs.taToolbar);
+				if(attrs.taToolbarClass)				scope.classes.toolbar = attrs.taToolbarClass;
+				if(attrs.taToolbarGroupClass)			scope.classes.toolbarGroup = attrs.taToolbarGroupClass;
+				if(attrs.taToolbarButtonClass)			scope.classes.toolbarButton = attrs.taToolbarButtonClass;
+				if(attrs.taToolbarActiveButtonClass)	scope.classes.toolbarButtonActive = attrs.taToolbarActiveButtonClass;
 				
 				scope.disabled = true;
 				
 				element.html('');
 				element.addClass("ta-toolbar " + scope.classes.toolbar);
 				
+				setupToolElement = function(toolElement, toolDefinition, toolScope){
+					toolElement.addClass(scope.classes.toolbarButton);
+					toolElement.attr('unselectable', 'on'); // important to not take focus from the main text/html entry
+					toolElement.attr('ng-disabled', 'isDisabled()');
+					toolElement.attr('tabindex', '-1');
+					
+					if(toolDefinition){
+						if(toolDefinition.buttontext) toolElement.html(toolDefinition.buttontext);
+						if(toolDefinition.iconclass){
+							var icon = angular.element('<i>');
+							icon.addClass(toolDefinition.iconclass);
+							toolElement.append(icon);
+						}
+					}
+					
+					if(toolScope) return $compile(toolElement)(toolScope);
+					else return toolElement;
+				};
+				
 				scope.tools = {}; // Keep a reference for updating the active states later
 				// create the tools in the toolbar
+				// default functions and values that don't change in each tool init
+				var defaultChildScope = {
+					$_parent: {},
+					$editor: function(){ return scope.$_parent; }, // dynamically gets the editor as it is set
+					isDisabled: function(){ // to set your own disabled logic set a function or boolean on the tool called 'disabled'
+						return (typeof this.disabled === 'function' && this.disabled()) || (typeof this.disabled === 'boolean' && this.disabled) || (this.name !== 'html' && (this.$parent.disabled || this.$parent.showHtml)) || this.$parent.disabled === undefined || this.$parent.disabled;
+					},
+					displayActiveToolClass: function(active){
+						return (active)? this.$parent.classes.toolbarButtonActive : '';
+					}
+				};
+						
 				for (var _i = 0; _i < scope.toolbar.length; _i++) {
 					// setup the toolbar group
 					group = scope.toolbar[_i];
@@ -535,27 +570,9 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 						// init and add the tools to the group
 						tool = group[_j]; // a tool name (key name from taTools struct)
 						toolElement = angular.element(taTools[tool].display);
-						toolElement.addClass(scope.classes.toolbarButton);
-						toolElement.attr('unselectable', 'on'); // important to not take focus from the main text/html entry
-						toolElement.attr('ng-disabled', 'isDisabled()');
-						if(taTools[tool].buttontext) toolElement.html(taTools[tool].buttontext);
-						if(taTools[tool].iconclass){
-							var icon = angular.element('<i>');
-							icon.addClass(taTools[tool].iconclass);
-							toolElement.append(icon);
-						}
-						var childScope = angular.extend(scope.$new(true), taTools[tool], { // add the tool specific functions, these overwrite anything in the tool
-							$editor: function(){ return scope.$parent; }, // dynamically gets the editor as it is set
-							name: tool,
-							isDisabled: function(){ // to set your own disabled logic set a function or boolean on the tool called 'disabled'
-								return (typeof this.disabled === 'function' && this.disabled()) || (typeof this.disabled === 'boolean' && this.disabled) || (this.name !== 'html' && (this.$parent.disabled || this.$parent.showHtml)) || this.$parent.disabled === undefined || this.$parent.disabled;
-							},
-							displayActiveToolClass: function(active){
-								return (active)? this.$parent.classes.toolbarButtonActive : '';
-							}
-						}); //creates a child scope of the main angularText scope and then extends the childScope with the functions of this particular tool
+						var childScope = angular.extend(scope.$new(true), taTools[tool], defaultChildScope, {name: tool}); //creates a child scope of the main angularText scope and then extends the childScope with the functions of this particular tool
 						scope.tools[tool] = childScope; // reference to the scope kept
-						groupElement.append($compile(toolElement)(childScope)); // append the tool compiled with the childScope to the group element
+						groupElement.append(setupToolElement(toolElement, taTools[tool], childScope)); // append the tool compiled with the childScope to the group element
 						scope.tools[tool].$element = toolElement;
 					}
 					element.append(groupElement); // append the group to the toolbar
@@ -567,29 +584,17 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 					if(toolInstance){ // if tool is defined on this toolbar, update/redo the tool
 						var toolElement;
 						if(_newTool.display && _newTool.display !== ''){
-							toolElement = angular.element(_newTool.display);
-							toolElement.addClass(scope.classes.toolbarButton);
-							toolElement.attr('unselectable', 'on'); // important to not take focus from the main text/html entry
-							toolElement.attr('ng-disabled', 'isDisabled()');
-							toolElement = $compile(toolElement)(toolInstance);
+							toolElement = setupToolElement(angular.element(_newTool.display), {}, toolInstance);
 							toolInstance.$element.replaceWith(toolElement);
 							toolInstance.$element = toolElement;
 						}else{
 							toolElement = toolInstance.$element;
 						}
 						
-						if(_newTool.buttontext === '' || !_newTool.buttontext){
-							delete _newTool.buttontext;
-							delete oldTool.buttontext;
-						}
 						if(_newTool.buttontext && _newTool.buttontext !== ''){
 							toolElement.html(_newTool.buttontext);
 						}else if(oldTool.buttontext) toolElement.html(oldTool.buttontext);
 						
-						if(_newTool.iconclass === '' || !_newTool.iconclass){
-							delete _newTool.iconclass;
-							delete oldTool.iconclass;
-						}
 						var iconclass;
 						if(_newTool.iconclass) iconclass = _newTool.iconclass;
 						else if(oldTool.iconclass) iconclass = oldTool.iconclass;
@@ -600,7 +605,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 							toolElement.append(icon);
 						}
 					}
-				}
+				};
 				
 				taToolbarEditorLinker.registerToolbar(scope);
 			}
@@ -612,6 +617,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 		return {
 			// register an editor and the toolbars that it is affected by
 			registerEditor: function(name, scope, targetToolbars){
+				if(editors[name]) throw ('textAngular Error: an Editor with name "' + name + '" already exists');
 				var _toolbars = [];
 				angular.forEach(targetToolbars, function(_name){
 					if(!_toolbars[_name]) _toolbars.push(toolbars[_name]);
@@ -629,7 +635,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 					enable: function(){ angular.forEach(_toolbars, function(toolbarScope){ toolbarScope.disabled = false; }); },
 					focus: function(){ // this should be called when the editor is focussed
 						angular.forEach(_toolbars, function(toolbarScope){
-							toolbarScope.$parent = scope;
+							toolbarScope.$_parent = scope;
 							toolbarScope.disabled = false;
 						});
 					},
@@ -646,6 +652,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 				};
 			},
 			registerToolbar: function(scope){
+				if(toolbars[scope.name]) throw ('textAngular Error: a Toolbar with name "' + scope.name + '" already exists');
 				toolbars[scope.name] = scope;
 				angular.forEach(editors, function(_editor){
 					_editor._registerToolbar(scope);
