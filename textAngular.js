@@ -274,10 +274,8 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 				element.append(scope.displayElements.text);
 				element.append(scope.displayElements.html);
 				
-				if(attrs.name){
-					scope.displayElements.forminput.attr('name', attrs.name);
-					element.append(scope.displayElements.forminput);
-				}
+				scope.displayElements.forminput.attr('name', _name);
+				element.append(scope.displayElements.forminput);
 				
 				if(attrs.tabindex){
 					scope.displayElements.text.attr('tabindex', attrs.tabindex);
@@ -361,8 +359,8 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 				}
 				
 				scope.$watch('html', function(newValue, oldValue){
-					if(attrs.ngModel && newValue !== oldValue){
-						ngModel.$setViewValue(newValue);
+					if(newValue !== oldValue){
+						if(attrs.ngModel) ngModel.$setViewValue(newValue);
 						scope.displayElements.forminput.val(newValue);
 					}
 				});
@@ -370,6 +368,13 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 				if(attrs.taTargetToolbars) _toolbars = taToolbarEditorLinker.registerEditor(name, scope, attrs.taTargetToolbars.split(','));
 				else{
 					var _toolbar = angular.element('<div text-angular-toolbar name="textAngularToolbar' + _serial + '">');
+					// passthrough init of toolbar options
+					if(attrs.taToolbar)						_toolbar.attr('ta-toolbar', attrs.taToolbar);
+					if(attrs.taToolbarClass)				_toolbar.attr('ta-toolbar-class', attrs.taToolbarClass);
+					if(attrs.taToolbarGroupClass)			_toolbar.attr('ta-toolbar-group-class', attrs.taToolbarGroupClass);
+					if(attrs.taToolbarButtonClass)			_toolbar.attr('ta-toolbar-button-class', attrs.taToolbarButtonClass);
+					if(attrs.taToolbarActiveButtonClass)	_toolbar.attr('ta-toolbar-active-button-class', attrs.taToolbarActiveButtonClass);
+					
 					element.prepend(_toolbar);
 					$compile(_toolbar)(scope.$parent);
 					_toolbars = taToolbarEditorLinker.registerEditor(_name, scope, ['textAngularToolbar' + _serial]);
