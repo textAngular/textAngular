@@ -7,7 +7,7 @@ module.exports = function (grunt) {
 	grunt.loadNpmTasks('grunt-karma');
 	
 	// Default task.
-	grunt.registerTask('default', ['test', 'uglify']);
+	grunt.registerTask('default', ['uglify','test']);
 	grunt.registerTask('test', ['jshint', 'karma', 'coverage']);
 	
 	var testConfig = function (configFile, customOptions) {
@@ -56,7 +56,8 @@ module.exports = function (grunt) {
 			},
 			my_target: {
 				files: {
-					'textAngular.min.js': ['textAngular.js']
+					'textAngular.min.js': ['textAngular.js'],
+					'textAngular-sanitize.min.js': ['textAngular-sanitize.js']
 				}
 			}
 		}

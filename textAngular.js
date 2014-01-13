@@ -32,6 +32,8 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 	/*
 		A tool definition is an object with the following key/value parameters:
 			display: [string] an HTML element to be displayed as the buton. The `scope` of the button is the tool definition object with some additional functions
+			action: [function(deferred)] a function that is executed on clicking on the button - this will allways be executed using ng-click and will overwrite any ng-click value in the display attribute.
+					The function is passed a deferred object ($q.defer()), if this is wanted to be used `return false;` from the action and manually call `deferred.resolve();` elsewhere to notify the editor that the action has finished.
 			buttontext: [string]? if this is defined it will replace the contents of the element contained in the `display` element
 			iconclass: [string]? if this is defined an icon (<i>) will be appended to the `display` element with this string as it's class
 			activestate: [function()]? this function is called on every caret movement, if it returns true then the class taOptions.classes.toolbarButtonActive will be applied to the `display` element, else the class will be removed
@@ -44,7 +46,8 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 	*/
 	// name and toolDefinition to add into the tools available to be added on the toolbar
 	function registerTextAngularTool(name, toolDefinition){
-		if(!toolDefinition.display || toolDefinition.display === '') throw('textAngular Error: Tool Definition for "' + name + '" does not have a valid display value');
+		if(!name || name === '') throw('textAngular Error: A name is required for a Tool Definition');
+		if(!toolDefinition.display || toolDefinition.display === '' || angular.element(toolDefinition.display).length === 0) throw('textAngular Error: Tool Definition for "' + name + '" does not have a valid display value');
 		taTools[name] = toolDefinition;
 	}
 	
@@ -54,13 +57,15 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 	textAngular.value('taTools', taTools);
 	
 	// configure initial textAngular tools here via taRegisterTool
-	textAngular.config(function(taRegisterTool){
+	textAngular.config(['taRegisterTool', function(taRegisterTool){
 		taRegisterTool("html", {
-			display: "<button type='button' ng-click='action()' ng-class='displayActiveToolClass(active)'>",
+			display: "<button type='button' ng-class='displayActiveToolClass(active)'>",
 			buttontext: 'Toggle HTML',
 			action: function() {
 				this.$editor().switchView();
-				this.active = this.$editor().showHtml;
+			},
+			activeState: function(){
+				return this.$editor().showHtml;
 			}
 		});
 		// add the Header tools
@@ -72,14 +77,14 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 		};
 		for(var h = 1; h <= 6; h++){
 			taRegisterTool('h' + h, {
-				display: "<button type='button' ng-click='action()' ng-class='displayActiveToolClass(active)'>",
+				display: "<button type='button' ng-class='displayActiveToolClass(active)'>",
 				buttontext: 'H' + h,
 				action: headerAction,
 				activeState: _retActiveStateFunction('h' + h)
 			});
 		}
 		taRegisterTool('p', {
-			display: "<button type='button' ng-click='action()' ng-class='displayActiveToolClass(active)'>",
+			display: "<button type='button' ng-class='displayActiveToolClass(active)'>",
 			buttontext: 'P',
 			action: function() {
 				return this.$editor().wrapSelection("formatBlock", "<P>");
@@ -87,7 +92,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 			activeState: function() { return this.$editor().queryFormatBlockState('p'); }
 		});
 		taRegisterTool('pre', {
-			display: "<button type='button' ng-click='action()' ng-class='displayActiveToolClass(active)'>",
+			display: "<button type='button' ng-class='displayActiveToolClass(active)'>",
 			buttontext: 'pre',
 			action: function() {
 				return this.$editor().wrapSelection("formatBlock", "<PRE>");
@@ -95,7 +100,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 			activeState: function() { return this.$editor().queryFormatBlockState('pre'); }
 		});
 		taRegisterTool('ul', {
-			display: "<button type='button' ng-click='action()' ng-class='displayActiveToolClass(active)'>",
+			display: "<button type='button' ng-class='displayActiveToolClass(active)'>",
 			iconclass: 'fa fa-list-ul',
 			action: function() {
 				return this.$editor().wrapSelection("insertUnorderedList", null);
@@ -103,7 +108,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 			activeState: function() { return document.queryCommandState('insertUnorderedList'); }
 		});
 		taRegisterTool('ol', {
-			display: "<button type='button' ng-click='action()' ng-class='displayActiveToolClass(active)'>",
+			display: "<button type='button' ng-class='displayActiveToolClass(active)'>",
 			iconclass: 'fa fa-list-ol',
 			action: function() {
 				return this.$editor().wrapSelection("insertOrderedList", null);
@@ -111,7 +116,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 			activeState: function() { return document.queryCommandState('insertOrderedList'); }
 		});
 		taRegisterTool('quote', {
-			display: "<button type='button' ng-click='action()' ng-class='displayActiveToolClass(active)'>",
+			display: "<button type='button' ng-class='displayActiveToolClass(active)'>",
 			iconclass: 'fa fa-quote-right',
 			action: function() {
 				return this.$editor().wrapSelection("formatBlock", "<BLOCKQUOTE>");
@@ -119,21 +124,21 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 			activeState: function() { return this.$editor().queryFormatBlockState('blockquote'); }
 		});
 		taRegisterTool('undo', {
-			display: "<button type='button' ng-click='action()' ng-class='displayActiveToolClass(active)'>",
+			display: "<button type='button' ng-class='displayActiveToolClass(active)'>",
 			iconclass: 'fa fa-undo',
 			action: function() {
 				return this.$editor().wrapSelection("undo", null);
 			}
 		});
 		taRegisterTool('redo', {
-			display: "<button type='button' ng-click='action()' ng-class='displayActiveToolClass(active)'>",
+			display: "<button type='button' ng-class='displayActiveToolClass(active)'>",
 			iconclass: 'fa fa-repeat',
 			action: function() {
 				return this.$editor().wrapSelection("redo", null);
 			}
 		});
 		taRegisterTool('bold', {
-			display: "<button type='button' ng-click='action()' ng-class='displayActiveToolClass(active)'>",
+			display: "<button type='button' ng-class='displayActiveToolClass(active)'>",
 			iconclass: 'fa fa-bold',
 			action: function() {
 				return this.$editor().wrapSelection("bold", null);
@@ -143,7 +148,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 			}
 		});
 		taRegisterTool('justifyLeft', {
-			display: "<button type='button' ng-click='action()' ng-class='displayActiveToolClass(active)'>",
+			display: "<button type='button' ng-class='displayActiveToolClass(active)'>",
 			iconclass: 'fa fa-align-left',
 			action: function() {
 				return this.$editor().wrapSelection("justifyLeft", null);
@@ -153,7 +158,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 			}
 		});
 		taRegisterTool('justifyRight', {
-			display: "<button type='button' ng-click='action()' ng-class='displayActiveToolClass(active)'>",
+			display: "<button type='button' ng-class='displayActiveToolClass(active)'>",
 			iconclass: 'fa fa-align-right',
 			action: function() {
 				return this.$editor().wrapSelection("justifyRight", null);
@@ -163,7 +168,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 			}
 		});
 		taRegisterTool('justifyCenter', {
-			display: "<button type='button' ng-click='action()' ng-class='displayActiveToolClass(active)'>",
+			display: "<button type='button' ng-class='displayActiveToolClass(active)'>",
 			iconclass: 'fa fa-align-center',
 			action: function() {
 				return this.$editor().wrapSelection("justifyCenter", null);
@@ -173,7 +178,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 			}
 		});
 		taRegisterTool('italics', {
-			display: "<button type='button' ng-click='action()' ng-class='displayActiveToolClass(active)'>",
+			display: "<button type='button' ng-class='displayActiveToolClass(active)'>",
 			iconclass: 'fa fa-italic',
 			action: function() {
 				return this.$editor().wrapSelection("italic", null);
@@ -183,7 +188,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 			}
 		});
 		taRegisterTool('underline', {
-			display: "<button type='button' ng-click='action()' ng-class='displayActiveToolClass(active)'>",
+			display: "<button type='button' ng-class='displayActiveToolClass(active)'>",
 			iconclass: 'fa fa-underline',
 			action: function() {
 				return this.$editor().wrapSelection("underline", null);
@@ -193,14 +198,14 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 			}
 		});
 		taRegisterTool('clear', {
-			display: "<button type='button' ng-click='action()' ng-class='displayActiveToolClass(active)'>",
+			display: "<button type='button' ng-class='displayActiveToolClass(active)'>",
 			iconclass: 'fa fa-ban',
 			action: function() {
 				return this.$editor().wrapSelection("removeFormat", null);
 			}
 		});
 		taRegisterTool('insertImage', {
-			display: "<button type='button' ng-click='action()' ng-class='displayActiveToolClass(active)'>",
+			display: "<button type='button' ng-class='displayActiveToolClass(active)'>",
 			iconclass: 'fa fa-picture-o',
 			action: function() {
 				var imageLink;
@@ -211,7 +216,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 			}
 		});
 		taRegisterTool('insertLink', {
-			display: "<button type='button' ng-click='action()' ng-class='displayActiveToolClass(active)'>",
+			display: "<button type='button' ng-class='displayActiveToolClass(active)'>",
 			iconclass: 'fa fa-link',
 			action: function() {
 				var urlLink;
@@ -222,13 +227,13 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 			}
 		});
 		taRegisterTool('unlink', {
-			display: "<button type='button' ng-click='action()' ng-class='displayActiveToolClass(active)'>",
+			display: "<button type='button' ng-class='displayActiveToolClass(active)'>",
 			iconclass: 'fa fa-unlink',
 			action: function() {
 				return this.$editor().wrapSelection('unlink', null);
 			}
 		});
-	});
+	}]);
 	
 	textAngular.directive("textAngular", ['$compile', '$timeout', '$log', 'taOptions', 'taToolbarEditorLinker', function($compile, $timeout, $log, taOptions, taToolbarEditorLinker) {
 		$log.info("Thank you for using textAngular! http://www.textangular.com");
@@ -249,9 +254,6 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 							scope.displayElements.html[0].focus();
 						else
 							scope.displayElements.text[0].focus();
-						// note that wrapSelection is called via ng-click in the tool plugins so we are already within a $apply
-						scope.updateSelectedStyles();
-						if (!scope.showHtml) scope.updateTaBindtext(); // only update if in text or WYSIWYG mode
 					},
 					showHtml: false
 				});
@@ -305,6 +307,17 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 				scope.displayElements.text.addClass("ta-text ta-editor " + scope.classes.textEditor);
 				scope.displayElements.html.addClass("ta-html ta-editor " + scope.classes.textEditor);
 				
+				// used in the toolbar actions
+				scope._actionRunning = false;
+				scope.startAction = function(){
+					scope._actionRunning = true;
+				};
+				scope.endAction = function(){
+					scope._actionRunning = false;
+					scope.updateSelectedStyles();
+					if (!scope.showHtml) scope.updateTaBindtext(); // only update if in text or WYSIWYG mode
+				};
+				
 				// note that focusout > focusin is called everytime we click a button
 				element.on('focusin', function(){ // cascades to displayElements.text and displayElements.html automatically.
 					element.addClass(scope.classes.focussed);
@@ -316,7 +329,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 						// if we have NOT focussed again on the text etc then fire the blur events
 						if(document.activeElement !== scope.displayElements.html[0] && document.activeElement !== scope.displayElements.text[0]){
 							element.removeClass(scope.classes.focussed);
-							_toolbars.unfocus();
+							if(!scope._actionRunning) _toolbars.unfocus();
 							$timeout(function(){ element.triggerHandler('blur'); }, 0); // to prevent multiple apply error defer to next seems to work.
 						}
 					}, 100);
@@ -324,7 +337,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 					return false;
 				});
 				
-				// Setup the default toolbar tools, this way allows the user to add new tools like plugins. Note that this is called from the activeState function which is invoked on the main textAngular scope NOT the toolbar scope.
+				// Setup the default toolbar tools, this way allows the user to add new tools like plugins. This is on the editor for future proofing if we find a better way to do this.
 				scope.queryFormatBlockState = function(command){
 					command = command.toLowerCase();
 					var val = document.queryCommandValue('formatBlock').toLowerCase();
@@ -334,11 +347,11 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 					scope.showHtml = !scope.showHtml;
 					if (scope.showHtml) { //Show the HTML view
 						$timeout(function() { //defer until the element is visible
-							return scope.displayElements.html[0].focus(); //dereference the DOM object from the angular.element
+							return scope.displayElements.html[0].focus(); // [0] dereferences the DOM object from the angular.element
 						}, 100);
 					} else { //Show the WYSIWYG view
 						$timeout(function() { //defer until the element is visible
-							return scope.displayElements.text[0].focus(); //dereference the DOM object from the angular.element
+							return scope.displayElements.text[0].focus(); // [0] dereferences the DOM object from the angular.element
 						}, 100);
 					}
 				};
@@ -381,15 +394,15 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 				}
 				
 				// the following is for applying the active states to the tools that support it
-				scope.bUpdateSelectedStyles = false;
+				scope._bUpdateSelectedStyles = false;
 				// loop through all the tools polling their activeState function if it exists
 				scope.updateSelectedStyles = function() {
 					_toolbars.updateSelectedStyles();
-					if (scope.bUpdateSelectedStyles) $timeout(scope.updateSelectedStyles, 200); // used to update the active state when a key is held down, ie the left arrow
+					if (scope._bUpdateSelectedStyles) $timeout(scope.updateSelectedStyles, 200); // used to update the active state when a key is held down, ie the left arrow
 				};
 				// start updating on keydown
 				keydown = function() {
-					scope.bUpdateSelectedStyles = true;
+					scope._bUpdateSelectedStyles = true;
 					scope.$apply(function() {
 						scope.updateSelectedStyles();
 					});
@@ -398,13 +411,13 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 				scope.displayElements.text.on('keydown', keydown);
 				// stop updating on key up and update the display/model
 				keyup = function() {
-					scope.bUpdateSelectedStyles = false;
+					scope._bUpdateSelectedStyles = false;
 				};
 				scope.displayElements.html.on('keyup', keyup);
 				scope.displayElements.text.on('keyup', keyup);
 				// update the toolbar active states when we click somewhere in the text/html boxed
 				mouseup = function() {
-					scope.bUpdateSelectedStyles = false; // ensure only one execution of updateSelectedStyles()
+					scope._bUpdateSelectedStyles = false; // ensure only one execution of updateSelectedStyles()
 					scope.$apply(function() {
 						scope.updateSelectedStyles();
 					});
@@ -446,11 +459,10 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 					// all the code here takes the information from the above keyup function or any other time that the viewValue is updated and parses it for storage in the ngModel
 					if(ngModel.$oldViewValue === undefined) ngModel.$oldViewValue = value;
 					try{
-						$sanitize(value); // this is what runs when ng-bind-html is used on the variable
+						value = ngModel.$oldViewValue = $sanitize(value); // this is what runs when ng-bind-html is used on the variable
 					}catch(e){
 						return ngModel.$oldViewValue; //prevents the errors occuring when we are typing in html code
 					}
-					ngModel.$oldViewValue = value;
 					return value;
 				});
 				
@@ -461,9 +473,8 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 					if (document.activeElement !== element[0]) {
 						ngModel.$oldViewValue = val;
 						if(scope.taBind === 'text'){ //WYSIWYG Mode
-							var e = angular.element('<div>' + val + '</div>'); // wrap in div for DOM manipulation
-							e.find('script').remove(); // to prevent JS XSS insertion executing arbritrary code, we still save the contents of script tags, we just don't allow them to run in ta-bind
-							element.html(e.html()); // escape out of the div to get corrected val (val = e.html())
+							val = $sanitize(val); // make the output safe to avoid the insertion of DOM XSS
+							element.html(val); // escape out of the div to get corrected val (val = e.html())
 							element.find('a').on('click', function(e){
 								e.preventDefault();
 								return false;
@@ -514,7 +525,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 			return $html;
 		};
 		return taFixChrome;
-	}).directive('textAngularToolbar', ['$compile', 'taToolbarEditorLinker', 'taOptions', 'taTools', function($compile, taToolbarEditorLinker, taOptions, taTools){
+	}).directive('textAngularToolbar', ['$compile', '$q', 'taToolbarEditorLinker', 'taOptions', 'taTools', function($compile, $q, taToolbarEditorLinker, taOptions, taTools){
 		return {
 			scope: {
 				name: '@' // a name IS required
@@ -529,22 +540,29 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 				if(attrs.taToolbarActiveButtonClass)	scope.classes.toolbarButtonActive = attrs.taToolbarActiveButtonClass;
 				
 				scope.disabled = true;
-				
 				element.html('');
 				element.addClass("ta-toolbar " + scope.classes.toolbar);
 				
 				setupToolElement = function(toolElement, toolDefinition, toolScope){
 					toolElement.addClass(scope.classes.toolbarButton);
+					toolElement.attr('name', toolScope.name);
 					toolElement.attr('unselectable', 'on'); // important to not take focus from the main text/html entry
 					toolElement.attr('ng-disabled', 'isDisabled()');
 					toolElement.attr('tabindex', '-1');
-					
+					toolElement.attr('ng-click', 'executeAction()');
+					toolElement.on('mousedown', function(e){
+						// this prevents focusout from firing on the editor when clicking toolbar buttons
+						e.preventDefault();
+						return false;
+					});
 					if(toolDefinition){
 						if(toolDefinition.buttontext) toolElement.html(toolDefinition.buttontext);
 						if(toolDefinition.iconclass){
-							var icon = angular.element('<i>');
+							var icon = angular.element('<i>'), content = toolElement.html();
 							icon.addClass(toolDefinition.iconclass);
+							toolElement.html('');
 							toolElement.append(icon);
+							toolElement.append('&nbsp;' + content);
 						}
 					}
 					
@@ -555,14 +573,32 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 				scope.tools = {}; // Keep a reference for updating the active states later
 				// create the tools in the toolbar
 				// default functions and values that don't change in each tool init
+				scope._parent = { // default value is toolbar in disabled state, these values prevent errors
+					disabled: true,
+					showHtml: false
+				};
 				var defaultChildScope = {
-					$_parent: {},
-					$editor: function(){ return scope.$_parent; }, // dynamically gets the editor as it is set
+					$editor: function(){ return scope._parent; }, // dynamically gets the editor as it is set
 					isDisabled: function(){ // to set your own disabled logic set a function or boolean on the tool called 'disabled'
-						return (typeof this.disabled === 'function' && this.disabled()) || (typeof this.disabled === 'boolean' && this.disabled) || (this.name !== 'html' && (this.$parent.disabled || this.$parent.showHtml)) || this.$parent.disabled === undefined || this.$parent.disabled;
+						return ( // this bracket is important as without it it just returns the first bracket and ignores the rest
+							this.$eval('disabled') || this.$eval('disabled()') || // when the button's disabled function/value evaluates to true
+							(this.name !== 'html' && this.$editor().showHtml) || // all buttons except the HTML Switch button should be disabled in the showHtml (RAW html) mode
+							this.$parent.disabled || // if the toolbar is disabled
+							this.$editor().disabled // if the current editor is disabled
+						);
 					},
 					displayActiveToolClass: function(active){
-						return (active)? this.$parent.classes.toolbarButtonActive : '';
+						return (active)? this.$editor().classes.toolbarButtonActive : '';
+					},
+					executeAction: function(){
+						var deferred = $q.defer(),
+							promise = deferred.promise;
+						promise['finally'](this.$editor().endAction);
+						this.$editor().startAction();
+						var result = this.action(deferred);
+						if(result || result === undefined){ // if true or undefined is returned then the action has finished. Otherwise the deferred action will be resolved manually.
+							deferred.resolve();
+						}
 					}
 				};
 						
@@ -587,28 +623,27 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 				scope.updateTool = function(key, _newTool){
 					var oldTool = taTools[key], toolInstance = scope.tools[key];
 					if(toolInstance){ // if tool is defined on this toolbar, update/redo the tool
-						var toolElement;
+						if(_newTool.buttontext === null){
+							delete _newTool.buttontext;
+						}else if(!_newTool.buttontext && oldTool.buttontext){
+							_newTool.buttontext = oldTool.buttontext;
+						}
+						
+						if(_newTool.iconclass === null){
+							delete _newTool.iconclass;
+						}else if(!_newTool.iconclass && oldTool.iconclass){
+							_newTool.iconclass = oldTool.iconclass;
+						}
+						
 						if(_newTool.display && _newTool.display !== ''){
-							toolElement = setupToolElement(angular.element(_newTool.display), {}, toolInstance);
-							toolInstance.$element.replaceWith(toolElement);
-							toolInstance.$element = toolElement;
+							toolElement = angular.element(_newTool.display);
 						}else{
 							toolElement = toolInstance.$element;
 						}
 						
-						if(_newTool.buttontext && _newTool.buttontext !== ''){
-							toolElement.html(_newTool.buttontext);
-						}else if(oldTool.buttontext) toolElement.html(oldTool.buttontext);
-						
-						var iconclass;
-						if(_newTool.iconclass) iconclass = _newTool.iconclass;
-						else if(oldTool.iconclass) iconclass = oldTool.iconclass;
-						toolElement.find('i').remove(); // in case of update / remove
-						if(iconclass){ // if not defined then neither sets it
-							var icon = angular.element('<i>');
-							icon.addClass(iconclass);
-							toolElement.append(icon);
-						}
+						toolElement = setupToolElement(toolElement, _newTool, toolInstance);
+						toolInstance.$element.replaceWith(toolElement);
+						toolInstance.$element = toolElement;
 					}
 				};
 				
@@ -640,7 +675,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 					enable: function(){ angular.forEach(_toolbars, function(toolbarScope){ toolbarScope.disabled = false; }); },
 					focus: function(){ // this should be called when the editor is focussed
 						angular.forEach(_toolbars, function(toolbarScope){
-							toolbarScope.$_parent = scope;
+							toolbarScope._parent = scope;
 							toolbarScope.disabled = false;
 						});
 					},

@@ -16,7 +16,7 @@ module.exports = function (config) {
 			'bower_components/jquery/jquery.min.js',
 			'bower_components/angular/angular.min.js',
 			'bower_components/angular-mocks/angular-mocks.js',
-			'bower_components/angular-sanitize/angular-sanitize.min.js',
+			'textAngular-sanitize.js',
 			'textAngular.js',
 			'test/*.spec.js'
 		],
