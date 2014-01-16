@@ -441,16 +441,30 @@ textAngular.directive("textAngular", ['$compile', '$window', '$document', '$root
 				});
 			}
 			
-			ngModel.$parsers.push(function(value){
-				// all the code here takes the information from the above keyup function or any other time that the viewValue is updated and parses it for storage in the ngModel
-				if(ngModel.$oldViewValue === undefined) ngModel.$oldViewValue = value;
-				try{
-					$sanitize(value); // this is what runs when ng-bind-html is used on the variable
-				}catch(e){
-					return ngModel.$oldViewValue; //prevents the errors occuring when we are typing in html code
+			//prevents the errors occuring when we are typing in html code
+			function trySanitize(unsafe, oldsafe) {
+				// any exceptions (lets say, color for example) should be made here but with great care
+				var safe;
+				try {
+					safe = $sanitize(unsafe);
+				} catch (e) {
+					safe = oldsafe || '';
 				}
-				ngModel.$oldViewValue = value;
-				return value;
+				return safe;
+			}
+
+			// all the code here takes the information from the above keyup function or any other time that the viewValue is updated and parses it for storage in the ngModel
+			ngModel.$parsers.push(function(unsafe) {
+				
+				// this is what runs when ng-bind-html is used on the variable
+				var safe = ngModel.$oldViewValue = trySanitize(unsafe, ngModel.$oldViewValue);
+				return safe;
+			});
+
+			// because textAngular is bi-directional (which is awesome) we need to also sanitize values going in from the server
+			ngModel.$formatters.push(function(unsafe) {
+				var safe = trySanitize(unsafe, '');
+				return safe;
 			});
 			
 			// changes to the model variable from outside the html/text inputs
