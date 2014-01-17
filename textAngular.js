@@ -325,6 +325,7 @@ textAngular.directive("textAngular", ['$compile', '$window', '$document', '$root
 					toolElement = angular.element($rootScope.textAngularTools[tool].display);
 					toolElement.addClass(scope.classes.toolbarButton);
 					toolElement.attr('unselectable', 'on'); // important to not take focus from the main text/html entry
+					toolElement.attr('tabindex', '-1');
 					toolElement.attr('ng-disabled', 'showHtml()');
 					var childScope = angular.extend(scope.$new(true), $rootScope.textAngularTools[tool], { // add the tool specific functions
 						name: tool,
