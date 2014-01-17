@@ -226,7 +226,7 @@ textAngular.directive("textAngular", ['$compile', '$window', '$document', '$root
 		scope: {},
 		restrict: "EA",
 		link: function(scope, element, attrs, ngModel) {
-			var group, groupElement, keydown, keyup, tool, toolElement; //all these vars should not be accessable outside this directive
+			var group, groupElement, keydown, keyup, mouseup, tool, toolElement; //all these vars should not be accessable outside this directive
 			// get the settings from the defaults and add our specific functions that need to be on the scope
 			angular.extend(scope, $rootScope.textAngularOpts, {
 				// wraps the selection in the provided tag / execCommand function.
@@ -383,7 +383,7 @@ textAngular.directive("textAngular", ['$compile', '$window', '$document', '$root
 						}
 					}
 				}
-				if (this.bUpdateSelectedStyles) $timeout(this.updateSelectedStyles, 200); // used to update the active state when a key is held down, ie the left arrow
+				if (scope.bUpdateSelectedStyles) $timeout(scope.updateSelectedStyles, 200); // used to update the active state when a key is held down, ie the left arrow
 			};
 			// start updating on keydown
 			keydown = function(e) {
