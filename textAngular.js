@@ -11,7 +11,7 @@ if(!window.console) console = {log: function() {}}; // fixes IE console undefine
 
 var textAngular = angular.module("textAngular", ['ngSanitize']); //This makes ngSanitize required
 
-textAngular.directive("textAngular", ['$compile', '$window', '$document', '$rootScope', '$timeout', function($compile, $window, $document, $rootScope, $timeout) {
+textAngular.directive("textAngular", ['$compile', '$window', '$document', '$rootScope', '$timeout', 'taSanitize', function($compile, $window, $document, $rootScope, $timeout, taSanitize) {
 	console.log("Thank you for using textAngular! http://www.textangular.com")
 	// deepExtend instead of angular.extend in order to allow easy customization of "display" for default buttons
 	// snatched from: http://stackoverflow.com/a/15311794/2966847
@@ -346,6 +346,13 @@ textAngular.directive("textAngular", ['$compile', '$window', '$document', '$root
 			// changes to the model variable from outside the html/text inputs
 			if(attrs.ngModel){ // if no ngModel, then the only input is from inside text-angular
 				ngModel.$render = function() {
+					if(ngModel.$viewValue === undefined && originalContents !== undefined) {
+						var originalSafe = taSanitize(originalContents);
+						scope.text = originalSafe;
+						scope.html = originalSafe;
+						ngModel.$setViewValue(originalSafe);
+						originalContents = undefined;
+					}
 					scope.displayElements.forminput.val(ngModel.$viewValue);
 					// if the editors aren't focused they need to be updated, otherwise they are doing the updating
 					if (!($document[0].activeElement === scope.displayElements.html[0]) && !($document[0].activeElement === scope.displayElements.text[0])) {
@@ -411,7 +418,7 @@ textAngular.directive("textAngular", ['$compile', '$window', '$document', '$root
 			scope.displayElements.text.on('mouseup', mouseup);
 		}
 	};
-}]).directive('taBind', ['$sanitize', '$document', 'taFixChrome', function($sanitize, $document, taFixChrome){
+}]).directive('taBind', ['$sanitize', '$document', 'taFixChrome', 'taSanitize', function($sanitize, $document, taFixChrome, taSanitize){
 	// Uses for this are textarea or input with ng-model and ta-bind='text' OR any non-form element with contenteditable="contenteditable" ta-bind="html|text" ng-model
 	return {
 		require: 'ngModel',
@@ -441,30 +448,18 @@ textAngular.directive("textAngular", ['$compile', '$window', '$document', '$root
 					if(!isReadonly) ngModel.$setViewValue(compileHtml());
 				});
 			}
-			
-			//prevents the errors occuring when we are typing in html code
-			function trySanitize(unsafe, oldsafe) {
-				// any exceptions (lets say, color for example) should be made here but with great care
-				var safe;
-				try {
-					safe = $sanitize(unsafe);
-				} catch (e) {
-					safe = oldsafe || '';
-				}
-				return safe;
-			}
 
 			// all the code here takes the information from the above keyup function or any other time that the viewValue is updated and parses it for storage in the ngModel
 			ngModel.$parsers.push(function(unsafe) {
 				
 				// this is what runs when ng-bind-html is used on the variable
-				var safe = ngModel.$oldViewValue = trySanitize(unsafe, ngModel.$oldViewValue);
+				var safe = ngModel.$oldViewValue = taSanitize(unsafe, ngModel.$oldViewValue);
 				return safe;
 			});
 
 			// because textAngular is bi-directional (which is awesome) we need to also sanitize values going in from the server
 			ngModel.$formatters.push(function(unsafe) {
-				var safe = trySanitize(unsafe, '');
+				var safe = taSanitize(unsafe);
 				return safe;
 			});
 			
@@ -529,4 +524,15 @@ textAngular.directive("textAngular", ['$compile', '$window', '$document', '$root
 		return $html;
 	};
 	return taFixChrome;
-});
+}).factory('taSanitize', ['$sanitize', function taSanitizeFactory($sanitize) {
+	return function taSanitize(unsafe, oldsafe) {
+		// any exceptions (lets say, color for example) should be made here but with great care
+		var safe;
+		try {
+			safe = $sanitize(unsafe);
+		} catch (e) {
+			safe = oldsafe || '';
+		}
+		return safe;
+	}
+}]);
