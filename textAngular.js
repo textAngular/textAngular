@@ -470,8 +470,8 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 				// changes to the model variable from outside the html/text inputs
 				ngModel.$render = function() {
 					// if the editor isn't focused it needs to be updated, otherwise it's receiving user input
-					var val = ngModel.$viewValue || ''; // in case model is null
 					if (document.activeElement !== element[0]) {
+						var val = ngModel.$viewValue || ''; // in case model is null
 						ngModel.$oldViewValue = val;
 						if(scope.taBind === 'text'){ //WYSIWYG Mode
 							val = $sanitize(val); // make the output safe to avoid the insertion of DOM XSS
@@ -483,7 +483,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 						}else if(_isContentEditable || (element[0].tagName.toLowerCase() !== 'textarea' && element[0].tagName.toLowerCase() !== 'input')) // make sure the end user can SEE the html code.
 							element.html(val);
 						else element.val(val); // only for input and textarea inputs
-					}else if(!_isContentEditable) element.val(val); // only for input and textarea inputs
+					}
 				};
 				
 				if(attrs.taReadonly){
