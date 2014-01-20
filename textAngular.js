@@ -235,15 +235,17 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 		});
 	}]);
 	
-	textAngular.directive("textAngular", ['$compile', '$timeout', '$log', 'taOptions', 'taToolbarEditorLinker', function($compile, $timeout, $log, taOptions, taToolbarEditorLinker) {
+	textAngular.directive("textAngular", ['$compile', '$timeout', '$log', 'taOptions', 'textAngularManager', function($compile, $timeout, $log, taOptions, textAngularManager) {
 		$log.info("Thank you for using textAngular! http://www.textangular.com");
 		return {
 			require: '?ngModel',
 			scope: {},
 			restrict: "EA",
 			link: function(scope, element, attrs, ngModel) {
-				var keydown, keyup, mouseup, originalContents; //all these vars should not be accessable outside this directive
-				var _toolbars, _serial = Math.floor(Math.random() * 10000000000000000), _name = (attrs.name) ? attrs.name : 'textAngularEditor' + _serial;
+				// all these vars should not be accessable outside this directive
+				var _keydown, _keyup, _mouseup, _originalContents, _toolbars,
+					_serial = Math.floor(Math.random() * 10000000000000000),
+					_name = (attrs.name) ? attrs.name : 'textAngularEditor' + _serial;
 				// get the settings from the defaults and add our specific functions that need to be on the scope
 				angular.extend(scope, taOptions, {
 					// wraps the selection in the provided tag / execCommand function.
@@ -262,7 +264,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 				if(attrs.taTextEditorClass)			scope.classes.textEditor = attrs.taTextEditorClass;
 				if(attrs.taHtmlEditorClass)			scope.classes.htmlEditor = attrs.taHtmlEditorClass;
 				
-				originalContents = element.html();
+				_originalContents = element.html();
 				element.html(''); // clear the original content
 				
 				// Setup the HTML elements as variable references for use later
@@ -367,8 +369,8 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 						}
 					};
 				}else{ // if no ngModel then update from the contents of the origional html.
-					scope.displayElements.forminput.val(originalContents);
-					scope.html = originalContents;
+					scope.displayElements.forminput.val(_originalContents);
+					scope.html = _originalContents;
 				}
 				
 				scope.$watch('html', function(newValue, oldValue){
@@ -378,7 +380,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 					}
 				});
 				
-				if(attrs.taTargetToolbars) _toolbars = taToolbarEditorLinker.registerEditor(name, scope, attrs.taTargetToolbars.split(','));
+				if(attrs.taTargetToolbars) _toolbars = textAngularManager.registerEditor(_name, scope, attrs.taTargetToolbars.split(','));
 				else{
 					var _toolbar = angular.element('<div text-angular-toolbar name="textAngularToolbar' + _serial + '">');
 					// passthrough init of toolbar options
@@ -390,7 +392,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 					
 					element.prepend(_toolbar);
 					$compile(_toolbar)(scope.$parent);
-					_toolbars = taToolbarEditorLinker.registerEditor(_name, scope, ['textAngularToolbar' + _serial]);
+					_toolbars = textAngularManager.registerEditor(_name, scope, ['textAngularToolbar' + _serial]);
 				}
 				
 				// the following is for applying the active states to the tools that support it
@@ -401,29 +403,29 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 					if (scope._bUpdateSelectedStyles) $timeout(scope.updateSelectedStyles, 200); // used to update the active state when a key is held down, ie the left arrow
 				};
 				// start updating on keydown
-				keydown = function() {
+				_keydown = function() {
 					scope._bUpdateSelectedStyles = true;
 					scope.$apply(function() {
 						scope.updateSelectedStyles();
 					});
 				};
-				scope.displayElements.html.on('keydown', keydown);
-				scope.displayElements.text.on('keydown', keydown);
+				scope.displayElements.html.on('keydown', _keydown);
+				scope.displayElements.text.on('keydown', _keydown);
 				// stop updating on key up and update the display/model
-				keyup = function() {
+				_keyup = function() {
 					scope._bUpdateSelectedStyles = false;
 				};
-				scope.displayElements.html.on('keyup', keyup);
-				scope.displayElements.text.on('keyup', keyup);
+				scope.displayElements.html.on('keyup', _keyup);
+				scope.displayElements.text.on('keyup', _keyup);
 				// update the toolbar active states when we click somewhere in the text/html boxed
-				mouseup = function() {
+				_mouseup = function() {
 					scope._bUpdateSelectedStyles = false; // ensure only one execution of updateSelectedStyles()
 					scope.$apply(function() {
 						scope.updateSelectedStyles();
 					});
 				};
-				scope.displayElements.html.on('mouseup', mouseup);
-				scope.displayElements.text.on('mouseup', mouseup);
+				scope.displayElements.html.on('mouseup', _mouseup);
+				scope.displayElements.text.on('mouseup', _mouseup);
 			}
 		};
 	}]).directive('taBind', ['$sanitize', 'taFixChrome', function($sanitize, taFixChrome){
@@ -432,15 +434,15 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 			require: 'ngModel',
 			scope: {'taBind': '@'},
 			link: function(scope, element, attrs, ngModel){
-				var isContentEditable = element[0].tagName.toLowerCase() !== 'textarea' && element[0].tagName.toLowerCase() !== 'input' && element.attr('contenteditable') !== undefined && element.attr('contenteditable');
-				var isReadonly = false;
+				var _isContentEditable = element[0].tagName.toLowerCase() !== 'textarea' && element[0].tagName.toLowerCase() !== 'input' && element.attr('contenteditable') !== undefined && element.attr('contenteditable');
+				var _isReadonly = false;
 				// in here we are undoing the converts used elsewhere to prevent the < > and & being displayed when they shouldn't in the code.
-				var compileHtml = function(){
+				var _compileHtml = function(){
 					return taFixChrome(element).html();
 				};
 				
 				scope.$parent['updateTaBind' + scope.taBind] = function(){//used for updating when inserting wrapped elements
-					var compHtml = compileHtml();
+					var compHtml = _compileHtml();
 					var tempParsers = ngModel.$parsers;
 					ngModel.$parsers = []; // temp disable of the parsers
 					ngModel.$oldViewValue = compHtml;
@@ -449,9 +451,9 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 				};
 				
 				//this code is used to update the models when data is entered/deleted
-				if(isContentEditable){
+				if(_isContentEditable){
 					element.on('keyup', function(){
-						if(!isReadonly) ngModel.$setViewValue(compileHtml());
+						if(!_isReadonly) ngModel.$setViewValue(_compileHtml());
 					});
 				}
 				
@@ -479,10 +481,10 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 								e.preventDefault();
 								return false;
 							});
-						}else if(isContentEditable || (element[0].tagName.toLowerCase() !== 'textarea' && element[0].tagName.toLowerCase() !== 'input')) // make sure the end user can SEE the html code.
+						}else if(_isContentEditable || (element[0].tagName.toLowerCase() !== 'textarea' && element[0].tagName.toLowerCase() !== 'input')) // make sure the end user can SEE the html code.
 							element.html(val);
 						else element.val(val); // only for input and textarea inputs
-					}else if(!isContentEditable) element.val(val); // only for input and textarea inputs
+					}else if(!_isContentEditable) element.val(val); // only for input and textarea inputs
 				};
 				
 				if(attrs.taReadonly){
@@ -492,7 +494,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 						if(element.attr('contenteditable') !== undefined && element.attr('contenteditable')) element.removeAttr('contenteditable');
 					}else{ // we changed to NOT readOnly mode (taReadonly='false')
 						if(element[0].tagName.toLowerCase() === 'textarea' || element[0].tagName.toLowerCase() === 'input') element.removeAttr('disabled');
-						else if(isContentEditable) element.attr('contenteditable', 'true');
+						else if(_isContentEditable) element.attr('contenteditable', 'true');
 					}
 					scope.$parent.$watch(attrs.taReadonly, function(newVal, oldVal){ // taReadonly only has an effect if the taBind element is an input or textarea or has contenteditable='true' on it. Otherwise it is readonly by default
 						if(oldVal === newVal) return;
@@ -501,9 +503,9 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 							if(element.attr('contenteditable') !== undefined && element.attr('contenteditable')) element.removeAttr('contenteditable');
 						}else{ // we changed to NOT readOnly mode (taReadonly='false')
 							if(element[0].tagName.toLowerCase() === 'textarea' || element[0].tagName.toLowerCase() === 'input') element.removeAttr('disabled');
-							else if(isContentEditable) element.attr('contenteditable', 'true');
+							else if(_isContentEditable) element.attr('contenteditable', 'true');
 						}
-						isReadonly = newVal;
+						_isReadonly = newVal;
 					});
 				}
 			}
@@ -525,7 +527,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 			return $html;
 		};
 		return taFixChrome;
-	}).directive('textAngularToolbar', ['$compile', '$q', 'taToolbarEditorLinker', 'taOptions', 'taTools', function($compile, $q, taToolbarEditorLinker, taOptions, taTools){
+	}).directive('textAngularToolbar', ['$compile', '$q', 'textAngularManager', 'taOptions', 'taTools', function($compile, $q, textAngularManager, taOptions, taTools){
 		return {
 			scope: {
 				name: '@' // a name IS required
@@ -647,17 +649,19 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 					}
 				};
 				
-				taToolbarEditorLinker.registerToolbar(scope);
+				textAngularManager.registerToolbar(scope);
 			}
 		};
-	}]).service('taToolbarEditorLinker', [function(){
+	}]).service('textAngularManager', [function(){ // this service is used to manage all textAngular editors and toolbars. All publicly published functions that modify/need to access the toolbar or editor scopes should be in here
 		// these contain references to all the editors and toolbars that have been initialised in this app
 		var toolbars = {}, editors = {};
 		// when we focus into a toolbar, we need to set the TOOLBAR's $parent to be the toolbars it's linked to. We also need to set the tools to be updated to be the toolbars...
 		return {
 			// register an editor and the toolbars that it is affected by
-			registerEditor: function(name, scope, targetToolbars){
-				if(editors[name]) throw ('textAngular Error: an Editor with name "' + name + '" already exists');
+			registerEditor: function(name, scope, targetToolbars){ // targetToolbars are optional, we don't require a toolbar to function
+				if(!name || name === '') throw('textAngular Error: An editor requires a name');
+				if(!scope) throw('textAngular Error: An editor requires a scope');
+				if(editors[name]) throw ('textAngular Error: An Editor with name "' + name + '" already exists');
 				var _toolbars = [];
 				angular.forEach(targetToolbars, function(_name){
 					if(!_toolbars[_name]) _toolbars.push(toolbars[_name]);
@@ -670,8 +674,11 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 						if(this.toolbars.indexOf(toolbarScope.name) >= 0) _toolbars.push(toolbarScope);
 					}
 				};
+				// this is a suite of functions the editor should use to update all it's linked toolbars
 				return {
+					// disable all linked toolbars
 					disable: function(){ angular.forEach(_toolbars, function(toolbarScope){ toolbarScope.disabled = true; }); },
+					// enable all linked toolbars
 					enable: function(){ angular.forEach(_toolbars, function(toolbarScope){ toolbarScope.disabled = false; }); },
 					focus: function(){ // this should be called when the editor is focussed
 						angular.forEach(_toolbars, function(toolbarScope){
@@ -680,7 +687,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 						});
 					},
 					unfocus: function(){ return this.disable(); }, // this should be called when the editor becomes unfocussed
-					updateSelectedStyles: function(){
+					updateSelectedStyles: function(){ // update the active state of all buttons on liked toolbars
 						angular.forEach(_toolbars, function(toolbarScope){
 							angular.forEach(toolbarScope.tools, function(toolScope){
 								if(toolScope.activeState){
@@ -691,20 +698,24 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 					}
 				};
 			},
+			// registers a toolbar such that it can be linked to editors
 			registerToolbar: function(scope){
-				if(toolbars[scope.name]) throw ('textAngular Error: a Toolbar with name "' + scope.name + '" already exists');
+				if(!scope) throw('textAngular Error: A toolbar requires a scope');
+				if(!scope.name || scope.name === '') throw('textAngular Error: A toolbar requires a name');
+				if(toolbars[scope.name]) throw ('textAngular Error: A toolbar with name "' + scope.name + '" already exists');
 				toolbars[scope.name] = scope;
 				angular.forEach(editors, function(_editor){
 					_editor._registerToolbar(scope);
 				});
 			},
 			// functions for updating the toolbar buttons display
-			updateTools: function(newTaTools){ // pass a partial struct of the taTools, this allows us to update the tools on the fly.
+			updateTools: function(newTaTools){ // pass a partial struct of the taTools, this allows us to update the tools on the fly, will not change the defaults.
 				var _this = this;
 				angular.forEach(newTaTools, function(_newTool, key){
 					_this.updateTool(key, _newTool);
 				});
 			},
+			// this function resets all toolbars to their default tool definitions
 			resetTools: function(){
 				var _this = this;
 				angular.forEach(taTools, function(_newTool, key){
@@ -718,18 +729,27 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 					_this.updateToolbarTool(toolbarKey, toolKey, _newTool);
 				});
 			},
-			// resets a tool to the default/starting state
+			// resets a tool to the default/starting state on all toolbars
 			resetTool: function(toolKey){
 				var _this = this;
 				angular.forEach(toolbars, function(toolbarScope, toolbarKey){
-					_this.resetToolbarTool(toolbarKey, toolKey, taTools[toolKey]);
+					_this.resetToolbarTool(toolbarKey, toolKey);
 				});
 			},
+			// update a tool on a specific toolbar
 			updateToolbarTool: function(toolbarKey, toolKey, _newTool){
 				if(toolbars[toolbarKey]) toolbars[toolbarKey].updateTool(toolKey, _newTool);
 			},
+			// reset a tool on a specific toolbar to it's default starting value
 			resetToolbarTool: function(toolbarKey, toolKey){
 				if(toolbars[toolbarKey]) toolbars[toolbarKey].updateTool(toolKey, taTools[toolKey]);
+			},
+			// this is used when externally the html of an editor has been changed and textAngular needs to be notified to update the model - will call a $digest if not already happening
+			refreshEditor: function(name){
+				if(editors[name]){
+					editors[name].scope.updateTaBindtext();
+					if(!editors[name].scope.$$phase) editors[name].scope.$digest();
+				}else throw('textAngular Error: No Editor with name "' + name + '" exists');
 			}
 		};
 	}]);
