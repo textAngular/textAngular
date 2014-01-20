@@ -235,7 +235,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 		});
 	}]);
 	
-	textAngular.directive("textAngular", ['$compile', '$timeout', '$log', 'taOptions', 'textAngularManager', function($compile, $timeout, $log, taOptions, textAngularManager) {
+	textAngular.directive("textAngular", ['$compile', '$timeout', '$log', 'taOptions', 'taSanitize', 'textAngularManager', function($compile, $timeout, $log, taOptions, taSanitize, textAngularManager) {
 		$log.info("Thank you for using textAngular! http://www.textangular.com");
 		return {
 			require: '?ngModel',
@@ -367,6 +367,9 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 							scope.html = ngModel.$viewValue || ''; // in case model is null;
 						}
 					};
+					if(ngModel.$viewValue === undefined && originalContents !== undefined){
+						ngModel.$setViewValue(originalContents); // on passing through to taBind it will be sanitised
+					}
 				}else{ // if no ngModel then update from the contents of the origional html.
 					scope.displayElements.forminput.val(_originalContents);
 					scope.html = _originalContents;
@@ -427,7 +430,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 				scope.displayElements.text.on('mouseup', _mouseup);
 			}
 		};
-	}]).directive('taBind', ['$sanitize', 'taFixChrome', function($sanitize, taFixChrome){
+	}]).directive('taBind', ['taSanitize', 'taFixChrome', function(taSanitize, taFixChrome){
 		// Uses for this are textarea or input with ng-model and ta-bind='text' OR any non-form element with contenteditable="contenteditable" ta-bind="html|text" ng-model
 		return {
 			require: 'ngModel',
@@ -456,16 +459,13 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 					});
 				}
 				
-				ngModel.$parsers.push(function(value){
+				ngModel.$parsers.push(function(unsafe){
 					// all the code here takes the information from the above keyup function or any other time that the viewValue is updated and parses it for storage in the ngModel
-					if(ngModel.$oldViewValue === undefined) ngModel.$oldViewValue = value;
-					try{
-						value = ngModel.$oldViewValue = $sanitize(value); // this is what runs when ng-bind-html is used on the variable
-					}catch(e){
-						return ngModel.$oldViewValue; //prevents the errors occuring when we are typing in html code
-					}
-					return value;
+					return (ngModel.$oldViewValue = taSanitize(unsafe, ngModel.$oldViewValue));
 				});
+				
+				// because textAngular is bi-directional (which is awesome) we need to also sanitize values going in from the server
+				ngModel.$formatters.push(taSanitize);
 				
 				// changes to the model variable from outside the html/text inputs
 				ngModel.$render = function() {
@@ -474,7 +474,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 						var val = ngModel.$viewValue || ''; // in case model is null
 						ngModel.$oldViewValue = val;
 						if(scope.taBind === 'text'){ //WYSIWYG Mode
-							val = $sanitize(val); // make the output safe to avoid the insertion of DOM XSS
+							val = taSanitize(val); // make the output safe to avoid the insertion of DOM XSS
 							element.html(val); // escape out of the div to get corrected val (val = e.html())
 							element.find('a').on('click', function(e){
 								e.preventDefault();
@@ -526,7 +526,18 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 			return $html;
 		};
 		return taFixChrome;
-	}).directive('textAngularToolbar', ['$compile', '$q', 'textAngularManager', 'taOptions', 'taTools', function($compile, $q, textAngularManager, taOptions, taTools){
+	}).factory('taSanitize', ['$sanitize', function taSanitizeFactory($sanitize) {
+		return function taSanitize(unsafe, oldsafe) {
+			// any exceptions (lets say, color for example) should be made here but with great care
+			var safe;
+			try {
+				safe = $sanitize(unsafe);
+			} catch (e) {
+				safe = oldsafe || '';
+			}
+			return safe;
+		};
+	}]).directive('textAngularToolbar', ['$compile', '$q', 'textAngularManager', 'taOptions', 'taTools', function($compile, $q, textAngularManager, taOptions, taTools){
 		return {
 			scope: {
 				name: '@' // a name IS required
