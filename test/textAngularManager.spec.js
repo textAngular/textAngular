@@ -19,8 +19,60 @@ describe('textAngularManager', function(){
 			}));
 		});
 		
-		describe('updating', function(){
+		describe('modification', function(){
+			var $rootScope, toolbar1, toolbar2, textAngularManager;
+			beforeEach(inject(function(_textAngularManager_){
+				textAngularManager = _textAngularManager_;
+			}));
+			beforeEach(inject(function (_$compile_, _$rootScope_) {
+				$rootScope = _$rootScope_;
+				toolbar1 = _$compile_('<text-angular-toolbar name="test1"></text-angular-toolbar>')($rootScope);
+				toolbar2 = _$compile_('<text-angular-toolbar name="test2"></text-angular-toolbar>')($rootScope);
+				$rootScope.$digest();
+			}));
 			
+			describe('single toolbar', function(){
+				// we test these by adding an icon with a specific class and then testing for it's existance
+				it('should update only one button on one toolbar', function(){
+					textAngularManager.updateToolbarToolDisplay('test1', 'h1', {iconclass: 'test-icon-class'});
+					expect(jQuery('i.test-icon-class', toolbar1).length).toBe(1);
+					expect(jQuery('i.test-icon-class', toolbar2).length).toBe(0);
+				});
+				it('should reset one toolbar button on one toolbar', function(){
+					textAngularManager.updateToolbarToolDisplay('test1', 'h1', {iconclass: 'test-icon-class'});
+					textAngularManager.updateToolbarToolDisplay('test1', 'h2', {iconclass: 'test-icon-class2'});
+					textAngularManager.resetToolbarToolDisplay('test1', 'h1');
+					expect(jQuery('[name="h1"] i.test-icon-class', toolbar1).length).toBe(0);
+					expect(jQuery('[name="h1"] i.test-icon-class', toolbar2).length).toBe(0);
+					expect(jQuery('[name="h2"] i.test-icon-class2', toolbar1).length).toBe(1);
+				});
+			});
+			describe('multi toolbar', function(){
+				it('should update only one button on multiple toolbars', function(){
+					textAngularManager.updateToolDisplay('h1', {iconclass: 'test-icon-class'});
+					expect(jQuery('[name="h1"] i.test-icon-class', toolbar1).length).toBe(1);
+					expect(jQuery('[name="h1"] i.test-icon-class', toolbar2).length).toBe(1);
+				});
+				it('should reset one toolbar button', function(){
+					textAngularManager.updateToolDisplay('h1', {iconclass: 'test-icon-class'});
+					textAngularManager.updateToolDisplay('h2', {iconclass: 'test-icon-class2'});
+					textAngularManager.resetToolDisplay('h1');
+					expect(jQuery('[name="h1"] i.test-icon-class', toolbar1).length).toBe(0);
+					expect(jQuery('[name="h1"] i.test-icon-class', toolbar2).length).toBe(0);
+					expect(jQuery('[name="h2"] i.test-icon-class2', toolbar1).length).toBe(1);
+				});
+				it('should update multiple buttons on multiple toolbars', function(){
+					textAngularManager.updateToolsDisplay({'h1': {iconclass: 'test-icon-class'},'h2': {iconclass: 'test-icon-class2'}});
+					expect(jQuery('[name="h1"] i.test-icon-class, [name="h2"] i.test-icon-class2', toolbar1).length).toBe(2);
+					expect(jQuery('[name="h1"] i.test-icon-class, [name="h2"] i.test-icon-class2', toolbar2).length).toBe(2);
+				});
+				it('should reset all toolbar buttons', function(){
+					textAngularManager.updateToolsDisplay({'h1': {iconclass: 'test-icon-class'},'h2': {iconclass: 'test-icon-class2'}});
+					textAngularManager.resetToolsDisplay();
+					expect(jQuery('[name="h1"] i.test-icon-class, [name="h2"] i.test-icon-class2', toolbar1).length).toBe(0);
+					expect(jQuery('[name="h1"] i.test-icon-class, [name="h2"] i.test-icon-class2', toolbar2).length).toBe(0);
+				});
+			});
 		});
 	});
 	
@@ -61,6 +113,72 @@ describe('textAngularManager', function(){
 			}));
 		});
 		
+		describe('interacting', function(){
+			var $rootScope, textAngularManager, editorFuncs, testbar1, testbar2, testbar3;
+			var editorScope = {};
+			beforeEach(inject(function(_textAngularManager_){
+				textAngularManager = _textAngularManager_;
+			}));
+			beforeEach(inject(function (_$compile_, _$rootScope_) {
+				$rootScope = _$rootScope_;
+				$rootScope.htmlcontent = '<p>Test Content</p>';
+				textAngularManager.registerToolbar((testbar1 = {name: 'testbar1', disabled: true}));
+				textAngularManager.registerToolbar((testbar2 = {name: 'testbar2', disabled: true}));
+				textAngularManager.registerToolbar((testbar3 = {name: 'testbar3', disabled: true}));
+				editorFuncs = textAngularManager.registerEditor('test', editorScope, ['testbar1','testbar2']);
+				$rootScope.$digest();
+			}));
+			describe('focus', function(){
+				beforeEach(function(){
+					editorFuncs.focus();
+					$rootScope.$digest();
+				});
+				it('should set disabled to false on toolbars', function(){
+					expect(!testbar1.disabled);
+					expect(!testbar2.disabled);
+					expect(testbar3.disabled);
+				});
+				it('should set the active editor to the editor', function(){
+					expect(testbar1._parent).toBe(editorScope);
+					expect(testbar2._parent).toBe(editorScope);
+					expect(testbar3._parent).toNotBe(editorScope);
+				});
+			});
+			describe('unfocus', function(){
+				beforeEach(function(){
+					editorFuncs.unfocus();
+					$rootScope.$digest();
+				});
+				it('should set disabled to false on toolbars', function(){
+					expect(testbar1.disabled);
+					expect(testbar2.disabled);
+					expect(!testbar3.disabled);
+				});
+			});
+			describe('enable', function(){
+				beforeEach(function(){
+					editorFuncs.disable();
+					$rootScope.$digest();
+				});
+				it('should set disabled to false on toolbars', function(){
+					expect(!testbar1.disabled);
+					expect(!testbar2.disabled);
+					expect(testbar3.disabled);
+				});
+			});
+			describe('disable', function(){
+				beforeEach(function(){
+					editorFuncs.disable();
+					$rootScope.$digest();
+				});
+				it('should set disabled to false on toolbars', function(){
+					expect(testbar1.disabled);
+					expect(testbar2.disabled);
+					expect(!testbar3.disabled);
+				});
+			});
+		});
+		
 		describe('updating', function(){
 			var $rootScope, element;
 			beforeEach(inject(function (_$compile_, _$rootScope_) {
@@ -80,82 +198,3 @@ describe('textAngularManager', function(){
 		});
 	});
 });
-
-/*
-	}]).service('textAngularManager', [function(){ // this service is used to manage all textAngular editors and toolbars. All publicly published functions that modify/need to access the toolbar or editor scopes should be in here
-		// these contain references to all the editors and toolbars that have been initialised in this app
-		var toolbars = {}, editors = {};
-		// when we focus into a toolbar, we need to set the TOOLBAR's $parent to be the toolbars it's linked to. We also need to set the tools to be updated to be the toolbars...
-		return {
-			// register an editor and the toolbars that it is affected by
-			registerEditor: function(name, scope, targetToolbars){
-				if(editors[name]) throw ('textAngular Error: an Editor with name "' + name + '" already exists');
-				var _toolbars = [];
-				angular.forEach(targetToolbars, function(_name){
-					if(!_toolbars[_name]) _toolbars.push(toolbars[_name]);
-					// if it doesn't exist it may not have been compiled yet and it will be added later
-				});
-				editors[name] = {
-					scope: scope,
-					toolbars: targetToolbars,
-					_registerToolbar: function(toolbarScope){ // add to the list late
-						if(this.toolbars.indexOf(toolbarScope.name) >= 0) _toolbars.push(toolbarScope);
-					}
-				};
-				return {
-					disable: function(){ angular.forEach(_toolbars, function(toolbarScope){ toolbarScope.disabled = true; }); },
-					enable: function(){ angular.forEach(_toolbars, function(toolbarScope){ toolbarScope.disabled = false; }); },
-					focus: function(){ // this should be called when the editor is focussed
-						angular.forEach(_toolbars, function(toolbarScope){
-							toolbarScope._parent = scope;
-							toolbarScope.disabled = false;
-						});
-					},
-					unfocus: function(){ return this.disable(); }, // this should be called when the editor becomes unfocussed
-					updateSelectedStyles: function(){
-						angular.forEach(_toolbars, function(toolbarScope){
-							angular.forEach(toolbarScope.tools, function(toolScope){
-								if(toolScope.activeState){
-									toolScope.active = toolScope.activeState(scope);
-								}
-							});
-						});
-					}
-				};
-			}
-			// functions for updating the toolbar buttons display
-			updateTools: function(newTaTools){ // pass a partial struct of the taTools, this allows us to update the tools on the fly.
-				var _this = this;
-				angular.forEach(newTaTools, function(_newTool, key){
-					_this.updateTool(key, _newTool);
-				});
-			},
-			resetTools: function(){
-				var _this = this;
-				angular.forEach(taTools, function(_newTool, key){
-					_this.resetTool(key);
-				});
-			},
-			// update a tool on all toolbars
-			updateTool: function(toolKey, _newTool){
-				var _this = this;
-				angular.forEach(toolbars, function(toolbarScope, toolbarKey){
-					_this.updateToolbarTool(toolbarKey, toolKey, _newTool);
-				});
-			},
-			// resets a tool to the default/starting state
-			resetTool: function(toolKey){
-				var _this = this;
-				angular.forEach(toolbars, function(toolbarScope, toolbarKey){
-					_this.resetToolbarTool(toolbarKey, toolKey, taTools[toolKey]);
-				});
-			},
-			updateToolbarTool: function(toolbarKey, toolKey, _newTool){
-				if(toolbars[toolbarKey]) toolbars[toolbarKey].updateTool(toolKey, _newTool);
-			},
-			resetToolbarTool: function(toolbarKey, toolKey){
-				if(toolbars[toolbarKey]) toolbars[toolbarKey].updateTool(toolKey, taTools[toolKey]);
-			}
-		};
-	}]);
-*/

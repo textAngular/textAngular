@@ -252,10 +252,8 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 					wrapSelection: function(command, opt) {
 						document.execCommand(command, false, opt);
 						// refocus on the shown display element, this fixes a display bug when using :focus styles to outline the box. You still have focus on the text/html input it just doesn't show up
-						if (scope.showHtml)
-							scope.displayElements.html[0].focus();
-						else
-							scope.displayElements.text[0].focus();
+						if (scope.showHtml) scope.displayElements.html[0].focus();
+						else scope.displayElements.text[0].focus();
 					},
 					showHtml: false
 				});
@@ -326,10 +324,8 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 					_toolbars.focus();
 					$timeout(function(){
 						// bubble the focus specifically to the active element
-						if (scope.showHtml)
-							scope.displayElements.html[0].focus();
-						else
-							scope.displayElements.text[0].focus();
+						if (scope.showHtml) scope.displayElements.html[0].focus();
+						else scope.displayElements.text[0].focus();
 					}, 0); // to prevent multiple apply error defer to next seems to work.
 				});
 				element.on('focusout', function(e){
@@ -638,7 +634,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 				}
 				
 				// update a tool
-				scope.updateTool = function(key, _newTool){
+				scope.updateToolDisplay = function(key, _newTool){
 					var oldTool = taTools[key], toolInstance = scope.tools[key];
 					if(toolInstance){ // if tool is defined on this toolbar, update/redo the tool
 						if(_newTool.buttontext === null){
@@ -725,40 +721,40 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 				});
 			},
 			// functions for updating the toolbar buttons display
-			updateTools: function(newTaTools){ // pass a partial struct of the taTools, this allows us to update the tools on the fly, will not change the defaults.
+			updateToolsDisplay: function(newTaTools){ // pass a partial struct of the taTools, this allows us to update the tools on the fly, will not change the defaults.
 				var _this = this;
 				angular.forEach(newTaTools, function(_newTool, key){
-					_this.updateTool(key, _newTool);
+					_this.updateToolDisplay(key, _newTool);
 				});
 			},
 			// this function resets all toolbars to their default tool definitions
-			resetTools: function(){
+			resetToolsDisplay: function(){
 				var _this = this;
 				angular.forEach(taTools, function(_newTool, key){
-					_this.resetTool(key);
+					_this.resetToolDisplay(key);
 				});
 			},
 			// update a tool on all toolbars
-			updateTool: function(toolKey, _newTool){
+			updateToolDisplay: function(toolKey, _newTool){
 				var _this = this;
 				angular.forEach(toolbars, function(toolbarScope, toolbarKey){
-					_this.updateToolbarTool(toolbarKey, toolKey, _newTool);
+					_this.updateToolbarToolDisplay(toolbarKey, toolKey, _newTool);
 				});
 			},
 			// resets a tool to the default/starting state on all toolbars
-			resetTool: function(toolKey){
+			resetToolDisplay: function(toolKey){
 				var _this = this;
 				angular.forEach(toolbars, function(toolbarScope, toolbarKey){
-					_this.resetToolbarTool(toolbarKey, toolKey);
+					_this.resetToolbarToolDisplay(toolbarKey, toolKey);
 				});
 			},
 			// update a tool on a specific toolbar
-			updateToolbarTool: function(toolbarKey, toolKey, _newTool){
-				if(toolbars[toolbarKey]) toolbars[toolbarKey].updateTool(toolKey, _newTool);
+			updateToolbarToolDisplay: function(toolbarKey, toolKey, _newTool){
+				if(toolbars[toolbarKey]) toolbars[toolbarKey].updateToolDisplay(toolKey, _newTool);
 			},
 			// reset a tool on a specific toolbar to it's default starting value
-			resetToolbarTool: function(toolbarKey, toolKey){
-				if(toolbars[toolbarKey]) toolbars[toolbarKey].updateTool(toolKey, taTools[toolKey]);
+			resetToolbarToolDisplay: function(toolbarKey, toolKey){
+				if(toolbars[toolbarKey]) toolbars[toolbarKey].updateToolDisplay(toolKey, taTools[toolKey]);
 			},
 			// this is used when externally the html of an editor has been changed and textAngular needs to be notified to update the model - will call a $digest if not already happening
 			refreshEditor: function(name){
