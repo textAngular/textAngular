@@ -364,8 +364,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 						scope.displayElements.forminput.val(ngModel.$viewValue);
 						// if the editors aren't focused they need to be updated, otherwise they are doing the updating
 						if (document.activeElement !== scope.displayElements.html[0] && document.activeElement !== scope.displayElements.text[0]) {
-							var val = ngModel.$viewValue || ''; // in case model is null
-							scope.html = val;
+							scope.html = ngModel.$viewValue || ''; // in case model is null;
 						}
 					};
 				}else{ // if no ngModel then update from the contents of the origional html.
