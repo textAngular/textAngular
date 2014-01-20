@@ -324,7 +324,13 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 				element.on('focusin', function(){ // cascades to displayElements.text and displayElements.html automatically.
 					element.addClass(scope.classes.focussed);
 					_toolbars.focus();
-					$timeout(function(){ element.triggerHandler('focus'); }, 0); // to prevent multiple apply error defer to next seems to work.
+					$timeout(function(){
+						// bubble the focus specifically to the active element
+						if (scope.showHtml)
+							scope.displayElements.html[0].focus();
+						else
+							scope.displayElements.text[0].focus();
+					}, 0); // to prevent multiple apply error defer to next seems to work.
 				});
 				element.on('focusout', function(e){
 					$timeout(function(){
