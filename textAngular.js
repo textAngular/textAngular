@@ -300,7 +300,11 @@ textAngular.directive("textAngular", ['$compile', '$window', '$document', '$root
 			// note that focusout > focusin is called everytime we click a button
 			element.on('focusin', function(){ // cascades to displayElements.text and displayElements.html automatically.
 				element.addClass(scope.classes.focussed);
-				$timeout(function(){ element.triggerHandler('focus'); }, 0); // to prevent multiple apply error defer to next seems to work.
+				$timeout(function(){
+					// bubble the focus specifically to the active element
+					if (scope.showHtml) scope.displayElements.html[0].focus();
+					else scope.displayElements.text[0].focus();
+				}, 0); // to prevent multiple apply error defer to next seems to work.
 			});
 			element.on('focusout', function(){
 				$timeout(function(){
