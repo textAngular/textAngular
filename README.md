@@ -15,7 +15,7 @@ Demo is available at: http://www.textangular.com
 
 ### Usage
 
-1. Get textAngular via `bower install textAngular`, using the cdn at http://cdnjs.cloudflare.com/ajax/libs/textAngular/1.1.2/text-angular.min.js or from the github page https://github.com/fraywing/textAngular/releases/latest
+1. Get textAngular via `bower install textAngular`, using the cdn at http://cdnjs.cloudflare.com/ajax/libs/textAngular/1.1.2/textAngular.min.js or from the github page https://github.com/fraywing/textAngular/releases/latest
 2. Include textAngular.js or textAngular.min.js in your project using script tags
 3. Add a dependency to `textAngular` in your app module, for example: ```angular.module('myModule', ['textAngular'])```.
 4. Create an element to hold the editor and add an `ng-model="htmlVariable"` attribute where `htmtlVariable` is the scope variable that will hold the HTML entered into the editor:
@@ -58,7 +58,12 @@ Special thanks to all the contributions thus far!
 Including those from:
 
 * [SimeonC](https://github.com/SimeonC)
-* [Slobodan Mišković](https://github.com/slobo)
+* [slobo](https://github.com/slobo)
 * [edouard-lopez](https://github.com/edouard-lopez)
 * [108ium](https://github.com/108ium)
 * [nadeeshacabral](https://github.com/nadeeshacabral) 
+* [netbubu17](https://github.com/netbubu17)
+* [worldspawn](https://github.com/worldspawn)
+* [JonathanGawrych](https://github.com/JonathanGawrych)
+* [kanakiyajay](https://github.com/kanakiyajay)
+* [kencaron](https://github.com/kencaron)
