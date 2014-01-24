@@ -432,7 +432,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 				scope.displayElements.text.on('mouseup', _mouseup);
 			}
 		};
-	}]).directive('taBind', ['taSanitize', 'taFixChrome', function(taSanitize, taFixChrome){
+	}]).directive('taBind', ['taSanitize', function(taSanitize){
 		// Uses for this are textarea or input with ng-model and ta-bind='text' OR any non-form element with contenteditable="contenteditable" ta-bind="html|text" ng-model
 		return {
 			require: 'ngModel',
@@ -442,16 +442,11 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 				var _isReadonly = false;
 				// in here we are undoing the converts used elsewhere to prevent the < > and & being displayed when they shouldn't in the code.
 				var _compileHtml = function(){
-					return taFixChrome(element).html();
+					return element.html();
 				};
 				
 				scope.$parent['updateTaBind' + scope.taBind] = function(){//used for updating when inserting wrapped elements
-					var compHtml = _compileHtml();
-					var tempParsers = ngModel.$parsers;
-					ngModel.$parsers = []; // temp disable of the parsers
-					ngModel.$oldViewValue = compHtml;
-					ngModel.$setViewValue(compHtml);
-					ngModel.$parsers = tempParsers;
+					ngModel.$setViewValue(_compileHtml());
 				};
 				
 				//this code is used to update the models when data is entered/deleted
@@ -511,24 +506,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 				}
 			}
 		};
-	}]).factory('taFixChrome', function(){
-		// get whaterever rubbish is inserted in chrome
-		var taFixChrome = function($html){ // should be an angular.element object, returns object for chaining convenience
-			// fix the chrome trash that gets inserted sometimes
-			var spans = angular.element($html).find('span'); // default wrapper is a span so find all of them
-			for(var s = 0; s < spans.length; s++){
-				var span = angular.element(spans[s]);
-				if(span.attr('style') && span.attr('style').match(/line-height: 1.428571429;|color: inherit; line-height: 1.1;/i)){ // chrome specific string that gets inserted into the style attribute, other parts may vary. Second part is specific ONLY to hitting backspace in Headers
-					if(span.next().length > 0 && span.next()[0].tagName === 'BR') span.next().remove();
-					span.replaceWith(span.html());
-				}
-			}
-			var result = $html.html().replace(/style="[^"]*?(line-height: 1.428571429;|color: inherit; line-height: 1.1;)[^"]*"/ig, ''); // regex to replace ONLY offending styles - these can be inserted into various other tags on delete
-			if(result !== $html.html()) $html.html(result); // only replace when something has changed, else we get focus problems on inserting lists
-			return $html;
-		};
-		return taFixChrome;
-	}).factory('taSanitize', ['$sanitize', function taSanitizeFactory($sanitize) {
+	}]).factory('taSanitize', ['$sanitize', function taSanitizeFactory($sanitize) {
 		return function taSanitize(unsafe, oldsafe) {
 			// any exceptions (lets say, color for example) should be made here but with great care
 			var safe;
