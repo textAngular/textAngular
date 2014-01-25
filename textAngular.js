@@ -7,14 +7,25 @@ Version 1.1.2
 See README.md or https://github.com/fraywing/textAngular/wiki for requirements and use.
 */
 
-if(!window.console) console = {log: function() {}}; // fixes IE console undefined errors
+// fixes IE console undefined errors
+if (!window.console) console = {log: function() {}};
 
-var textAngular = angular.module("textAngular", ['ngSanitize']); //This makes ngSanitize required
+//This makes ngSanitize required
+var textAngular = angular.module("textAngular", ['ngSanitize']);
 
-textAngular.directive("textAngular", ['$compile', '$window', '$document', '$rootScope', '$timeout', function($compile, $window, $document, $rootScope, $timeout) {
+textAngular.directive(
+	"textAngular",
+	[
+		'$compile',
+		'$window',
+	    '$document',
+		'$rootScope',
+		'$timeout',
+		function($compile, $window, $document, $rootScope, $timeout) {
 	console.log("Thank you for using textAngular! http://www.textangular.com")
-	// deepExtend instead of angular.extend in order to allow easy customization of "display" for default buttons
-	// snatched from: http://stackoverflow.com/a/15311794/2966847
+	// deepExtend instead of angular.extend in order to allow easy customization of
+	// "display" for default buttons
+	// (snatched from: http://stackoverflow.com/a/15311794/2966847 )
 	function deepExtend(destination, source) {
 		for (var property in source) {
 			if (source[property] && source[property].constructor &&
@@ -27,9 +38,37 @@ textAngular.directive("textAngular", ['$compile', '$window', '$document', '$root
 		}
 		return destination;
 	};
-	// Here we set up the global display defaults, make sure we don't overwrite any that the user may have already set.
+	// Here we set up the global display defaults, make sure we don't
+	// overwrite any that the user may have already set.
 	$rootScope.textAngularOpts = deepExtend({
-		toolbar: [['h1', 'h2', 'h3', 'p', 'pre', 'quote'], ['bold', 'italics', 'underline', 'ul', 'ol', 'redo', 'undo', 'clear'], ['justifyLeft','justifyCenter','justifyRight'],['html', 'insertImage', 'insertLink', 'unlink']],
+		toolbar: [
+			[
+				'h1',
+				'h2',
+				'h3',
+				'p',
+				'pre',
+				'quote'
+			], [
+				'bold',
+				'italics',
+				'underline',
+				'ul',
+				'ol',
+				'redo',
+				'undo',
+				'clear'
+			], [
+				'justifyLeft',
+				'justifyCenter',
+				'justifyRight'
+			], [
+				'html',
+				'insertImage',
+				'insertLink',
+				'unlink'
+			]
+		],
 		classes: {
 			focussed: "focussed",
 			toolbar: "btn-toolbar",
@@ -40,7 +79,8 @@ textAngular.directive("textAngular", ['$compile', '$window', '$document', '$root
 			htmlEditor: 'form-control'
 		}
 	}, ($rootScope.textAngularOpts != null)? $rootScope.textAngularOpts : {});
-	// Setup the default toolbar tools, this way allows the user to add new tools like plugins
+	// Setup the default toolbar tools, this way allows the user to add new tools
+	// like plugins
 	var queryFormatBlockState = function(command){
 		command = command.toLowerCase();
 		var val = $document[0].queryCommandValue('formatBlock').toLowerCase();
@@ -48,93 +88,118 @@ textAngular.directive("textAngular", ['$compile', '$window', '$document', '$root
 	}
 	$rootScope.textAngularTools = deepExtend({
 		html: {
-			display: "<button type='button' ng-click='action()' ng-class='displayActiveToolClass(active)'>Toggle HTML</button>",
+			display: "<button type='button' ng-click='action()' " +
+				"ng-class='displayActiveToolClass(active)'>Toggle HTML</button>",
 			action: function() {
-				// this variable in an action function referrs to the angular scope of the tool
+				// this variable in an action function refers to the angular
+				// scope of the tool
 				var ht, _this = this;
 				this.$parent.showHtml = !this.$parent.showHtml;
 				if (this.$parent.showHtml) { //Show the HTML view
 					$timeout((function() { //defer until the element is visible
-						return _this.$parent.displayElements.html[0].focus(); //dereference the DOM object from the angular.element
+						//dereference the DOM object from the angular.element
+						return _this.$parent.displayElements.html[0].focus();
 					}), 100);
 				} else { //Show the WYSIWYG view
 					$timeout((function() { //defer until the element is visible
-						return _this.$parent.displayElements.text[0].focus(); //dereference the DOM object from the angular.element
+						//dereference the DOM object from the angular.element
+						return _this.$parent.displayElements.text[0].focus();
 					}), 100);
 				}
 				this.active = this.$parent.showHtml;
 			}
 		},
 		h1: {
-			display: "<button type='button' ng-click='action()' ng-class='displayActiveToolClass(active)'>H1</button>",
+			display: "<button type='button' ng-click='action()' " +
+				"ng-class='displayActiveToolClass(active)'>H1</button>",
 			action: function() {
 				return this.$parent.wrapSelection("formatBlock", "<H1>");
 			},
 			activeState: function() { return queryFormatBlockState('h1'); }
 		},
 		h2: {
-			display: "<button type='button' ng-click='action()' ng-class='displayActiveToolClass(active)'>H2</button>",
+			display: "<button type='button' ng-click='action()' " +
+				"ng-class='displayActiveToolClass(active)'>H2</button>",
 			action: function() {
 				return this.$parent.wrapSelection("formatBlock", "<H2>");
 			},
 			activeState: function() { return queryFormatBlockState('h2'); }
 		},
 		h3: {
-			display: "<button type='button' ng-click='action()' ng-class='displayActiveToolClass(active)'>H3</button>",
+			display: "<button type='button' ng-click='action()' " +
+				"ng-class='displayActiveToolClass(active)'>H3</button>",
 			action: function() {
 				return this.$parent.wrapSelection("formatBlock", "<H3>");
 			},
 			activeState: function() { return queryFormatBlockState('h3'); }
 		},
 		p: {
-			display: "<button type='button' ng-click='action()' ng-class='displayActiveToolClass(active)'>P</button>",
+			display: "<button type='button' ng-click='action()' " +
+				"ng-class='displayActiveToolClass(active)'>P</button>",
 			action: function() {
 				return this.$parent.wrapSelection("formatBlock", "<P>");
 			},
 			activeState: function() { return queryFormatBlockState('p'); }
 		},
 		pre: {
-			display: "<button type='button' ng-click='action()' ng-class='displayActiveToolClass(active)'>pre</button>",
+			display: "<button type='button' ng-click='action()' " +
+				"ng-class='displayActiveToolClass(active)'>pre</button>",
 			action: function() {
 				return this.$parent.wrapSelection("formatBlock", "<PRE>");
 			},
 			activeState: function() { return queryFormatBlockState('pre'); }
 		},
 		ul: {
-			display: "<button type='button' ng-click='action()' ng-class='displayActiveToolClass(active)'><i class='fa fa-list-ul'></i></button>",
+			display: "<button type='button' ng-click='action()' " +
+				"ng-class='displayActiveToolClass(active)'>" +
+				"<i class='fa fa-list-ul'></i></button>",
 			action: function() {
 				return this.$parent.wrapSelection("insertUnorderedList", null);
 			},
-			activeState: function() { return $document[0].queryCommandState('insertUnorderedList'); }
+			activeState: function() {
+				return $document[0].queryCommandState('insertUnorderedList');
+			}
 		},
 		ol: {
-			display: "<button type='button' ng-click='action()' ng-class='displayActiveToolClass(active)'><i class='fa fa-list-ol'></i></button>",
+			display: "<button type='button' ng-click='action()' " +
+			"ng-class='displayActiveToolClass(active)'>" +
+			"<i class='fa fa-list-ol'></i></button>",
 			action: function() {
 				return this.$parent.wrapSelection("insertOrderedList", null);
 			},
-			activeState: function() { return $document[0].queryCommandState('insertOrderedList'); }
+			activeState: function() {
+				return $document[0].queryCommandState('insertOrderedList');
+			}
 		},
 		quote: {
-			display: "<button type='button' ng-click='action()' ng-class='displayActiveToolClass(active)'><i class='fa fa-quote-right'></i></button>",
+			display: "<button type='button' ng-click='action()' " +
+			"ng-class='displayActiveToolClass(active)'>" +
+			"<i class='fa fa-quote-right'></i></button>",
 			action: function() {
 				return this.$parent.wrapSelection("formatBlock", "<BLOCKQUOTE>");
 			},
 			activeState: function() { return queryFormatBlockState('blockquote'); }
 		},
 		undo: {
-			display: "<button type='button' ng-click='action()' ng-class='displayActiveToolClass(active)'><i class='fa fa-undo'></i></button>",
+			display: "<button type='button' ng-click='action()' " +
+			"ng-class='displayActiveToolClass(active)'>" +
+			"<i class='fa fa-undo'></i></button>",
 			action: function() {
 				return this.$parent.wrapSelection("undo", null);
 			}
 		},
 		redo: {
-			display: "<button type='button' ng-click='action()' ng-class='displayActiveToolClass(active)'><i class='fa fa-repeat'></i></button>",
+			display: "<button type='button' ng-click='action()' " +
+			"ng-class='displayActiveToolClass(active)'>" +
+			"<i class='fa fa-repeat'></i></button>",
 			action: function() {
 				return this.$parent.wrapSelection("redo", null);
 			}
 		},
 		bold: {
-			display: "<button type='button' ng-click='action()' ng-class='displayActiveToolClass(active)'><i class='fa fa-bold'></i></button>",
+			display: "<button type='button' ng-click='action()' " +
+			"ng-class='displayActiveToolClass(active)'>" +
+			"<i class='fa fa-bold'></i></button>",
 			action: function() {
 				return this.$parent.wrapSelection("bold", null);
 			},
@@ -143,7 +208,9 @@ textAngular.directive("textAngular", ['$compile', '$window', '$document', '$root
 			}
 		},
 		justifyLeft: {
-			display: "<button type='button' ng-click='action()' ng-class='displayActiveToolClass(active)'><i class='fa fa-align-left'></i></button>",
+			display: "<button type='button' ng-click='action()' " +
+			"ng-class='displayActiveToolClass(active)'>" +
+			"<i class='fa fa-align-left'></i></button>",
 			action: function() {
 				return this.$parent.wrapSelection("justifyLeft", null);
 			},
@@ -152,7 +219,9 @@ textAngular.directive("textAngular", ['$compile', '$window', '$document', '$root
 			}
 		},
 		justifyRight: {
-			display: "<button type='button' ng-click='action()' ng-class='displayActiveToolClass(active)'><i class='fa fa-align-right'></i></button>",
+			display: "<button type='button' ng-click='action()' " +
+			"ng-class='displayActiveToolClass(active)'>" +
+			"<i class='fa fa-align-right'></i></button>",
 			action: function() {
 				return this.$parent.wrapSelection("justifyRight", null);
 			},
@@ -161,7 +230,9 @@ textAngular.directive("textAngular", ['$compile', '$window', '$document', '$root
 			}
 		},
 		justifyCenter: {
-			display: "<button type='button' ng-click='action()' ng-class='displayActiveToolClass(active)'><i class='fa fa-align-center'></i></button>",
+			display: "<button type='button' ng-click='action()' " +
+			"ng-class='displayActiveToolClass(active)'>" +
+			"<i class='fa fa-align-center'></i></button>",
 			action: function() {
 				return this.$parent.wrapSelection("justifyCenter", null);
 			},
@@ -170,7 +241,9 @@ textAngular.directive("textAngular", ['$compile', '$window', '$document', '$root
 			}
 		},
 		italics: {
-			display: "<button type='button' ng-click='action()' ng-class='displayActiveToolClass(active)'><i class='fa fa-italic'></i></button>",
+			display: "<button type='button' ng-click='action()' " +
+			"ng-class='displayActiveToolClass(active)'>" +
+			"<i class='fa fa-italic'></i></button>",
 			action: function() {
 				return this.$parent.wrapSelection("italic", null);
 			},
@@ -179,7 +252,9 @@ textAngular.directive("textAngular", ['$compile', '$window', '$document', '$root
 			}
 		},
 		underline: {
-			display: "<button type='button' ng-click='action()' ng-class='displayActiveToolClass(active)'><i class='fa fa-underline'></i></button>",
+			display: "<button type='button' ng-click='action()' " +
+			"ng-class='displayActiveToolClass(active)'>" +
+			"<i class='fa fa-underline'></i></button>",
 			action: function() {
 				return this.$parent.wrapSelection("underline", null);
 			},
@@ -188,23 +263,29 @@ textAngular.directive("textAngular", ['$compile', '$window', '$document', '$root
 			}
 		},
 		clear: {
-			display: "<button type='button' ng-click='action()' ng-class='displayActiveToolClass(active)'><i class='fa fa-ban'></i></button>",
+			display: "<button type='button' ng-click='action()' " +
+			"ng-class='displayActiveToolClass(active)'>" +
+			"<i class='fa fa-ban'></i></button>",
 			action: function() {
 				return this.$parent.wrapSelection("removeFormat", null);
 			}
 		},
 		insertImage: {
-			display: "<button type='button' ng-click='action()' ng-class='displayActiveToolClass(active)'><i class='fa fa-picture-o'></i></button>",
+			display: "<button type='button' ng-click='action()' " +
+			"ng-class='displayActiveToolClass(active)'>" +
+			"<i class='fa fa-picture-o'></i></button>",
 			action: function() {
 				var imageLink;
 				imageLink = prompt("Please enter an image URL to insert", 'http://');
-				if (imageLink !== '') {
+				if (imageLink !== '' || 'http://') {
 					return this.$parent.wrapSelection('insertImage', imageLink);
 				}
 			}
 		},
 		insertLink: {
-			display: "<button type='button' ng-click='action()' ng-class='displayActiveToolClass(active)'><i class='fa fa-link'></i></button>",
+			display: "<button type='button' ng-click='action()' " +
+			"ng-class='displayActiveToolClass(active)'>" +
+			"<i class='fa fa-link'></i></button>",
 			action: function() {
 				var urlLink;
 				urlLink = prompt("Please enter an URL to insert", 'http://');
@@ -214,91 +295,140 @@ textAngular.directive("textAngular", ['$compile', '$window', '$document', '$root
 			}
 		},
 		unlink: {
-			display: "<button type='button' ng-click='action()' ng-class='displayActiveToolClass(active)'><i class='fa fa-unlink'></i></button>",
+			display: "<button type='button' ng-click='action()' " +
+			"ng-class='displayActiveToolClass(active)'>" +
+			"<i class='fa fa-unlink'></i></button>",
 			action: function() {
 				return this.$parent.wrapSelection('unlink', null);
 			}
 		}
 	}, ($rootScope.textAngularTools != null)? $rootScope.textAngularTools : {});
-		
+
 	return {
 		require: '?ngModel',
 		scope: {},
 		restrict: "EA",
 		link: function(scope, element, attrs, ngModel) {
-			var group, groupElement, keydown, keyup, mouseup, tool, toolElement; //all these vars should not be accessable outside this directive
-			// get the settings from the defaults and add our specific functions that need to be on the scope
+			// all these vars should not be accessible outside this directive
+			// get the settings from the defaults and add our specific functions
+			// that need to be on the scope
+			var group, groupElement, keydown, keyup, mouseup, tool, toolElement;
+
 			angular.extend(scope, $rootScope.textAngularOpts, {
 				// wraps the selection in the provided tag / execCommand function.
 				wrapSelection: function(command, opt) {
 					document.execCommand(command, false, opt);
-					// refocus on the shown display element, this fixes a display bug when using :focus styles to outline the box. You still have focus on the text/html input it just doesn't show up
+					// refocus on the shown display element, this fixes a
+					// display bug when using :focus styles to outline the box.
+					// You still have focus on the text/html input;
+					// it just doesn't show up.
 					if (scope.showHtml)
 						scope.displayElements.html[0].focus();
 					else
 						scope.displayElements.text[0].focus();
-					// note that wrapSelection is called via ng-click in the tool plugins so we are already within a $apply
+					// note that wrapSelection is called via ng-click
+					// in the tool plugins so we are already within a $apply
 					scope.updateSelectedStyles();
-					if (!scope.showHtml) scope.updateTaBindtext(); // only update if in text or WYSIWYG mode
+					// only update if in text or WYSIWYG mode
+					if (!scope.showHtml) scope.updateTaBindtext();
 				},
 				showHtml: false
 			});
+
 			// setup the options from the optional attributes
-			if (!!attrs.taToolbar)					scope.toolbar = scope.$eval(attrs.taToolbar);
-			if (!!attrs.taFocussedClass)			scope.classes.focussed = scope.$eval(attrs.taFocussedClass);
-			if (!!attrs.taToolbarClass)				scope.classes.toolbar = attrs.taToolbarClass;
-			if (!!attrs.taToolbarGroupClass)		scope.classes.toolbarGroup = attrs.taToolbarGroupClass;
-			if (!!attrs.taToolbarButtonClass)		scope.classes.toolbarButton = attrs.taToolbarButtonClass;
-			if (!!attrs.taToolbarActiveButtonClass)	scope.classes.toolbarButtonActive = attrs.taToolbarActiveButtonClass;
-			if (!!attrs.taTextEditorClass)			scope.classes.textEditor = attrs.taTextEditorClass;
-			if (!!attrs.taHtmlEditorClass)			scope.classes.htmlEditor = attrs.taHtmlEditorClass;
-			
+			if (!!attrs.taToolbar) {
+				scope.toolbar = scope.$eval(attrs.taToolbar);
+			}
+			if (!!attrs.taFocussedClass) {
+				scope.classes.focussed = scope.$eval(attrs.taFocussedClass);
+			}
+			if (!!attrs.taToolbarClass) {
+				scope.classes.toolbar = attrs.taToolbarClass;
+			}
+			if (!!attrs.taToolbarGroupClass) {
+				scope.classes.toolbarGroup = attrs.taToolbarGroupClass;
+			}
+			if (!!attrs.taToolbarButtonClass) {
+				scope.classes.toolbarButton = attrs.taToolbarButtonClass;
+			}
+			if (!!attrs.taToolbarActiveButtonClass) {
+				scope.classes.toolbarButtonActive = attrs.taToolbarActiveButtonClass;
+			}
+			if (!!attrs.taTextEditorClass) {
+				scope.classes.textEditor = attrs.taTextEditorClass;
+			}
+			if (!!attrs.taHtmlEditorClass) {
+				scope.classes.htmlEditor = attrs.taHtmlEditorClass;
+			}
+
 			var originalContents = element.html();
 			element.html(''); // clear the original content
-			
+
 			// Setup the HTML elements as variable references for use later
 			scope.displayElements = {
-				toolbar: angular.element("<div></div>"),
-				forminput: angular.element("<input type='hidden' style='display: none;'>"), // we still need the hidden input even with a textarea as the textarea may have invalid/old input in it, wheras the input will ALLWAYS have the correct value.
-				html: angular.element("<textarea ng-show='showHtml' ta-bind='html' ng-model='html' ></textarea>"),
-				text: angular.element("<div contentEditable='true' ng-hide='showHtml' ta-bind='text' ng-model='text' ></div>")
+				toolbar: angular.element(
+					"<div></div>"
+					),
+				// we still need the hidden input even with a textarea,
+				// as the textarea may have invalid/old input in it,
+				// whereas the input will ALLWAYS have the correct value.
+				forminput: angular.element(
+					"<input type='hidden' style='display: none;'>"
+				),
+				html: angular.element(
+					"<textarea ng-show='showHtml' ta-bind='html'" +
+					" ng-model='html' ></textarea>"
+				),
+				text: angular.element(
+					"<div contentEditable='true' ng-hide='showHtml' " +
+					"ta-bind='text' ng-model='text' ></div>"
+				)
 			};
 			// add the main elements to the origional element
 			element.append(scope.displayElements.toolbar);
 			element.append(scope.displayElements.text);
 			element.append(scope.displayElements.html);
-			
-			if(!!attrs.name){
+
+			if (!!attrs.name){
 				scope.displayElements.forminput.attr('name', attrs.name);
 				element.append(scope.displayElements.forminput);
 			}
-			
-			if(!!attrs.taDisabled){
+
+			if (!!attrs.taDisabled){
 				scope.displayElements.text.attr('ta-readonly', 'disabled');
 				scope.displayElements.html.attr('ta-readonly', 'disabled');
 				scope.disabled = scope.$parent.$eval(attrs.taDisabled);
 				scope.$parent.$watch(attrs.taDisabled, function(newVal){
 					scope.disabled = newVal;
-					if(scope.disabled){
+					if (scope.disabled){
 						element.addClass('disabled');
-					}else{
+					} else {
 						element.removeClass('disabled');
 					}
 				});
 			}
-			
-			// compile the scope with the text and html elements only - if we do this with the main element it causes a compile loop
+
+			// compile the scope with the text and html elements only
+			// - if we do this with the main element it causes a compile loop
 			$compile(scope.displayElements.text)(scope);
 			$compile(scope.displayElements.html)(scope);
-			
+
 			// add the classes manually last
 			element.addClass("ta-root");
-			scope.displayElements.toolbar.addClass("ta-toolbar " + scope.classes.toolbar);
-			scope.displayElements.text.addClass("ta-text ta-editor " + scope.classes.textEditor);
-			scope.displayElements.html.addClass("ta-html ta-editor " + scope.classes.textEditor);
-			
+			scope.displayElements.toolbar.addClass(
+				"ta-toolbar " + scope.classes.toolbar
+			);
+			scope.displayElements.text.addClass(
+				"ta-text ta-editor " + scope.classes.textEditor
+			);
+			scope.displayElements.html.addClass(
+				"ta-html ta-editor " + scope.classes.textEditor
+			);
+
 			// note that focusout > focusin is called everytime we click a button
-			element.on('focusin', function(){ // cascades to displayElements.text and displayElements.html automatically.
+			element.on('focusin', function() {
+				// cascades to displayElements.text and
+				// displayElements.html automatically.
 				element.addClass(scope.classes.focussed);
 				$timeout(function(){
 					// bubble the focus specifically to the active element
@@ -308,14 +438,20 @@ textAngular.directive("textAngular", ['$compile', '$window', '$document', '$root
 			});
 			element.on('focusout', function(){
 				$timeout(function(){
-					// if we have NOT focussed again on the text etc then fire the blur events
-					if(!($document[0].activeElement === scope.displayElements.html[0]) && !($document[0].activeElement === scope.displayElements.text[0])){
+					// if we have NOT focussed again on the text etc,
+					//  then fire the blur events
+					if (
+						!($document[0].activeElement === scope.displayElements.html[0])
+						&&
+						!($document[0].activeElement === scope.displayElements.text[0])
+					) {
 						element.removeClass(scope.classes.focussed);
-						$timeout(function(){ element.triggerHandler('blur'); }, 0); // to prevent multiple apply error defer to next seems to work.
+						// to prevent multiple apply error defer to next seems to work.
+						$timeout(function(){ element.triggerHandler('blur'); }, 0);
 					}
 				}, 0);
 			});
-			
+
 			scope.tools = {}; // Keep a reference for updating the active states later
 			// create the tools in the toolbar
 			for (var _i = 0; _i < scope.toolbar.length; _i++) {
@@ -325,70 +461,109 @@ textAngular.directive("textAngular", ['$compile', '$window', '$document', '$root
 				groupElement.addClass(scope.classes.toolbarGroup);
 				for (var _j = 0; _j < group.length; _j++) {
 					// init and add the tools to the group
-					tool = group[_j]; // a tool name (key name from textAngularTools struct)
-					toolElement = angular.element($rootScope.textAngularTools[tool].display);
+					// a tool name (key name from textAngularTools struct)
+					tool = group[_j];
+					toolElement = angular.element(
+						$rootScope.textAngularTools[tool].display
+					);
 					toolElement.addClass(scope.classes.toolbarButton);
-					toolElement.attr('unselectable', 'on'); // important to not take focus from the main text/html entry
+
+					// important to not take focus from the main text/html entry
+					toolElement.attr('unselectable', 'on');
 					toolElement.attr('tabindex', '-1');
 					toolElement.attr('ng-disabled', 'showHtml()');
-					var childScope = angular.extend(scope.$new(true), $rootScope.textAngularTools[tool], { // add the tool specific functions
-						name: tool,
-						showHtml: function(){
-							if(this.name !== 'html') return this.$parent.disabled || this.$parent.showHtml;
-							return this.$parent.disabled;
-						},
-						displayActiveToolClass: function(active){
-							return (active)? this.$parent.classes.toolbarButtonActive : '';
+					// add the tool specific functions
+
+					//creates a child scope of the main angularText scope and
+					// then extends the childScope with the functions of this
+					// particular tool
+					var childScope = angular.extend(
+						scope.$new(true),
+						$rootScope.textAngularTools[tool], {
+							name: tool,
+							showHtml: function(){
+								if (this.name !== 'html') {
+									return this.$parent.disabled || this.$parent.showHtml;
+								}
+								return this.$parent.disabled;
+							},
+							displayActiveToolClass: function(active){
+								return (active)
+									? this.$parent.classes.toolbarButtonActive
+									: '';
+							}
 						}
-					}); //creates a child scope of the main angularText scope and then extends the childScope with the functions of this particular tool
+					);
 					scope.tools[tool] = childScope; // reference to the scope kept
-					groupElement.append($compile(toolElement)(childScope)); // append the tool compiled with the childScope to the group element
+					// append the tool compiled with the childScope to the group element
+					groupElement.append($compile(toolElement)(childScope));
 				}
-				scope.displayElements.toolbar.append(groupElement); // append the group to the toolbar
+				// append the group to the toolbar
+				scope.displayElements.toolbar.append(groupElement);
 			}
-			
+
 			// changes to the model variable from outside the html/text inputs
-			if(attrs.ngModel){ // if no ngModel, then the only input is from inside text-angular
+			// if no ngModel, then the only input is from inside text-angular
+			if (attrs.ngModel){
 				ngModel.$render = function() {
 					scope.displayElements.forminput.val(ngModel.$viewValue);
-					// if the editors aren't focused they need to be updated, otherwise they are doing the updating
-					if (!($document[0].activeElement === scope.displayElements.html[0]) && !($document[0].activeElement === scope.displayElements.text[0])) {
+					// if the editors aren't focused they need to be updated,
+					// otherwise they are doing the updating
+					if (
+						!($document[0].activeElement === scope.displayElements.html[0])
+						&&
+						!($document[0].activeElement === scope.displayElements.text[0])
+					) {
 						var val = ngModel.$viewValue || ''; // in case model is null
 						scope.text = val;
 						scope.html = val;
 					}
 				};
-			}else{ // if no ngModel then update from the contents of the origional html.
+			// if no ngModel then update from the contents of
+			// the origional html.
+			} else {
 				scope.displayElements.forminput.val(originalContents);
 				scope.text = originalContents;
 				scope.html = originalContents;
 			}
-			
+
 			scope.$watch('text', function(newValue, oldValue){
 				scope.html = newValue;
-				if(attrs.ngModel && newValue !== oldValue) ngModel.$setViewValue(newValue);
+				if (attrs.ngModel && newValue !== oldValue) {
+					ngModel.$setViewValue(newValue);
+				}
 				scope.displayElements.forminput.val(newValue);
 			});
 			scope.$watch('html', function(newValue, oldValue){
 				scope.text = newValue;
-				if(attrs.ngModel && newValue !== oldValue) ngModel.$setViewValue(newValue);
+				if (attrs.ngModel && newValue !== oldValue) {
+					ngModel.$setViewValue(newValue);
+				}
 				scope.displayElements.forminput.val(newValue);
 			});
-			
-			// the following is for applying the active states to the tools that support it
+
+			// the following is for applying the active states
+			// to the tools that support it
 			scope.bUpdateSelectedStyles = false;
-			// loop through all the tools polling their activeState function if it exists
+			// loop through all the tools polling their
+			// activeState function if it exists
 			scope.updateSelectedStyles = function() {
 				for (var _k = 0; _k < scope.toolbar.length; _k++) {
 					var groups = scope.toolbar[_k];
 					for (var _l = 0; _l < groups.length; _l++) {
 						tool = groups[_l];
 						if (scope.tools[tool].activeState != null) {
-							scope.tools[tool].active = scope.tools[tool].activeState.apply(scope);
+							scope.tools[tool].active = scope.tools[tool]
+															.activeState
+                                                            .apply(scope);
 						}
 					}
 				}
-				if (scope.bUpdateSelectedStyles) $timeout(scope.updateSelectedStyles, 200); // used to update the active state when a key is held down, ie the left arrow
+				// used to update the active state when a key is held down,
+				// ie the left arrow
+				if (scope.bUpdateSelectedStyles) {
+					$timeout(scope.updateSelectedStyles, 200);
+				}
 			};
 			// start updating on keydown
 			keydown = function(e) {
@@ -405,7 +580,8 @@ textAngular.directive("textAngular", ['$compile', '$window', '$document', '$root
 			};
 			scope.displayElements.html.on('keyup', keyup);
 			scope.displayElements.text.on('keyup', keyup);
-			// update the toolbar active states when we click somewhere in the text/html boxed
+			// update the toolbar active states when we click
+			// somewhere in the text/html boxed
 			mouseup = function(e) {
 				scope.$apply(function() {
 					scope.updateSelectedStyles();
@@ -415,22 +591,42 @@ textAngular.directive("textAngular", ['$compile', '$window', '$document', '$root
 			scope.displayElements.text.on('mouseup', mouseup);
 		}
 	};
-}]).directive('taBind', ['$sanitize', '$document', 'taFixChrome', function($sanitize, $document, taFixChrome){
-	// Uses for this are textarea or input with ng-model and ta-bind='text' OR any non-form element with contenteditable="contenteditable" ta-bind="html|text" ng-model
+
+// Uses for this are textarea or input with ng-model and ta-bind='text'
+// OR any non-form element with contenteditable="contenteditable"
+// ta-bind="html|text" ng-model
+}]).directive(
+	'taBind',
+	[
+		'$sanitize',
+		'$document',
+		'taFixChrome',
+		function($sanitize, $document, taFixChrome) {
 	return {
 		require: 'ngModel',
 		scope: {'taBind': '@'},
 		link: function(scope, element, attrs, ngModel){
-			var isContentEditable = element[0].tagName.toLowerCase() !== 'textarea' && element[0].tagName.toLowerCase() !== 'input' && element.attr('contenteditable') !== undefined && element.attr('contenteditable');
+			var isContentEditable
+			= element[0].tagName.toLowerCase()
+				!== 'textarea' && element[0].tagName.toLowerCase()
+				!== 'input' && element.attr('contenteditable')
+				!== undefined && element.attr('contenteditable');
 			var isReadonly = false;
-			// in here we are undoing the converts used elsewhere to prevent the < > and & being displayed when they shouldn't in the code.
+			// in here we are undoing the converts used elsewhere to prevent
+			// the < > and & being displayed when they shouldn't in the code.
 			var compileHtml = function(){
 				var result = taFixChrome(element).html();
-				if(scope.taBind === 'html' && isContentEditable) result = result.replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&amp;/g, '&');
+				if (
+					scope.taBind === 'html' && isContentEditable
+				) {
+					result = result.replace(/&lt;/g, "<")
+						.replace(/&gt;/g, ">").replace(/&amp;/g, '&');
+				}
 				return result;
 			};
-			
-			scope.$parent['updateTaBind' + scope.taBind] = function(){//used for updating when inserting wrapped elements
+
+			// used for updating when inserting wrapped elements
+			scope.$parent['updateTaBind' + scope.taBind] = function() {
 				var compHtml = compileHtml();
 				var tempParsers = ngModel.$parsers;
 				ngModel.$parsers = []; // temp disable of the parsers
@@ -438,17 +634,18 @@ textAngular.directive("textAngular", ['$compile', '$window', '$document', '$root
 				ngModel.$setViewValue(compHtml);
 				ngModel.$parsers = tempParsers;
 			};
-			
-			//this code is used to update the models when data is entered/deleted
-			if(isContentEditable){
+
+			// this code is used to update the models when data is entered/deleted
+			if (isContentEditable){
 				element.on('keyup', function(e){
-					if(!isReadonly) ngModel.$setViewValue(compileHtml());
+					if (!isReadonly) ngModel.$setViewValue(compileHtml());
 				});
 			}
-			
-			//prevents the errors occuring when we are typing in html code
+
+			// prevents the errors occuring when we are typing in html code
 			function trySanitize(unsafe, oldsafe) {
-				// any exceptions (lets say, color for example) should be made here but with great care
+				// any exceptions (lets say, color for example)
+				// should be made here but with great care
 				var safe;
 				try {
 					safe = $sanitize(unsafe);
@@ -458,58 +655,110 @@ textAngular.directive("textAngular", ['$compile', '$window', '$document', '$root
 				return safe;
 			}
 
-			// all the code here takes the information from the above keyup function or any other time that the viewValue is updated and parses it for storage in the ngModel
+			// all the code here takes the information from the above
+			// keyup function or any other time that the viewValue is
+			// updated and parses it for storage in the ngModel
 			ngModel.$parsers.push(function(unsafe) {
-				
+
 				// this is what runs when ng-bind-html is used on the variable
-				var safe = ngModel.$oldViewValue = trySanitize(unsafe, ngModel.$oldViewValue);
+				var safe
+					= ngModel.$oldViewValue
+					= trySanitize(unsafe, ngModel.$oldViewValue);
 				return safe;
 			});
 
-			// because textAngular is bi-directional (which is awesome) we need to also sanitize values going in from the server
+			// because textAngular is bi-directional (which is awesome)
+			// we need to also sanitize values going in from the server
 			ngModel.$formatters.push(function(unsafe) {
 				var safe = trySanitize(unsafe, '');
 				return safe;
 			});
-			
+
 			// changes to the model variable from outside the html/text inputs
 			ngModel.$render = function() {
-				// if the editor isn't focused it needs to be updated, otherwise it's receiving user input
+				// if the editor isn't focused it needs to be updated,
+				// otherwise it's receiving user input
 				if ($document[0].activeElement !== element[0]) {
 					var val = ngModel.$viewValue || ''; // in case model is null
 					ngModel.$oldViewValue = val;
-					if(scope.taBind === 'text'){ //WYSIWYG Mode
+					if (scope.taBind === 'text'){ //WYSIWYG Mode
 						try{
-							angular.element(val).find('script').remove(); // to prevent JS XSS insertion executing arbritrary code
-						}catch(e){}; // catches when no HTML tags are present errors.
+							// to prevent JS XSS insertion executing arbritrary code
+							angular.element(val).find('script').remove();
+						} catch (e){}; // catches when no HTML tags are present errors.
 						element.html(val);
 						element.find('a').on('click', function(e){
 							e.preventDefault();
 							return false;
 						});
-					}else if(isContentEditable || (element[0].tagName.toLowerCase() !== 'textarea' && element[0].tagName.toLowerCase() !== 'input')) // make sure the end user can SEE the html code.
-						element.html(val.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, '&gt;'));
+					// make sure the end user can SEE the html code.
+					} else if (
+						isContentEditable || (element[0].tagName.toLowerCase()
+							!== 'textarea' && element[0].tagName.toLowerCase()
+							!== 'input')
+					) {
+						element.html(val.replace(/&/g, "&amp;")
+							.replace(/</g, "&lt;").replace(/>/g, '&gt;'));
+					}
+
 					else element.val(val); // only for input and textarea inputs
-				}else if(!isContentEditable) element.val(val); // only for input and textarea inputs
-			};
-			
-			if(!!attrs.taReadonly){
-				//set initial value
-				if(scope.$parent.$eval(attrs.taReadonly)){ // we changed to readOnly mode (taReadonly='true')
-					if(element[0].tagName.toLowerCase() === 'textarea' || element[0].tagName.toLowerCase() === 'input') element.attr('disabled', 'disabled');
-					if(element.attr('contenteditable') !== undefined && element.attr('contenteditable')) element.removeAttr('contenteditable');
-				}else{ // we changed to NOT readOnly mode (taReadonly='false')
-					if(element[0].tagName.toLowerCase() === 'textarea' || element[0].tagName.toLowerCase() === 'input') element.removeAttr('disabled');
-					else if(isContentEditable) element.attr('contenteditable', 'true');
+				// only for input and textarea inputs
+				} else if (!isContentEditable) {
+					element.val(val);
 				}
-				scope.$parent.$watch(attrs.taReadonly, function(newVal, oldVal){ // taReadonly only has an effect if the taBind element is an input or textarea or has contenteditable='true' on it. Otherwise it is readonly by default
-					if(oldVal === newVal) return;
-					if(newVal){ // we changed to readOnly mode (taReadonly='true')
-						if(element[0].tagName.toLowerCase() === 'textarea' || element[0].tagName.toLowerCase() === 'input') element.attr('disabled', 'disabled');
-						if(element.attr('contenteditable') !== undefined && element.attr('contenteditable')) element.removeAttr('contenteditable');
-					}else{ // we changed to NOT readOnly mode (taReadonly='false')
-						if(element[0].tagName.toLowerCase() === 'textarea' || element[0].tagName.toLowerCase() === 'input') element.removeAttr('disabled');
-						else if(isContentEditable) element.attr('contenteditable', 'true');
+			};
+
+			if (!!attrs.taReadonly){
+				//set initial value
+				// we changed to readOnly mode (taReadonly='true')
+				if (scope.$parent.$eval(attrs.taReadonly)) {
+					if (element[0].tagName.toLowerCase() === 'textarea'
+						|| element[0].tagName.toLowerCase() === 'input'
+					) {
+						element.attr('disabled', 'disabled');
+					}
+					if (element.attr('contenteditable') !== undefined
+						&& element.attr('contenteditable')
+					) {
+						element.removeAttr('contenteditable');
+					}
+				// we changed to NOT readOnly mode (taReadonly='false')
+				} else {
+					if (element[0].tagName.toLowerCase() === 'textarea'
+						|| element[0].tagName.toLowerCase() === 'input'
+					) {
+						element.removeAttr('disabled');
+					}
+					else if (isContentEditable) {
+						element.attr('contenteditable', 'true');
+					}
+				}
+				// taReadonly only has an effect if the taBind element is
+				// an input or textarea or has contenteditable='true' on it.
+				// Otherwise it is readonly by default.
+				scope.$parent.$watch(
+					attrs.taReadonly,
+					function(newVal, oldVal) {
+					if (oldVal === newVal) return;
+					if (newVal) { // we changed to readOnly mode (taReadonly='true')
+						if (element[0].tagName.toLowerCase() === 'textarea'
+							|| element[0].tagName.toLowerCase() === 'input'
+						) {
+							element.attr('disabled', 'disabled');
+						}
+						if (element.attr('contenteditable') !== undefined
+							&& element.attr('contenteditable')
+						) {
+							element.removeAttr('contenteditable');
+						}
+					// we changed to NOT readOnly mode (taReadonly='false')
+					} else {
+						if (element[0].tagName.toLowerCase() === 'textarea' 
+							|| element[0].tagName.toLowerCase() === 'input'
+						) { element.removeAttr('disabled');
+						} else if (isContentEditable) {
+							element.attr('contenteditable', 'true');
+						}
 					}
 					isReadonly = newVal;
 				});
@@ -518,18 +767,34 @@ textAngular.directive("textAngular", ['$compile', '$window', '$document', '$root
 	};
 }]).factory('taFixChrome', function(){
 	// get whaterever rubbish is inserted in chrome
-	var taFixChrome = function($html){ // should be an angular.element object, returns object for chaining convenience
+
+	// should be an angular.element object, returns object for chaining convenience
+	var taFixChrome = function($html){
 		// fix the chrome trash that gets inserted sometimes
-		var spans = angular.element($html).find('span'); // default wrapper is a span so find all of them
-		for(var s = 0; s < spans.length; s++){
+
+		// default wrapper is a span so find all of them
+		var spans = angular.element($html).find('span');
+		for (var s = 0; s < spans.length; s++) {
 			var span = angular.element(spans[s]);
-			if(span.attr('style') && span.attr('style').match(/line-height: 1.428571429;|color: inherit; line-height: 1.1;/i)){ // chrome specific string that gets inserted into the style attribute, other parts may vary. Second part is specific ONLY to hitting backspace in Headers
-				if(span.next().length > 0 && span.next()[0].tagName === 'BR') span.next().remove()
-				span.replaceWith(span.html());
+			// chrome specific string that gets inserted into the style attribute,
+			// other parts may vary. Second part is specific ONLY to hitting
+			// backspace in Headers
+			if (span.attr('style') && span.attr('style')
+				.match(/line-height: 1.428571429;|color: inherit; line-height: 1.1;/i)){
+
+				if (span.next().length > 0
+					&& span.next()[0].tagName === 'BR'
+				) {
+					span.next().remove(); } span.replaceWith(span.html());
 			}
 		}
-		var result = $html.html().replace(/style="[^"]*?(line-height: 1.428571429;|color: inherit; line-height: 1.1;)[^"]*"/ig, ''); // regex to replace ONLY offending styles - these can be inserted into various other tags on delete
-		if(result !== $html.html()) $html.html(result); // only replace when something has changed, else we get focus problems on inserting lists
+		// regex to replace ONLY offending styles - these can be inserted into
+		// various other tags on delete
+		var result = $html.html()
+			.replace(/style="[^"]*?(line-height: 1.428571429;|color: inherit; line-height: 1.1;)[^"]*"/ig, '');
+		// only replace when something has changed, else we get focus
+		// problems on inserting lists
+		if (result !== $html.html()) $html.html(result);
 		return $html;
 	};
 	return taFixChrome;
