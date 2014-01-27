@@ -220,7 +220,7 @@ textAngular.directive("textAngular", ['$compile', '$window', '$document', '$root
 			}
 		}
 	}, ($rootScope.textAngularTools != null)? $rootScope.textAngularTools : {});
-		
+
 	return {
 		require: '?ngModel',
 		scope: {},
@@ -252,10 +252,10 @@ textAngular.directive("textAngular", ['$compile', '$window', '$document', '$root
 			if (!!attrs.taToolbarActiveButtonClass)	scope.classes.toolbarButtonActive = attrs.taToolbarActiveButtonClass;
 			if (!!attrs.taTextEditorClass)			scope.classes.textEditor = attrs.taTextEditorClass;
 			if (!!attrs.taHtmlEditorClass)			scope.classes.htmlEditor = attrs.taHtmlEditorClass;
-			
+
 			var originalContents = element.html();
 			element.html(''); // clear the original content
-			
+
 			// Setup the HTML elements as variable references for use later
 			scope.displayElements = {
 				toolbar: angular.element("<div></div>"),
@@ -267,12 +267,12 @@ textAngular.directive("textAngular", ['$compile', '$window', '$document', '$root
 			element.append(scope.displayElements.toolbar);
 			element.append(scope.displayElements.text);
 			element.append(scope.displayElements.html);
-			
+
 			if(!!attrs.name){
 				scope.displayElements.forminput.attr('name', attrs.name);
 				element.append(scope.displayElements.forminput);
 			}
-			
+
 			if(!!attrs.taDisabled){
 				scope.displayElements.text.attr('ta-readonly', 'disabled');
 				scope.displayElements.html.attr('ta-readonly', 'disabled');
@@ -286,19 +286,29 @@ textAngular.directive("textAngular", ['$compile', '$window', '$document', '$root
 					}
 				});
 			}
-			
+
 			// compile the scope with the text and html elements only - if we do this with the main element it causes a compile loop
 			$compile(scope.displayElements.text)(scope);
 			$compile(scope.displayElements.html)(scope);
-			
+
 			// add the classes manually last
 			element.addClass("ta-root");
 			scope.displayElements.toolbar.addClass("ta-toolbar " + scope.classes.toolbar);
 			scope.displayElements.text.addClass("ta-text ta-editor " + scope.classes.textEditor);
 			scope.displayElements.html.addClass("ta-html ta-editor " + scope.classes.textEditor);
-			
+
+			if(attrs.taHideToolbar == "true"){ // hide the toolbar initially if this attr is present
+                scope.displayElements.toolbar.addClass("ng-hide");
+                scope.displayElements.toolbar.removeClass("ng-show");
+            }
+
 			// note that focusout > focusin is called everytime we click a button
 			element.on('focusin', function(){ // cascades to displayElements.text and displayElements.html automatically.
+                if(attrs.taHideToolbar == "true"){ // toggle toolbar visibility
+                    scope.displayElements.toolbar.addClass("ng-show");
+                    scope.displayElements.toolbar.removeClass("ng-hide");
+                }
+
 				element.addClass(scope.classes.focussed);
 				$timeout(function(){
 					// bubble the focus specifically to the active element
@@ -307,6 +317,11 @@ textAngular.directive("textAngular", ['$compile', '$window', '$document', '$root
 				}, 0); // to prevent multiple apply error defer to next seems to work.
 			});
 			element.on('focusout', function(){
+                if (attrs.taHideToolbar == "true") { // toggle toolbar visibility
+                    scope.displayElements.toolbar.addClass("ng-hide");
+                    scope.displayElements.toolbar.removeClass("ng-show");
+                }
+
 				$timeout(function(){
 					// if we have NOT focussed again on the text etc then fire the blur events
 					if(!($document[0].activeElement === scope.displayElements.html[0]) && !($document[0].activeElement === scope.displayElements.text[0])){
@@ -315,7 +330,7 @@ textAngular.directive("textAngular", ['$compile', '$window', '$document', '$root
 					}
 				}, 0);
 			});
-			
+
 			scope.tools = {}; // Keep a reference for updating the active states later
 			// create the tools in the toolbar
 			for (var _i = 0; _i < scope.toolbar.length; _i++) {
@@ -346,7 +361,7 @@ textAngular.directive("textAngular", ['$compile', '$window', '$document', '$root
 				}
 				scope.displayElements.toolbar.append(groupElement); // append the group to the toolbar
 			}
-			
+
 			// changes to the model variable from outside the html/text inputs
 			if(attrs.ngModel){ // if no ngModel, then the only input is from inside text-angular
 				ngModel.$render = function() {
@@ -363,7 +378,7 @@ textAngular.directive("textAngular", ['$compile', '$window', '$document', '$root
 				scope.text = originalContents;
 				scope.html = originalContents;
 			}
-			
+
 			scope.$watch('text', function(newValue, oldValue){
 				scope.html = newValue;
 				if(attrs.ngModel && newValue !== oldValue) ngModel.$setViewValue(newValue);
@@ -374,7 +389,7 @@ textAngular.directive("textAngular", ['$compile', '$window', '$document', '$root
 				if(attrs.ngModel && newValue !== oldValue) ngModel.$setViewValue(newValue);
 				scope.displayElements.forminput.val(newValue);
 			});
-			
+
 			// the following is for applying the active states to the tools that support it
 			scope.bUpdateSelectedStyles = false;
 			// loop through all the tools polling their activeState function if it exists
@@ -429,7 +444,7 @@ textAngular.directive("textAngular", ['$compile', '$window', '$document', '$root
 				if(scope.taBind === 'html' && isContentEditable) result = result.replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&amp;/g, '&');
 				return result;
 			};
-			
+
 			scope.$parent['updateTaBind' + scope.taBind] = function(){//used for updating when inserting wrapped elements
 				var compHtml = compileHtml();
 				var tempParsers = ngModel.$parsers;
@@ -438,14 +453,14 @@ textAngular.directive("textAngular", ['$compile', '$window', '$document', '$root
 				ngModel.$setViewValue(compHtml);
 				ngModel.$parsers = tempParsers;
 			};
-			
+
 			//this code is used to update the models when data is entered/deleted
 			if(isContentEditable){
 				element.on('keyup', function(e){
 					if(!isReadonly) ngModel.$setViewValue(compileHtml());
 				});
 			}
-			
+
 			//prevents the errors occuring when we are typing in html code
 			function trySanitize(unsafe, oldsafe) {
 				// any exceptions (lets say, color for example) should be made here but with great care
@@ -460,7 +475,7 @@ textAngular.directive("textAngular", ['$compile', '$window', '$document', '$root
 
 			// all the code here takes the information from the above keyup function or any other time that the viewValue is updated and parses it for storage in the ngModel
 			ngModel.$parsers.push(function(unsafe) {
-				
+
 				// this is what runs when ng-bind-html is used on the variable
 				var safe = ngModel.$oldViewValue = trySanitize(unsafe, ngModel.$oldViewValue);
 				return safe;
@@ -471,7 +486,7 @@ textAngular.directive("textAngular", ['$compile', '$window', '$document', '$root
 				var safe = trySanitize(unsafe, '');
 				return safe;
 			});
-			
+
 			// changes to the model variable from outside the html/text inputs
 			ngModel.$render = function() {
 				// if the editor isn't focused it needs to be updated, otherwise it's receiving user input
@@ -492,7 +507,7 @@ textAngular.directive("textAngular", ['$compile', '$window', '$document', '$root
 					else element.val(val); // only for input and textarea inputs
 				}else if(!isContentEditable) element.val(val); // only for input and textarea inputs
 			};
-			
+
 			if(!!attrs.taReadonly){
 				//set initial value
 				if(scope.$parent.$eval(attrs.taReadonly)){ // we changed to readOnly mode (taReadonly='true')
