@@ -418,7 +418,21 @@ function validStyles(styleAttr){
 		var v = value.split(':');
 		if(v.length == 2){
 			if(
-				v[0].trim() === 'color' && v[1].trim().match(/[#0-9\-a-zA-Z]/)
+				v[0].trim() === 'color' && (
+					v[1].trim().match(/^rgb\([0-9%,\. ]*\)$/i)
+					|| v[1].trim().match(/^rgba\([0-9%,\. ]*\)$/i)
+					|| v[1].trim().match(/^hsl\([0-9%,\. ]*\)$/i)
+					|| v[1].trim().match(/^hsla\([0-9%,\. ]*\)$/i)
+					|| v[1].trim().match(/^#[0-9a-f]{3,6}$/i)
+					|| v[1].trim().match(/^[a-z]*$/i)
+				)
+			||
+				v[0].trim() === 'text-align' && (
+					v[1].trim() === 'left'
+					|| v[1].trim() === 'right'
+					|| v[1].trim() === 'center'
+					|| v[1].trim() === 'justify'
+				)
 			) result += v[0].trim() + ': ' + v[1].trim() + ';';
 		}
 	});
