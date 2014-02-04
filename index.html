@@ -1,0 +1,66 @@
+﻿<!DOCTYPE html>
+<html ng-app="textAngularTestingApp" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.0-rc2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/font-awesome.css">
+    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Roboto:400,300">
+    <link rel="stylesheet" href="http://www.textangular.com/css/style.css" type="text/css">
+    <style>
+        #editorWrapper {
+            padding-top: 30px;
+            width: 80%;
+            margin-right: auto;
+            margin-left: auto;
+            overflow: auto;
+        }
+
+        #editableDom {
+            margin-top: 30px;
+            border: solid 1px grey;
+            background-color: white;
+        }
+
+        .ta-editor {
+            overflow-y: auto;
+            height: 300px;
+        }
+    </style>
+
+    <script type="text/javascript" src="http://code.angularjs.org/snapshot/angular.js"></script>
+    <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/angularjs/1.2.10/angular-sanitize.js"></script>
+    <script type="text/javascript" src="textAngular.js"></script>
+    <script type="text/javascript" src="TextAngularCtrl.js"></script>
+    <title></title>
+</head>
+<body>
+    <div id="editorWrapper">
+        <div ng-controller="textAngularTestingCtrl">
+            <div text-angular id="editor" ng-model="editorContent">
+                <h2>Try me!</h2>
+                <p>textAngular is a super cool WYSIWYG Text Editor directive for AngularJS</p>
+                <p><b>Features:</b></p>
+                <ol>
+                    <li>Automatic Seamless Two-Way-Binding</li>
+                    <li>Super Easy <b>Theming</b> Options</li>
+                    <li>Simple Editor Instance Creation</li>
+                    <li>Safely Parses Html for Custom Toolbar Icons</li>
+                    <li>Doesn't Use an iFrame</li>
+                    <li>Works with Firefox, Chrome, and IE10+</li>
+                </ol><p><b>Code at GitHub:</b> <a href="https://github.com/fraywing/textAngular">Here</a> </p>
+            </div>
+            
+            <div id="editorHtmlContent">{{editorContent}}</div>
+        </div>
+
+        <div id="editableDom" contenteditable="true">
+            <h2>Go ahead, edit away!</h2>
+            <p>Here's a typical paragraph element</p>
+            <ol>
+                <li>and now a list</li>
+                <li>with only</li>
+                <li>three items</li>
+            </ol>
+        </div>
+    </div>
+</body>
+</html>
