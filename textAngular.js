@@ -561,7 +561,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 				element.html('');
 				element.addClass("ta-toolbar " + scope.classes.toolbar);
 				
-				setupToolElement = function(toolElement, toolDefinition, toolScope){
+				var setupToolElement = function(toolElement, toolDefinition, toolScope){
 					toolElement.addClass(scope.classes.toolbarButton);
 					toolElement.attr('name', toolScope.name);
 					toolElement.attr('unselectable', 'on'); // important to not take focus from the main text/html entry
@@ -622,13 +622,13 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 						
 				for (var _i = 0; _i < scope.toolbar.length; _i++) {
 					// setup the toolbar group
-					group = scope.toolbar[_i];
-					groupElement = angular.element("<div>");
+					var group = scope.toolbar[_i];
+					var groupElement = angular.element("<div>");
 					groupElement.addClass(scope.classes.toolbarGroup);
 					for (var _j = 0; _j < group.length; _j++) {
 						// init and add the tools to the group
-						tool = group[_j]; // a tool name (key name from taTools struct)
-						toolElement = angular.element(taTools[tool].display);
+						var tool = group[_j]; // a tool name (key name from taTools struct)
+						var toolElement = angular.element(taTools[tool].display);
 						var childScope = angular.extend(scope.$new(true), taTools[tool], defaultChildScope, {name: tool}); //creates a child scope of the main angularText scope and then extends the childScope with the functions of this particular tool
 						scope.tools[tool] = childScope; // reference to the scope kept
 						groupElement.append(setupToolElement(toolElement, taTools[tool], childScope)); // append the tool compiled with the childScope to the group element
