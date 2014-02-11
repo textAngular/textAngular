@@ -18,7 +18,7 @@ module.exports = function (config) {
 			'bower_components/angular-mocks/angular-mocks.js',
 			'textAngular-sanitize.js',
 			'textAngular.js',
-			'test/*.spec.js'
+			'test/**/*.spec.js'
 		],
 
 		// list of files to exclude

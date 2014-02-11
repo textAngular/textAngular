@@ -279,13 +279,12 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 						_name = (attrs.name) ? attrs.name : 'textAngularEditor' + _serial;
 					// get the settings from the defaults and add our specific functions that need to be on the scope
 					angular.extend(scope, angular.copy(taOptions), {
-						// wraps the selection in the provided tag / execCommand function.
+						// wraps the selection in the provided tag / execCommand function. Should only be called in WYSIWYG mode.
 						wrapSelection: function(command, opt){
 							document.execCommand(command, false, opt);
 							// refocus on the shown display element, this fixes a display bug when using :focus styles to outline the box.
 							// You still have focus on the text/html input it just doesn't show up
-							if(scope.showHtml) scope.displayElements.html[0].focus();
-							else scope.displayElements.text[0].focus();
+							scope.displayElements.text[0].focus();
 						},
 						showHtml: false
 					});
@@ -417,7 +416,18 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 					// changes to the model variable from outside the html/text inputs
 					// if no ngModel, then the only input is from inside text-angular
 					if(attrs.ngModel){
+						var _firstRun = true;
 						ngModel.$render = function(){
+							if(_firstRun){
+								// we need this firstRun to set the originalContents otherwise it gets overrided by the setting of ngModel to undefined from NaN
+								_firstRun = false;
+								// if view value is null or undefined initially and there was original content, set to the original content
+								var _initialValue = scope.$parent.$eval(attrs.ngModel);
+								if((_initialValue === undefined || _initialValue === null) && (_originalContents && _originalContents !== '')){
+									// on passing through to taBind it will be sanitised
+									ngModel.$setViewValue(_originalContents);
+								}
+							}
 							scope.displayElements.forminput.val(ngModel.$viewValue);
 							// if the editors aren't focused they need to be updated, otherwise they are doing the updating
 							if(document.activeElement !== scope.displayElements.html[0] && document.activeElement !== scope.displayElements.text[0]){
@@ -425,10 +435,6 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 								scope.html = ngModel.$viewValue || '';
 							}
 						};
-						if(ngModel.$viewValue === undefined && originalContents !== undefined){
-							// on passing through to taBind it will be sanitised
-							ngModel.$setViewValue(originalContents);
-						}
 					}else{
 						// if no ngModel then update from the contents of the origional html.
 						scope.displayElements.forminput.val(_originalContents);
@@ -458,6 +464,10 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 						_toolbars = textAngularManager.registerEditor(_name, scope, ['textAngularToolbar' + _serial]);
 					}
 					
+					scope.$on('$destroy', function(){
+						textAngularManager.unregisterEditor(_name);
+					});
+					
 					// the following is for applying the active states to the tools that support it
 					scope._bUpdateSelectedStyles = false;
 					// loop through all the tools polling their activeState function if it exists
@@ -481,7 +491,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 					scope.displayElements.html.on('keydown', _keydown);
 					scope.displayElements.text.on('keydown', _keydown);
 					// stop updating on key up and update the display/model
-					_keyup = function(event){
+					_keyup = function(){
 						scope._bUpdateSelectedStyles = false;
 					};
 					scope.displayElements.html.on('keyup', _keyup);
@@ -528,12 +538,12 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 				var _compileHtml = function(){
 					if(_isContentEditable) return element.html();
 					if(_isInputFriendly) return element.val();
-					throw ('textAngular Error: attempting to compile non-editable taBind');
+					throw ('textAngular Error: attempting to update non-editable taBind');
 				};
 				
 				//used for updating when inserting wrapped elements
 				scope.$parent['updateTaBind' + (attrs.id || '')] = function(){
-					if(_isInputFriendly && !_isReadonly) ngModel.$setViewValue(_compileHtml());
+					if(!_isReadonly) ngModel.$setViewValue(_compileHtml());
 				};
 				
 				//this code is used to update the models when data is entered/deleted
@@ -592,7 +602,8 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 				
 				if(attrs.taReadonly){
 					//set initial value
-					if(scope.$parent.$eval(attrs.taReadonly)){
+					_isReadonly = scope.$parent.$eval(attrs.taReadonly);
+					if(_isReadonly){
 						// we changed to readOnly mode (taReadonly='true')
 						if(element[0].tagName.toLowerCase() === 'textarea' || element[0].tagName.toLowerCase() === 'input'){
 							element.attr('disabled', 'disabled');
@@ -719,18 +730,21 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 							return false;
 						});
 						if(toolDefinition && !toolDefinition.display && !toolScope._display){
+							// first clear out the current contents if any
+							toolElement.html('');
+							// add the buttonText
 							if(toolDefinition.buttontext) toolElement.html(toolDefinition.buttontext);
+							// add the icon to the front of the button if there is content
 							if(toolDefinition.iconclass){
 								var icon = angular.element('<i>'), content = toolElement.html();
 								icon.addClass(toolDefinition.iconclass);
 								toolElement.html('');
 								toolElement.append(icon);
-								toolElement.append('&nbsp;' + content);
+								if(content && content !== '') toolElement.append('&nbsp;' + content);
 							}
 						}
 						
-						if(toolScope) return $compile(toolElement)(toolScope);
-						else return toolElement;
+						return $compile(toolElement)(toolScope);
 					};
 					
 					// Keep a reference for updating the active states later
@@ -817,6 +831,10 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 					};
 					
 					textAngularManager.registerToolbar(scope);
+					
+					scope.$on('$destroy', function(){
+						textAngularManager.unregisterToolbar(scope.name);
+					});
 				}
 			};
 		}
@@ -828,7 +846,10 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 				promise = deferred.promise;
 			promise['finally'](this.$editor().endAction);
 			// pass into the action the deferred function and also the function to reload the current selection if rangy available
-			var result = this.action(deferred, this.$editor().startAction());
+			var result;
+			try{
+				result = this.action(deferred, this.$editor().startAction());
+			}catch(any){}
 			if(result || result === undefined){
 				// if true or undefined is returned then the action has finished. Otherwise the deferred action will be resolved manually.
 				deferred.resolve();
@@ -915,6 +936,9 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 			retrieveEditor: function(name){
 				return editors[name];
 			},
+			unregisterEditor: function(name){
+				delete editors[name];
+			},
 			// registers a toolbar such that it can be linked to editors
 			registerToolbar: function(scope){
 				if(!scope) throw('textAngular Error: A toolbar requires a scope');
@@ -928,6 +952,17 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 			// retrieve toolbar by name, largely used by testing suites only
 			retrieveToolbar: function(name){
 				return toolbars[name];
+			},
+			// retrieve toolbars by editor name, largely used by testing suites only
+			retrieveToolbarsViaEditor: function(name){
+				var result = [], _this = this;
+				angular.forEach(this.retrieveEditor(name).toolbars, function(name){
+					result.push(_this.retrieveToolbar(name));
+				});
+				return result;
+			},
+			unregisterToolbar: function(name){
+				delete toolbars[name];
 			},
 			// functions for updating the toolbar buttons display
 			updateToolsDisplay: function(newTaTools){

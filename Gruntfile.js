@@ -36,7 +36,7 @@ module.exports = function (grunt) {
 		  }
 		},
 		jshint: {
-		  files: ['textAngular.js', 'test/**/*.spec.js'],
+		  files: ['textAngular.js', 'test/*.spec.js'],// don't hint the textAngularSanitize as they will fail
 		  options: {
 			eqeqeq: true,
 			immed: true,

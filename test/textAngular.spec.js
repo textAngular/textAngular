@@ -202,9 +202,30 @@ describe('textAngular', function(){
 	
 	describe('registration', function(){
 		beforeEach(module('textAngular'));
-		it('it should be added to the textAngularManager', inject(function($rootScope, $compile, textAngularManager){
+		it('should add itself to the textAngularManager', inject(function($rootScope, $compile, textAngularManager){
 			$compile('<text-angular name="test"></text-angular>')($rootScope);
 			expect(textAngularManager.retrieveEditor('test')).not.toBeUndefined();
+		}));
+		
+		it('should register toolbars to itself', inject(function($rootScope, $compile, textAngularManager){
+			var toolbar1 = {name: 'test-toolbar1'};
+			var toolbar2 = {name: 'test-toolbar2'};
+			textAngularManager.registerToolbar(toolbar1);
+			textAngularManager.registerToolbar(toolbar2);
+			$compile('<text-angular name="test" ta-target-toolbars="test-toolbar1,test-toolbar2"></text-angular>')($rootScope);
+			var _toolbars = textAngularManager.retrieveToolbarsViaEditor('test');
+			expect(_toolbars[0]).toBe(toolbar1);
+			expect(_toolbars[1]).toBe(toolbar2);
+		}));
+	});
+	
+	describe('unregistration', function(){
+		beforeEach(module('textAngular'));
+		it('should remove itself from the textAngularManager on $destroy', inject(function($rootScope, $compile, textAngularManager){
+			var element = $compile('<text-angular name="test"></text-angular>')($rootScope);
+			$rootScope.$digest();
+			textAngularManager.retrieveEditor('test').scope.$destroy();
+			expect(textAngularManager.retrieveEditor('test')).toBeUndefined();
 		}));
 	});
 	
@@ -245,6 +266,29 @@ describe('textAngular', function(){
 			$rootScope.$digest();
 		}));
 		describe('Inserts the current information into the fields', function(){
+			it('populates the WYSIWYG area', function(){
+				expect(jQuery('.ta-text p', element).length).toBe(1);
+			});
+			it('populates the textarea', function(){
+				expect(jQuery('.ta-html', element).val()).toBe('<p>Test Content</p>');
+			});
+			it('populates the hidden input value', function(){
+				expect(jQuery('input[type=hidden]', element).val()).toBe('<p>Test Content</p>');
+			});
+		});
+	});
+	
+	describe('Basic Initiation with ng-model and originalContents', function(){
+		'use strict';
+		var $rootScope, element;
+		beforeEach(module('textAngular'));
+		beforeEach(inject(function (_$compile_, _$rootScope_) {
+			$rootScope = _$rootScope_;
+			$rootScope.htmlcontent = '<p>Test Content</p>';
+			element = _$compile_('<text-angular name="test" ng-model="htmlcontent"><p>Original Content</p></text-angular>')($rootScope);
+			$rootScope.$digest();
+		}));
+		describe('Inserts the current information into the fields overriding the original content', function(){
 			it('populates the WYSIWYG area', function(){
 				expect(jQuery('.ta-text p', element).length).toBe(1);
 			});
@@ -312,6 +356,76 @@ describe('textAngular', function(){
 			it('should update input[type=hidden]', function(){
 				expect(jQuery('input[type=hidden]', element).val()).toBe('<div>Test Change Content</div>');
 			});
+		});
+	});
+	
+	describe('ng-model should handle undefined and null', function(){
+		'use strict';
+		beforeEach(module('textAngular'));
+		it('should handle initial undefined to empty-string', inject(function ($compile, $rootScope) {
+			$rootScope.htmlcontent = undefined;
+			var element = $compile('<text-angular name="test" ng-model="htmlcontent"></text-angular>')($rootScope);
+			$rootScope.$digest();
+			expect(jQuery('.ta-text', element).html()).toBe('');
+		}));
+		
+		it('should handle initial null to empty-string', inject(function ($compile, $rootScope) {
+			$rootScope.htmlcontent = null;
+			var element = $compile('<text-angular name="test" ng-model="htmlcontent"></text-angular>')($rootScope);
+			$rootScope.$digest();
+			expect(jQuery('.ta-text', element).html()).toBe('');
+		}));
+		
+		it('should handle initial undefined to originalContents', inject(function ($compile, $rootScope) {
+			$rootScope.htmlcontent = undefined;
+			var element = $compile('<text-angular name="test" ng-model="htmlcontent">Test Contents</text-angular>')($rootScope);
+			$rootScope.$digest();
+			expect(jQuery('.ta-text', element).html()).toBe('Test Contents');
+		}));
+		
+		it('should handle initial null to originalContents', inject(function ($compile, $rootScope) {
+			$rootScope.htmlcontent = null;
+			var element = $compile('<text-angular name="test" ng-model="htmlcontent">Test Contents</text-angular>')($rootScope);
+			$rootScope.$digest();
+			expect(jQuery('.ta-text', element).html()).toBe('Test Contents');
+		}));
+		
+		describe('should reset', function(){
+			it('from undefined to empty-string', inject(function ($compile, $rootScope) {
+				$rootScope.htmlcontent = 'Test Content';
+				var element = $compile('<text-angular name="test" ng-model="htmlcontent"></text-angular>')($rootScope);
+				$rootScope.$digest();
+				$rootScope.htmlcontent = undefined;
+				$rootScope.$digest();
+				expect(jQuery('.ta-text', element).html()).toBe('');
+			}));
+			
+			it('from null to empty-string', inject(function ($compile, $rootScope) {
+				$rootScope.htmlcontent = 'Test Content';
+				var element = $compile('<text-angular name="test" ng-model="htmlcontent"></text-angular>')($rootScope);
+				$rootScope.$digest();
+				$rootScope.htmlcontent = null;
+				$rootScope.$digest();
+				expect(jQuery('.ta-text', element).html()).toBe('');
+			}));
+			
+			it('from undefined to blank/emptystring WITH originalContents', inject(function ($compile, $rootScope) {
+				$rootScope.htmlcontent = 'Test Content1';
+				var element = $compile('<text-angular name="test" ng-model="htmlcontent">Test Contents2</text-angular>')($rootScope);
+				$rootScope.$digest();
+				$rootScope.htmlcontent = undefined;
+				$rootScope.$digest();
+				expect(jQuery('.ta-text', element).html()).toBe('');
+			}));
+			
+			it('from null to blank/emptystring WITH originalContents', inject(function ($compile, $rootScope) {
+				$rootScope.htmlcontent = 'Test Content1';
+				var element = $compile('<text-angular name="test" ng-model="htmlcontent">Test Contents2</text-angular>')($rootScope);
+				$rootScope.$digest();
+				$rootScope.htmlcontent = null;
+				$rootScope.$digest();
+				expect(jQuery('.ta-text', element).html()).toBe('');
+			}));
 		});
 	});
 });

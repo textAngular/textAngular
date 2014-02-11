@@ -19,6 +19,33 @@ describe('textAngularManager', function(){
 			}));
 		});
 		
+		describe('retrieval', function(){
+			it('should be undefined for no registered toolbar', inject(function(textAngularManager){
+				expect(textAngularManager.retrieveToolbar('test')).toBeUndefined();
+			}));
+			
+			it('should get the correct toolbar', inject(function(textAngularManager){
+				var scope = {name: 'test'};
+				textAngularManager.registerToolbar(scope);
+				expect(textAngularManager.retrieveToolbar('test')).toBe(scope);
+			}));
+			
+			it('should get the correct toolbar via editor', inject(function(textAngularManager){
+				var scope = {name: 'test'};
+				textAngularManager.registerToolbar(scope);
+				textAngularManager.registerEditor('testeditor', {}, ['test']);
+				expect(textAngularManager.retrieveToolbarsViaEditor('testeditor')[0]).toBe(scope);
+			}));
+		});
+		
+		describe('unregister', function(){
+			it('should get the correct toolbar', inject(function(textAngularManager){
+				textAngularManager.registerToolbar({name: 'test'});
+				textAngularManager.unregisterToolbar('test');
+				expect(textAngularManager.retrieveToolbar('test')).toBeUndefined();
+			}));
+		});
+		
 		describe('modification', function(){
 			var $rootScope, toolbar1, toolbar2, textAngularManager;
 			beforeEach(inject(function(_textAngularManager_){
@@ -110,6 +137,26 @@ describe('textAngularManager', function(){
 			
 			it('should return a updateSelectedStyles function', inject(function(textAngularManager){
 				expect(textAngularManager.registerEditor('test', {}).updateSelectedStyles).toBeDefined();
+			}));
+		});
+		
+		describe('retrieval', function(){
+			it('should be undefined for no registered editor', inject(function(textAngularManager){
+				expect(textAngularManager.retrieveEditor('test')).toBeUndefined();
+			}));
+			
+			it('should get the correct editor', inject(function(textAngularManager){
+				var scope = {};
+				textAngularManager.registerEditor('test', scope);
+				expect(textAngularManager.retrieveEditor('test').scope).toBe(scope);
+			}));
+		});
+		
+		describe('unregister', function(){
+			it('should get the correct editor', inject(function(textAngularManager){
+				textAngularManager.registerEditor('test', {});
+				textAngularManager.unregisterEditor('test');
+				expect(textAngularManager.retrieveEditor('test')).toBeUndefined();
 			}));
 		});
 		

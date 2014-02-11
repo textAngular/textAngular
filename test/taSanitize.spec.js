@@ -25,10 +25,17 @@ describe('taSanitize', function(){
 		}));
 	});
 	
-	it('if invalid HTML should return the oldsafe passed in or an empty string', inject(function(taSanitize){
-		var result = taSanitize('<broken><test', 'safe');
-		expect(result).toBe('safe');
-	}));
+	describe('if invalid HTML', function(){
+		it('should return the oldsafe passed in', inject(function(taSanitize){
+			var result = taSanitize('<broken><test', 'safe');
+			expect(result).toBe('safe');
+		}));
+		
+		it('should return an empty string if no oldsafe', inject(function(taSanitize){
+			var result = taSanitize('<broken><test');
+			expect(result).toBe('');
+		}));
+	});
 	
 	describe('only certain style attributes are allowed', function(){
 		describe('validated color attribute', function(){
