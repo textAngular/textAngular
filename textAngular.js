@@ -898,7 +898,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 							});
 						});
 					},
-					sendKeyCommand: function(event){
+					sendKeyCommand: function (event) {
 						// we return true if we applied an action, false otherwise
 						var result = false;
 						if(event.ctrlKey || event.metaKey) angular.forEach(taTools, function(tool){
