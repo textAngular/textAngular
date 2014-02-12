@@ -265,7 +265,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 	
 	textAngular.directive("textAngular", [
 		'$compile', '$timeout', '$log', 'taOptions', 'taSanitize', 'textAngularManager',
-		function($compile, $timeout, $log, taOptions, taSanitize, textAngularManager){
+		function ($compile, $timeout, $log, taOptions, taSanitize, textAngularManager) {
 			$log.info("Thank you for using textAngular! http://www.textangular.com");
 			return {
 				require: '?ngModel',
@@ -523,7 +523,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 				}
 			};
 		}
-	]).directive('taBind', ['taSanitize', '$timeout', function(taSanitize, $timeout){
+	]).directive('taBind', ['taSanitize', '$timeout', '$sanitize', function (taSanitize, $timeout, $sanitize) {
 		// Uses for this are textarea or input with ng-model and ta-bind='text'
 		// OR any non-form element with contenteditable="contenteditable" ta-bind="html|text" ng-model
 		return {
@@ -568,7 +568,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 				// catch DOM XSS via taSanitize
 				// Sanitizing both ways is identical
 				var _sanitize = function(unsafe){
-					return (ngModel.$oldViewValue = taSanitize(unsafe, ngModel.$oldViewValue));
+				    return (ngModel.$oldViewValue = $sanitize(unsafe, ngModel.$oldViewValue));
 				};
 				
 				// parsers trigger from the above keyup function or any other time that the viewValue is updated and parses it for storage in the ngModel
