@@ -367,6 +367,10 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 					// cascades to displayElements.text and displayElements.html automatically.
 					_focusin = function(){
 						element.addClass(scope.classes.focussed);
+            if ((element.find("[contenteditable=true]").text() === attrs.placeholder)&&(element.find("[contenteditable=true]").hasClass('placeholder-text'))){
+              element.find("[contenteditable=true]").removeClass('placeholder-text');
+              element.find("[contenteditable=true]").text('');
+            }
 						_toolbars.focus();
 					};
 					scope.displayElements.html.on('focus', _focusin);
@@ -376,6 +380,12 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 							// if we have NOT focussed again on the text etc then fire the blur events
 							if(document.activeElement !== scope.displayElements.html[0] && document.activeElement !== scope.displayElements.text[0]){
 								element.removeClass(scope.classes.focussed);
+                if (!!attrs.placeholder){
+                  if (element.find("[contenteditable=true]").text() === ''){
+                    element.find("[contenteditable=true]").text(attrs.placeholder);
+                    element.find("[contenteditable=true]").addClass('placeholder-text');
+                  }
+                }
 								if(!scope._actionRunning) _toolbars.unfocus();
 								// to prevent multiple apply error defer to next seems to work.
 								$timeout(function(){ element.triggerHandler('blur'); }, 0);
@@ -520,6 +530,11 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 					};
 					scope.displayElements.html.on('mouseup', _mouseup);
 					scope.displayElements.text.on('mouseup', _mouseup);
+
+          if (!!attrs.placeholder){
+            element.find("[contenteditable=true]").text(attrs.placeholder);
+            element.find("[contenteditable=true]").attr('placeholder', attrs.placeholder);
+          }
 				}
 			};
 		}
@@ -584,7 +599,13 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 						var val = ngModel.$viewValue || '';
 						if(_isContentEditable){
 							// WYSIWYG Mode
-							element.html(val);
+              if ((val === '')&&(element.attr("contenteditable") === "true")&&(element.attr("placeholder"))){
+                element.html(element.attr('placeholder'));
+                element.addClass('placeholder-text');
+              }
+              else{
+                element.html(val);
+              }
 							// if in WYSIWYG and readOnly we kill the use of links by clicking
 							if(!_isReadonly) element.find('a').on('click', function(e){
 								e.preventDefault();
