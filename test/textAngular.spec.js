@@ -428,4 +428,32 @@ describe('textAngular', function(){
 			}));
 		});
 	});
+
+  describe('Add placeholder text via placeholder attribute', function(){
+    'use strict';
+    var $rootScope, element;
+    beforeEach(module('textAngular'));
+    beforeEach(inject(function (_$compile_, _$rootScope_) {
+      $rootScope = _$rootScope_;
+      element = _$compile_('<text-angular name="test" placeholder="Lorem Ipsum" ta-focussed-class="test-focus-class" ta-text-editor-class="test-text-class" ta-html-editor-class="test-html-class"></text-angular>')($rootScope);
+      $rootScope.$digest();
+    }));
+
+    describe('Adds/Removes Placeholder Classes/Text', function () {
+      it('initially has the placeholder-text class', function(){
+        expect(jQuery(element.find("[contenteditable=true]")).hasClass('placeholder-text')).toBe(true);
+      });
+      it('initially has placeholder text', function(){
+        expect(jQuery(element.find("[contenteditable=true]")).text()).toEqual('Lorem Ipsum');
+      });
+      it('removes placeholder-text class on focusin', function(){
+        jQuery('textarea.ta-html.ta-editor', element).trigger('focus');
+        expect(jQuery('textarea.ta-html.ta-editor', element).hasClass('placeholder-text')).toBe(false);
+      });
+      it('removes placeholder text on focusin', function(){
+        jQuery('textarea.ta-html.ta-editor', element).trigger('focus');
+        expect(jQuery('textarea.ta-html.ta-editor', element).text()).toEqual('');
+      });
+    });
+  });
 });

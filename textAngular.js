@@ -533,6 +533,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 
           if (!!attrs.placeholder){
             element.find("[contenteditable=true]").text(attrs.placeholder);
+            element.find("[contenteditable=true]").addClass('placeholder-text');
             element.find("[contenteditable=true]").attr('placeholder', attrs.placeholder);
           }
 				}
