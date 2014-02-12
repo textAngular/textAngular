@@ -28,11 +28,11 @@ describe('taBind', function(){
 			$rootScope.$digest();
 			expect($rootScope.html).toBe('<p>Test Contents</p>');
 		});
-		it('should NOT update model from update function', function(){
+		it('should error on update model from update function', function(){
 			element.html('<div>Test 2 Content</div>');
-			$rootScope.updateTaBind();
-			$rootScope.$digest();
-			expect($rootScope.html).toBe('<p>Test Contents</p>');
+			expect(function(){
+				$rootScope.updateTaBind();
+			}).toThrow('textAngular Error: attempting to update non-editable taBind');
 		});
 		it('should update display from model change', function(){
 			$rootScope.html = '<div>Test 2 Content</div>';
@@ -131,6 +131,35 @@ describe('taBind', function(){
 			$rootScope.html = '<div>Test 2 Content</div>';
 			$rootScope.$digest();
 			expect(element.val()).toBe('<div>Test 2 Content</div>');
+		});
+	});
+	
+	describe('should update from cut and paste events', function(){
+		var $rootScope, element, $timeout;
+		beforeEach(inject(function (_$compile_, _$rootScope_, _$timeout_) {
+			$rootScope = _$rootScope_;
+			$timeout = _$timeout_;
+			$rootScope.html = '<p>Test Contents</p>';
+			element = _$compile_('<textarea ta-bind ng-model="html"></textarea>')($rootScope);
+			$rootScope.$digest();
+		}));
+		
+		it('should update model from paste', function(){
+			element.val('<div>Test 2 Content</div>');
+			element.trigger('paste');
+			$rootScope.$digest();
+			$timeout(function(){
+				expect($rootScope.html).toBe('<div>Test 2 Content</div>');
+			}, 1);
+		});
+		
+		it('should update model from cut', function(){
+			element.val('<div>Test 2 Content</div>');
+			element.trigger('cut');
+			$rootScope.$digest();
+			$timeout(function(){
+				expect($rootScope.html).toBe('<div>Test 2 Content</div>');
+			}, 1);
 		});
 	});
 	
@@ -317,6 +346,199 @@ describe('taBind', function(){
 				_$rootScope_.$digest();
 				expect(element.attr('contenteditable')).not.toBeDefined();
 			}));
+		});
+		
+		describe('when true don\'t update model', function(){
+			describe('from cut and paste events', function(){
+				describe('on textarea', function(){
+					var $rootScope, element;
+					beforeEach(inject(function (_$compile_, _$rootScope_) {
+						$rootScope = _$rootScope_;
+						$rootScope.html = '<p>Test Contents</p>';
+						$rootScope.readonly = true;
+						element = _$compile_('<textarea ta-bind ta-readonly="readonly" ng-model="html"></textarea>')($rootScope);
+						$rootScope.$digest();
+					}));
+					
+					it('should update model from paste', function(){
+						element.val('<div>Test 2 Content</div>');
+						element.trigger('paste');
+						$rootScope.$digest();
+						expect($rootScope.html).toBe('<p>Test Contents</p>');
+					});
+					
+					it('should update model from cut', function(){
+						element.val('<div>Test 2 Content</div>');
+						element.trigger('cut');
+						$rootScope.$digest();
+						expect($rootScope.html).toBe('<p>Test Contents</p>');
+					});
+				});
+				
+				describe('on input', function(){
+					var $rootScope, element;
+					beforeEach(inject(function (_$compile_, _$rootScope_) {
+						$rootScope = _$rootScope_;
+						$rootScope.html = '<p>Test Contents</p>';
+						$rootScope.readonly = true;
+						element = _$compile_('<input ta-bind ta-readonly="readonly" ng-model="html"/>')($rootScope);
+						$rootScope.$digest();
+					}));
+					
+					it('should update model from paste', function(){
+						element.val('<div>Test 2 Content</div>');
+						element.trigger('paste');
+						$rootScope.$digest();
+						expect($rootScope.html).toBe('<p>Test Contents</p>');
+					});
+					
+					it('should update model from cut', function(){
+						element.val('<div>Test 2 Content</div>');
+						element.trigger('cut');
+						$rootScope.$digest();
+						expect($rootScope.html).toBe('<p>Test Contents</p>');
+					});
+				});
+				
+				describe('on editable div', function(){
+					var $rootScope, element;
+					beforeEach(inject(function (_$compile_, _$rootScope_) {
+						$rootScope = _$rootScope_;
+						$rootScope.html = '<p>Test Contents</p>';
+						$rootScope.readonly = true;
+						element = _$compile_('<div ta-bind contenteditable="true" ta-readonly="readonly" ng-model="html"></div>')($rootScope);
+						$rootScope.$digest();
+					}));
+					
+					it('should update model from paste', function(){
+						element.html('<div>Test 2 Content</div>');
+						element.trigger('paste');
+						$rootScope.$digest();
+						expect($rootScope.html).toBe('<p>Test Contents</p>');
+					});
+					
+					it('should update model from cut', function(){
+						element.html('<div>Test 2 Content</div>');
+						element.trigger('cut');
+						$rootScope.$digest();
+						expect($rootScope.html).toBe('<p>Test Contents</p>');
+					});
+				});
+			});
+			
+			describe('from updateTaBind function', function(){
+				describe('on textarea', function(){
+					var $rootScope, element;
+					beforeEach(inject(function (_$compile_, _$rootScope_) {
+						$rootScope = _$rootScope_;
+						$rootScope.html = '<p>Test Contents</p>';
+						$rootScope.readonly = true;
+						element = _$compile_('<textarea ta-bind ta-readonly="readonly" ng-model="html"></textarea>')($rootScope);
+						$rootScope.$digest();
+					}));
+					
+					it('should update model', function(){
+						element.val('<div>Test 2 Content</div>');
+						$rootScope.updateTaBind();
+						$rootScope.$digest();
+						expect($rootScope.html).toBe('<p>Test Contents</p>');
+					});
+				});
+				
+				describe('on input', function(){
+					var $rootScope, element;
+					beforeEach(inject(function (_$compile_, _$rootScope_) {
+						$rootScope = _$rootScope_;
+						$rootScope.html = '<p>Test Contents</p>';
+						$rootScope.readonly = true;
+						element = _$compile_('<input ta-bind ta-readonly="readonly" ng-model="html"/>')($rootScope);
+						$rootScope.$digest();
+					}));
+					
+					it('should update model', function(){
+						element.val('<div>Test 2 Content</div>');
+						$rootScope.updateTaBind();
+						$rootScope.$digest();
+						expect($rootScope.html).toBe('<p>Test Contents</p>');
+					});
+				});
+				
+				describe('on editable div', function(){
+					var $rootScope, element;
+					beforeEach(inject(function (_$compile_, _$rootScope_) {
+						$rootScope = _$rootScope_;
+						$rootScope.html = '<p>Test Contents</p>';
+						$rootScope.readonly = true;
+						element = _$compile_('<div ta-bind contenteditable="true" ta-readonly="readonly" ng-model="html"></div>')($rootScope);
+						$rootScope.$digest();
+					}));
+					
+					it('should update model', function(){
+						element.html('<div>Test 2 Content</div>');
+						$rootScope.updateTaBind();
+						$rootScope.$digest();
+						expect($rootScope.html).toBe('<p>Test Contents</p>');
+					});
+				});
+			});
+			
+			describe('from blur function', function(){
+				describe('on textarea', function(){
+					var $rootScope, element;
+					beforeEach(inject(function (_$compile_, _$rootScope_) {
+						$rootScope = _$rootScope_;
+						$rootScope.html = '<p>Test Contents</p>';
+						$rootScope.readonly = true;
+						element = _$compile_('<textarea ta-bind ta-readonly="readonly" ng-model="html"></textarea>')($rootScope);
+						$rootScope.$digest();
+					}));
+					
+					it('should update model', function(){
+						element.val('<div>Test 2 Content</div>');
+						element.trigger('blur');
+						$rootScope.$digest();
+						expect($rootScope.html).toBe('<p>Test Contents</p>');
+					});
+				});
+				
+				describe('on input', function(){
+					var $rootScope, element;
+					beforeEach(inject(function (_$compile_, _$rootScope_) {
+						$rootScope = _$rootScope_;
+						$rootScope.html = '<p>Test Contents</p>';
+						$rootScope.readonly = true;
+						element = _$compile_('<input ta-bind ta-readonly="readonly" ng-model="html"/>')($rootScope);
+						$rootScope.$digest();
+					}));
+					
+					it('should update model', function(){
+						element.val('<div>Test 2 Content</div>');
+						element.trigger('blur');
+						$rootScope.$digest();
+						expect($rootScope.html).toBe('<p>Test Contents</p>');
+					});
+				});
+			});
+			
+			describe('from keyup function', function(){
+				describe('on editable div', function(){
+					var $rootScope, element;
+					beforeEach(inject(function (_$compile_, _$rootScope_) {
+						$rootScope = _$rootScope_;
+						$rootScope.html = '<p>Test Contents</p>';
+						$rootScope.readonly = true;
+						element = _$compile_('<div ta-bind contenteditable="true" ta-readonly="readonly" ng-model="html"></div>')($rootScope);
+						$rootScope.$digest();
+					}));
+					
+					it('should update model', function(){
+						element.html('<div>Test 2 Content</div>');
+						element.trigger('keyup');
+						$rootScope.$digest();
+						expect($rootScope.html).toBe('<p>Test Contents</p>');
+					});
+				});
+			});
 		});
 	});
 });
