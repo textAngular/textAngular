@@ -318,6 +318,11 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 						scope.displayElements.html.attr('tabindex', attrs.tabindex);
 					}
 					
+					if (attrs.placeholder) {
+						scope.displayElements.text.attr('placeholder', attrs.placeholder);
+						scope.displayElements.html.attr('placeholder', attrs.placeholder);
+					}
+					
 					if(attrs.taDisabled){
 						scope.displayElements.text.attr('ta-readonly', 'disabled');
 						scope.displayElements.html.attr('ta-readonly', 'disabled');
@@ -548,21 +553,39 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 				
 				//this code is used to update the models when data is entered/deleted
 				if(_isInputFriendly){
-					element.on('keyup', function(){
-						if(!_isReadonly) ngModel.$setViewValue(_compileHtml());
-					});
 					element.on('paste cut', function(){
 						// timeout to next is needed as otherwise the paste/cut event has not finished actually changing the display
 						if(!_isReadonly) $timeout(function(){
 							ngModel.$setViewValue(_compileHtml());
 						}, 0);
 					});
-				}
-				
-				if(_isInputFriendly && !_isContentEditable){
-					element.on('change blur', function(){
-						if(!_isReadonly) ngModel.$setViewValue(_compileHtml());
-					});
+					
+					if(!_isContentEditable){
+						element.on('change blur', function(){
+							if(!_isReadonly) ngModel.$setViewValue(_compileHtml());
+						});
+					}else{
+						element.on('keyup', function(){
+							if(!_isReadonly) ngModel.$setViewValue(_compileHtml());
+						});
+						
+						element.on('blur', function(){
+							var val = _compileHtml();
+							if(val === '') element.addClass('placeholder-text');
+							if(!_isReadonly) ngModel.$setViewValue(_compileHtml());
+							ngModel.$render();
+						});
+						
+						// if is not a contenteditable the default placeholder logic can work - ie the HTML value itself
+						if (element.attr("placeholder")) {
+							// we start off not focussed on this element
+							element.addClass('placeholder-text');
+							element.on('focus', function(){
+								element.removeClass('placeholder-text');
+								ngModel.$render();
+							});
+						}
+					}
 				}
 				
 				// catch DOM XSS via taSanitize
@@ -584,7 +607,9 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 						var val = ngModel.$viewValue || '';
 						if(_isContentEditable){
 							// WYSIWYG Mode
-							element.html(val);
+							if (val === '' && element.attr('placeholder') && element.hasClass('placeholder-text'))
+									element.html(element.attr('placeholder'));
+							else element.html(val);
 							// if in WYSIWYG and readOnly we kill the use of links by clicking
 							if(!_isReadonly) element.find('a').on('click', function(e){
 								e.preventDefault();
