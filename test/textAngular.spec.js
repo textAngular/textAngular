@@ -3,6 +3,34 @@ describe('textAngular', function(){
 		Display Tests
 	*/
 	
+	describe('Minimal Initiation', function(){
+		'use strict';
+		var $rootScope, element;
+		beforeEach(module('textAngular'));
+		beforeEach(inject(function (_$compile_, _$rootScope_) {
+			$rootScope = _$rootScope_;
+			element = _$compile_('<text-angular><p>Test Content</p></text-angular>')($rootScope);
+			$rootScope.$digest();
+		}));
+		describe('Adds Correct Classes and Elements', function () {
+			it('add .ta-root to base element', function(){
+				expect(jQuery(element).hasClass('.ta-root'));
+			});
+			it('adds 2 .ta-editor elements', function(){
+				expect(jQuery('.ta-editor', element).length).toBe(2);
+			});
+			it('adds the WYSIWYG div', function(){
+				expect(jQuery('div.ta-text.ta-editor', element).length).toBe(1);
+			});
+			it('adds the textarea', function(){
+				expect(jQuery('textarea.ta-html.ta-editor', element).length).toBe(1);
+			});
+			it('no hidden form submission element', function(){
+				expect(jQuery('input[type=hidden][name=test]', element).length).toBe(0);
+			});
+		});
+	});
+	
 	describe('Basic Initiation without ng-model', function(){
 		'use strict';
 		var $rootScope, element;
@@ -26,8 +54,7 @@ describe('textAngular', function(){
 				expect(jQuery('textarea.ta-html.ta-editor', element).length).toBe(1);
 			});
 			it('adds one hidden form submission element', function(){
-				expect(jQuery('input[type=hidden]', element).length).toBe(1);
-				expect(jQuery('input[name=test]', element).length).toBe(1);
+				expect(jQuery('input[type=hidden][name=test]', element).length).toBe(1);
 			});
 		});
 	});
@@ -47,11 +74,11 @@ describe('textAngular', function(){
 				expect(!jQuery(element).hasClass('.test-focus-class'));
 			});
 			it('adds focus class when ta-text is focussed', function(){
-				jQuery('.ta-text', element).trigger('focus');
+				jQuery('.ta-text', element).triggerHandler('focus');
 				expect(jQuery(element).hasClass('.test-focus-class'));
 			});
 			it('adds focus class when ta-html is focussed', function(){
-				jQuery('.ta-html', element).trigger('focus');
+				jQuery('.ta-html', element).triggerHandler('focus');
 				expect(jQuery(element).hasClass('.test-focus-class'));
 			});
 			it('adds text editor class', function(){
@@ -82,7 +109,7 @@ describe('textAngular', function(){
 			$rootScope.$digest();
 		}));
 		it('should add .test-focus-class instead of default .focussed', function(){
-			jQuery('.ta-text', element).trigger('focus');
+			jQuery('.ta-text', element).triggerHandler('focus');
 			expect(jQuery(element).hasClass('.test-focus-class'));
 		});
 		it('adds text editor class', function(){
@@ -187,16 +214,32 @@ describe('textAngular', function(){
 			$rootScope = _$rootScope_;
 			element = _$compile_('<text-angular name="test"></text-angular>')($rootScope);
 			$rootScope.$digest();
-			element.trigger('focusin');
 		}));
 		
-		it('should have added .focussed', function(){
-			expect(jQuery(element).hasClass('focussed'));
+		describe('should have added .focussed', function(){
+			it('on trigger focus on ta-text', function(){
+				element.find('.ta-text').triggerHandler('focus');
+				expect(element.hasClass('focussed'));
+			});
+			it('on trigger focus on ta-html', function(){
+				element.find('.ta-html').triggerHandler('focus');
+				expect(element.hasClass('focussed'));
+			});
 		});
 		
-		it('should have removed .focussed', function(){
-			element.trigger('focusout');
-			expect(!jQuery(element).hasClass('focussed'));
+		describe('should have removed .focussed', function(){
+			it('on ta-text trigger blur', function(){	
+				element.find('.ta-text').triggerHandler('focus');
+				$rootScope.$digest();
+				element.find('.ta-text').triggerHandler('blur');
+				expect(!element.hasClass('focussed'));
+			});
+			it('on ta-html trigger blur', function(){
+				element.find('.ta-html').triggerHandler('focus');
+				$rootScope.$digest();
+				element.find('.ta-html').triggerHandler('blur');
+				expect(!element.hasClass('focussed'));
+			});
 		});
 	});
 	
@@ -310,7 +353,7 @@ describe('textAngular', function(){
 			element = _$compile_('<text-angular name="test"><p>Test Content</p></text-angular>')($rootScope);
 			$rootScope.$digest();
 			jQuery('.ta-text', element).html('<div>Test Change Content</div>');
-			jQuery('.ta-text', element).trigger('keyup');
+			jQuery('.ta-text', element).triggerHandler('keyup');
 			$rootScope.$digest();
 		}));
 		

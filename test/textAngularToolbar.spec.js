@@ -149,6 +149,50 @@ describe('textAngularToolbar', function(){
 		});
 	});
 	
+	describe('enables and disables from editor', function(){
+		var $rootScope, element, $timeout;
+		beforeEach(inject(function (_$compile_, _$rootScope_, _$timeout_) {
+			$timeout = _$timeout_;
+			$rootScope = _$rootScope_;
+			element = _$compile_('<text-angular name="test"></text-angular>')($rootScope);
+			$rootScope.$digest();
+		}));
+		
+		describe('should have activated all buttons', function(){
+			it('on trigger focus on ta-text', function(){
+				element.find('.ta-text').triggerHandler('focus');
+				$rootScope.$digest();
+				expect(element.find('button').attr('disabled')).toBeUndefined();
+			});
+			it('on trigger focus on ta-html', function(){
+				element.find('.ta-html').triggerHandler('focus');
+				$rootScope.$digest();
+				expect(element.find('button').attr('disabled')).toBeUndefined();
+			});
+		});
+		
+		describe('should have disabled all buttons', function(){
+			it('on ta-text trigger blur', function(){	
+				element.find('.ta-text').triggerHandler('focus');
+				$rootScope.$digest();
+				element.find('.ta-text').triggerHandler('blur');
+				$rootScope.$digest();
+				$timeout(function(){
+					expect(element.find('button').attr('disabled')).toBe('disabled');
+				}, 1);
+			});
+			it('on ta-html trigger blur', function(){
+				element.find('.ta-html').triggerHandler('focus');
+				$rootScope.$digest();
+				element.find('.ta-html').triggerHandler('blur');
+				$rootScope.$digest();
+				$timeout(function(){
+					expect(element.find('button').attr('disabled')).toBe('disabled');
+				}, 1);
+			});
+		});
+	});
+	
 	describe('registration', function(){
 		it('should add itself to the textAngularManager', inject(function($rootScope, $compile, textAngularManager){
 			$compile('<text-angular-toolbar name="test"></text-angular-toolbar>')($rootScope);
@@ -273,7 +317,7 @@ describe('textAngularToolbar', function(){
 			});
 		});
 		
-		describe('resetting the button display', function(){
+		describe('updating the button display', function(){
 			beforeEach(inject(function(textAngularManager){
 				textAngularManager.updateToolsDisplay({
 					'display': {
@@ -291,25 +335,78 @@ describe('textAngularToolbar', function(){
 					}
 				});
 				$rootScope.$digest();
-				textAngularManager.resetToolsDisplay();
+			}));
+			
+			it('should override the old display with the html in the new display attribute', function(){
+				expect($('div[name=display]', element).html()).toBe('Replaced Text');
+			});
+			
+			it('should display only new buttontext in the button', function(){
+				expect($('button[name=buttontext]', element).html()).toBe('otherstuff');
+			});
+			
+			it('should display only new icon in the button', function(){
+				expect($('button[name=iconclass]', element).html()).toBe('<i class="test-icon-class"></i>');
+			});
+			
+			it('should display both new icon and new buttontext in the button', function(){
+				expect($('button[name=iconandtext]', element).html()).toBe('<i class="test-icon-class"></i>&nbsp;otherstuff');
+			});
+		});
+		
+		describe('resetting part of the button display', function(){
+			beforeEach(inject(function(textAngularManager){
+				textAngularManager.updateToolsDisplay({
+					'display': {
+						display: '<div>Replaced Text</div>',
+						buttontext: 'This isnt a test'
+					},
+					'buttontext': {
+						buttontext: 'otherstuff',
+						iconclass: 'newest-test-class'
+					},
+					'iconclass': {
+						iconclass: 'test-icon-class',
+						buttontext: 'More text to insert'
+					}
+				});
+				$rootScope.$digest();
+				textAngularManager.updateToolsDisplay({
+					'display': {
+						display: null
+					},
+					'buttontext': {
+						buttontext: null
+					},
+					'iconclass': {
+						iconclass: null
+					}
+				});
 				$rootScope.$digest();
 			}));
 			
-			it('should reset to the origional display attribute', function(){
-				expect($('div[name=display]', element).html()).toBe('THIS IS A TEST DIV');
+			it('should remove the display attribute and follow the other rules', function(){
+				// note as it is reset this is now a button not a div
+				expect($('button[name=display]', element).html()).toBe('<i class="badclass"></i>&nbsp;This isnt a test');
 			});
 			
-			it('should reset to the origional buttontext in the button', function(){
-				expect($('button[name=buttontext]', element).html()).toBe('Only Text');
+			it('should remove the button text', function(){
+				expect($('button[name=buttontext]', element).html()).toBe('<i class="newest-test-class"></i>');
 			});
 			
-			it('should reset to the origional icon in the button', function(){
-				expect($('button[name=iconclass]', element).html()).toBe('<i class="onlyiconclass"></i>');
+			it('should remove the icon tag', function(){
+				expect($('button[name=iconclass]', element).html()).toBe('More text to insert');
 			});
 			
-			it('should reset to the origional both icon and buttontext in the button', function(){
-				expect($('button[name=iconandtext]', element).html()).toBe('<i class="iconclass"></i>&nbsp;good text');
-			});
+			it('should error on attempting to set all 3 to null', inject(function(textAngularManager){
+				expect(function(){
+					textAngularManager.updateToolsDisplay({'iconandtext': {
+						display: null,
+						buttontext: null,
+						iconclass: null
+					}});
+				}).toThrow('textAngular Error: Tool Definition for updating "iconandtext" does not have a valid display/iconclass/buttontext value');
+			}));
 		});
 	});
 		

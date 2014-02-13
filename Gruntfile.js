@@ -3,12 +3,13 @@ module.exports = function (grunt) {
 	// load all grunt tasks
 	grunt.loadNpmTasks('grunt-contrib-jshint');
 	grunt.loadNpmTasks('grunt-contrib-uglify');
+	grunt.loadNpmTasks('grunt-contrib-clean');
 	grunt.loadNpmTasks('grunt-istanbul-coverage');
 	grunt.loadNpmTasks('grunt-karma');
 	
 	// Default task.
 	grunt.registerTask('default', ['uglify','test']);
-	grunt.registerTask('test', ['jshint', 'karma', 'coverage']);
+	grunt.registerTask('test', ['clean', 'jshint', 'karma', 'coverage']);
 	
 	var testConfig = function (configFile, customOptions) {
 		var options = { configFile: configFile, keepalive: true };
@@ -18,6 +19,7 @@ module.exports = function (grunt) {
 	
 	// Project configuration.
 	grunt.initConfig({
+		clean: ["coverage/*"],
 		coverage: {
 		  options: {
 			thresholds: {

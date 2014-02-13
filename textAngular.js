@@ -710,10 +710,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 						var toolElement;
 						if(toolDefinition && toolDefinition.display){
 							toolElement = angular.element(toolDefinition.display);
-							toolScope._display = toolDefinition.display;
 						}
-						// this is used for when a manual display has been set and only something else has been changed
-						else if(toolScope._display) toolElement = angular.element(toolScope._display);
 						else toolElement = angular.element("<button type='button'>");
 						
 						toolElement.addClass(scope.classes.toolbarButton);
@@ -743,6 +740,8 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 								if(content && content !== '') toolElement.append('&nbsp;' + content);
 							}
 						}
+						
+						toolScope._lastToolDefinition = angular.copy(toolDefinition);
 						
 						return $compile(toolElement)(toolScope);
 					};
@@ -788,10 +787,9 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 							// init and add the tools to the group
 							// a tool name (key name from taTools struct)
 							//creates a child scope of the main angularText scope and then extends the childScope with the functions of this particular tool
-							var childScope = angular.extend(scope.$new(true), taTools[tool], defaultChildScope, {name: tool});
 							// reference to the scope and element kept
-							scope.tools[tool] = childScope;
-							scope.tools[tool].$element = setupToolElement(taTools[tool], childScope);
+							scope.tools[tool] = angular.extend(scope.$new(true), taTools[tool], defaultChildScope, {name: tool});
+							scope.tools[tool].$element = setupToolElement(taTools[tool], scope.tools[tool]);
 							// append the tool compiled with the childScope to the group element
 							groupElement.append(scope.tools[tool].$element);
 						});
@@ -800,28 +798,26 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 					});
 					
 					// update a tool
-					// if a value is set to null, remove from the display, if it's undefined return to the taTools definition.
-					scope.updateToolDisplay = function(key, _newTool){
-						var oldTool = taTools[key], toolInstance = scope.tools[key];
+					// if a value is set to null, remove from the display
+					// when forceNew is set to true it will ignore all previous settings, used to reset to taTools definition
+					// to reset to defaults pass in taTools[key] as _newTool and forceNew as true, ie `updateToolDisplay(key, taTools[key], true);`
+					scope.updateToolDisplay = function(key, _newTool, forceNew){
+						var toolInstance = scope.tools[key];
 						if(toolInstance){
+							// get the last toolDefinition, then override with the new definition
+							if(toolInstance._lastToolDefinition && !forceNew) _newTool = angular.extend({}, toolInstance._lastToolDefinition, _newTool);
+							if(_newTool.buttontext === null && _newTool.iconclass === null && _newTool.display === null)
+								throw('textAngular Error: Tool Definition for updating "' + key + '" does not have a valid display/iconclass/buttontext value');
+							
 							// if tool is defined on this toolbar, update/redo the tool
 							if(_newTool.buttontext === null){
 								delete _newTool.buttontext;
-							}else if(!_newTool.buttontext && oldTool.buttontext){
-								_newTool.buttontext = oldTool.buttontext;
 							}
-							
 							if(_newTool.iconclass === null){
 								delete _newTool.iconclass;
-							}else if(!_newTool.iconclass && oldTool.iconclass){
-								_newTool.iconclass = oldTool.iconclass;
 							}
-							
 							if(_newTool.display === null){
 								delete _newTool.display;
-								delete toolInstance._display;
-							}else if(!toolInstance._display && oldTool.display){
-								_newTool.display = oldTool.display;
 							}
 							
 							toolElement = setupToolElement(_newTool, toolInstance);
@@ -841,7 +837,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 	]).service('taToolExecuteAction', ['$q', function($q){
 		// this must be called on a toolScope or instance
 		return function(editor){
-			if(!this.$editor && editor) this.$editor = function(){ return editor; };
+			if(editor !== undefined) this.$editor = function(){ return editor; };
 			var deferred = $q.defer(),
 				promise = deferred.promise;
 			promise['finally'](this.$editor().endAction);
@@ -881,56 +877,62 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 					_registerToolbar: function(toolbarScope){
 						// add to the list late
 						if(this.toolbars.indexOf(toolbarScope.name) >= 0) _toolbars.push(toolbarScope);
-					}
-				};
-				// this is a suite of functions the editor should use to update all it's linked toolbars
-				return {
-					disable: function(){
-						// disable all linked toolbars
-						angular.forEach(_toolbars, function(toolbarScope){ toolbarScope.disabled = true; });
 					},
-					enable: function(){
-						// enable all linked toolbars
-						angular.forEach(_toolbars, function(toolbarScope){ toolbarScope.disabled = false; });
-					},
-					focus: function(){
-						// this should be called when the editor is focussed
-						angular.forEach(_toolbars, function(toolbarScope){
-							toolbarScope._parent = scope;
-							toolbarScope.disabled = false;
-							toolbarScope.focussed = true;
-						});
-					},
-					unfocus: function(){
-						// this should be called when the editor becomes unfocussed
-						angular.forEach(_toolbars, function(toolbarScope){
-							toolbarScope.disabled = true;
-							toolbarScope.focussed = false;
-						});
-					},
-					updateSelectedStyles: function(rangyRange){
-						// rangyRange will only be populated if the rangy library is included
-						// update the active state of all buttons on liked toolbars
-						angular.forEach(_toolbars, function(toolbarScope){
-							angular.forEach(toolbarScope.tools, function(toolScope){
-								if(toolScope.activeState){
-									toolScope.active = toolScope.activeState(rangyRange);
+					// this is a suite of functions the editor should use to update all it's linked toolbars
+					editorFunctions: {
+						disable: function(){
+							// disable all linked toolbars
+							angular.forEach(_toolbars, function(toolbarScope){ toolbarScope.disabled = true; });
+						},
+						enable: function(){
+							// enable all linked toolbars
+							angular.forEach(_toolbars, function(toolbarScope){ toolbarScope.disabled = false; });
+						},
+						focus: function(){
+							// this should be called when the editor is focussed
+							angular.forEach(_toolbars, function(toolbarScope){
+								toolbarScope._parent = scope;
+								toolbarScope.disabled = false;
+								toolbarScope.focussed = true;
+							});
+						},
+						unfocus: function(){
+							// this should be called when the editor becomes unfocussed
+							angular.forEach(_toolbars, function(toolbarScope){
+								toolbarScope.disabled = true;
+								toolbarScope.focussed = false;
+							});
+						},
+						updateSelectedStyles: function(rangyRange){
+							// rangyRange will only be populated if the rangy library is included
+							// update the active state of all buttons on liked toolbars
+							angular.forEach(_toolbars, function(toolbarScope){
+								angular.forEach(toolbarScope.tools, function(toolScope){
+									if(toolScope.activeState){
+										toolScope.active = toolScope.activeState(rangyRange);
+									}
+								});
+							});
+						},
+						sendKeyCommand: function(event){
+							// we return true if we applied an action, false otherwise
+							var result = false;
+							if(event.ctrlKey || event.metaKey) angular.forEach(taTools, function(tool, name){
+								if(tool.commandKeyCode && tool.commandKeyCode === event.which){
+									for(var _t = 0; _t < _toolbars.length; _t++){
+										if(_toolbars[_t].tools[name] !== undefined){
+											taToolExecuteAction.call(_toolbars[_t].tools[name], scope);
+											result = true;
+											break;
+										}
+									}
 								}
 							});
-						});
-					},
-					sendKeyCommand: function(event){
-						// we return true if we applied an action, false otherwise
-						var result = false;
-						if(event.ctrlKey || event.metaKey) angular.forEach(taTools, function(tool){
-							if(tool.commandKeyCode && tool.commandKeyCode === event.which){
-								taToolExecuteAction.call(tool, scope);
-								result = true;
-							}
-						});
-						return result;
+							return result;
+						}
 					}
 				};
+				return editors[name].editorFunctions;
 			},
 			// retrieve editor by name, largely used by testing suites only
 			retrieveEditor: function(name){
@@ -996,10 +998,12 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 			// update a tool on a specific toolbar
 			updateToolbarToolDisplay: function(toolbarKey, toolKey, _newTool){
 				if(toolbars[toolbarKey]) toolbars[toolbarKey].updateToolDisplay(toolKey, _newTool);
+				else throw('textAngular Error: No Toolbar with name "' + toolbarKey + '" exists');
 			},
 			// reset a tool on a specific toolbar to it's default starting value
 			resetToolbarToolDisplay: function(toolbarKey, toolKey){
-				if(toolbars[toolbarKey]) toolbars[toolbarKey].updateToolDisplay(toolKey, taTools[toolKey]);
+				if(toolbars[toolbarKey]) toolbars[toolbarKey].updateToolDisplay(toolKey, taTools[toolKey], true);
+				else throw('textAngular Error: No Toolbar with name "' + toolbarKey + '" exists');
 			},
 			// this is used when externally the html of an editor has been changed and textAngular needs to be notified to update the model.
 			// this will call a $digest if not already happening
