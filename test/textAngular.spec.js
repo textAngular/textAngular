@@ -175,32 +175,33 @@ describe('textAngular', function(){
 	
 	describe('Check view change', function(){
 		'use strict';
-		var $rootScope, element;
+		var $rootScope, element, editorScope;
 		beforeEach(module('textAngular'));
-		beforeEach(inject(function (_$compile_, _$rootScope_) {
+		beforeEach(inject(function (_$compile_, _$rootScope_, textAngularManager) {
 			$rootScope = _$rootScope_;
 			element = _$compile_('<text-angular name="test"></text-angular>')($rootScope);
 			$rootScope.$digest();
+			editorScope = textAngularManager.retrieveEditor('test').scope;
 		}));
 		
 		it('initially should hide .ta-html and show .ta-text', function(){
-			expect(jQuery('.ta-text', element).is(':visible'));
+			expect(jQuery('.ta-text', element).is(':visible:focus'));
 			expect(!jQuery('.ta-html', element).is(':visible'));
 		});
 		
 		describe('from WYSIWYG text to RAW HTML view', function () {
 			it('should hide .ta-text and show .ta-html', function(){
-				jQuery("button[name=html]").click();
+				editorScope.switchView();
 				expect(!jQuery('.ta-text', element).is(':visible'));
-				expect(jQuery('.ta-html', element).is(':visible'));
+				expect(jQuery('.ta-html', element).is(':visible:focus'));
 			});
 		});
 		
 		describe('from RAW HTML to WYSIWYG text view', function () {
 			it('should hide .ta-html and show .ta-text', function(){
-				jQuery("button[name=html]").click();
-				jQuery("button[name=html]").click();
-				expect(jQuery('.ta-text', element).is(':visible'));
+				editorScope.switchView();
+				editorScope.switchView();
+				expect(jQuery('.ta-text', element).is(':visible:focus'));
 				expect(!jQuery('.ta-html', element).is(':visible'));
 			});
 		});
@@ -239,6 +240,26 @@ describe('textAngular', function(){
 				$rootScope.$digest();
 				element.find('.ta-html').triggerHandler('blur');
 				expect(!element.hasClass('focussed'));
+			});
+		});
+	});
+	
+	describe('Check placeholder passthrough', function(){
+		'use strict';
+		var $rootScope, element;
+		beforeEach(module('textAngular'));
+		beforeEach(inject(function (_$compile_, _$rootScope_) {
+			$rootScope = _$rootScope_;
+			element = _$compile_('<text-angular name="test" placeholder="Test Placeholder"></text-angular>')($rootScope);
+			$rootScope.$digest();
+		}));
+		
+		describe('should have added placeholder to', function(){
+			it('.ta-text', function(){
+				expect(element.find('.ta-text').attr('placeholder')).toBe('Test Placeholder');
+			});
+			it('.ta-html', function(){
+				expect(element.find('.ta-html').attr('placeholder')).toBe('Test Placeholder');
 			});
 		});
 	});
@@ -469,6 +490,240 @@ describe('textAngular', function(){
 				$rootScope.$digest();
 				expect(jQuery('.ta-text', element).html()).toBe('');
 			}));
+		});
+	});
+	
+	describe('should have correct startAction and endAction functions', function(){
+		'use strict';
+		describe('should work with rangy loaded', function(){
+			beforeEach(module('textAngular'));
+			
+			it('should have rangy loaded with save-restore module', function(){
+				expect(window.rangy).toBeDefined();
+				expect(window.rangy.saveSelection).toBeDefined();
+			});
+			var editorScope, element, sel, range;
+			beforeEach(inject(function($compile, $rootScope, textAngularManager, $document){
+				$rootScope.htmlcontent = '<p>Lorem ipsum dolor sit amet, <i>consectetur adipisicing</i> elit, <strong>sed do eiusmod tempor incididunt</strong> ut labore et dolore magna aliqua.</p>';
+				element = $compile('<text-angular name="test" ng-model="htmlcontent">Test Contents2</text-angular>')($rootScope);
+				$document.find('body').append(element);
+				$rootScope.$digest();
+				editorScope = textAngularManager.retrieveEditor('test').scope;
+				// setup selection
+				sel = window.rangy.getSelection();
+				range = window.rangy.createRangyRange();
+				range.selectNodeContents(element.find('.ta-text p strong')[0]);
+				sel.setSingleRange(range);
+			}));
+			afterEach(function(){
+				element.remove();
+			});
+			describe('startAction should return a function that will restore a selection', function(){
+				it('should start with the correct selection', function(){
+					expect(sel.getRangeAt(0).toHtml()).toBe('sed do eiusmod tempor incididunt');
+				});
+				
+				it('should set _actionRunning to true', function(){
+					editorScope.startAction();
+					expect(editorScope._actionRunning);
+				});
+				
+				it('should return a function that resets the selection', function(){
+					var resetFunc = editorScope.startAction();
+					expect(sel.toHtml()).toBe('sed do eiusmod tempor incididunt');
+					// change selection
+					var range = window.rangy.createRangyRange();
+					range.selectNodeContents(element.find('.ta-text p i')[0]);
+					sel.setSingleRange(range);
+					sel.refresh();
+					expect(sel.toHtml()).toBe('consectetur adipisicing');
+					// reset selection
+					resetFunc();
+					sel.refresh();
+					expect(sel.toHtml()).toBe('sed do eiusmod tempor incididunt');
+				});
+			});
+			
+			describe('endAction should remove the ability to restore selection', function(){
+				it('shouldn\'t affect the selection', function(){
+					editorScope.startAction();
+					editorScope.endAction();
+					expect(sel.toHtml()).toBe('sed do eiusmod tempor incididunt');
+				});
+				
+				it('shouldn\'t restore the selection', function(){
+					var resetFunc = editorScope.startAction();
+					editorScope.endAction();
+					var range = window.rangy.createRangyRange();
+					range.selectNodeContents(element.find('.ta-text p i')[0]);
+					sel.setSingleRange(range);
+					sel.refresh();
+					expect(sel.toHtml()).toBe('consectetur adipisicing');
+					// reset selection - should do nothing now
+					resetFunc();
+					sel.refresh();
+					expect(sel.toHtml()).toBe('consectetur adipisicing');
+				});
+			});
+		});
+		
+		describe('should work without rangy loaded', function(){
+			var _rangy;
+			beforeEach(function(){
+				// used for testing
+				_rangy = window.rangy;
+				window.rangy = undefined;
+			});
+			afterEach(function(){
+				window.rangy = _rangy;
+			});
+			beforeEach(module('textAngular'));
+			
+			it('should NOT have rangy loaded with save-restore module', function(){
+				expect(window.rangy).not.toBeDefined();
+			});
+			
+			var editorScope, element;
+			beforeEach(inject(function($compile, $rootScope, textAngularManager, $document){
+				$rootScope.htmlcontent = '<p>Lorem ipsum dolor sit amet, <i>consectetur adipisicing</i> elit, <strong>sed do eiusmod tempor incididunt</strong> ut labore et dolore magna aliqua.</p>';
+				element = $compile('<text-angular name="test" ng-model="htmlcontent">Test Contents2</text-angular>')($rootScope);
+				$document.find('body').append(element);
+				$rootScope.$digest();
+				editorScope = textAngularManager.retrieveEditor('test').scope;
+				// setup selection
+				var sel = _rangy.getSelection();
+				var range = _rangy.createRangyRange();
+				range.selectNodeContents(element.find('.ta-text p strong')[0]);
+				sel.setSingleRange(range);
+			}));
+			
+			it('should set the variables correctly and NOT error', function(){
+				var resultFunc;
+				expect(function(){
+					resultFunc = editorScope.startAction();
+				}).not.toThrow();
+				expect(resultFunc).not.toBeDefined();
+				expect(editorScope._actionRunning);
+				expect(function(){
+					editorScope.endAction();
+				}).not.toThrow();
+			});
+		});
+	});
+	
+	describe('Toolbar interaction functions work', function(){
+		beforeEach(module('textAngular'));
+		var editorScope, element, sel, range;
+		beforeEach(inject(function(taRegisterTool, taOptions){
+			taRegisterTool('testbutton', {
+				buttontext: 'reactive action',
+				action: function(){
+					return this.$element.attr('hit-this', 'true');
+				},
+				commandKeyCode: 21,
+				activeState: function(){ return true; }
+			});
+			taOptions.toolbar = [
+				['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'pre', 'quote', 'testbutton'],
+				['bold', 'italics', 'underline', 'ul', 'ol', 'redo', 'undo', 'clear'],
+				['justifyLeft','justifyCenter','justifyRight'],
+				['html', 'insertImage', 'insertLink', 'unlink']
+			];
+		}));
+		beforeEach(inject(function($compile, $rootScope, textAngularManager, $document){
+			$rootScope.htmlcontent = '<p>Lorem ipsum <u>dolor sit amet<u>, consectetur <i>adipisicing elit, sed do eiusmod tempor incididunt</i> ut labore et dolore magna aliqua.</p>';
+			element = $compile('<text-angular name="test" ng-model="htmlcontent">Test Contents2</text-angular>')($rootScope);
+			$document.find('body').append(element);
+			editorScope = textAngularManager.retrieveEditor('test').scope;
+			textAngularManager.retrieveEditor('test').editorFunctions.focus();
+			$rootScope.$digest();
+			// setup selection
+			sel = window.rangy.getSelection();
+			range = window.rangy.createRangyRange();
+			range.selectNodeContents(element.find('.ta-text p i')[0]);
+			sel.setSingleRange(range);
+		}));
+		afterEach(function(){
+			element.remove();
+		});
+		
+		it('keypress should call sendKeyCommand', function(){
+			element.find('.ta-text').trigger({type: 'keypress', metaKey: true, which: 21});
+			editorScope.$parent.$digest();
+			expect(element.find('.ta-toolbar button[name=testbutton]').attr('hit-this')).toBe('true');
+		});
+		
+		describe('wrapSelection', function(){
+			it('should wrap the selected text in tags', function(){
+				editorScope.wrapSelection('bold');
+				expect(element.find('.ta-text p i').html()).toBe('<b>adipisicing elit, sed do eiusmod tempor incididunt</b>');
+			});
+			
+			it('should unwrap the selected text in tags on re-call', function(){
+				editorScope.wrapSelection('bold');
+				editorScope.wrapSelection('bold');
+				expect(element.find('.ta-text p i').html()).toBe('adipisicing elit, sed do eiusmod tempor incididunt');
+			});
+		});
+		
+		describe('queryFormatBlockState', function(){
+			it('should return true if formatted', function(){
+				editorScope.wrapSelection("formatBlock", "<PRE>");
+				expect(editorScope.queryFormatBlockState('PRE'));
+			});
+			it('should return false if un-formatted', function(){
+				editorScope.wrapSelection("formatBlock", "<PRE>");
+				expect(editorScope.queryFormatBlockState('p'));
+			});
+		});
+		
+		describe('updating styles', function(){
+			var iButton;
+			beforeEach(function(){
+				//find italics button
+				iButton = element.find('button[name=italics]');
+			});
+			
+			it('should be initially active when selected', function(){
+				expect(iButton.hasClass('active'));
+			});
+			
+			it('should change on keypress', function(){
+				range.selectNodeContents(element.find('.ta-text p u')[0]);
+				sel.setSingleRange(range);
+				element.find('.ta-text').triggerHandler('keypress');
+				expect(!iButton.hasClass('active'));
+			});
+			
+			it('should change on keydown and stop on keyup', inject(function($timeout){
+				element.find('.ta-text').triggerHandler('keydown');
+				range.selectNodeContents(element.find('.ta-text p u')[0]);
+				sel.setSingleRange(range);
+				$timeout(function(){
+					expect(!iButton.hasClass('active'));
+					$timeout(function(){
+						range = window.rangy.createRangyRange();
+						range.selectNodeContents(element.find('.ta-text p i')[0]);
+						$timeout(function(){
+							expect(iButton.hasClass('active'));
+							element.find('.ta-text').triggerHandler('keydown');
+							$timeout(function(){
+								range.selectNodeContents(element.find('.ta-text p u')[0]);
+								$timeout(function(){
+									expect(iButton.hasClass('active'));
+								}, 201);
+							}, 201);
+						}, 201);
+					}, 201);
+				}, 201);
+			}));
+			
+			it('should change on mouseup', function(){
+				range.selectNodeContents(element.find('.ta-text p u')[0]);
+				sel.setSingleRange(range);
+				element.find('.ta-text').triggerHandler('mouseup');
+				expect(!iButton.hasClass('active'));
+			});
 		});
 	});
 });

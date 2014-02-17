@@ -355,7 +355,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 						if(window.rangy && window.rangy.saveSelection){
 							_savedSelection = window.rangy.saveSelection();
 							return function(){
-								window.rangy.restoreSelection(_savedSelection);
+								if(_savedSelection) window.rangy.restoreSelection(_savedSelection);
 							};
 						}
 					};
@@ -378,10 +378,10 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 					scope.displayElements.text.on('focus', _focusin);
 					_focusout = function(e){
 						$timeout(function(){
-							// if we have NOT focussed again on the text etc then fire the blur events
-							if(document.activeElement !== scope.displayElements.html[0] && document.activeElement !== scope.displayElements.text[0]){
+							// if we are NOT runnig an action and have NOT focussed again on the text etc then fire the blur events
+							if(!scope._actionRunning && document.activeElement !== scope.displayElements.html[0] && document.activeElement !== scope.displayElements.text[0]){
 								element.removeClass(scope.classes.focussed);
-								if(!scope._actionRunning) _toolbars.unfocus();
+								_toolbars.unfocus();
 								// to prevent multiple apply error defer to next seems to work.
 								$timeout(function(){ element.triggerHandler('blur'); }, 0);
 							}
@@ -395,9 +395,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 					// Setup the default toolbar tools, this way allows the user to add new tools like plugins.
 					// This is on the editor for future proofing if we find a better way to do this.
 					scope.queryFormatBlockState = function(command){
-						command = command.toLowerCase();
-						var val = document.queryCommandValue('formatBlock').toLowerCase();
-						return val === command || val === command;
+						return command.toLowerCase() === document.queryCommandValue('formatBlock').toLowerCase();
 					};
 					scope.switchView = function(){
 						scope.showHtml = !scope.showHtml;
@@ -503,15 +501,15 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 					scope.displayElements.text.on('keyup', _keyup);
 					// stop updating on key up and update the display/model
 					_keypress = function(event){
-						if(_toolbars.sendKeyCommand(event)){
-							if(!scope._bUpdateSelectedStyles){
-								scope.$apply(function(){
+						scope.$apply(function(){
+							if(_toolbars.sendKeyCommand(event)){
+								if(!scope._bUpdateSelectedStyles){
 									scope.updateSelectedStyles();
-								});
+								}
+								event.preventDefault();
+								return false;
 							}
-							event.preventDefault();
-							return false;
-						}
+						});
 					};
 					scope.displayElements.html.on('keypress', _keypress);
 					scope.displayElements.text.on('keypress', _keypress);
@@ -561,17 +559,19 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 					});
 					
 					if(!_isContentEditable){
+						// if a textarea or input just add in change and blur handlers, everything else is done by angulars input directive
 						element.on('change blur', function(){
 							if(!_isReadonly) ngModel.$setViewValue(_compileHtml());
 						});
 					}else{
+						// all the code specific to contenteditable divs
 						element.on('keyup', function(){
 							if(!_isReadonly) ngModel.$setViewValue(_compileHtml());
 						});
 						
 						element.on('blur', function(){
 							var val = _compileHtml();
-							if(val === '') element.addClass('placeholder-text');
+							if(val === '' && element.attr("placeholder")) element.addClass('placeholder-text');
 							if(!_isReadonly) ngModel.$setViewValue(_compileHtml());
 							ngModel.$render();
 						});
@@ -864,12 +864,15 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 		return function(editor){
 			if(editor !== undefined) this.$editor = function(){ return editor; };
 			var deferred = $q.defer(),
-				promise = deferred.promise;
-			promise['finally'](this.$editor().endAction);
+				promise = deferred.promise,
+				_editor = this.$editor();
+			promise['finally'](function(){
+				_editor.endAction.call(_editor);
+			});
 			// pass into the action the deferred function and also the function to reload the current selection if rangy available
 			var result;
 			try{
-				result = this.action(deferred, this.$editor().startAction());
+				result = this.action(deferred, _editor.startAction());
 			}catch(any){}
 			if(result || result === undefined){
 				// if true or undefined is returned then the action has finished. Otherwise the deferred action will be resolved manually.
