@@ -58,12 +58,11 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 			disabled: [function()]?
 					if this function returns true then the tool will have the class taOptions.classes.disabled applied to it, else it will be removed
 		Other functions available on the scope are:
-			displayActiveToolClass: [function(boolean)] 
 			name: [string]
 					the name of the tool, this is the first parameter passed into taRegisterTool
 			isDisabled: [function()]
 					returns true if the tool is disabled, false if it isn't
-			displayActiveToolClass: [function()]
+			displayActiveToolClass: [function(boolean)]
 					returns true if the tool is 'active' in the currently focussed toolbar
 	*/
 	// name and toolDefinition to add into the tools available to be added on the toolbar
@@ -172,7 +171,8 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 			},
 			activeState: function(commonElement){
 				var result = false;
-				if(commonElement) result = commonElement.css('text-align') === 'left' || commonElement.css('text-align') === '';
+				if(commonElement) result = commonElement.css('text-align') === 'left' || commonElement.attr('align') === 'left' ||
+					(commonElement.css('text-align') !== 'right' && commonElement.css('text-align') !== 'center' && !document.queryCommandState('justifyRight') && !document.queryCommandState('justifyCenter'));
 				result = result || document.queryCommandState('justifyLeft');
 				return result;
 			}
@@ -475,7 +475,8 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 					// loop through all the tools polling their activeState function if it exists
 					scope.updateSelectedStyles = function(){
 						var _ranges;
-						if(window.rangy && window.rangy.getSelection && (_ranges = window.rangy.getSelection().getAllRanges()).length === 1){
+						// test if rangy exists and if the common element ISN'T the root ta-text node
+						if(window.rangy && window.rangy.getSelection && (_ranges = window.rangy.getSelection().getAllRanges()).length === 1 && _ranges[0].commonAncestorContainer.parentNode !== scope.displayElements.text[0]){
 							_toolbars.updateSelectedStyles(angular.element(_ranges[0].commonAncestorContainer.parentNode));
 						}else _toolbars.updateSelectedStyles();
 						// used to update the active state when a key is held down, ie the left arrow
@@ -525,7 +526,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 				}
 			};
 		}
-	]).directive('taBind', ['taSanitize', '$timeout', function(taSanitize, $timeout){
+	]).directive('taBind', ['taSanitize', '$timeout', 'taFixChrome', function(taSanitize, $timeout, taFixChrome){
 		// Uses for this are textarea or input with ng-model and ta-bind='text'
 		// OR any non-form element with contenteditable="contenteditable" ta-bind="html|text" ng-model
 		return {
@@ -590,7 +591,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 				// catch DOM XSS via taSanitize
 				// Sanitizing both ways is identical
 				var _sanitize = function(unsafe){
-					return (ngModel.$oldViewValue = taSanitize(unsafe, ngModel.$oldViewValue));
+					return (ngModel.$oldViewValue = taSanitize(taFixChrome(unsafe), ngModel.$oldViewValue));
 				};
 				
 				// parsers trigger from the above keyup function or any other time that the viewValue is updated and parses it for storage in the ngModel
@@ -668,7 +669,32 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 				}
 			}
 		};
-	}]).factory('taSanitize', ['$sanitize', function taSanitizeFactory($sanitize){
+	}]).factory('taFixChrome', function(){
+		// get whaterever rubbish is inserted in chrome
+		// should be passed an html string, returns an html string
+		var taFixChrome = function(html){
+			// default wrapper is a span so find all of them
+			var $html = angular.element('<div>' + html + '</div>');
+			var spans = angular.element($html).find('span');
+			for(var s = 0; s < spans.length; s++){
+				var span = angular.element(spans[s]);
+				// chrome specific string that gets inserted into the style attribute, other parts may vary. Second part is specific ONLY to hitting backspace in Headers
+				if(span.attr('style') && span.attr('style').match(/line-height: 1.428571429;|color: inherit; line-height: 1.1;/i)){
+					span.attr('style', span.attr('style').replace(/( |)font-family: inherit;|( |)line-height: 1.428571429;|( |)line-height:1.1;|( |)color: inherit;/ig, '').trim());
+					if(!span.attr('style') || span.attr('style') === ''){
+						if(span.next().length > 0 && span.next()[0].tagName === 'BR') span.next().remove();
+						span.replaceWith(span.html());
+					}
+				}
+			}
+			// regex to replace ONLY offending styles - these can be inserted into various other tags on delete
+			var result = $html.html().replace(/style="[^"]*?(line-height: 1.428571429;|color: inherit; line-height: 1.1;)[^"]*"/ig, '');
+			// only replace when something has changed, else we get focus problems on inserting lists
+			if(result !== $html.html()) $html.html(result);
+			return $html.html();
+		};
+		return taFixChrome;
+	}).factory('taSanitize', ['$sanitize', function taSanitizeFactory($sanitize){
 		// recursive function that returns an array of angular.elements that have the passed attribute set on them
 		function getByAttribute(element, attribute){
 			var resultingElements = [];
