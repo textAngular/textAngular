@@ -12,7 +12,6 @@ if(!window.console) console = {log: function() {}}; // fixes IE console undefine
 var textAngular = angular.module("textAngular", ['ngSanitize']); //This makes ngSanitize required
 
 textAngular.directive("textAngular", ['$compile', '$window', '$document', '$rootScope', '$timeout', function($compile, $window, $document, $rootScope, $timeout) {
-	console.log("Thank you for using textAngular! http://www.textangular.com")
 	// deepExtend instead of angular.extend in order to allow easy customization of "display" for default buttons
 	// snatched from: http://stackoverflow.com/a/15311794/2966847
 	function deepExtend(destination, source) {
