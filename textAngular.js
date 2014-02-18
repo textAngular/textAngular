@@ -197,7 +197,7 @@ textAngular.directive("textAngular", ['$compile', '$window', '$document', '$root
 			action: function() {
 				var imageLink;
 				imageLink = prompt("Please enter an image URL to insert", 'http://');
-				if (imageLink !== '') {
+                if (imageLink !== 'http://' && imageLink !== '') {
 					return this.$parent.wrapSelection('insertImage', imageLink);
 				}
 			}
