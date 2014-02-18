@@ -264,9 +264,8 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 	}]);
 	
 	textAngular.directive("textAngular", [
-		'$compile', '$timeout', '$log', 'taOptions', 'taSanitize', 'textAngularManager',
-		function($compile, $timeout, $log, taOptions, taSanitize, textAngularManager){
-			$log.info("Thank you for using textAngular! http://www.textangular.com");
+		'$compile', '$timeout', 'taOptions', 'taSanitize', 'textAngularManager',
+		function($compile, $timeout, taOptions, taSanitize, textAngularManager){
 			return {
 				require: '?ngModel',
 				scope: {},
