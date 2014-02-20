@@ -58,6 +58,19 @@ describe('textAngularManager', function(){
 				$rootScope.$digest();
 			}));
 			
+			describe('throws error on no toolbar', function(){
+				it('when update tool', function(){
+					expect(function(){
+						textAngularManager.updateToolbarToolDisplay('test', 'h1', {iconclass: 'test-icon-class'});
+					}).toThrow('textAngular Error: No Toolbar with name "test" exists');
+				});
+				it('when reset tool', function(){
+					expect(function(){
+						textAngularManager.resetToolbarToolDisplay('test', 'h1');
+					}).toThrow('textAngular Error: No Toolbar with name "test" exists');
+				});
+			});
+			
 			describe('single toolbar', function(){
 				// we test these by adding an icon with a specific class and then testing for it's existance
 				it('should update only one button on one toolbar', function(){
@@ -166,64 +179,161 @@ describe('textAngularManager', function(){
 			beforeEach(inject(function(_textAngularManager_){
 				textAngularManager = _textAngularManager_;
 			}));
-			beforeEach(inject(function (_$compile_, _$rootScope_) {
-				$rootScope = _$rootScope_;
-				$rootScope.htmlcontent = '<p>Test Content</p>';
-				textAngularManager.registerToolbar((testbar1 = {name: 'testbar1', disabled: true}));
-				textAngularManager.registerToolbar((testbar2 = {name: 'testbar2', disabled: true}));
-				textAngularManager.registerToolbar((testbar3 = {name: 'testbar3', disabled: true}));
-				editorFuncs = textAngularManager.registerEditor('test', editorScope, ['testbar1','testbar2']);
-				$rootScope.$digest();
+			
+			describe('active state', function(){
+				beforeEach(inject(function (_$rootScope_) {
+					$rootScope = _$rootScope_;
+					textAngularManager.registerToolbar((testbar1 = {name: 'testbar1', disabled: true}));
+					textAngularManager.registerToolbar((testbar2 = {name: 'testbar2', disabled: true}));
+					textAngularManager.registerToolbar((testbar3 = {name: 'testbar3', disabled: true}));
+					editorFuncs = textAngularManager.registerEditor('test', editorScope, ['testbar1','testbar2']);
+					$rootScope.$digest();
+				}));
+				describe('focus', function(){
+					beforeEach(function(){
+						editorFuncs.focus();
+						$rootScope.$digest();
+					});
+					it('should set disabled to false on toolbars', function(){
+						expect(!testbar1.disabled);
+						expect(!testbar2.disabled);
+						expect(testbar3.disabled);
+					});
+					it('should set the active editor to the editor', function(){
+						expect(testbar1._parent).toBe(editorScope);
+						expect(testbar2._parent).toBe(editorScope);
+						expect(testbar3._parent).toNotBe(editorScope);
+					});
+				});
+				describe('unfocus', function(){
+					beforeEach(function(){
+						editorFuncs.unfocus();
+						$rootScope.$digest();
+					});
+					it('should set disabled to false on toolbars', function(){
+						expect(testbar1.disabled);
+						expect(testbar2.disabled);
+						expect(!testbar3.disabled);
+					});
+				});
+				describe('disable', function(){
+					beforeEach(function(){
+						editorFuncs.disable();
+						$rootScope.$digest();
+					});
+					it('should set disabled to false on toolbars', function(){
+						expect(testbar1.disabled).toBe(true);
+						expect(testbar2.disabled).toBe(true);
+						expect(testbar3.disabled).toBe(true);
+					});
+				});
+				describe('enable', function(){
+					beforeEach(function(){
+						editorFuncs.disable();
+						$rootScope.$digest();
+						editorFuncs.enable();
+						$rootScope.$digest();
+					});
+					it('should set disabled to false on toolbars', function(){
+						expect(testbar1.disabled).toBe(false);
+						expect(testbar2.disabled).toBe(false);
+						expect(testbar3.disabled).toBe(true);
+					});
+				});
+			});
+			
+			describe('actions passthrough', function(){
+				var editorScope, element;
+				beforeEach(inject(function(taRegisterTool, taOptions, _$rootScope_, _$compile_){
+					// add a tool that is ALLWAYS active
+					taRegisterTool('activeonrangyrange', {
+						buttontext: 'Active On Rangy Rangy',
+						action: function(){
+							return this.$element.attr('hit-this', 'true');
+						},
+						commandKeyCode: 21,
+						activeState: function(rangyrange){ return rangyrange !== undefined; }
+					});
+					taRegisterTool('inactiveonrangyrange', {
+						buttontext: 'Inactive On Rangy Rangy',
+						action: function(){
+							return this.$element.attr('hit-this', 'true');
+						},
+						commandKeyCode: 23,
+						activeState: function(rangyrange){ return rangyrange === undefined; }
+					});
+					taRegisterTool('noactivestate', {
+						buttontext: 'Shouldnt error, Shouldnt be active either',
+						action: function(){
+							return this.$element.attr('hit-this', 'true');
+						}
+					});
+					taOptions.toolbar = [['noactivestate','activeonrangyrange','inactiveonrangyrange']];
+					$rootScope = _$rootScope_;
+					element = _$compile_('<text-angular name="test"><p>Test Content</p></text-angular>')($rootScope);
+					$rootScope.$digest();
+					editorScope = textAngularManager.retrieveEditor('test');
+				}));
+				describe('updateSelectedStyles', function(){
+					describe('should activate buttons correctly', function(){
+						it('without rangyrange passed through', function(){
+							editorScope.editorFunctions.updateSelectedStyles();
+							$rootScope.$digest();
+							expect(element.find('.ta-toolbar button.active').length).toBe(1);
+						});
+						it('with rangyrange passed through', function(){
+							editorScope.editorFunctions.updateSelectedStyles({});
+							$rootScope.$digest();
+							expect(element.find('.ta-toolbar button.active').length).toBe(1);
+						});
+					});
+				});
+				
+				describe('sendKeyCommand', function(){
+					it('should return true if there is a relevantCommandKeyCode on a tool', function(){
+						expect(editorScope.editorFunctions.sendKeyCommand({metaKey: true, which: 21})).toBe(true);
+					});
+					
+					it('should call the action of the specified tool', function(){
+						editorScope.editorFunctions.sendKeyCommand({metaKey: true, which: 21});
+						$rootScope.$digest();
+						expect(element.find('.ta-toolbar button[name=activeonrangyrange]').attr('hit-this')).toBe('true');
+					});
+					
+					it('should react only when modifiers present', function(){
+						editorScope.editorFunctions.sendKeyCommand({which: 21});
+						$rootScope.$digest();
+						expect(element.find('.ta-toolbar button[name=activeonrangyrange]').attr('hit-this')).toBeUndefined();
+					});
+					
+					it('should react to metaKey', function(){
+						editorScope.editorFunctions.sendKeyCommand({metaKey: true, which: 21});
+						$rootScope.$digest();
+						expect(element.find('.ta-toolbar button[name=activeonrangyrange]').attr('hit-this')).toBe('true');
+					});
+					
+					it('should react to ctrlKey', function(){
+						editorScope.editorFunctions.sendKeyCommand({ctrlKey: true, which: 21});
+						$rootScope.$digest();
+						expect(element.find('.ta-toolbar button[name=activeonrangyrange]').attr('hit-this')).toBe('true');
+					});
+				});
+			});
+		});
+		
+		describe('linking toolbar to existing editor', function(){
+			it('should link when referenced', inject(function(textAngularManager) {
+				var scope = {name: 'test'};
+				textAngularManager.registerEditor('testeditor', {}, ['test']);
+				textAngularManager.registerToolbar(scope);
+				expect(textAngularManager.retrieveToolbarsViaEditor('testeditor')[0]).toBe(scope);
 			}));
-			describe('focus', function(){
-				beforeEach(function(){
-					editorFuncs.focus();
-					$rootScope.$digest();
-				});
-				it('should set disabled to false on toolbars', function(){
-					expect(!testbar1.disabled);
-					expect(!testbar2.disabled);
-					expect(testbar3.disabled);
-				});
-				it('should set the active editor to the editor', function(){
-					expect(testbar1._parent).toBe(editorScope);
-					expect(testbar2._parent).toBe(editorScope);
-					expect(testbar3._parent).toNotBe(editorScope);
-				});
-			});
-			describe('unfocus', function(){
-				beforeEach(function(){
-					editorFuncs.unfocus();
-					$rootScope.$digest();
-				});
-				it('should set disabled to false on toolbars', function(){
-					expect(testbar1.disabled);
-					expect(testbar2.disabled);
-					expect(!testbar3.disabled);
-				});
-			});
-			describe('enable', function(){
-				beforeEach(function(){
-					editorFuncs.disable();
-					$rootScope.$digest();
-				});
-				it('should set disabled to false on toolbars', function(){
-					expect(!testbar1.disabled);
-					expect(!testbar2.disabled);
-					expect(testbar3.disabled);
-				});
-			});
-			describe('disable', function(){
-				beforeEach(function(){
-					editorFuncs.disable();
-					$rootScope.$digest();
-				});
-				it('should set disabled to false on toolbars', function(){
-					expect(testbar1.disabled);
-					expect(testbar2.disabled);
-					expect(!testbar3.disabled);
-				});
-			});
+			it('should not link when not referenced', inject(function(textAngularManager) {
+				var scope = {name: 'test'};
+				textAngularManager.registerEditor('testeditor', {}, []);
+				textAngularManager.registerToolbar(scope);
+				expect(textAngularManager.retrieveToolbarsViaEditor('testeditor').length).toBe(0);
+			}));
 		});
 		
 		describe('updating', function(){

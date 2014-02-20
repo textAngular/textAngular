@@ -413,6 +413,7 @@
           replace(/>/g, '&gt;');
     }
 
+<<<<<<< HEAD
     // Custom logic for accepting certain style options only - textAngular
     // Currently allows only the color attribute, all other attributes should be easily done through classes.
     function validStyles(styleAttr) {
@@ -438,6 +439,104 @@
                     )
                 ) result += v[0].trim() + ': ' + v[1].trim() + ';';
             }
+=======
+/**
+ * Escapes all potentially dangerous characters, so that the
+ * resulting string can be safely inserted into attribute or
+ * element text.
+ * @param value
+ * @returns escaped text
+ */
+function encodeEntities(value) {
+  return value.
+    replace(/&/g, '&amp;').
+    replace(NON_ALPHANUMERIC_REGEXP, function(value){
+      return '&#' + value.charCodeAt(0) + ';';
+    }).
+    replace(/</g, '&lt;').
+    replace(/>/g, '&gt;');
+}
+
+var trim = (function() {
+  // native trim is way faster: http://jsperf.com/angular-trim-test
+  // but IE doesn't have it... :-(
+  // TODO: we should move this into IE/ES5 polyfill
+  if (!String.prototype.trim) {
+    return function(value) {
+      return angular.isString(value) ? value.replace(/^\s\s*/, '').replace(/\s\s*$/, '') : value;
+    };
+  }
+  return function(value) {
+    return angular.isString(value) ? value.trim() : value;
+  };
+})();
+
+// Custom logic for accepting certain style options only - textAngular
+// Currently allows only the color attribute, all other attributes should be easily done through classes.
+function validStyles(styleAttr){
+	var result = '';
+	var styleArray = styleAttr.split(';');
+	angular.forEach(styleArray, function(value){
+		var v = value.split(':');
+		if(v.length == 2){
+			var key = trim(angular.lowercase(v[0]));
+			var value = trim(angular.lowercase(v[1]));
+			if(
+				key === 'color' && (
+					value.match(/^rgb\([0-9%,\. ]*\)$/i)
+					|| value.match(/^rgba\([0-9%,\. ]*\)$/i)
+					|| value.match(/^hsl\([0-9%,\. ]*\)$/i)
+					|| value.match(/^hsla\([0-9%,\. ]*\)$/i)
+					|| value.match(/^#[0-9a-f]{3,6}$/i)
+					|| value.match(/^[a-z]*$/i)
+				)
+			||
+				key === 'text-align' && (
+					value === 'left'
+					|| value === 'right'
+					|| value === 'center'
+					|| value === 'justify'
+				)
+			) result += key + ': ' + value + ';';
+		}
+	});
+	return result;
+}
+
+/**
+ * create an HTML/XML writer which writes to buffer
+ * @param {Array} buf use buf.jain('') to get out sanitized html string
+ * @returns {object} in the form of {
+ *     start: function(tag, attrs, unary) {},
+ *     end: function(tag) {},
+ *     chars: function(text) {},
+ *     comment: function(text) {}
+ * }
+ */
+function htmlSanitizeWriter(buf, uriValidator){
+  var ignore = false;
+  var out = angular.bind(buf, buf.push);
+  return {
+    start: function(tag, attrs, unary){
+      tag = angular.lowercase(tag);
+      if (!ignore && specialElements[tag]) {
+        ignore = tag;
+      }
+      if (!ignore && validElements[tag] === true) {
+        out('<');
+        out(tag);
+        angular.forEach(attrs, function(value, key){
+          var lkey=angular.lowercase(key);
+          var isImage=(tag === 'img' && lkey === 'src') || (lkey === 'background');
+          if ((lkey === 'style' && (value = validStyles(value)) !== '') || validAttrs[lkey] === true &&
+            (uriAttrs[lkey] !== true || uriValidator(value, isImage))) {
+            out(' ');
+            out(key);
+            out('="');
+            out(encodeEntities(value));
+            out('"');
+          }
+>>>>>>> de9a8b7b96796e1a2d9972fcaeb915841c151fe6
         });
         return result;
     }

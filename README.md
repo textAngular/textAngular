@@ -12,7 +12,7 @@ Demo is available at: http://www.textangular.com
 
 1. [Bootstrap 3.x](http://getbootstrap.com/) for the default styles
 2. [Font-Awesome 4.x](http://fortawesome.github.io/Font-Awesome/) for the default icons on the toolbar
-3. [Rangy 1.x](https://code.google.com/p/rangy/) for better activeState detection and more dynamic plugins
+3. [Rangy 1.x](https://code.google.com/p/rangy/) for better activeState detection and more dynamic plugins, also the selectionsaverestore module.
 
 ### Usage
 
@@ -68,3 +68,4 @@ Including those from:
 * [kanakiyajay](https://github.com/kanakiyajay)
 * [kencaron](https://github.com/kencaron)
 * [gintau](https://github.com/gintau)
+* [uxtx](https://github.com/uxtx)
