@@ -24,7 +24,7 @@
   },
   "devDependencies": {
     "angular-mocks": "~1.x",
-    "jquery": ">= 1.9",
+    "jquery": "1.9.x",
     "bootstrap": "3.0.x",
     "font-awesome": "4.0.x",
     "rangy": "1.2.x"

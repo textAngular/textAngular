@@ -280,7 +280,10 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 					angular.extend(scope, angular.copy(taOptions), {
 						// wraps the selection in the provided tag / execCommand function. Should only be called in WYSIWYG mode.
 						wrapSelection: function(command, opt){
-							document.execCommand(command, false, opt);
+							// catch errors like FF erroring when you try to force an undo with nothing done
+							try{
+								document.execCommand(command, false, opt);
+							}catch(e){}
 							// refocus on the shown display element, this fixes a display bug when using :focus styles to outline the box.
 							// You still have focus on the text/html input it just doesn't show up
 							scope.displayElements.text[0].focus();
@@ -292,9 +295,9 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 					if(attrs.taTextEditorClass)			scope.classes.textEditor = attrs.taTextEditorClass;
 					if(attrs.taHtmlEditorClass)			scope.classes.htmlEditor = attrs.taHtmlEditorClass;
 					
-					_originalContents = element.html();
+					_originalContents = element[0].innerHTML;
 					// clear the original content
-					element.html('');
+					element[0].innerHTML = '';
 					
 					// Setup the HTML elements as variable references for use later
 					scope.displayElements = {
@@ -539,7 +542,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 				var _isReadonly = false;
 				// in here we are undoing the converts used elsewhere to prevent the < > and & being displayed when they shouldn't in the code.
 				var _compileHtml = function(){
-					if(_isContentEditable) return element.html();
+					if(_isContentEditable) return element[0].innerHTML;
 					if(_isInputFriendly) return element.val();
 					throw ('textAngular Error: attempting to update non-editable taBind');
 				};
@@ -608,8 +611,8 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 						if(_isContentEditable){
 							// WYSIWYG Mode
 							if (val === '' && element.attr('placeholder') && element.hasClass('placeholder-text'))
-									element.html(element.attr('placeholder'));
-							else element.html(val);
+									element[0].innerHTML = element.attr('placeholder');
+							else element[0].innerHTML = val;
 							// if in WYSIWYG and readOnly we kill the use of links by clicking
 							if(!_isReadonly) element.find('a').on('click', function(e){
 								e.preventDefault();
@@ -617,7 +620,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 							});
 						}else if(element[0].tagName.toLowerCase() !== 'textarea' && element[0].tagName.toLowerCase() !== 'input'){
 							// make sure the end user can SEE the html code as a display.
-							element.html(val);
+							element[0].innerHTML = val;
 						}else{
 							// only for input and textarea inputs
 							element.val(val);
@@ -680,18 +683,18 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 				var span = angular.element(spans[s]);
 				// chrome specific string that gets inserted into the style attribute, other parts may vary. Second part is specific ONLY to hitting backspace in Headers
 				if(span.attr('style') && span.attr('style').match(/line-height: 1.428571429;|color: inherit; line-height: 1.1;/i)){
-					span.attr('style', span.attr('style').replace(/( |)font-family: inherit;|( |)line-height: 1.428571429;|( |)line-height:1.1;|( |)color: inherit;/ig, '').trim());
+					span.attr('style', span.attr('style').replace(/( |)font-family: inherit;|( |)line-height: 1.428571429;|( |)line-height:1.1;|( |)color: inherit;/ig, ''));
 					if(!span.attr('style') || span.attr('style') === ''){
 						if(span.next().length > 0 && span.next()[0].tagName === 'BR') span.next().remove();
-						span.replaceWith(span.html());
+						span.replaceWith(span[0].innerHTML);
 					}
 				}
 			}
 			// regex to replace ONLY offending styles - these can be inserted into various other tags on delete
-			var result = $html.html().replace(/style="[^"]*?(line-height: 1.428571429;|color: inherit; line-height: 1.1;)[^"]*"/ig, '');
+			var result = $html[0].innerHTML.replace(/style="[^"]*?(line-height: 1.428571429;|color: inherit; line-height: 1.1;)[^"]*"/ig, '');
 			// only replace when something has changed, else we get focus problems on inserting lists
-			if(result !== $html.html()) $html.html(result);
-			return $html.html();
+			if(result !== $html[0].innerHTML) $html[0].innerHTML = result;
+			return $html[0].innerHTML;
 		};
 		return taFixChrome;
 	}).factory('taSanitize', ['$sanitize', function taSanitizeFactory($sanitize){
@@ -719,7 +722,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 			});
 			
 			// get the html string back
-			unsafe = unsafeElement.html();
+			unsafe = unsafeElement[0].innerHTML;
 			var safe;
 			try {
 				safe = $sanitize(unsafe);
@@ -748,7 +751,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 					
 					scope.disabled = true;
 					scope.focussed = false;
-					element.html('');
+					element[0].innerHTML = '';
 					element.addClass("ta-toolbar " + scope.classes.toolbar);
 					
 					scope.$watch('focussed', function(){
@@ -778,14 +781,14 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 						});
 						if(toolDefinition && !toolDefinition.display && !toolScope._display){
 							// first clear out the current contents if any
-							toolElement.html('');
+							toolElement[0].innerHTML = '';
 							// add the buttonText
-							if(toolDefinition.buttontext) toolElement.html(toolDefinition.buttontext);
+							if(toolDefinition.buttontext) toolElement[0].innerHTML = toolDefinition.buttontext;
 							// add the icon to the front of the button if there is content
 							if(toolDefinition.iconclass){
-								var icon = angular.element('<i>'), content = toolElement.html();
+								var icon = angular.element('<i>'), content = toolElement[0].innerHTML;
 								icon.addClass(toolDefinition.iconclass);
-								toolElement.html('');
+								toolElement[0].innerHTML = '';
 								toolElement.append(icon);
 								if(content && content !== '') toolElement.append('&nbsp;' + content);
 							}

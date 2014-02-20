@@ -656,13 +656,13 @@ describe('textAngular', function(){
 		describe('wrapSelection', function(){
 			it('should wrap the selected text in tags', function(){
 				editorScope.wrapSelection('bold');
-				expect(element.find('.ta-text p i').html()).toBe('<b>adipisicing elit, sed do eiusmod tempor incididunt</b>');
+				expect(element.find('.ta-text p b').length).toBe(1);
 			});
 			
 			it('should unwrap the selected text in tags on re-call', function(){
 				editorScope.wrapSelection('bold');
 				editorScope.wrapSelection('bold');
-				expect(element.find('.ta-text p i').html()).toBe('adipisicing elit, sed do eiusmod tempor incididunt');
+				expect(element.find('.ta-text p b').length).toBe(0);
 			});
 		});
 		

@@ -410,30 +410,47 @@ function encodeEntities(value) {
     replace(/>/g, '&gt;');
 }
 
+var trim = (function() {
+  // native trim is way faster: http://jsperf.com/angular-trim-test
+  // but IE doesn't have it... :-(
+  // TODO: we should move this into IE/ES5 polyfill
+  if (!String.prototype.trim) {
+    return function(value) {
+      return angular.isString(value) ? value.replace(/^\s\s*/, '').replace(/\s\s*$/, '') : value;
+    };
+  }
+  return function(value) {
+    return angular.isString(value) ? value.trim() : value;
+  };
+})();
+
 // Custom logic for accepting certain style options only - textAngular
 // Currently allows only the color attribute, all other attributes should be easily done through classes.
 function validStyles(styleAttr){
 	var result = '';
-	angular.forEach(styleAttr.split(';'), function(value){
+	var styleArray = styleAttr.split(';');
+	angular.forEach(styleArray, function(value){
 		var v = value.split(':');
 		if(v.length == 2){
+			var key = trim(angular.lowercase(v[0]));
+			var value = trim(angular.lowercase(v[1]));
 			if(
-				v[0].trim() === 'color' && (
-					v[1].trim().match(/^rgb\([0-9%,\. ]*\)$/i)
-					|| v[1].trim().match(/^rgba\([0-9%,\. ]*\)$/i)
-					|| v[1].trim().match(/^hsl\([0-9%,\. ]*\)$/i)
-					|| v[1].trim().match(/^hsla\([0-9%,\. ]*\)$/i)
-					|| v[1].trim().match(/^#[0-9a-f]{3,6}$/i)
-					|| v[1].trim().match(/^[a-z]*$/i)
+				key === 'color' && (
+					value.match(/^rgb\([0-9%,\. ]*\)$/i)
+					|| value.match(/^rgba\([0-9%,\. ]*\)$/i)
+					|| value.match(/^hsl\([0-9%,\. ]*\)$/i)
+					|| value.match(/^hsla\([0-9%,\. ]*\)$/i)
+					|| value.match(/^#[0-9a-f]{3,6}$/i)
+					|| value.match(/^[a-z]*$/i)
 				)
 			||
-				v[0].trim() === 'text-align' && (
-					v[1].trim() === 'left'
-					|| v[1].trim() === 'right'
-					|| v[1].trim() === 'center'
-					|| v[1].trim() === 'justify'
+				key === 'text-align' && (
+					value === 'left'
+					|| value === 'right'
+					|| value === 'center'
+					|| value === 'justify'
 				)
-			) result += v[0].trim() + ': ' + v[1].trim() + ';';
+			) result += key + ': ' + value + ';';
 		}
 	});
 	return result;
@@ -463,7 +480,7 @@ function htmlSanitizeWriter(buf, uriValidator){
         out(tag);
         angular.forEach(attrs, function(value, key){
           var lkey=angular.lowercase(key);
-          var isImage = (tag === 'img' && lkey === 'src') || (lkey === 'background');
+          var isImage=(tag === 'img' && lkey === 'src') || (lkey === 'background');
           if ((lkey === 'style' && (value = validStyles(value)) !== '') || validAttrs[lkey] === true &&
             (uriAttrs[lkey] !== true || uriValidator(value, isImage))) {
             out(' ');

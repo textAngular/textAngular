@@ -186,13 +186,32 @@ describe('taTools test tool actions', function(){
 		it('check untestables don\'t error', function(){
 			expect(function(){
 				findAndTriggerButton('redo');
+			}).not.toThrow();
+		});
+		it('check untestables don\'t error', function(){
+			expect(function(){
 				findAndTriggerButton('undo');
+			}).not.toThrow();
+		});
+		it('check untestables don\'t error', function(){
+			expect(function(){
 				findAndTriggerButton('clear');
+			}).not.toThrow();
+		});
+		it('check untestables don\'t error', function(){
+			expect(function(){
 				findAndTriggerButton('insertImage');
+			}).not.toThrow();
+		});
+		it('check untestables don\'t error', function(){
+			expect(function(){
 				findAndTriggerButton('insertLink');
+			}).not.toThrow();
+		});
+		it('check untestables don\'t error', function(){
+			expect(function(){
 				findAndTriggerButton('unlink');
 			}).not.toThrow();
-			
 		});
 	};
 	

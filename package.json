@@ -26,7 +26,8 @@
     "requirejs": "~2.1.10",
     "karma-requirejs": "~0.2.1",
     "karma-phantomjs-launcher": "~0.1.1",
-    "karma": "~0.10.9"
+    "karma": "~0.10.9",
+    "karma-browserstack-launcher": "0.0.8"
   },
   "scripts": {
     "test": "grunt",
