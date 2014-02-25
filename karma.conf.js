@@ -9,60 +9,8 @@ module.exports = function (config) {
 			'karma-jasmine',
 			'karma-chrome-launcher',
 			'karma-firefox-launcher',
-			'karma-browserstack-launcher',
 			'karma-coverage'
 		],
-		
-		browserStack: {
-			username: 'SimeonCheeseman',
-			accessKey: 'uXtrS8MdBaoOYAoQVYeD'
-		},
-		
-		// define browsers
-		customLaunchers: {
-			bs_ie8: {
-				base: 'BrowserStack',
-				browser: 'ie',
-				browser_version: '8.0',
-				os: 'Windows',
-				os_version: '7'
-			},
-			bs_ie9: {
-				base: 'BrowserStack',
-				browser: 'ie',
-				browser_version: '9.0',
-				os: 'Windows',
-				os_version: '7'
-			},
-			bs_ie10: {
-				base: 'BrowserStack',
-				browser: 'ie',
-				browser_version: '10.0',
-				os: 'Windows',
-				os_version: '7'
-			},
-			bs_ff: {
-				base: 'BrowserStack',
-				browser: 'firefox',
-				browser_version: 'latest',
-				os: 'Windows',
-				os_version: '7'
-			},
-			bs_chrome: {
-				base: 'BrowserStack',
-				browser: 'chrome',
-				browser_version: 'latest',
-				os: 'Windows',
-				os_version: '7'
-			},
-			bs_safari: {
-				base: 'BrowserStack',
-				browser: 'safari',
-				browser_version: 'latest',
-				os: 'OS X',
-				os_version: 'Mavericks'
-			},
-		},
 		
 		files: [
 			'bower_components/jquery/jquery.min.js',
@@ -117,7 +65,6 @@ module.exports = function (config) {
 		// - Safari (only Mac)
 		// - PhantomJS
 		// - IE (only Windows)
-		//browsers: ['Chrome','Firefox'],
 		browsers: ['Chrome'],
 
 

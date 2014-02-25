@@ -28,6 +28,12 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 			disabled: "disabled",
 			textEditor: 'form-control',
 			htmlEditor: 'form-control'
+		},
+		setup: {
+			// wysiwyg mode
+			textEditorSetup: function($element){ /* Do some processing here */ },
+			// raw html
+			htmlEditorSetup: function($element){ /* Do some processing here */ }
 		}
 	});
 	
@@ -294,6 +300,9 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 					if(attrs.taFocussedClass)			scope.classes.focussed = attrs.taFocussedClass;
 					if(attrs.taTextEditorClass)			scope.classes.textEditor = attrs.taTextEditorClass;
 					if(attrs.taHtmlEditorClass)			scope.classes.htmlEditor = attrs.taHtmlEditorClass;
+					// optional setup functions
+					if(attrs.taTextEditorSetup)			scope.setup.textEditorSetup = scope.$parent.$eval(attrs.taTextEditorSetup);
+					if(attrs.taHtmlEditorSetup)			scope.setup.htmlEditorSetup = scope.$parent.$eval(attrs.taHtmlEditorSetup);
 					
 					_originalContents = element[0].innerHTML;
 					// clear the original content
@@ -304,9 +313,26 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 						// we still need the hidden input even with a textarea as the textarea may have invalid/old input in it,
 						// wheras the input will ALLWAYS have the correct value.
 						forminput: angular.element("<input type='hidden' tabindex='-1' style='display: none;'>"),
-						html: angular.element("<textarea id='taHtmlElement' ng-show='showHtml' ta-bind ng-model='html'></textarea>"),
-						text: angular.element("<div id='taTextElement' contentEditable='true' ng-hide='showHtml' ta-bind ng-model='html'></div>")
+						html: angular.element("<textarea></textarea>"),
+						text: angular.element("<div></div>")
 					};
+					
+					// allow for insertion of custom directives on the textarea and div
+					scope.setup.htmlEditorSetup(scope.displayElements.html);
+					scope.setup.textEditorSetup(scope.displayElements.text);
+					scope.displayElements.html.attr({
+						'id': 'taHtmlElement',
+						'ng-show': 'showHtml',
+						'ta-bind': 'ta-bind',
+						'ng-model': 'html'
+					});
+					scope.displayElements.text.attr({
+						'id': 'taTextElement',
+						'contentEditable': 'true',
+						'ng-hide': 'showHtml',
+						'ta-bind': 'ta-bind',
+						'ng-model': 'html'
+					});
 					
 					// add the main elements to the origional element
 					element.append(scope.displayElements.text);
