@@ -244,6 +244,29 @@ describe('textAngular', function(){
 		});
 	});
 	
+	describe('Check text and html editor setup functions', function(){
+		'use strict';
+		var $rootScope, element;
+		beforeEach(module('textAngular'));
+		beforeEach(inject(function (_$compile_, _$rootScope_) {
+			$rootScope = _$rootScope_;
+			$rootScope.attrSetup = function($element){
+				$element.attr('testattr', 'trueish');
+			};
+			element = _$compile_('<text-angular ta-text-editor-setup="attrSetup" ta-html-editor-setup="attrSetup" name="test"></text-angular>')($rootScope);
+			$rootScope.$digest();
+		}));
+		
+		describe('should have added attribute to', function(){
+			it('ta-text', function(){
+				expect(element.find('.ta-text').attr('testattr')).toBe('trueish');
+			});
+			it('ta-html', function(){
+				expect(element.find('.ta-html').attr('testattr')).toBe('trueish');
+			});
+		});
+	});
+	
 	describe('Check placeholder passthrough', function(){
 		'use strict';
 		var $rootScope, element;
