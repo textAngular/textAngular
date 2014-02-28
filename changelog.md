@@ -1,5 +1,9 @@
 ###Changelog
 
+2014-02-28 v1.2.0
+
+- Lots and Lots of changes, too many to list. Structural changes and added functionality. Supports down to IE8 and all other browsers.
+
 2013-12-11 v1.1.2
 
 - Updated to work correctly with IE (console.log bug)
