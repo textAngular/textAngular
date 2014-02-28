@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+  <meta charset="UTF-8">
+
+  <title>textAngular 1.2.0 Demo</title>
+
+  <meta name="robots" content="noindex">
+
+  <link rel='stylesheet prefetch' href='../bower_components/bootstrap/dist/css/bootstrap.min.css'>
+  <link rel='stylesheet prefetch' href='../bower_components/font-awesome/css/font-awesome.css'>
+
+
+    <style>
+.ta-editor {
+  min-height: 300px;
+  height: auto;
+  overflow: auto;
+  font-family: inherit;
+  font-size: 100%;
+}
+.red{
+	color: red;
+}
+
+.statictoolbar{
+	position: fixed;
+	top: 12px;
+}
+</style>
+
+</head>
+
+<body>
+
+<div ng-app="textAngularTest" ng-controller="wysiwygeditor" class="container app">
+  <text-angular-toolbar name="statictoolbar" class="statictoolbar"></text-angular-toolbar>
+  <h1>Toolbar</h1>
+  <p><button type="button" ng-click="changetesth1()">Test Change H1 Text</button><button type="button" ng-click="changeallh2()">All Change H2 Text</button><button type="button" ng-click="changeallh()">All H* Text</button><button type="button" ng-click="iconsallh()">Change H* Icons</button><button type="button" ng-click="resettoolbar()">Reset All Toolbar Buttons</button></p>
+  <text-angular-toolbar name="test"></text-angular-toolbar>
+  <h1>Editor</h1>
+  <button ng-click="disabled = !disabled" unselectable>Disable text-angular Toggle</button>
+  <text-angular-toolbar name="htmlcontenttools"></text-angular-toolbar>
+  <div text-angular="text-angular" name="htmlcontent" ng-model="data.htmlcontent" ta-disabled='disabled' ta-target-toolbars='htmlcontenttools,statictoolbar'></div>
+  <h1>Raw HTML in a text area</h1>
+  <textarea ng-model="data.htmlcontent" style="width: 100%"></textarea>
+  <h1>Bound with ng-bind-html</h1>
+  <div ng-bind-html="data.htmlcontent"></div>
+  <h1>Bound with ta-bind, our internal html-binding directive</h1>
+  <div ta-bind="text" ng-model="data.htmlcontent" ta-readonly='disabled'></div>
+  <button type="button" ng-click="data.htmlcontent = data.orightml">Reset</button>
+  <button type="button" ng-click="clear()">clear</button>
+  <p>Note: although we support classes and styles, angularjs' ng-bind-html directive will strip out all style attributes.</p>
+  
+  <h1>Option to masquerade as a fancy text-area - complete with form submission and optional ngModel</h1>
+  <text-angular name="htmlcontent_nomodel"><p>Any <b>HTML</b> we put in-between the text-angular tags gets automatically put into the editor if there <strong style="font-size: 12pt;"><u><em>is not</em></u></strong> a ngModel</p></text-angular>
+</div>
+  <script src='http://rangy.googlecode.com/svn/trunk/currentrelease/rangy-core.js'></script>
+  <script src='../bower_components/angular/angular.min.js'></script>
+  <script src='../textAngular-sanitize.min.js'></script>
+  <script src='../textAngular.js'></script>
+
+  <script type="text/javascript">
+	angular.module("textAngularTest", ['textAngular'])
+	.config(function($provide){
+		// this demonstrates how to register a new tool and add it to the default toolbar
+		$provide.decorator('taOptions', ['taRegisterTool', '$delegate', function(taRegisterTool, taOptions){ // $delegate is the taOptions we are decorating
+			taRegisterTool('test', {
+				display: "<button type='button' ng-click='action()' ng-class='displayActiveToolClass(active)'>Test</button>",
+				action: function(){ alert('Test Pressed') }
+			});
+			taOptions.toolbar[1].push('test');
+			return taOptions;
+		}]);
+		// this demonstrates changing the classes of the icons for the tools for font-awesome v3.x
+		/*
+$provide.decorator('taTools', ['$delegate', function(taTools){
+			taTools.bold.iconclass = 'icon-bold';
+			taTools.italics.iconclass = 'icon-italic';
+			taTools.underline.iconclass = 'icon-underline';
+			taTools.ul.iconclass = 'icon-list-ul';
+			taTools.ol.iconclass = 'icon-list-ol';
+			taTools.undo.iconclass = 'icon-undo';
+			taTools.redo.iconclass = 'icon-repeat';
+			taTools.justifyLeft.iconclass = 'icon-align-left';
+			taTools.justifyRight.iconclass = 'icon-align-right';
+			taTools.justifyCenter.iconclass = 'icon-align-center';
+			taTools.clear.iconclass = 'icon-ban-circle';
+			taTools.insertLink.iconclass = 'icon-link';
+			taTools.unlink.iconclass = 'icon-link red';
+			taTools.insertImage.iconclass = 'icon-picture';
+			// there is no quote icon in old font-awesome so we change to text as follows
+			delete taTools.quote.iconclass;
+			taTools.quote.buttontext = 'quote';
+			return taTools;
+		}]);
+*/
+	});
+	function wysiwygeditor($scope, textAngularManager, $document) {
+		$scope.data = {orightml: '<h2>Try me!</h2><p>textAngular is a super cool WYSIWYG Text Editor directive for AngularJS</p><p><b>Features:</b></p><ol><li>Automatic Seamless Two-Way-Binding</li><li>Super Easy <b>Theming</b> Options</li><li style="color: green;">Simple Editor Instance Creation</li><li>Safely Parses Html for Custom Toolbar Icons</li><li class="text-danger">Doesn&apos;t Use an iFrame</li><li>Works with Firefox, Chrome, and IE8+</li></ol><p><b>Code at GitHub:</b> <a href="https://github.com/fraywing/textAngular">Here</a> </p>'};
+		$scope.data.htmlcontent = $scope.data.orightml;
+		$scope.disabled = false;
+		$scope.changetesth1 = function(){
+			textAngularManager.updateToolbarToolDisplay('test', 'h1', {buttontext: 'Heading 1'});
+		};
+		$scope.changeallh2 = function(){
+			textAngularManager.updateToolDisplay('h2', {buttontext: 'Heading 2'});
+		};
+		$scope.changeallh = function(){
+			var data = {};
+			for(var i = 1; i < 7; i++){
+				data['h' + i] = {buttontext: 'Heading ' + i};
+			}
+			textAngularManager.updateToolsDisplay(data);
+		};
+		$scope.resettoolbar = function(){
+			textAngularManager.resetToolsDisplay();
+		};
+		$scope.iconsallh = function(){
+			var data = {};
+			for(var i = 1; i < 7; i++){
+				data['h' + i] = {
+					iconclass: 'fa fa-flag',
+					buttontext: i
+				};
+			}
+			textAngularManager.updateToolsDisplay(data);
+		};
+		$scope.clear = function(){
+			$scope.data = {orightml: '<h2>Try me!</h2><p>textAngular is a super cool WYSIWYG Text Editor directive for AngularJS</p><p><b>Features:</b></p><ol><li>Automatic Seamless Two-Way-Binding</li><li>Super Easy <b>Theming</b> Options</li><li style="color: green;">Simple Editor Instance Creation</li><li>Safely Parses Html for Custom Toolbar Icons</li><li class="text-danger">Doesn&apos;t Use an iFrame</li><li>Works with Firefox, Chrome, and IE8+</li></ol><p><b>Code at GitHub:</b> <a href="https://github.com/fraywing/textAngular">Here</a> </p>'};
+		};
+	};
+  </script>
+
+</body>
+
+</html>
