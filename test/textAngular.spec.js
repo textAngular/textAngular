@@ -317,6 +317,55 @@ describe('textAngular', function(){
 	});
 	
 	/*
+		Form validation tests
+	*/
+		
+	describe('form validation', function(){
+		'use strict';
+		var $rootScope, element;
+		beforeEach(module('textAngular'));
+		beforeEach(inject(function (_$compile_, _$rootScope_) {
+			$rootScope = _$rootScope_;
+			$rootScope.htmlcontent = '<p>Test Content</p>';
+			element = _$compile_('<form name="form"><text-angular name="test" ng-model="htmlcontent"></text-angular></form>')($rootScope);
+			$rootScope.$digest();
+		}));
+		describe('should start with', function () {
+			it('pristine', function(){
+				expect($rootScope.form.$pristine);
+			});
+			it('not dirty', function(){
+				expect(!$rootScope.form.$dirty);
+			});
+			it('field pristine', function(){
+				expect($rootScope.form.test.$pristine);
+			});
+			it('field not dirty', function(){
+				expect(!$rootScope.form.test.$dirty);
+			});
+		});
+		
+		describe('should update', function () {
+			beforeEach(function(){
+				$rootScope.htmlcontent = '<div>Test Change Content</div>';
+				$rootScope.$digest();
+			});
+			it('pristine', function(){
+				expect(!$rootScope.form.$pristine);
+			});
+			it('not dirty', function(){
+				expect($rootScope.form.$dirty);
+			});
+			it('field pristine', function(){
+				expect(!$rootScope.form.test.$pristine);
+			});
+			it('field not dirty', function(){
+				expect($rootScope.form.test.$dirty);
+			});
+		});
+	});
+	
+	/*
 		Data Tests
 	*/
 	
