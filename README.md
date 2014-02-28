@@ -15,7 +15,7 @@ Demo is available at: http://www.textangular.com
 
 ### Usage
 
-1. Get textAngular via `bower install textAngular`, using the cdn at http://cdnjs.cloudflare.com/ajax/libs/textAngular/1.1.2/text-angular.min.js or from the github page https://github.com/fraywing/textAngular/releases/latest
+1. Get textAngular via `bower install textAngular`, using the cdn at http://cdnjs.cloudflare.com/ajax/libs/textAngular/1.1.2/textAngular.min.js or from the github page https://github.com/fraywing/textAngular/releases/latest
 2. Include textAngular.js or textAngular.min.js in your project using script tags
 3. Add a dependency to `textAngular` in your app module, for example: ```angular.module('myModule', ['textAngular'])```.
 4. Create an element to hold the editor and add an `ng-model="htmlVariable"` attribute where `htmtlVariable` is the scope variable that will hold the HTML entered into the editor:
@@ -43,7 +43,7 @@ If you find something, please let me know - throw me a message, or submit a issu
 
 ## Developer Notes
 
-I generate the minified file using `uglify-js2`, to install run `npm install -g uglifyjs`. Then to minify the file run (on UNIX based command prompt, this may differ for windows computers): `uglifyjs -m -v textAngular.js > textAngular.min.js`
+I generate the minified file using `uglify-js2`, to install run `npm install -g uglify-js`. Then to minify the file run (on UNIX based command prompt, this may differ for windows computers): `uglifyjs -m -v textAngular.js > textAngular.min.js`
 Any pull request must have the new version of the minified file.
 
 ## License
