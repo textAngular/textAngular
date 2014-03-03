@@ -156,8 +156,8 @@ describe('HTML', function() {
   });
 
   it('should handle entities', function() {
-    var everything = '<div rel="!@#$%^&amp;*()_+-={}[]:&#34;;\'&lt;&gt;?,./`~ &#295;">' +
-    '!@#$%^&amp;*()_+-={}[]:&#34;;\'&lt;&gt;?,./`~ &#295;</div>';
+    var everything = '<div rel="!@#$%^&amp;*()_+-={}[]:&#34;;\'&lt;&gt;?,./`~ ">' +
+    '!@#$%^&amp;*()_+-={}[]:&#34;;\'&lt;&gt;?,./`~ </div>';
     expectHTML(everything).toEqual(everything);
   });
 
