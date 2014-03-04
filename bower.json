@@ -19,8 +19,7 @@
     "package.json"
   ],
   "dependencies": {
-    "angular": "~1.2.x",
-    "angular-sanitize": "~1.2.x"
+    "angular": "~1.2.x"
   },
   "devDependencies": {
     "angular-mocks": "~1.x",
