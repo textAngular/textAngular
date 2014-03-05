@@ -10,7 +10,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 (function(){ // encapsulate all variables so they don't become global vars
 	"Use Strict";
 	var textAngular = angular.module("textAngular", ['ngSanitize']); //This makes ngSanitize required
-	
+
 	// Here we set up the global display defaults, to set your own use a angular $provider#decorator.
 	textAngular.value('taOptions', {
 		toolbar: [
@@ -36,9 +36,9 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 			htmlEditorSetup: function($element){ /* Do some processing here */ }
 		}
 	});
-	
+
 	// setup the global contstant functions for setting up the toolbar
-	
+
 	// all tool definitions
 	var taTools = {};
 	/*
@@ -81,16 +81,22 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 			throw('textAngular Error: Tool Definition for "' + name + '" does not have a valid display/iconclass/buttontext value');
 		taTools[name] = toolDefinition;
 	}
-	
+
+	textAngular.constant('taTranslations', {
+		toggleHTML: "Toggle HTML",
+		insertImage: "Please enter an image URL to insert",
+		insertLink: "Please enter an URL to insert"
+	});
+
 	textAngular.constant('taRegisterTool', registerTextAngularTool);
 	textAngular.value('taTools', taTools);
-	
+
 	// configure initial textAngular tools here via taRegisterTool
-	textAngular.config(['taRegisterTool', function(taRegisterTool){
+	textAngular.config(['taRegisterTool', 'taTranslations', function(taRegisterTool, taTranslations){
 		// clear taTools variable. Just catches testing and any other time that this config may run multiple times...
 		angular.forEach(taTools, function(value, key){ delete taTools[key];	});
 		taRegisterTool("html", {
-			buttontext: 'Toggle HTML',
+			buttontext: taTranslations.toggleHTML,
 			action: function(){
 				this.$editor().switchView();
 			},
@@ -237,7 +243,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 			iconclass: 'fa fa-picture-o',
 			action: function(){
 				var imageLink;
-				imageLink = prompt("Please enter an image URL to insert", 'http://');
+				imageLink = prompt(taTranslations.insertImage, 'http://');
 				if(imageLink !== '' && imageLink !== 'http://'){
 					return this.$editor().wrapSelection('insertImage', imageLink);
 				}
@@ -247,7 +253,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 			iconclass: 'fa fa-link',
 			action: function(){
 				var urlLink;
-				urlLink = prompt("Please enter an URL to insert", 'http://');
+				urlLink = prompt(taTranslations.insertLink, 'http://');
 				if(urlLink !== '' && urlLink !== 'http://'){
 					return this.$editor().wrapSelection('createLink', urlLink);
 				}
@@ -268,7 +274,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 			}
 		});
 	}]);
-	
+
 	textAngular.directive("textAngular", [
 		'$compile', '$timeout', 'taOptions', 'taSanitize', 'textAngularManager',
 		function($compile, $timeout, taOptions, taSanitize, textAngularManager){
@@ -303,11 +309,11 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 					// optional setup functions
 					if(attrs.taTextEditorSetup)			scope.setup.textEditorSetup = scope.$parent.$eval(attrs.taTextEditorSetup);
 					if(attrs.taHtmlEditorSetup)			scope.setup.htmlEditorSetup = scope.$parent.$eval(attrs.taHtmlEditorSetup);
-					
+
 					_originalContents = element[0].innerHTML;
 					// clear the original content
 					element[0].innerHTML = '';
-					
+
 					// Setup the HTML elements as variable references for use later
 					scope.displayElements = {
 						// we still need the hidden input even with a textarea as the textarea may have invalid/old input in it,
@@ -316,7 +322,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 						html: angular.element("<textarea></textarea>"),
 						text: angular.element("<div></div>")
 					};
-					
+
 					// allow for insertion of custom directives on the textarea and div
 					scope.setup.htmlEditorSetup(scope.displayElements.html);
 					scope.setup.textEditorSetup(scope.displayElements.text);
@@ -333,24 +339,24 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 						'ta-bind': 'ta-bind',
 						'ng-model': 'html'
 					});
-					
+
 					// add the main elements to the origional element
 					element.append(scope.displayElements.text);
 					element.append(scope.displayElements.html);
-					
+
 					scope.displayElements.forminput.attr('name', _name);
 					element.append(scope.displayElements.forminput);
-					
+
 					if(attrs.tabindex){
 						scope.displayElements.text.attr('tabindex', attrs.tabindex);
 						scope.displayElements.html.attr('tabindex', attrs.tabindex);
 					}
-					
+
 					if (attrs.placeholder) {
 						scope.displayElements.text.attr('placeholder', attrs.placeholder);
 						scope.displayElements.html.attr('placeholder', attrs.placeholder);
 					}
-					
+
 					if(attrs.taDisabled){
 						scope.displayElements.text.attr('ta-readonly', 'disabled');
 						scope.displayElements.html.attr('ta-readonly', 'disabled');
@@ -364,16 +370,16 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 							}
 						});
 					}
-					
+
 					// compile the scope with the text and html elements only - if we do this with the main element it causes a compile loop
 					$compile(scope.displayElements.text)(scope);
 					$compile(scope.displayElements.html)(scope);
-					
+
 					// add the classes manually last
 					element.addClass("ta-root");
 					scope.displayElements.text.addClass("ta-text ta-editor " + scope.classes.textEditor);
 					scope.displayElements.html.addClass("ta-html ta-editor " + scope.classes.textEditor);
-					
+
 					// used in the toolbar actions
 					scope._actionRunning = false;
 					var _savedSelection = false;
@@ -395,7 +401,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 						// only update if in text or WYSIWYG mode
 						if(!scope.showHtml) scope.updateTaBindtaTextElement();
 					};
-					
+
 					// note that focusout > focusin is called everytime we click a button - except bad support: http://www.quirksmode.org/dom/events/blurfocus.html
 					// cascades to displayElements.text and displayElements.html automatically.
 					_focusin = function(){
@@ -419,7 +425,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 					};
 					scope.displayElements.html.on('blur', _focusout);
 					scope.displayElements.text.on('blur', _focusout);
-					
+
 					// Setup the default toolbar tools, this way allows the user to add new tools like plugins.
 					// This is on the editor for future proofing if we find a better way to do this.
 					scope.queryFormatBlockState = function(command){
@@ -443,7 +449,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 							}, 100);
 						}
 					};
-					
+
 					// changes to the model variable from outside the html/text inputs
 					// if no ngModel, then the only input is from inside text-angular
 					if(attrs.ngModel){
@@ -471,14 +477,14 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 						scope.displayElements.forminput.val(_originalContents);
 						scope.html = _originalContents;
 					}
-					
+
 					scope.$watch('html', function(newValue, oldValue){
 						if(newValue !== oldValue){
 							if(attrs.ngModel) ngModel.$setViewValue(newValue);
 							scope.displayElements.forminput.val(newValue);
 						}
 					});
-					
+
 					if(attrs.taTargetToolbars) _toolbars = textAngularManager.registerEditor(_name, scope, attrs.taTargetToolbars.split(','));
 					else{
 						var _toolbar = angular.element('<div text-angular-toolbar name="textAngularToolbar' + _serial + '">');
@@ -489,16 +495,16 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 						if(attrs.taToolbarButtonClass)			_toolbar.attr('ta-toolbar-button-class', attrs.taToolbarButtonClass);
 						if(attrs.taToolbarActiveButtonClass)	_toolbar.attr('ta-toolbar-active-button-class', attrs.taToolbarActiveButtonClass);
 						if(attrs.taFocussedClass)				_toolbar.attr('ta-focussed-class', attrs.taFocussedClass);
-						
+
 						element.prepend(_toolbar);
 						$compile(_toolbar)(scope.$parent);
 						_toolbars = textAngularManager.registerEditor(_name, scope, ['textAngularToolbar' + _serial]);
 					}
-					
+
 					scope.$on('$destroy', function(){
 						textAngularManager.unregisterEditor(_name);
 					});
-					
+
 					// the following is for applying the active states to the tools that support it
 					scope._bUpdateSelectedStyles = false;
 					// loop through all the tools polling their activeState function if it exists
@@ -572,12 +578,12 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 					if(_isInputFriendly) return element.val();
 					throw ('textAngular Error: attempting to update non-editable taBind');
 				};
-				
+
 				//used for updating when inserting wrapped elements
 				scope.$parent['updateTaBind' + (attrs.id || '')] = function(){
 					if(!_isReadonly) ngModel.$setViewValue(_compileHtml());
 				};
-				
+
 				//this code is used to update the models when data is entered/deleted
 				if(_isInputFriendly){
 					element.on('paste cut', function(){
@@ -586,7 +592,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 							ngModel.$setViewValue(_compileHtml());
 						}, 0);
 					});
-					
+
 					if(!_isContentEditable){
 						// if a textarea or input just add in change and blur handlers, everything else is done by angulars input directive
 						element.on('change blur', function(){
@@ -597,14 +603,14 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 						element.on('keyup', function(){
 							if(!_isReadonly) ngModel.$setViewValue(_compileHtml());
 						});
-						
+
 						element.on('blur', function(){
 							var val = _compileHtml();
 							if(val === '' && element.attr("placeholder")) element.addClass('placeholder-text');
 							if(!_isReadonly) ngModel.$setViewValue(_compileHtml());
 							ngModel.$render();
 						});
-						
+
 						// if is not a contenteditable the default placeholder logic can work - ie the HTML value itself
 						if (element.attr("placeholder")) {
 							// we start off not focussed on this element
@@ -616,18 +622,18 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 						}
 					}
 				}
-				
+
 				// catch DOM XSS via taSanitize
 				// Sanitizing both ways is identical
 				var _sanitize = function(unsafe){
 					return (ngModel.$oldViewValue = taSanitize(taFixChrome(unsafe), ngModel.$oldViewValue));
 				};
-				
+
 				// parsers trigger from the above keyup function or any other time that the viewValue is updated and parses it for storage in the ngModel
 				ngModel.$parsers.push(_sanitize);
 				// because textAngular is bi-directional (which is awesome) we need to also sanitize values going in from the server
 				ngModel.$formatters.push(_sanitize);
-				
+
 				// changes to the model variable from outside the html/text inputs
 				ngModel.$render = function(){
 					// if the editor isn't focused it needs to be updated, otherwise it's receiving user input
@@ -653,7 +659,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 						}
 					}
 				};
-				
+
 				if(attrs.taReadonly){
 					//set initial value
 					_isReadonly = scope.$parent.$eval(attrs.taReadonly);
@@ -746,7 +752,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 				element.css('text-align', element.attr('align'));
 				element.removeAttr('align');
 			});
-			
+
 			// get the html string back
 			unsafe = unsafeElement[0].innerHTML;
 			var safe;
@@ -774,24 +780,24 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 					if(attrs.taToolbarButtonClass)			scope.classes.toolbarButton = attrs.taToolbarButtonClass;
 					if(attrs.taToolbarActiveButtonClass)	scope.classes.toolbarButtonActive = attrs.taToolbarActiveButtonClass;
 					if(attrs.taFocussedClass)				scope.classes.focussed = attrs.taFocussedClass;
-					
+
 					scope.disabled = true;
 					scope.focussed = false;
 					element[0].innerHTML = '';
 					element.addClass("ta-toolbar " + scope.classes.toolbar);
-					
+
 					scope.$watch('focussed', function(){
 						if(scope.focussed) element.addClass(scope.classes.focussed);
 						else element.removeClass(scope.classes.focussed);
 					});
-					
+
 					setupToolElement = function(toolDefinition, toolScope){
 						var toolElement;
 						if(toolDefinition && toolDefinition.display){
 							toolElement = angular.element(toolDefinition.display);
 						}
 						else toolElement = angular.element("<button type='button'>");
-						
+
 						toolElement.addClass(scope.classes.toolbarButton);
 						toolElement.attr('name', toolScope.name);
 						// important to not take focus from the main text/html entry
@@ -819,12 +825,12 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 								if(content && content !== '') toolElement.append('&nbsp;' + content);
 							}
 						}
-						
+
 						toolScope._lastToolDefinition = angular.copy(toolDefinition);
-						
+
 						return $compile(toolElement)(toolScope);
 					};
-					
+
 					// Keep a reference for updating the active states later
 					scope.tools = {};
 					// create the tools in the toolbar
@@ -857,7 +863,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 						},
 						executeAction: taToolExecuteAction
 					};
-							
+
 					angular.forEach(scope.toolbar, function(group){
 						// setup the toolbar group
 						groupElement = angular.element("<div>");
@@ -875,7 +881,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 						// append the group to the toolbar
 						element.append(groupElement);
 					});
-					
+
 					// update a tool
 					// if a value is set to null, remove from the display
 					// when forceNew is set to true it will ignore all previous settings, used to reset to taTools definition
@@ -887,7 +893,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 							if(toolInstance._lastToolDefinition && !forceNew) _newTool = angular.extend({}, toolInstance._lastToolDefinition, _newTool);
 							if(_newTool.buttontext === null && _newTool.iconclass === null && _newTool.display === null)
 								throw('textAngular Error: Tool Definition for updating "' + key + '" does not have a valid display/iconclass/buttontext value');
-							
+
 							// if tool is defined on this toolbar, update/redo the tool
 							if(_newTool.buttontext === null){
 								delete _newTool.buttontext;
@@ -898,15 +904,15 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 							if(_newTool.display === null){
 								delete _newTool.display;
 							}
-							
+
 							toolElement = setupToolElement(_newTool, toolInstance);
 							toolInstance.$element.replaceWith(toolElement);
 							toolInstance.$element = toolElement;
 						}
 					};
-					
+
 					textAngularManager.registerToolbar(scope);
-					
+
 					scope.$on('$destroy', function(){
 						textAngularManager.unregisterToolbar(scope.name);
 					});
