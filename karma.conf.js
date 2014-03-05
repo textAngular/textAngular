@@ -29,7 +29,7 @@ module.exports = function (config) {
 		],
 
 		preprocessors: {
-			'textAngular.js': ['coverage']
+			'**/textAngular.js': ['coverage']
 		},
 
 		// test results reporter to use
