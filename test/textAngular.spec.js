@@ -722,6 +722,16 @@ describe('textAngular', function(){
 			element.remove();
 		});
 		
+		it('should not trigger focus out while an action is processing', inject(function($timeout){
+			element.find('.ta-text').triggerHandler('focus');
+			editorScope.$parent.$digest();
+			editorScope.startAction();
+			element.find('.ta-text').triggerHandler('blur');
+			editorScope.$parent.$digest();
+			$timeout.flush();
+			expect(element.find('button:disabled').length).toBe(0);
+		}));
+		
 		it('keypress should call sendKeyCommand', function(){
 			element.find('.ta-text').trigger({type: 'keypress', metaKey: true, which: 21});
 			editorScope.$parent.$digest();
@@ -774,17 +784,17 @@ describe('textAngular', function(){
 				element.find('.ta-text').triggerHandler('keydown');
 				range.selectNodeContents(element.find('.ta-text p u')[0]);
 				sel.setSingleRange(range);
-				$timeout(function(){
+				setTimeout(function(){
 					expect(!iButton.hasClass('active'));
-					$timeout(function(){
+					setTimeout(function(){
 						range = window.rangy.createRangyRange();
 						range.selectNodeContents(element.find('.ta-text p i')[0]);
-						$timeout(function(){
+						setTimeout(function(){
 							expect(iButton.hasClass('active'));
 							element.find('.ta-text').triggerHandler('keydown');
-							$timeout(function(){
+							setTimeout(function(){
 								range.selectNodeContents(element.find('.ta-text p u')[0]);
-								$timeout(function(){
+								setTimeout(function(){
 									expect(iButton.hasClass('active'));
 								}, 201);
 							}, 201);
@@ -800,5 +810,30 @@ describe('textAngular', function(){
 				expect(!iButton.hasClass('active'));
 			});
 		});
+	});
+	
+	describe('Multiple Editors same toolbar', function(){
+		beforeEach(module('textAngular'));
+		// For more info on this see the excellent writeup @ https://github.com/fraywing/textAngular/issues/112
+		var element1, element2, toolbar, $rootScope;
+		beforeEach(inject(function($compile, _$rootScope_){
+			$rootScope = _$rootScope_;
+			$rootScope.htmlcontent = '<p>Lorem ipsum <u>dolor sit amet<u>, consectetur <i>adipisicing elit, sed do eiusmod tempor incididunt</i> ut labore et dolore magna aliqua.</p>';
+			toolbar = $compile('<text-angular-toolbar name="toolbar"></text-angular-toolbar>')($rootScope);
+			element1 = $compile('<text-angular name="test1" ng-model="htmlcontent" ta-target-toolbars="toolbar"></text-angular>')($rootScope);
+			element2 = $compile('<text-angular name="test2" ng-model="htmlcontent" ta-target-toolbars="toolbar"></text-angular>')($rootScope);
+			$rootScope.$digest();
+		}));
+		
+		it('should re-focus on toolbar when swapping directly from editor to editor', inject(function($timeout){
+			element1.find('.ta-text').triggerHandler('focus');
+			$rootScope.$digest();
+			expect(toolbar.find('button:not(:disabled)').length).toBe(25);
+			element2.find('.ta-text').triggerHandler('focus');
+			$rootScope.$digest();
+			$timeout.flush();
+			// expect none to be disabled
+			expect(toolbar.find('button:not(:disabled)').length).toBe(25);
+		}));
 	});
 });

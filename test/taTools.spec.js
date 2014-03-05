@@ -174,13 +174,19 @@ describe('taTools test tool actions', function(){
 			expect(button.hasClass('active'));
 		});
 		
-		it('html button should function correctly', function(){
+		it('html button should function correctly', inject(function($timeout){
 			button = findAndTriggerButton('html');
+			$timeout.flush();
 			expect(button.hasClass('active'));
 			expect(!element.find('.ta-text').is(":visible"));
 			expect(element.find('.ta-html').is(":visible"));
+			expect(element.find('.ta-html').is(":focus"));
 			button = findAndTriggerButton('html'); // retrigger to reset to non html view
-		});
+			$timeout.flush();
+			expect(!element.find('.ta-html').is(":visible"));
+			expect(element.find('.ta-text').is(":visible"));
+			expect(element.find('.ta-text').is(":focus"));
+		}));
 		
 		it('check untestables don\'t error', function(){
 			expect(function(){
@@ -341,38 +347,3 @@ describe('taTools test tool actions', function(){
 		});
 	});
 });
-/*
-
-	E if(this.$window.rangy && this.$window.rangy.getSelection &&
-					(_ranges = this.$window.rangy.getSelection().getAllRanges()).length === 1
-				){
-					var possibleNodes = angular.element(_ranges[0].commonAncestorContainer);
-					// remove lists
-					var removeListElements = function(list){
-						list = angular.element(list);
-						var prevElement = list;
-						angular.forEach(list.children(), function(liElem){
-							var newElem = angular.element('<p></p>');
-							newElem.html(angular.element(liElem).html());
-							prevElement.after(newElem);
-							prevElement = newElem;
-						});
-						list.remove();
-					};
-					angular.forEach(possibleNodes.find("ul"), removeListElements);
-					angular.forEach(possibleNodes.find("ol"), removeListElements);
-					// clear out all class attributes. These do not seem to be cleared via removeFormat
-					var $editor = this.$editor();
-					var recursiveRemoveClass = function(node){
-						node = angular.element(node);
-						if(node[0] !== $editor.displayElements.text[0]) node.removeAttr('class');
-						angular.forEach(node.children(), recursiveRemoveClass);
-					};
-					angular.forEach(possibleNodes, recursiveRemoveClass);
-					// check if in list. If not in list then use formatBlock option
-					if(possibleNodes[0].tagName.toLowerCase() === 'ol' || possibleNodes[0].tagName.toLowerCase() === 'ul'){
-						Iif(_ranges[0].containsNode(possibleNodes[0], false)) removeListElements(possibleNodes[0]);
-					}else Eif(possibleNodes[0].tagName.toLowerCase() !== 'li') this.$editor().wrapSelection("formatBlock", "<p>");
-					
-				}else this.$editor().wrapSelection("formatBlock", "<p>");
-*/

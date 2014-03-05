@@ -440,15 +440,13 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 					scope.displayElements.html.on('focus', _focusin);
 					scope.displayElements.text.on('focus', _focusin);
 					_focusout = function(e){
-						$timeout(function(){
-							// if we are NOT runnig an action and have NOT focussed again on the text etc then fire the blur events
-							if(!scope._actionRunning && document.activeElement !== scope.displayElements.html[0] && document.activeElement !== scope.displayElements.text[0]){
-								element.removeClass(scope.classes.focussed);
-								_toolbars.unfocus();
-								// to prevent multiple apply error defer to next seems to work.
-								$timeout(function(){ element.triggerHandler('blur'); }, 0);
-							}
-						}, 100);
+						// if we are NOT runnig an action and have NOT focussed again on the text etc then fire the blur events
+						if(!scope._actionRunning && document.activeElement !== scope.displayElements.html[0] && document.activeElement !== scope.displayElements.text[0]){
+							element.removeClass(scope.classes.focussed);
+							_toolbars.unfocus();
+							// to prevent multiple apply error defer to next seems to work.
+							$timeout(function(){ element.triggerHandler('blur'); }, 0);
+						}
 						e.preventDefault();
 						return false;
 					};

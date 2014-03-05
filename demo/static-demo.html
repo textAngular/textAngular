@@ -44,6 +44,7 @@
   <button ng-click="disabled = !disabled" unselectable>Disable text-angular Toggle</button>
   <text-angular-toolbar name="htmlcontenttools"></text-angular-toolbar>
   <div text-angular="text-angular" name="htmlcontent" ng-model="data.htmlcontent" ta-disabled='disabled' ta-target-toolbars='htmlcontenttools,statictoolbar'></div>
+  <div text-angular="text-angular" name="htmlcontent2" ng-model="data.htmlcontent" ta-disabled='disabled' ta-target-toolbars='htmlcontenttools,statictoolbar'></div>
   <h1>Raw HTML in a text area</h1>
   <textarea ng-model="data.htmlcontent" style="width: 100%"></textarea>
   <h1>Bound with ng-bind-html</h1>
@@ -53,6 +54,13 @@
   <button type="button" ng-click="data.htmlcontent = data.orightml">Reset</button>
   <button type="button" ng-click="clear()">clear</button>
   <p>Note: although we support classes and styles, angularjs' ng-bind-html directive will strip out all style attributes.</p>
+  
+  
+  <form>
+    <label for="name">Name:</label> <input type="text" tabindex="1" id="name" ng-model="name">
+    <label for="website">Website:</label> <input type="url" tabindex="2" id="website" ng-model="website">
+    Bio: <div text-angular ng-model="bio" tabindex="3"></div>
+</form>
   
   <h1>Option to masquerade as a fancy text-area - complete with form submission and optional ngModel</h1>
   <text-angular name="htmlcontent_nomodel"><p>Any <b>HTML</b> we put in-between the text-angular tags gets automatically put into the editor if there <strong style="font-size: 12pt;"><u><em>is not</em></u></strong> a ngModel</p></text-angular>
