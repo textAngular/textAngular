@@ -76,13 +76,11 @@ describe('taToolsExecuteFunction', function(){
 
 describe('taTools test tool actions', function(){
 	'use strict';
-	var $rootScope, element, button, styleUpdateFunction, editorScope;
-	beforeEach(module('textAngular'));
-	
+	var $rootScope, element, button, editorScope, $window;
 	var findAndTriggerButton = function(name){
 		var button = element.find('button[name=' + name + ']');
 		button.scope().executeAction(editorScope);
-		styleUpdateFunction();
+		editorScope.endAction();
 		$rootScope.$digest();
 		return button;
 	};
@@ -181,6 +179,7 @@ describe('taTools test tool actions', function(){
 			expect(button.hasClass('active'));
 			expect(!element.find('.ta-text').is(":visible"));
 			expect(element.find('.ta-html').is(":visible"));
+			button = findAndTriggerButton('html'); // retrigger to reset to non html view
 		});
 		
 		it('check untestables don\'t error', function(){
@@ -191,11 +190,6 @@ describe('taTools test tool actions', function(){
 		it('check untestables don\'t error', function(){
 			expect(function(){
 				findAndTriggerButton('undo');
-			}).not.toThrow();
-		});
-		it('check untestables don\'t error', function(){
-			expect(function(){
-				findAndTriggerButton('clear');
 			}).not.toThrow();
 		});
 		it('check untestables don\'t error', function(){
@@ -216,15 +210,17 @@ describe('taTools test tool actions', function(){
 	};
 	
 	describe('with un-wrapped content', function(){
-		beforeEach(inject(function (_$compile_, _$rootScope_, $document, textAngularManager, $window) {
+		beforeEach(module('textAngular'));
+		beforeEach(inject(function (_$compile_, _$rootScope_, $document, textAngularManager, _$window_) {
+			$window = _$window_;
 			$window.prompt = function(){ return 'soehusoaehusnahoeusnt'; };
 			$rootScope = _$rootScope_;
 			element = _$compile_('<text-angular name="test">Test Content</text-angular>')($rootScope);
 			$document.find('body').append(element);
 			$rootScope.$digest();
-			styleUpdateFunction = (editorScope = textAngularManager.retrieveEditor('test').scope).updateSelectedStyles;
-			var sel = window.rangy.getSelection();
-			var range = window.rangy.createRangyRange();
+			editorScope = textAngularManager.retrieveEditor('test').scope;
+			var sel = $window.rangy.getSelection();
+			var range = $window.rangy.createRangyRange();
 			range.selectNode(element.find('.ta-text')[0].childNodes[0]);
 			sel.setSingleRange(range);
 		}));
@@ -235,15 +231,18 @@ describe('taTools test tool actions', function(){
 		testAllButtons();
 	});
 	
-	describe('with un-wrapped content', function(){
-		beforeEach(inject(function (_$compile_, _$rootScope_, $document, textAngularManager, $window) {
+	describe('with wrapped content', function(){
+		beforeEach(module('textAngular'));
+		beforeEach(inject(function (_$compile_, _$rootScope_, $document, textAngularManager, _$window_) {
+			$window = _$window_;
 			$window.prompt = function(){ return ''; };
 			$rootScope = _$rootScope_;
 			element = _$compile_('<text-angular name="test"><p>Test Content</p></text-angular>')($rootScope);
+			$document.find('body').append(element);
 			$rootScope.$digest();
-			styleUpdateFunction = textAngularManager.retrieveEditor('test').scope.updateSelectedStyles;
-			var sel = window.rangy.getSelection();
-			var range = window.rangy.createRangyRange();
+			editorScope = textAngularManager.retrieveEditor('test').scope;
+			var sel = $window.rangy.getSelection();
+			var range = $window.rangy.createRangyRange();
 			range.selectNodeContents(element.find('.ta-text p')[0]);
 			sel.setSingleRange(range);
 		}));
@@ -253,4 +252,127 @@ describe('taTools test tool actions', function(){
 		
 		testAllButtons();
 	});
+	
+	describe('test clear button', function(){
+		beforeEach(module('textAngular'));
+		beforeEach(inject(function (_$compile_, _$rootScope_, $document, textAngularManager, _$window_) {
+			$window = _$window_;
+			$window.prompt = function(){ return ''; };
+			$rootScope = _$rootScope_;
+			$rootScope.htmlcontent = '<p class="test-class" style="text-align: left;">Test Content <b>that</b> <u>should</u> be cleared</p><h1>Test Other Tags</h1><ul><li>Test <b>1</b></li><li>Test 2</li></ul>';
+			element = _$compile_('<text-angular name="testclearbutton" ng-model="htmlcontent"></text-angular>')($rootScope);
+			$document.find('body').append(element);
+			$rootScope.$digest();
+			editorScope = textAngularManager.retrieveEditor('testclearbutton').scope;
+			var sel = $window.rangy.getSelection();
+			var range = $window.rangy.createRangyRange();
+			range.selectNodeContents(element.find('.ta-text')[0]);
+			sel.setSingleRange(range);
+		}));
+		afterEach(function(){
+			element.remove();
+		});
+		
+		it('doesn\'t error', function(){
+			expect(function(){
+				findAndTriggerButton('clear');
+			}).not.toThrow();
+		});
+		
+		it('clears out all formatting', function(){
+			findAndTriggerButton('clear');
+			//expect($rootScope.htmlcontent).toBe('<p>Test Content that should be cleared</p><p>Test Other Tags</p><p>Test 1</p><p>Test 2</p>');
+			// bug in phantom JS
+			expect($rootScope.htmlcontent).toBe('<p>Test Content that should be cleared</p><h1>Test Other Tags</h1><p>Test 1</p><p>Test 2</p>');
+		});
+		
+		it('doesn\'t remove partially selected list elements, but clears them of formatting', function(){
+			var sel = $window.rangy.getSelection();
+			var range = $window.rangy.createRangyRange();
+			range.setStartBefore(element.find('.ta-text ul li:first-child b')[0]);
+			range.setEndBefore(element.find('.ta-text ul li:last-child')[0]);
+			sel.setSingleRange(range);
+			sel.refresh();
+			findAndTriggerButton('clear');
+			expect($rootScope.htmlcontent).toBe('<p class="test-class" style="text-align: left;">Test Content <b>that</b> <u>should</u> be cleared</p><h1>Test Other Tags</h1><ul><li>Test 1</li><li>Test 2</li></ul>');
+		});
+		
+		it('doesn\'t clear wholly selected list elements, but clears them of formatting', function(){
+			var sel = $window.rangy.getSelection();
+			var range = $window.rangy.createRangyRange();
+			range.selectNodeContents(element.find('.ta-text ul')[0]);
+			sel.setSingleRange(range);
+			sel.refresh();
+			findAndTriggerButton('clear');
+			expect($rootScope.htmlcontent).toBe('<p class="test-class" style="text-align: left;">Test Content <b>that</b> <u>should</u> be cleared</p><h1>Test Other Tags</h1><ul><li>Test 1</li><li>Test 2</li></ul>');
+		});
+		
+		it('doesn\'t clear singly selected list elements, but clears them of formatting', function(){
+			var sel = $window.rangy.getSelection();
+			var range = $window.rangy.createRangyRange();
+			range.selectNodeContents(element.find('.ta-text ul li:first-child')[0]);
+			range.setEndAfter(element.find('.ta-text ul li:first-child')[0]);
+			sel.setSingleRange(range);
+			sel.refresh();
+			findAndTriggerButton('clear');
+			expect($rootScope.htmlcontent).toBe('<p class="test-class" style="text-align: left;">Test Content <b>that</b> <u>should</u> be cleared</p><h1>Test Other Tags</h1><ul><li>Test 1</li><li>Test 2</li></ul>');
+		});
+		
+		it('doesn\'t clear singly selected list elements, but clears them of formatting', function(){
+			var sel = $window.rangy.getSelection();
+			var range = $window.rangy.createRangyRange();
+			range.selectNode(element.find('.ta-text ul li:first-child')[0]);
+			range.setEndAfter(element.find('.ta-text ul li:first-child')[0]);
+			sel.setSingleRange(range);
+			sel.refresh();
+			findAndTriggerButton('clear');
+			expect($rootScope.htmlcontent).toBe('<p class="test-class" style="text-align: left;">Test Content <b>that</b> <u>should</u> be cleared</p><h1>Test Other Tags</h1><ul><li>Test 1</li><li>Test 2</li></ul>');
+		});
+		
+		it('works without rangy', function(){
+			var button = element.find('button[name=clear]');
+			var _rangy = button.scope().$window.rangy;
+			button.scope().$window.rangy = undefined;
+			button.scope().executeAction(editorScope);
+			editorScope.endAction();
+			$rootScope.$digest();
+			expect($rootScope.htmlcontent).toBe('<p class="test-class">Test Content that should be cleared</p><p>Test Other Tags</p><ul><li>Test 1</li></ul><ul><li>Test 2</li></ul><p></p>');
+			button.scope().$window.rangy = _rangy;
+		});
+	});
 });
+/*
+
+	E if(this.$window.rangy && this.$window.rangy.getSelection &&
+					(_ranges = this.$window.rangy.getSelection().getAllRanges()).length === 1
+				){
+					var possibleNodes = angular.element(_ranges[0].commonAncestorContainer);
+					// remove lists
+					var removeListElements = function(list){
+						list = angular.element(list);
+						var prevElement = list;
+						angular.forEach(list.children(), function(liElem){
+							var newElem = angular.element('<p></p>');
+							newElem.html(angular.element(liElem).html());
+							prevElement.after(newElem);
+							prevElement = newElem;
+						});
+						list.remove();
+					};
+					angular.forEach(possibleNodes.find("ul"), removeListElements);
+					angular.forEach(possibleNodes.find("ol"), removeListElements);
+					// clear out all class attributes. These do not seem to be cleared via removeFormat
+					var $editor = this.$editor();
+					var recursiveRemoveClass = function(node){
+						node = angular.element(node);
+						if(node[0] !== $editor.displayElements.text[0]) node.removeAttr('class');
+						angular.forEach(node.children(), recursiveRemoveClass);
+					};
+					angular.forEach(possibleNodes, recursiveRemoveClass);
+					// check if in list. If not in list then use formatBlock option
+					if(possibleNodes[0].tagName.toLowerCase() === 'ol' || possibleNodes[0].tagName.toLowerCase() === 'ul'){
+						Iif(_ranges[0].containsNode(possibleNodes[0], false)) removeListElements(possibleNodes[0]);
+					}else Eif(possibleNodes[0].tagName.toLowerCase() !== 'li') this.$editor().wrapSelection("formatBlock", "<p>");
+					
+				}else this.$editor().wrapSelection("formatBlock", "<p>");
+*/
