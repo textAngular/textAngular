@@ -8,8 +8,8 @@ module.exports = function (grunt) {
 	grunt.loadNpmTasks('grunt-karma');
 	
 	// Default task.
-	grunt.registerTask('default', ['uglify','test']);
-	grunt.registerTask('test', ['clean', 'jshint', 'karma', 'coverage']);
+	grunt.registerTask('default', ['uglify', 'clean', 'test']);
+	grunt.registerTask('test', ['jshint', 'karma', 'coverage']);
 	
 	var testConfig = function (configFile, customOptions) {
 		var options = { configFile: configFile, keepalive: true };

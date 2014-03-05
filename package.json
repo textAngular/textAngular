@@ -39,7 +39,7 @@
     "karma-browserstack-launcher": "0.0.8"
   },
   "scripts": {
-    "test": "grunt --verbose",
+    "test": "grunt test --verbose",
     "postinstall": "./node_modules/bower/bin/bower install"
   },
   "repository": {
