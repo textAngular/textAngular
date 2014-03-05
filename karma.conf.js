@@ -31,6 +31,10 @@ module.exports = function (config) {
 		preprocessors: {
 			'**/textAngular.js': ['coverage']
 		},
+		coverageReporter: {
+			type : 'html',
+			dir : 'coverage/'
+		},
 
 		// test results reporter to use
 		// possible values: 'dots', 'progress', 'junit'

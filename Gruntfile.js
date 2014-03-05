@@ -28,7 +28,7 @@ module.exports = function (grunt) {
 			  'lines': 97.5,
 			  'functions': 95
 			},
-			dir: './coverage',
+			dir: 'coverage',
 			root: ''
 		  }
 		},
