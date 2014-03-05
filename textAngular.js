@@ -376,6 +376,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 					element.append(scope.displayElements.forminput);
 					
 					if(attrs.tabindex){
+						element.removeAttr('tabindex');
 						scope.displayElements.text.attr('tabindex', attrs.tabindex);
 						scope.displayElements.html.attr('tabindex', attrs.tabindex);
 					}

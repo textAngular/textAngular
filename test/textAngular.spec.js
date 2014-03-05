@@ -133,12 +133,15 @@ describe('textAngular', function(){
 			$rootScope.$digest();
 		}));
 		
-		describe('Check copied across', function () {
+		describe('Check moved across', function () {
 			it('to textEditor', function(){
 				expect(jQuery('.ta-text', element).attr('tabindex')).toBe('42');
 			});
 			it('to htmlEditor', function(){
 				expect(jQuery('.ta-html', element).attr('tabindex')).toBe('42');
+			});
+			it('removed from .ta-root', function(){
+				expect(element.attr('tabindex')).toBeUndefined();
 			});
 		});
 	});
