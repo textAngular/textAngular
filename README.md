@@ -1,6 +1,9 @@
 textAngular v1.2.0
 ===========
 
+[![Build Status](https://travis-ci.org/fraywing/textAngular.png?branch=master)](https://travis-ci.org/fraywing/textAngular)
+
+
 Demo is available at: http://www.textangular.com
 
 ## Requirements
