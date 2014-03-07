@@ -177,18 +177,18 @@ describe('textAngularToolbar', function(){
 				$rootScope.$digest();
 				element.find('.ta-text').triggerHandler('blur');
 				$rootScope.$digest();
-				$timeout(function(){
-					expect(element.find('button').attr('disabled')).toBe('disabled');
-				}, 1);
+				$timeout.flush();
+				$rootScope.$digest();
+				expect(element.find('button').attr('disabled')).toBe('disabled');
 			});
 			it('on ta-html trigger blur', function(){
 				element.find('.ta-html').triggerHandler('focus');
 				$rootScope.$digest();
 				element.find('.ta-html').triggerHandler('blur');
 				$rootScope.$digest();
-				$timeout(function(){
-					expect(element.find('button').attr('disabled')).toBe('disabled');
-				}, 1);
+				$timeout.flush();
+				$rootScope.$digest();
+				expect(element.find('button').attr('disabled')).toBe('disabled');
 			});
 		});
 	});
@@ -243,6 +243,13 @@ describe('textAngularToolbar', function(){
 		
 		it('should have ng-disabled set', function(){
 			expect(element.attr('ng-disabled')).toBe('isDisabled()');
+		});
+		
+		it('should prevent event on mousedown', function(){
+			element.on('mousedown', function(e){
+				expect(e.isDefaultPrevented());
+			});
+			element.triggerHandler('mousedown');
 		});
 	});
 	
@@ -493,6 +500,26 @@ describe('textAngularToolbar', function(){
 	});
 	
 	describe('test custom tool functions', function(){
+		var $rootScope, element, toolbarScope;
+		beforeEach(inject(function(_$rootScope_, $compile, textAngularManager, taRegisterTool, taOptions){
+			taRegisterTool('disabled1', {buttontext: 'allways-disabled', disabled: true});
+			taRegisterTool('disabled2', {buttontext: 'allways-disabled', disabled: function(){ return true;}});
+			taOptions.toolbar = [['disabled1','disabled2']];
+			$rootScope = _$rootScope_;
+			element = $compile('<text-angular-toolbar name="test"></text-angular-toolbar>')($rootScope);
+			toolbarScope = textAngularManager.retrieveToolbar('test');
+			toolbarScope.disabled = false;
+			toolbarScope.focussed = true;
+			$rootScope.$digest();
+		}));
+		
+		it('should respect a disabled value', function(){
+			expect(element.find('[name=disabled1]').is(":disabled"));
+		});
+		
+		it('should respect a disabled functions return value', function(){
+			expect(element.find('[name=disabled2]').is(":disabled"));
+		});
 		// disabled as value and as function on scope
 		// action is called in correct deferred pattern
 	});

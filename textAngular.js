@@ -229,8 +229,42 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 		});
 		taRegisterTool('clear', {
 			iconclass: 'fa fa-ban',
-			action: function(){
-				return this.$editor().wrapSelection("removeFormat", null);
+			action: function(deferred, restoreSelection){
+				this.$editor().wrapSelection("removeFormat", null);
+				var _ranges = [];
+				// if rangy, do better removal. Else just change everything to a <p> tag - this don't work so well on lists
+				if(this.$window.rangy && this.$window.rangy.getSelection &&
+					(_ranges = this.$window.rangy.getSelection().getAllRanges()).length === 1
+				){
+					var possibleNodes = angular.element(_ranges[0].commonAncestorContainer);
+					// remove lists
+					var removeListElements = function(list){
+						list = angular.element(list);
+						var prevElement = list;
+						angular.forEach(list.children(), function(liElem){
+							var newElem = angular.element('<p></p>');
+							newElem.html(angular.element(liElem).html());
+							prevElement.after(newElem);
+							prevElement = newElem;
+						});
+						list.remove();
+					};
+					angular.forEach(possibleNodes.find("ul"), removeListElements);
+					angular.forEach(possibleNodes.find("ol"), removeListElements);
+					// clear out all class attributes. These do not seem to be cleared via removeFormat
+					var $editor = this.$editor();
+					var recursiveRemoveClass = function(node){
+						node = angular.element(node);
+						if(node[0] !== $editor.displayElements.text[0]) node.removeAttr('class');
+						angular.forEach(node.children(), recursiveRemoveClass);
+					};
+					angular.forEach(possibleNodes, recursiveRemoveClass);
+					// check if in list. If not in list then use formatBlock option
+					if(possibleNodes[0].tagName.toLowerCase() !== 'li' &&
+						possibleNodes[0].tagName.toLowerCase() !== 'ol' &&
+						possibleNodes[0].tagName.toLowerCase() !== 'ul') this.$editor().wrapSelection("formatBlock", "<p>");
+				}else this.$editor().wrapSelection("formatBlock", "<p>");
+				restoreSelection();
 			}
 		});
 		taRegisterTool('insertImage', {
@@ -270,8 +304,8 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 	}]);
 	
 	textAngular.directive("textAngular", [
-		'$compile', '$timeout', 'taOptions', 'taSanitize', 'textAngularManager',
-		function($compile, $timeout, taOptions, taSanitize, textAngularManager){
+		'$compile', '$timeout', 'taOptions', 'taSanitize', 'textAngularManager', '$window',
+		function($compile, $timeout, taOptions, taSanitize, textAngularManager, $window){
 			return {
 				require: '?ngModel',
 				scope: {},
@@ -342,6 +376,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 					element.append(scope.displayElements.forminput);
 					
 					if(attrs.tabindex){
+						element.removeAttr('tabindex');
 						scope.displayElements.text.attr('tabindex', attrs.tabindex);
 						scope.displayElements.html.attr('tabindex', attrs.tabindex);
 					}
@@ -380,16 +415,16 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 					scope.startAction = function(){
 						scope._actionRunning = true;
 						// if rangy library is loaded return a function to reload the current selection
-						if(window.rangy && window.rangy.saveSelection){
-							_savedSelection = window.rangy.saveSelection();
+						if($window.rangy && $window.rangy.saveSelection){
+							_savedSelection = $window.rangy.saveSelection();
 							return function(){
-								if(_savedSelection) window.rangy.restoreSelection(_savedSelection);
+								if(_savedSelection) $window.rangy.restoreSelection(_savedSelection);
 							};
 						}
 					};
 					scope.endAction = function(){
 						scope._actionRunning = false;
-						if(_savedSelection) rangy.removeMarkers(_savedSelection);
+						if(_savedSelection) $window.rangy.removeMarkers(_savedSelection);
 						_savedSelection = false;
 						scope.updateSelectedStyles();
 						// only update if in text or WYSIWYG mode
@@ -405,15 +440,13 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 					scope.displayElements.html.on('focus', _focusin);
 					scope.displayElements.text.on('focus', _focusin);
 					_focusout = function(e){
-						$timeout(function(){
-							// if we are NOT runnig an action and have NOT focussed again on the text etc then fire the blur events
-							if(!scope._actionRunning && document.activeElement !== scope.displayElements.html[0] && document.activeElement !== scope.displayElements.text[0]){
-								element.removeClass(scope.classes.focussed);
-								_toolbars.unfocus();
-								// to prevent multiple apply error defer to next seems to work.
-								$timeout(function(){ element.triggerHandler('blur'); }, 0);
-							}
-						}, 100);
+						// if we are NOT runnig an action and have NOT focussed again on the text etc then fire the blur events
+						if(!scope._actionRunning && document.activeElement !== scope.displayElements.html[0] && document.activeElement !== scope.displayElements.text[0]){
+							element.removeClass(scope.classes.focussed);
+							_toolbars.unfocus();
+							// to prevent multiple apply error defer to next seems to work.
+							$timeout(function(){ element.triggerHandler('blur'); }, 0);
+						}
 						e.preventDefault();
 						return false;
 					};
@@ -505,7 +538,10 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 					scope.updateSelectedStyles = function(){
 						var _ranges;
 						// test if rangy exists and if the common element ISN'T the root ta-text node
-						if(window.rangy && window.rangy.getSelection && (_ranges = window.rangy.getSelection().getAllRanges()).length === 1 && _ranges[0].commonAncestorContainer.parentNode !== scope.displayElements.text[0]){
+						if($window.rangy && $window.rangy.getSelection &&
+							(_ranges = $window.rangy.getSelection().getAllRanges()).length === 1 &&
+							_ranges[0].commonAncestorContainer.parentNode !== scope.displayElements.text[0]
+						){
 							_toolbars.updateSelectedStyles(angular.element(_ranges[0].commonAncestorContainer.parentNode));
 						}else _toolbars.updateSelectedStyles();
 						// used to update the active state when a key is held down, ie the left arrow
@@ -758,8 +794,8 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 			return safe;
 		};
 	}]).directive('textAngularToolbar', [
-		'$compile', 'textAngularManager', 'taOptions', 'taTools', 'taToolExecuteAction',
-		function($compile, textAngularManager, taOptions, taTools, taToolExecuteAction){
+		'$compile', 'textAngularManager', 'taOptions', 'taTools', 'taToolExecuteAction', '$window',
+		function($compile, textAngularManager, taOptions, taTools, taToolExecuteAction, $window){
 			return {
 				scope: {
 					name: '@' // a name IS required
@@ -835,6 +871,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 						queryFormatBlockState: function(){ return false; }
 					};
 					var defaultChildScope = {
+						$window: $window,
 						$editor: function(){
 							// dynamically gets the editor as it is set
 							return scope._parent;

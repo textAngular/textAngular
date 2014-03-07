@@ -7,8 +7,7 @@ module.exports = function (config) {
 
 		plugins: [
 			'karma-jasmine',
-			'karma-chrome-launcher',
-			'karma-phantomjs-launcher',
+			'karma-phantomJS-launcher',
 			'karma-coverage'
 		],
 		
@@ -29,11 +28,7 @@ module.exports = function (config) {
 		],
 
 		preprocessors: {
-			'**/textAngular.js': ['coverage']
-		},
-		coverageReporter: {
-			type : 'html',
-			dir : 'coverage/'
+			'textAngular.js': ['coverage']
 		},
 
 		// test results reporter to use
@@ -69,7 +64,7 @@ module.exports = function (config) {
 		// - Safari (only Mac)
 		// - PhantomJS
 		// - IE (only Windows)
-		browsers: ['Chrome'],
+		browsers: ['PhantomJS'],
 
 
 		// If browser does not capture in given timeout [ms], kill it

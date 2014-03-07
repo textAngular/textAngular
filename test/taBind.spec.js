@@ -121,6 +121,15 @@ describe('taBind', function () {
 			$rootScope.$digest();
 			expect(element.html()).toBe('<div>Test 2 Content</div>');
 		});
+		
+		it('should prevent links from being clicked', function () {
+			$rootScope.html = '<div><a href="test">Test</a> 2 Content</div>';
+			$rootScope.$digest();
+			element.find('a').on('click', function(e){
+				expect(e.isDefaultPrevented());
+			});
+			element.find('a').triggerHandler('click');
+		});
 	});
 
 	describe('should function as an textarea', function () {
@@ -199,18 +208,17 @@ describe('taBind', function () {
 			element.val('<div>Test 2 Content</div>');
 			element.trigger('paste');
 			$rootScope.$digest();
-			$timeout(function () {
-				expect($rootScope.html).toBe('<div>Test 2 Content</div>');
-			}, 1);
+			$timeout.flush();
+			$rootScope.$digest();
+			expect($rootScope.html).toBe('<div>Test 2 Content</div>');
 		});
 
 		it('should update model from cut', function () {
 			element.val('<div>Test 2 Content</div>');
 			element.trigger('cut');
+			$timeout.flush();
 			$rootScope.$digest();
-			$timeout(function () {
-				expect($rootScope.html).toBe('<div>Test 2 Content</div>');
-			}, 1);
+			expect($rootScope.html).toBe('<div>Test 2 Content</div>');
 		});
 	});
 
