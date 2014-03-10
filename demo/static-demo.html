@@ -36,13 +36,13 @@
 <body>
 
 <div ng-app="textAngularTest" ng-controller="wysiwygeditor" class="container app">
-  <text-angular-toolbar name="statictoolbar" class="statictoolbar"></text-angular-toolbar>
+  <div text-angular-toolbar name="statictoolbar" class="statictoolbar"></div>
   <h1>Toolbar</h1>
   <p><button type="button" ng-click="changetesth1()">Test Change H1 Text</button><button type="button" ng-click="changeallh2()">All Change H2 Text</button><button type="button" ng-click="changeallh()">All H* Text</button><button type="button" ng-click="iconsallh()">Change H* Icons</button><button type="button" ng-click="resettoolbar()">Reset All Toolbar Buttons</button></p>
-  <text-angular-toolbar name="test"></text-angular-toolbar>
+  <div text-angular-toolbar name="test"></div>
   <h1>Editor</h1>
   <button ng-click="disabled = !disabled" unselectable>Disable text-angular Toggle</button>
-  <text-angular-toolbar name="htmlcontenttools"></text-angular-toolbar>
+  <div text-angular-toolbar name="htmlcontenttools"></div>
   <div text-angular="text-angular" name="htmlcontent" ng-model="data.htmlcontent" ta-disabled='disabled' ta-target-toolbars='htmlcontenttools,statictoolbar'></div>
   <div text-angular="text-angular" name="htmlcontent2" ng-model="data.htmlcontent" ta-disabled='disabled' ta-target-toolbars='htmlcontenttools,statictoolbar'></div>
   <h1>Raw HTML in a text area</h1>

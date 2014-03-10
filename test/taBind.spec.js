@@ -11,53 +11,55 @@ describe('taBind', function () {
 	}));
 
 	describe('should respect HTML5 placeholder', function () {
-		var $rootScope, element;
-		beforeEach(inject(function (_$compile_, _$rootScope_) {
-			$rootScope = _$rootScope_;
-			$rootScope.html = '';
-			element = _$compile_('<textarea id="taTextElement" contenteditable="true" ta-bind="" ng-model="html" placeholder="Add Comment" class="ng-scope ng-isolate-scope ng-pristine ng-valid"></textarea>')($rootScope);
-			$rootScope.$digest();
-		}));
-
-		it('should add the placeholder-text class', function () {
-			expect(element.hasClass('placeholder-text')).toBe(true);
-		});
-		it('should add the placeholder text', function () {
-			expect(element.text()).toEqual('Add Comment');
-		});
-		it('should remove the placeholder text on focusin', function () {
-			element.triggerHandler('focus');
-			expect(element.text()).toEqual('');
-		});
-		it('should remove the placeholder-text class on focusin', function () {
-			element.triggerHandler('focus');
-			expect(element.hasClass('placeholder-text')).toBe(false);
-		});
-		it('should add the placeholder text back on blur if the input is blank', function () {
-			element.triggerHandler('focus');
-			expect(element.text()).toEqual('');
-			element.triggerHandler('blur');
-			expect(element.text()).toEqual('Add Comment');
-		});
-		it('should add the placeholder-text class back on blur if the input is blank', function () {
-			element.triggerHandler('focus');
-			expect(element.hasClass('placeholder-text')).toBe(false);
-			element.triggerHandler('blur');
-			expect(element.hasClass('placeholder-text')).toBe(true);
-		});
-		it('should not add the placeholder text back on blur if the input is not blank', function () {
-			element.triggerHandler('focus');
-			expect(element.text()).toEqual('');
-			element.text('Lorem Ipsum');
-			element.triggerHandler('blur');
-			expect(element.text()).toEqual('Lorem Ipsum');
-		});
-		it('should not add the placeholder-text class back on blur if the input is not blank', function () {
-			element.triggerHandler('focus');
-			expect(element.hasClass('placeholder-text')).toBe(false);
-			element.text('Lorem Ipsum');
-			element.triggerHandler('blur');
-			expect(element.hasClass('placeholder-text')).toBe(false);
+		describe('as contenteditable div', function(){
+			var $rootScope, element;
+			beforeEach(inject(function (_$compile_, _$rootScope_) {
+				$rootScope = _$rootScope_;
+				$rootScope.html = '';
+				element = _$compile_('<div ta-bind contenteditable="true" ng-model="html" placeholder="Add Comment"></div>')($rootScope);
+				$rootScope.$digest();
+			}));
+	
+			it('should add the placeholder-text class', function () {
+				expect(element.hasClass('placeholder-text')).toBe(true);
+			});
+			it('should add the placeholder text', function () {
+				expect(element.html()).toEqual('Add Comment');
+			});
+			it('should remove the placeholder text on focusin', function () {
+				element.triggerHandler('focus');
+				expect(element.html()).toEqual('<p><br></p>');
+			});
+			it('should remove the placeholder-text class on focusin', function () {
+				element.triggerHandler('focus');
+				expect(element.hasClass('placeholder-text')).toBe(false);
+			});
+			it('should add the placeholder text back on blur if the input is blank', function () {
+				element.triggerHandler('focus');
+				expect(element.html()).toEqual('<p><br></p>');
+				element.triggerHandler('blur');
+				expect(element.html()).toEqual('Add Comment');
+			});
+			it('should add the placeholder-text class back on blur if the input is blank', function () {
+				element.triggerHandler('focus');
+				expect(element.hasClass('placeholder-text')).toBe(false);
+				element.triggerHandler('blur');
+				expect(element.hasClass('placeholder-text')).toBe(true);
+			});
+			it('should not add the placeholder text back on blur if the input is not blank', function () {
+				element.triggerHandler('focus');
+				expect(element.html()).toEqual('<p><br></p>');
+				element.html('<p>Lorem Ipsum</p>');
+				element.triggerHandler('blur');
+				expect(element.html()).toEqual('<p>Lorem Ipsum</p>');
+			});
+			it('should not add the placeholder-text class back on blur if the input is not blank', function () {
+				element.triggerHandler('focus');
+				expect(element.hasClass('placeholder-text')).toBe(false);
+				element.html('<p>Lorem Ipsum</p>');
+				element.triggerHandler('blur');
+				expect(element.hasClass('placeholder-text')).toBe(false);
+			});
 		});
 	});
 

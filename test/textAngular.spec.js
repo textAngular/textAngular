@@ -505,14 +505,14 @@ describe('textAngular', function(){
 			$rootScope.htmlcontent = undefined;
 			var element = $compile('<text-angular name="test" ng-model="htmlcontent"></text-angular>')($rootScope);
 			$rootScope.$digest();
-			expect(jQuery('.ta-text', element).html()).toBe('');
+			expect(jQuery('.ta-text', element).html()).toBe('<p><br></p>');
 		}));
 		
 		it('should handle initial null to empty-string', inject(function ($compile, $rootScope) {
 			$rootScope.htmlcontent = null;
 			var element = $compile('<text-angular name="test" ng-model="htmlcontent"></text-angular>')($rootScope);
 			$rootScope.$digest();
-			expect(jQuery('.ta-text', element).html()).toBe('');
+			expect(jQuery('.ta-text', element).html()).toBe('<p><br></p>');
 		}));
 		
 		it('should handle initial undefined to originalContents', inject(function ($compile, $rootScope) {
@@ -536,7 +536,7 @@ describe('textAngular', function(){
 				$rootScope.$digest();
 				$rootScope.htmlcontent = undefined;
 				$rootScope.$digest();
-				expect(jQuery('.ta-text', element).html()).toBe('');
+				expect(jQuery('.ta-text', element).html()).toBe('<p><br></p>');
 			}));
 			
 			it('from null to empty-string', inject(function ($compile, $rootScope) {
@@ -545,7 +545,7 @@ describe('textAngular', function(){
 				$rootScope.$digest();
 				$rootScope.htmlcontent = null;
 				$rootScope.$digest();
-				expect(jQuery('.ta-text', element).html()).toBe('');
+				expect(jQuery('.ta-text', element).html()).toBe('<p><br></p>');
 			}));
 			
 			it('from undefined to blank/emptystring WITH originalContents', inject(function ($compile, $rootScope) {
@@ -554,7 +554,7 @@ describe('textAngular', function(){
 				$rootScope.$digest();
 				$rootScope.htmlcontent = undefined;
 				$rootScope.$digest();
-				expect(jQuery('.ta-text', element).html()).toBe('');
+				expect(jQuery('.ta-text', element).html()).toBe('<p><br></p>');
 			}));
 			
 			it('from null to blank/emptystring WITH originalContents', inject(function ($compile, $rootScope) {
@@ -563,7 +563,7 @@ describe('textAngular', function(){
 				$rootScope.$digest();
 				$rootScope.htmlcontent = null;
 				$rootScope.$digest();
-				expect(jQuery('.ta-text', element).html()).toBe('');
+				expect(jQuery('.ta-text', element).html()).toBe('<p><br></p>');
 			}));
 		});
 	});

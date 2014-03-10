@@ -9,6 +9,38 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 
 (function(){ // encapsulate all variables so they don't become global vars
 	"Use Strict";
+	// IE version detection - http://stackoverflow.com/questions/4169160/javascript-ie-detection-why-not-use-simple-conditional-comments
+	// We need this as IE sometimes plays funny tricks with the contenteditable.
+	// ----------------------------------------------------------
+	// If you're not in IE (or IE version is less than 5) then:
+	// ie === undefined
+	// If you're in IE (>=5) then you can determine which version:
+	// ie === 7; // IE7
+	// Thus, to detect IE:
+	// if (ie) {}
+	// And to detect the version:
+	// ie === 6 // IE6
+	// ie > 7 // IE8, IE9, IE10 ...
+	// ie < 9 // Anything less than IE9
+	// ----------------------------------------------------------
+	/* istanbul ignore next: untestable browser check */
+	var ie = (function(){
+		var undef,rv = -1; // Return value assumes failure.
+		var ua = window.navigator.userAgent;
+		var msie = ua.indexOf('MSIE ');
+		var trident = ua.indexOf('Trident/');
+		
+		if (msie > 0) {
+			// IE 10 or older => return version number
+			rv = parseInt(ua.substring(msie + 5, ua.indexOf('.', msie)), 10);
+		} else if (trident > 0) {
+			// IE 11 (or newer) => return version number
+			var rvNum = ua.indexOf('rv:');
+			rv = parseInt(ua.substring(rvNum + 3, ua.indexOf('.', rvNum)), 10);
+		}
+		
+		return ((rv > -1) ? rv : undef);
+	}());
 	var textAngular = angular.module("textAngular", ['ngSanitize']); //This makes ngSanitize required
 	
 	// Here we set up the global display defaults, to set your own use a angular $provider#decorator.
@@ -602,6 +634,9 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 				var _isContentEditable = element.attr('contenteditable') !== undefined && element.attr('contenteditable');
 				var _isInputFriendly = _isContentEditable || element[0].tagName.toLowerCase() === 'textarea' || element[0].tagName.toLowerCase() === 'input';
 				var _isReadonly = false;
+				// defaults to the paragraph element, but we need the line-break or it doesn't allow you to type into the empty element
+				// non IE is '<p><br/></p>', ie is '<p></p>' as for once IE gets it correct...
+				var _defaultVal = (ie === undefined)? '<p><br></p>' : '<p></p>';
 				// in here we are undoing the converts used elsewhere to prevent the < > and & being displayed when they shouldn't in the code.
 				var _compileHtml = function(){
 					if(_isContentEditable) return element[0].innerHTML;
@@ -631,13 +666,18 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 					}else{
 						// all the code specific to contenteditable divs
 						element.on('keyup', function(){
-							if(!_isReadonly) ngModel.$setViewValue(_compileHtml());
+							if(!_isReadonly){
+								ngModel.$setViewValue(_compileHtml());
+							}
 						});
 						
 						element.on('blur', function(){
 							var val = _compileHtml();
-							if(val === '' && element.attr("placeholder")) element.addClass('placeholder-text');
-							if(!_isReadonly) ngModel.$setViewValue(_compileHtml());
+							if((val === '' || val === _defaultVal) && element.attr("placeholder")) element.addClass('placeholder-text');
+							if(!_isReadonly){
+								if(val === _defaultVal) ngModel.$setViewValue('');
+								else ngModel.$setViewValue(_compileHtml());
+							}
 							ngModel.$render();
 						});
 						
@@ -649,7 +689,9 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 								element.removeClass('placeholder-text');
 								ngModel.$render();
 							});
-						}
+						}else element.on('focus', function(){
+							ngModel.$render();
+						});
 					}
 				}
 				
@@ -672,8 +714,9 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 						var val = ngModel.$viewValue || '';
 						if(_isContentEditable){
 							// WYSIWYG Mode
-							if (val === '' && element.attr('placeholder') && element.hasClass('placeholder-text'))
-									element[0].innerHTML = element.attr('placeholder');
+							if ((val === '' || val === _defaultVal) && element.attr('placeholder') && element.hasClass('placeholder-text'))
+								element[0].innerHTML = element.attr('placeholder');
+							else if(val === '') element[0].innerHTML = _defaultVal;
 							else element[0].innerHTML = val;
 							// if in WYSIWYG and readOnly we kill the use of links by clicking
 							if(!_isReadonly) element.find('a').on('click', function(e){
