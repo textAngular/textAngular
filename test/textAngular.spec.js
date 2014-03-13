@@ -335,35 +335,55 @@ describe('textAngular', function(){
 		}));
 		describe('should start with', function () {
 			it('pristine', function(){
-				expect($rootScope.form.$pristine);
+				expect($rootScope.form.$pristine).toBe(true);
 			});
 			it('not dirty', function(){
-				expect(!$rootScope.form.$dirty);
+				expect($rootScope.form.$dirty).toBe(false);
 			});
 			it('field pristine', function(){
-				expect($rootScope.form.test.$pristine);
+				expect($rootScope.form.test.$pristine).toBe(true);
 			});
 			it('field not dirty', function(){
-				expect(!$rootScope.form.test.$dirty);
+				expect($rootScope.form.test.$dirty).toBe(false);
 			});
 		});
 		
-		describe('should update', function () {
+		describe('should NOT change on direct model change', function () {
 			beforeEach(function(){
 				$rootScope.htmlcontent = '<div>Test Change Content</div>';
 				$rootScope.$digest();
 			});
 			it('pristine', function(){
-				expect(!$rootScope.form.$pristine);
+				expect($rootScope.form.$pristine).toBe(true);
 			});
 			it('not dirty', function(){
-				expect($rootScope.form.$dirty);
+				expect($rootScope.form.$dirty).toBe(false);
 			});
 			it('field pristine', function(){
-				expect(!$rootScope.form.test.$pristine);
+				expect($rootScope.form.test.$pristine).toBe(true);
 			});
 			it('field not dirty', function(){
-				expect($rootScope.form.test.$dirty);
+				expect($rootScope.form.test.$dirty).toBe(false);
+			});
+		});
+		
+		describe('should change on input update', function () {
+			beforeEach(function(){
+				element.find('.ta-text').html('<div>Test Change Content</div>');
+				element.find('.ta-text').triggerHandler('keyup');
+				$rootScope.$digest();
+			});
+			it('not pristine', function(){
+				expect($rootScope.form.$pristine).toBe(false);
+			});
+			it('dirty', function(){
+				expect($rootScope.form.$dirty).toBe(true);
+			});
+			it('field not pristine', function(){
+				expect($rootScope.form.test.$pristine).toBe(false);
+			});
+			it('field dirty', function(){
+				expect($rootScope.form.test.$dirty).toBe(true);
 			});
 		});
 	});
