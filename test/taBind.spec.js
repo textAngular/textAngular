@@ -210,7 +210,7 @@ describe('taBind', function () {
 			expect(element.html()).toBe('<div>Test 2 Content</div>');
 		});
 		
-		it('should prevent links from being clicked', function () {
+		it('should prevent links default event', function () {
 			$rootScope.html = '<div><a href="test">Test</a> 2 Content</div>';
 			$rootScope.$digest();
 			element.find('a').on('click', function(e){
@@ -309,7 +309,37 @@ describe('taBind', function () {
 			expect($rootScope.html).toBe('<div>Test 2 Content</div>');
 		});
 	});
-
+	
+	describe('emits the ta-element-select event correctly', function(){
+		var $rootScope, element;
+		beforeEach(inject(function (_$compile_, _$rootScope_) {
+			$rootScope = _$rootScope_;
+			$rootScope.html = '<p><a>Test Contents</a><img/></p>';
+			element = _$compile_('<div ta-bind contenteditable="contenteditable" ng-model="html"></div>')($rootScope);
+			$rootScope.$digest();
+		}));
+		it('on click of <a> element', function(){
+			var targetElement = element.find('a');
+			var test;
+			$rootScope.$on('ta-element-select', function(event, element){
+				test = element;
+			});
+			targetElement.triggerHandler('click');
+			$rootScope.$digest();
+			expect(test).toBe(targetElement[0]);
+		});
+		it('on click of <img> element', function(){
+			var targetElement = element.find('img');
+			var test;
+			$rootScope.$on('ta-element-select', function(event, element){
+				test = element;
+			});
+			targetElement.triggerHandler('click');
+			$rootScope.$digest();
+			expect(test).toBe(targetElement[0]);
+		});
+	});
+	
 	describe('should create the updateTaBind function on parent scope', function () {
 		describe('without id', function () {
 			it('should exist', inject(function (_$compile_, _$rootScope_) {

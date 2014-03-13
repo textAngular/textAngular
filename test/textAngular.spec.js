@@ -716,7 +716,14 @@ describe('textAngular', function(){
 					return this.$element.attr('hit-this', 'true');
 				},
 				commandKeyCode: 21,
-				activeState: function(){ return true; }
+				activeState: function(){ return true; },
+				onElementSelect: {
+					element: 'a',
+					action: function(event, element, editorScope){
+						element.attr('hit-via-select', 'true');
+						this.$element.attr('hit-via-select', 'true');
+					}
+				}
 			});
 			taOptions.toolbar = [
 				['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'pre', 'quote', 'testbutton'],
@@ -726,7 +733,7 @@ describe('textAngular', function(){
 			];
 		}));
 		beforeEach(inject(function($compile, $rootScope, textAngularManager, $document){
-			$rootScope.htmlcontent = '<p>Lorem ipsum <u>dolor sit amet<u>, consectetur <i>adipisicing elit, sed do eiusmod tempor incididunt</i> ut labore et dolore magna aliqua.</p>';
+			$rootScope.htmlcontent = '<p>Lorem ipsum <u>dolor sit amet<u>, consectetur <i>adipisicing elit, sed do eiusmod tempor incididunt</i> ut labore et <a>dolore</a> magna aliqua.</p>';
 			element = $compile('<text-angular name="test" ng-model="htmlcontent">Test Contents2</text-angular>')($rootScope);
 			$document.find('body').append(element);
 			editorScope = textAngularManager.retrieveEditor('test').scope;
@@ -780,6 +787,28 @@ describe('textAngular', function(){
 				editorScope.wrapSelection("formatBlock", "<PRE>");
 				expect(editorScope.queryFormatBlockState('p'));
 			});
+		});
+		
+		describe('ta-element-select event', function(){
+			it('fires correctly on element selector', function(){
+				var triggerElement = element.find('.ta-text a');
+				triggerElement.triggerHandler('click');
+				expect(triggerElement.attr('hit-via-select')).toBe('true');
+			});
+			
+			it('fires correctly when filter returns true', inject(function(taTools){
+				taTools.testbutton.onElementSelect.filter = function(){ return true; };
+				var triggerElement = element.find('.ta-text a');
+				triggerElement.triggerHandler('click');
+				expect(triggerElement.attr('hit-via-select')).toBe('true');
+			}));
+			
+			it('does not fire when filter returns false', inject(function(taTools){
+				taTools.testbutton.onElementSelect.filter = function(){ return false; };
+				var triggerElement = element.find('.ta-text a');
+				triggerElement.triggerHandler('click');
+				expect(triggerElement.attr('hit-via-select')).toBeUndefined();
+			}));
 		});
 		
 		describe('updating styles', function(){

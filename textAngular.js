@@ -113,6 +113,10 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 		}
 	});
 	
+	// This is the element selector string that is used to catch click events within a taBind, prevents the default and $emits a 'ta-element-select' event
+	// these are individually used in an angular.element().find() call. What can go here depends on whether you have full jQuery loaded or just jQLite with angularjs.
+	textAngular.value('taSelectableElements', ['a','img']);
+	
 	// setup the global contstant functions for setting up the toolbar
 	
 	// all tool definitions
@@ -146,6 +150,14 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 					returns true if the tool is disabled, false if it isn't
 			displayActiveToolClass: [function(boolean)]
 					returns true if the tool is 'active' in the currently focussed toolbar
+			onElementSelect: [Object]
+					This object contains the following key/value pairs and is used to trigger the ta-element-select event
+					element: [String]
+						an element name, will only trigger the onElementSelect action if the tagName of the element matches this string
+					filter: [function(element)]?
+						an optional filter that returns a boolean, if true it will trigger the onElementSelect.
+					action: [function(event, element, editorScope)]
+						the action that should be executed if the onElementSelect function runs
 	*/
 	// name and toolDefinition to add into the tools available to be added on the toolbar
 	function registerTextAngularTool(name, toolDefinition){
@@ -613,6 +625,11 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 						textAngularManager.unregisterEditor(_name);
 					});
 					
+					// catch element select event and pass to toolbar tools
+					scope.$on('ta-element-select', function(event, element){
+						_toolbars.triggerElementSelect(event, element);
+					});
+					
 					// the following is for applying the active states to the tools that support it
 					scope._bUpdateSelectedStyles = false;
 					// loop through all the tools polling their activeState function if it exists
@@ -674,7 +691,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 				}
 			};
 		}
-	]).directive('taBind', ['taSanitize', '$timeout', 'taFixChrome', function(taSanitize, $timeout, taFixChrome){
+	]).directive('taBind', ['taSanitize', '$timeout', 'taFixChrome', 'taSelectableElements', function(taSanitize, $timeout, taFixChrome, taSelectableElements){
 		// Uses for this are textarea or input with ng-model and ta-bind='text'
 		// OR any non-form element with contenteditable="contenteditable" ta-bind="html|text" ng-model
 		return {
@@ -788,10 +805,16 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 								else element[0].innerHTML = val;
 							}
 							// if in WYSIWYG and readOnly we kill the use of links by clicking
-							if(!_isReadonly) element.find('a').on('click', function(e){
-								e.preventDefault();
-								return false;
-							});
+							if(!_isReadonly){
+								angular.forEach(taSelectableElements, function(selector){
+									element.find(selector).on('click', function(e){
+										// emit the element-select event, pass the element
+										scope.$emit('ta-element-select', this);
+										e.preventDefault();
+										return false;
+									});
+								});
+							}
 						}else if(element[0].tagName.toLowerCase() !== 'textarea' && element[0].tagName.toLowerCase() !== 'input'){
 							// make sure the end user can SEE the html code as a display.
 							element[0].innerHTML = val;
@@ -1159,6 +1182,30 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 									for(var _t = 0; _t < _toolbars.length; _t++){
 										if(_toolbars[_t].tools[name] !== undefined){
 											taToolExecuteAction.call(_toolbars[_t].tools[name], scope);
+											result = true;
+											break;
+										}
+									}
+								}
+							});
+							return result;
+						},
+						triggerElementSelect: function(event, element){
+							// search through the taTools to see if a match for the tag is made.
+							// if there is, see if the tool is on a registered toolbar and not disabled.
+							// NOTE: This can trigger on MULTIPLE tools simultaneously.
+							var result = true;
+							element = angular.element(element);
+							angular.forEach(taTools, function(tool, name){
+								if(
+									tool.onElementSelect &&
+									tool.onElementSelect.element &&
+									tool.onElementSelect.element.toLowerCase() === element[0].tagName.toLowerCase() &&
+									(!tool.onElementSelect.filter || tool.onElementSelect.filter(element))
+								){
+									for(var _t = 0; _t < _toolbars.length; _t++){
+										if(_toolbars[_t].tools[name] !== undefined){
+											tool.onElementSelect.action.call(_toolbars[_t].tools[name], event, element, scope);
 											result = true;
 											break;
 										}
