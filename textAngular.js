@@ -17,7 +17,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 			['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'pre', 'quote'],
 			['bold', 'italics', 'underline', 'ul', 'ol', 'redo', 'undo', 'clear'],
 			['justifyLeft','justifyCenter','justifyRight'],
-			['html', 'insertImage', 'insertLink', 'unlink']
+			['html', 'insertImage', 'insertLink', 'insertVideo',  'unlink']
 		],
 		classes: {
 			focussed: "focussed",
@@ -277,6 +277,19 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 				}
 			}
 		});
+		taRegisterTool('insertVideo', {
+			iconclass: 'fa fa-picture-o', // no predecided class for insert video as of now. 
+			action: function(){
+				var urlPrompt;
+				urlPrompt = prompt("Please enter a youtube URL to embed", 'http://');
+				if (urlPrompt !== '') {
+					console.log(urlPrompt);
+					var urlReplace = urlPrompt.replace("http://www.youtube.com/watch?v=", "http://www.youtube.com/embed/");
+					 var embed = '<div style="padding:20px"><iframe src="'+urlReplace+'" allowfullscreen="true" width="300" frameborder="0" height="250"></iframe></div>';
+					return this.$parent.wrapSelection('inserthtml',   embed);
+				}
+			}
+		});		
 		taRegisterTool('insertLink', {
 			iconclass: 'fa fa-link',
 			action: function(){
