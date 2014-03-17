@@ -1081,7 +1081,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 						else element.removeClass(scope.classes.focussed);
 					});
 					
-					setupToolElement = function(toolDefinition, toolScope){
+					var setupToolElement = function(toolDefinition, toolScope){
 						var toolElement;
 						if(toolDefinition && toolDefinition.display){
 							toolElement = angular.element(toolDefinition.display);
@@ -1157,7 +1157,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 							
 					angular.forEach(scope.toolbar, function(group){
 						// setup the toolbar group
-						groupElement = angular.element("<div>");
+						var groupElement = angular.element("<div>");
 						groupElement.addClass(scope.classes.toolbarGroup);
 						angular.forEach(group, function(tool){
 							// init and add the tools to the group
