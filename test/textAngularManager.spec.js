@@ -268,7 +268,32 @@ describe('textAngularManager', function(){
 							return this.$element.attr('hit-this', 'true');
 						}
 					});
-					taOptions.toolbar = [['noactivestate','activeonrangyrange','inactiveonrangyrange']];
+					taRegisterTool('onselect', {
+						buttontext: 'Active on element select',
+						action: function(){
+							return this.$element.attr('hit-this', 'true');
+						},
+						onElementSelect: {
+							element: 'a',
+							action: function(event, element, editorScope){
+								return this.$element.attr('hit-this', 'true');
+							}
+						}
+					});
+					taRegisterTool('unused', {
+						buttontext: 'Button Is Not Used',
+						action: function(){
+							throw('Error Should Not Run');
+						},
+						commandKeyCode: 42,
+						onElementSelect: {
+							element: 'a',
+							action: function(event, element, editorScope){
+								throw('Error Should Not Run');
+							}
+						}
+					});
+					taOptions.toolbar = [['noactivestate','activeonrangyrange','inactiveonrangyrange','onselect']];
 					$rootScope = _$rootScope_;
 					element = _$compile_('<text-angular name="test"><p>Test Content</p></text-angular>')($rootScope);
 					$rootScope.$digest();
@@ -316,6 +341,30 @@ describe('textAngularManager', function(){
 						editorScope.editorFunctions.sendKeyCommand({ctrlKey: true, which: 21});
 						$rootScope.$digest();
 						expect(element.find('.ta-toolbar button[name=activeonrangyrange]').attr('hit-this')).toBe('true');
+					});
+					
+					it('should do nothing if button not added', function(){
+						expect(function(){
+							editorScope.editorFunctions.sendKeyCommand({ctrlKey: true, which: 42});
+						}).not.toThrow();
+					});
+				});
+				
+				describe('onElementSelect', function(){
+					it('should do nothing if button not added', function(){
+						expect(function(){
+							editorScope.editorFunctions.triggerElementSelect({}, '<a>');
+						}).not.toThrow();
+					});
+					
+					it('should return true if there is a relevant select element on a tool', function(){
+						expect(editorScope.editorFunctions.triggerElementSelect({}, '<a>')).toBe(true);
+					});
+					
+					it('should call the onElementSelect.action handler of defined tools', function(){
+						editorScope.editorFunctions.triggerElementSelect({}, '<a>');
+						$rootScope.$digest();
+						expect(element.find('.ta-toolbar button[name=onselect]').attr('hit-this')).toBe('true');
 					});
 				});
 			});

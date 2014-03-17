@@ -520,7 +520,6 @@ describe('textAngularToolbar', function(){
 		it('should respect a disabled functions return value', function(){
 			expect(element.find('[name=disabled2]').is(":disabled"));
 		});
-		// disabled as value and as function on scope
 		// action is called in correct deferred pattern
 	});
 });

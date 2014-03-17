@@ -36,15 +36,16 @@
 <body>
 
 <div ng-app="textAngularTest" ng-controller="wysiwygeditor" class="container app">
-  <text-angular-toolbar name="statictoolbar" class="statictoolbar"></text-angular-toolbar>
+  <div text-angular-toolbar name="statictoolbar" class="statictoolbar"></div>
   <h1>Toolbar</h1>
   <p><button type="button" ng-click="changetesth1()">Test Change H1 Text</button><button type="button" ng-click="changeallh2()">All Change H2 Text</button><button type="button" ng-click="changeallh()">All H* Text</button><button type="button" ng-click="iconsallh()">Change H* Icons</button><button type="button" ng-click="resettoolbar()">Reset All Toolbar Buttons</button></p>
-  <text-angular-toolbar name="test"></text-angular-toolbar>
+  <div text-angular-toolbar name="test"></div>
   <h1>Editor</h1>
   <button ng-click="disabled = !disabled" unselectable>Disable text-angular Toggle</button>
-  <text-angular-toolbar name="htmlcontenttools"></text-angular-toolbar>
-  <div text-angular="text-angular" name="htmlcontent" ng-model="data.htmlcontent" ta-disabled='disabled' ta-target-toolbars='htmlcontenttools,statictoolbar'></div>
-  <div text-angular="text-angular" name="htmlcontent2" ng-model="data.htmlcontent" ta-disabled='disabled' ta-target-toolbars='htmlcontenttools,statictoolbar'></div>
+  <div text-angular-toolbar name="htmlcontenttools"></div>
+  <div text-angular="text-angular" name="htmlcontent" ng-model="data.htmlcontent3" ta-disabled='disabled' placeholder='Placeholder Text ONe' ta-target-toolbars='htmlcontenttools,statictoolbar'></div>
+  <text-angular ng-if="canEdit" name="htmlcontent2" ng-model="data.htmlcontent" ta-disabled='disabled' placeholder='Placeholder Text' ta-target-toolbars='htmlcontenttools,statictoolbar'></text-angular>
+  <button ng-click="canEdit = !canEdit">Can Edit</button>
   <h1>Raw HTML in a text area</h1>
   <textarea ng-model="data.htmlcontent" style="width: 100%"></textarea>
   <h1>Bound with ng-bind-html</h1>
@@ -63,10 +64,11 @@
 </form>
   
   <h1>Option to masquerade as a fancy text-area - complete with form submission and optional ngModel</h1>
-  <text-angular name="htmlcontent_nomodel"><p>Any <b>HTML</b> we put in-between the text-angular tags gets automatically put into the editor if there <strong style="font-size: 12pt;"><u><em>is not</em></u></strong> a ngModel</p></text-angular>
+  <text-angular name="htmlcontent_nomodel"><p>Any <b>HTML</b> we put in-between the text-angular tags gets <a href="automatic">automatically</a> put into the editor if there <strong style="font-size: 12pt;"><u><em>is not</em></u></strong> a ngModel</p></text-angular>
 </div>
   <script src='http://rangy.googlecode.com/svn/trunk/currentrelease/rangy-core.js'></script>
-  <script src='../bower_components/angular/angular.min.js'></script>
+  <script src='../bower_components/jquery/jquery.min.js'></script>
+  <script src='../bower_components/angular/angular.js'></script>
   <script src='../textAngular-sanitize.js'></script>
   <script src='../textAngular.js'></script>
 
@@ -76,10 +78,18 @@
 		// this demonstrates how to register a new tool and add it to the default toolbar
 		$provide.decorator('taOptions', ['taRegisterTool', '$delegate', function(taRegisterTool, taOptions){ // $delegate is the taOptions we are decorating
 			taRegisterTool('test', {
-				display: "<button type='button' ng-click='action()' ng-class='displayActiveToolClass(active)'>Test</button>",
+				buttontext: 'Test',
 				action: function(){ alert('Test Pressed') }
 			});
 			taOptions.toolbar[1].push('test');
+			taRegisterTool('colourRed', {
+	            iconclass: "fa fa-square red",
+	            action: function(){
+	                this.$editor().wrapSelection('forecolor', 'red');
+	            }
+	        });
+	        // add the button to the default toolbar definition
+	        taOptions.toolbar[1].push('colourRed');
 			return taOptions;
 		}]);
 		// this demonstrates changing the classes of the icons for the tools for font-awesome v3.x
@@ -110,6 +120,7 @@ $provide.decorator('taTools', ['$delegate', function(taTools){
 		$scope.data = {orightml: '<h2>Try me!</h2><p>textAngular is a super cool WYSIWYG Text Editor directive for AngularJS</p><p><b>Features:</b></p><ol><li>Automatic Seamless Two-Way-Binding</li><li>Super Easy <b>Theming</b> Options</li><li style="color: green;">Simple Editor Instance Creation</li><li>Safely Parses Html for Custom Toolbar Icons</li><li class="text-danger">Doesn&apos;t Use an iFrame</li><li>Works with Firefox, Chrome, and IE8+</li></ol><p><b>Code at GitHub:</b> <a href="https://github.com/fraywing/textAngular">Here</a> </p><p>昮朐 魡 燚璒瘭 譾躒鑅, 皾籈譧 紵脭脧 逯郹酟 煃 瑐瑍, 踆跾踄 趡趛踠 顣飁 廞 熥獘 豥 蔰蝯蝺 廦廥彋 蕍蕧螛 溹溦 幨懅憴 妎岓岕 緁, 滍 蘹蠮 蟷蠉蟼 鱐鱍鱕, 阰刲 鞮鞢騉 烳牼翐 魡 骱 銇韎餀 媓幁惁 嵉愊惵 蛶觢, 犝獫 嶵嶯幯 縓罃蔾 魵 踄 罃蔾 獿譿躐 峷敊浭, 媓幁 黐曮禷 椵楘溍 輗 漀 摲摓 墐墆墏 捃挸栚 蛣袹跜, 岓岕 溿 斶檎檦 匢奾灱 逜郰傃</p>'};
 		$scope.data.htmlcontent = $scope.data.orightml;
 		$scope.disabled = false;
+		$scope.canEdit = true;
 		$scope.changetesth1 = function(){
 			textAngularManager.updateToolbarToolDisplay('test', 'h1', {buttontext: 'Heading 1'});
 		};

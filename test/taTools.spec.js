@@ -188,30 +188,27 @@ describe('taTools test tool actions', function(){
 			expect(element.find('.ta-text').is(":focus"));
 		}));
 		
-		it('check untestables don\'t error', function(){
-			expect(function(){
-				findAndTriggerButton('redo');
-			}).not.toThrow();
-		});
-		it('check untestables don\'t error', function(){
-			expect(function(){
-				findAndTriggerButton('undo');
-			}).not.toThrow();
-		});
-		it('check untestables don\'t error', function(){
-			expect(function(){
-				findAndTriggerButton('insertImage');
-			}).not.toThrow();
-		});
-		it('check untestables don\'t error', function(){
-			expect(function(){
-				findAndTriggerButton('insertLink');
-			}).not.toThrow();
-		});
-		it('check untestables don\'t error', function(){
-			expect(function(){
-				findAndTriggerButton('unlink');
-			}).not.toThrow();
+		describe('check untestables don\'t error - ', function(){
+			it('redo', function(){
+				expect(function(){
+					findAndTriggerButton('redo');
+				}).not.toThrow();
+			});
+			it('undo', function(){
+				expect(function(){
+					findAndTriggerButton('undo');
+				}).not.toThrow();
+			});
+			it('insertImage', function(){
+				expect(function(){
+					findAndTriggerButton('insertImage');
+				}).not.toThrow();
+			});
+			it('insertVideo', function(){
+				expect(function(){
+					findAndTriggerButton('insertVideo');
+				}).not.toThrow();
+			});
 		});
 	};
 	
@@ -219,7 +216,8 @@ describe('taTools test tool actions', function(){
 		beforeEach(module('textAngular'));
 		beforeEach(inject(function (_$compile_, _$rootScope_, $document, textAngularManager, _$window_) {
 			$window = _$window_;
-			$window.prompt = function(){ return 'soehusoaehusnahoeusnt'; };
+			// prompt such that we actually get to test all of the insertVideo code
+			$window.prompt = function(){ return 'hello?v=asoeustnhe&'; };
 			$rootScope = _$rootScope_;
 			element = _$compile_('<text-angular name="test">Test Content</text-angular>')($rootScope);
 			$document.find('body').append(element);
@@ -344,6 +342,81 @@ describe('taTools test tool actions', function(){
 			$rootScope.$digest();
 			expect($rootScope.htmlcontent).toBe('<p class="test-class">Test Content that should be cleared</p><p>Test Other Tags</p><ul><li>Test 1</li></ul><ul><li>Test 2</li></ul><p></p>');
 			button.scope().$window.rangy = _rangy;
+		});
+	});
+	
+	describe('test link functions and button', function(){
+		beforeEach(module('textAngular'));
+		beforeEach(inject(function (_$compile_, _$rootScope_, $document, textAngularManager, _$window_) {
+			$window = _$window_;
+			$window.prompt = function(){ return ''; };
+			$rootScope = _$rootScope_;
+			element = _$compile_('<text-angular name="test"><p>Test Content</p></text-angular>')($rootScope);
+			$document.find('body').append(element);
+			$rootScope.$digest();
+			editorScope = textAngularManager.retrieveEditor('test').scope;
+			var sel = $window.rangy.getSelection();
+			var range = $window.rangy.createRangyRange();
+			range.selectNodeContents(element.find('.ta-text p')[0]);
+			sel.setSingleRange(range);
+		}));
+		afterEach(function(){
+			element.remove();
+		});
+		
+		it('doesn\'t error', function(){
+			expect(function(){
+				findAndTriggerButton('insertLink');
+			}).not.toThrow();
+		});
+		
+		it('creates a link', function(){
+			$window.prompt = function(){ return 'testval'; };
+			findAndTriggerButton('insertLink');
+			expect(element.find('.ta-text p a').attr('href')).toBe('testval');
+		});
+		
+		describe('interacts with the popover', function(){
+			beforeEach(function(){
+				$window.prompt = function(){ return 'testval'; };
+				findAndTriggerButton('insertLink');
+			});
+			
+			it('opens on click', function(){
+				element.find('.ta-text p a').triggerHandler('click');
+				expect(editorScope.displayElements.popover.hasClass('in')).toBe(true);
+			});
+			
+			it('has correct content', function(){
+				element.find('.ta-text p a').triggerHandler('click');
+				var contents = editorScope.displayElements.popoverContainer.contents();
+				expect(contents.eq(0)[0].tagName.toLowerCase()).toBe('a');
+				expect(contents.eq(0).html()).toBe('testval');
+				expect(contents.eq(0).attr('href')).toBe('testval');
+			});
+			
+			it('has functioning unlink button', function(){
+				element.find('.ta-text p a').triggerHandler('click');
+				editorScope.displayElements.popoverContainer.find('button').eq(1).triggerHandler('click');
+				$rootScope.$digest();
+				expect(element.find('.ta-text p a').length).toBe(0);
+			});
+			
+			it('has functioning edit button', function(){
+				$window.prompt = function(){ return 'newval'; };
+				element.find('.ta-text p a').triggerHandler('click');
+				editorScope.displayElements.popoverContainer.find('button').eq(0).triggerHandler('click');
+				$rootScope.$digest();
+				expect(element.find('.ta-text p a').attr('href')).toBe('newval');
+			});
+			
+			it('has functioning edit button when blank passed', function(){
+				$window.prompt = function(){ return ''; };
+				element.find('.ta-text p a').triggerHandler('click');
+				editorScope.displayElements.popoverContainer.find('button').eq(0).triggerHandler('click');
+				$rootScope.$digest();
+				expect(element.find('.ta-text p a').attr('href')).toBe('testval');
+			});
 		});
 	});
 });

@@ -20,16 +20,16 @@ module.exports = function (grunt) {
 	
 	// Project configuration.
 	grunt.initConfig({
-		clean: ["coverage/*.json"],
+		clean: ["coverage/*"],
 		coverage: {
 		  options: {
-			thresholds: {
+		  	thresholds: {
 			  'statements': 100,
-			  'branches': 98,
+			  'branches': 100,
 			  'lines': 100,
 			  'functions': 100
 			},
-			dir: 'coverage/'
+			dir: '.'
 		  }
 		},
 		coveralls: {
