@@ -634,11 +634,15 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 					if(document.activeElement !== element[0]){
 						// catch model being null or undefined
 						var val = ngModel.$viewValue || '';
+						val = val.trim();
+						
 						if(_isContentEditable){
 							// WYSIWYG Mode
-							if (val === '' && element.attr('placeholder') && element.hasClass('placeholder-text'))
-									element[0].innerHTML = element.attr('placeholder');
-							else element[0].innerHTML = val;
+							if (val === '' && element.attr('placeholder') && element.hasClass('placeholder-text')){
+								element[0].innerHTML = element.attr('placeholder');
+							} else {
+								element[0].innerHTML = val;
+							}
 							// if in WYSIWYG and readOnly we kill the use of links by clicking
 							if(!_isReadonly) element.find('a').on('click', function(e){
 								e.preventDefault();
@@ -650,6 +654,11 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 						}else{
 							// only for input and textarea inputs
 							element.val(val);
+						}
+					} else {
+						// WYSIWYG focus in.
+						if(element[0].innerHTML == element.attr('placeholder') && ngModel.$viewValue == '') {
+							element[0].innerHTML = '';
 						}
 					}
 				};
