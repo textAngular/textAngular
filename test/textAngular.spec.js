@@ -811,6 +811,38 @@ describe('textAngular', function(){
 			}));
 		});
 		
+		describe('popover', function(){
+			it('should show the popover', function(){
+				editorScope.showPopover(element.find('.ta-text p i'));
+				expect(editorScope.displayElements.popover.hasClass('in')).toBe(true);
+			});
+			describe('should hide the popover', function(){
+				beforeEach(inject(function($timeout){
+					editorScope.showPopover(element.find('.ta-text p i'));
+					$timeout.flush();
+					editorScope.$parent.$digest();
+				}));
+				it('on function call', function(){
+					editorScope.hidePopover();
+					expect(editorScope.displayElements.popover.hasClass('in')).toBe(false);
+				});
+				it('on click in editor', function(){
+					editorScope.displayElements.html.parent().triggerHandler('click');
+					editorScope.$parent.$digest();
+					expect(editorScope.displayElements.popover.hasClass('in')).toBe(false);
+				});
+				it('should prevent mousedown from propagating up from popover', function(){
+					var test = false;
+					editorScope.displayElements.popover.on('mousedown', function(e){
+						test = e.isDefaultPrevented();
+					});
+					editorScope.displayElements.popover.triggerHandler('mousedown');
+					editorScope.$parent.$digest();
+					expect(test).toBe(true);
+				});
+			});
+		});
+		
 		describe('updating styles', function(){
 			var iButton;
 			beforeEach(function(){

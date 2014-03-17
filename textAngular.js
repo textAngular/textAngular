@@ -65,15 +65,16 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 	
 	// use as: addCSSRule(document.styleSheets[0], "header", "float: left");
 	function addCSSRule(selector, rules) {
+		var insertIndex = Math.max(sheet.rules.length - 1, 0);
 		/* istanbul ignore else: untestable IE option */
 		if(sheet.insertRule) {
-			sheet.insertRule(selector + "{" + rules + "}");
+			sheet.insertRule(selector + "{" + rules + "}", insertIndex);
 		}
 		else {
-			sheet.addRule(selector, rules);
+			sheet.addRule(selector, rules, insertIndex);
 		}
 		// return the index of the stylesheet rule
-		return sheet.rules.length - 1;
+		return insertIndex;
 	}
 	
 	function removeCSSRule(index){
@@ -93,7 +94,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 			['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'pre', 'quote'],
 			['bold', 'italics', 'underline', 'ul', 'ol', 'redo', 'undo', 'clear'],
 			['justifyLeft','justifyCenter','justifyRight'],
-			['html', 'insertImage', 'insertLink', 'unlink']
+			['html', 'insertImage', 'insertLink', 'insertVideo']
 		],
 		classes: {
 			focussed: "focussed",
@@ -115,7 +116,8 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 	
 	// This is the element selector string that is used to catch click events within a taBind, prevents the default and $emits a 'ta-element-select' event
 	// these are individually used in an angular.element().find() call. What can go here depends on whether you have full jQuery loaded or just jQLite with angularjs.
-	textAngular.value('taSelectableElements', ['a','img']);
+	// div is only used as div.ta-insert-video caught in filter.
+	textAngular.value('taSelectableElements', ['a','img','div']);
 	
 	// setup the global contstant functions for setting up the toolbar
 	
@@ -174,7 +176,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 	textAngular.value('taTools', taTools);
 	
 	// configure initial textAngular tools here via taRegisterTool
-	textAngular.config(['taRegisterTool', function(taRegisterTool){
+	textAngular.run(['taRegisterTool', '$window', function(taRegisterTool, $window){
 		// clear taTools variable. Just catches testing and any other time that this config may run multiple times...
 		angular.forEach(taTools, function(value, key){ delete taTools[key];	});
 		taRegisterTool("html", {
@@ -355,45 +357,98 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 				restoreSelection();
 			}
 		});
+		
 		taRegisterTool('insertImage', {
 			iconclass: 'fa fa-picture-o',
 			action: function(){
 				var imageLink;
-				imageLink = prompt("Please enter an image URL to insert", 'http://');
-				if(imageLink !== '' && imageLink !== 'http://'){
-					return this.$editor().wrapSelection('insertImage', imageLink);
+				imageLink = $window.prompt("Please enter an image URL to insert", 'http://');
+				if(imageLink && imageLink !== '' && imageLink !== 'http://'){
+					return this.$editor().wrapSelection('insertImage', imageLink, true);
 				}
 			}
 		});
+		taRegisterTool('insertVideo', {
+			iconclass: 'fa fa-youtube-play',
+			action: function(){
+				var urlPrompt;
+				urlPrompt = $window.prompt("Please enter a youtube URL to embed", 'http://');
+				if (urlPrompt && urlPrompt !== '' && urlPrompt !== 'http://') {
+					// get the video ID
+					var ids = urlPrompt.match(/(\?|&)v=[^&]*/);
+					if(ids.length > 0){
+						// create the embed link
+						var urlLink = "http://www.youtube.com/embed/" + ids[0].substring(3);
+						// create the HTML
+						var embed = '<div class="ta-insert-video" style="padding:20px"><iframe src="' + urlLink + '" allowfullscreen="true" width="300" frameborder="0" height="250"></iframe></div>';
+						// insert
+						return this.$editor().wrapSelection('insertHTML', embed, true);
+					}
+				}
+			}
+		});	
 		taRegisterTool('insertLink', {
 			iconclass: 'fa fa-link',
 			action: function(){
 				var urlLink;
-				urlLink = prompt("Please enter an URL to insert", 'http://');
-				if(urlLink !== '' && urlLink !== 'http://'){
-					return this.$editor().wrapSelection('createLink', urlLink);
+				urlLink = $window.prompt("Please enter an URL to insert", 'http://');
+				if(urlLink && urlLink !== '' && urlLink !== 'http://'){
+					return this.$editor().wrapSelection('createLink', urlLink, true);
 				}
 			},
 			activeState: function(commonElement){
 				if(commonElement) return commonElement[0].tagName === 'A';
 				return false;
-			}
-		});
-		taRegisterTool('unlink', {
-			iconclass: 'fa fa-unlink',
-			action: function(){
-				return this.$editor().wrapSelection('unlink', null);
 			},
-			activeState: function(commonElement){
-				if(commonElement) return commonElement[0].tagName === 'A';
-				return false;
+			onElementSelect: {
+				element: 'a',
+				action: function(event, $element, editorScope){
+					// setup the editor toolbar
+					event.preventDefault();
+					var container = editorScope.displayElements.popoverContainer;
+					container.empty();
+					container.css('line-height', '28px');
+					var link = angular.element('<a href="' + $element.attr('href') + '" target="_blank">' + $element.attr('href') + '</a>');
+					link.css({
+						'display': 'inline-block',
+						'max-width': '200px',
+						'overflow': 'hidden',
+						'text-overflow': 'ellipsis',
+						'white-space': 'nowrap',
+						'vertical-align': 'middle'
+					});
+					container.append(link);
+					var buttonGroup = angular.element('<div class="btn-group pull-right">');
+					var reLinkButton = angular.element('<button type="button" class="btn btn-default btn-sm btn-small" tabindex="-1" unselectable="on"><i class="fa fa-edit icon-edit"></i></button>');
+					reLinkButton.on('click', function(event){
+						event.preventDefault();
+						var urlLink = $window.prompt("Please enter an URL to insert", $element.attr('href'));
+						if(urlLink !== ''){
+							$element.attr('href', urlLink);
+							editorScope.updateTaBindtaTextElement();
+						}
+						editorScope.hidePopover();
+					});
+					buttonGroup.append(reLinkButton);
+					var unLinkButton = angular.element('<button type="button" class="btn btn-default btn-sm btn-small" tabindex="-1" unselectable="on"><i class="fa fa-unlink icon-unlink"></i></button>');
+					// directly before ths click event is fired a digest is fired off whereby the reference to $element is orphaned off
+					unLinkButton.on('click', function(event){
+						event.preventDefault();
+						$element.replaceWith($element.contents());
+						editorScope.updateTaBindtaTextElement();
+						editorScope.hidePopover();
+					});
+					buttonGroup.append(unLinkButton);
+					container.append(buttonGroup);
+					editorScope.showPopover($element);
+				}
 			}
 		});
 	}]);
 	
 	textAngular.directive("textAngular", [
-		'$compile', '$timeout', 'taOptions', 'taSanitize', 'textAngularManager', '$window',
-		function($compile, $timeout, taOptions, taSanitize, textAngularManager, $window){
+		'$compile', '$timeout', 'taOptions', 'taSanitize', 'textAngularManager', '$window', '$animate',
+		function($compile, $timeout, taOptions, taSanitize, textAngularManager, $window, $animate){
 			return {
 				require: '?ngModel',
 				scope: {},
@@ -407,11 +462,15 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 					// get the settings from the defaults and add our specific functions that need to be on the scope
 					angular.extend(scope, angular.copy(taOptions), {
 						// wraps the selection in the provided tag / execCommand function. Should only be called in WYSIWYG mode.
-						wrapSelection: function(command, opt){
+						wrapSelection: function(command, opt, isSelectableElementTool){
 							// catch errors like FF erroring when you try to force an undo with nothing done
 							try{
 								document.execCommand(command, false, opt);
 							}catch(e){}
+							if(isSelectableElementTool){
+								// re-apply the selectable tool events
+								scope['reApplyOnSelectorHandlerstaTextElement' + _serial]();
+							}
 							// refocus on the shown display element, this fixes a display bug when using :focus styles to outline the box.
 							// You still have focus on the text/html input it just doesn't show up
 							scope.displayElements.text[0].focus();
@@ -436,7 +495,38 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 						// wheras the input will ALLWAYS have the correct value.
 						forminput: angular.element("<input type='hidden' tabindex='-1' style='display: none;'>"),
 						html: angular.element("<textarea></textarea>"),
-						text: angular.element("<div></div>")
+						text: angular.element("<div></div>"),
+						// other toolbased elements
+						popover: angular.element('<div class="popover fade bottom" style="max-width: none; width: 305px;"><div class="arrow"></div></div>'),
+						popoverContainer: angular.element('<div class="popover-content"></div>')
+					};
+					
+					// Setup the link/image/video edit toolbar
+					scope.displayElements.popover.append(scope.displayElements.popoverContainer);
+					element.append(scope.displayElements.popover);
+					
+					scope.displayElements.popover.on('mousedown', function(e){
+						// this prevents focusout from firing on the editor when clicking anything in the popover
+						e.preventDefault();
+						return false;
+					});
+					
+					// define the popover show and hide functions
+					scope.showPopover = function(element){
+						scope.displayElements.popover.css('top', element[0].offsetTop + element[0].offsetHeight + 'px');
+						scope.displayElements.popover.css('left', element[0].offsetLeft + (element[0].offsetWidth / 2.0) - 152.5 + 'px');
+						scope.displayElements.popover.css('display', 'block');
+						$animate.addClass(scope.displayElements.popover, 'in');
+						$timeout(function(){
+							scope.displayElements.html.parent().one('click', scope.hidePopover);
+						}, 100);
+					};
+					scope.hidePopover = function(){
+						$animate.removeClass(scope.displayElements.popover, 'in', /* istanbul ignore next: dosen't test with mocked animate */ function(){
+							scope.displayElements.popover.css('display', '');
+							scope.displayElements.popoverContainer.attr('style', '');
+							scope.displayElements.popoverContainer.attr('class', 'popover-content');
+						});
 					};
 					
 					// allow for insertion of custom directives on the textarea and div
@@ -586,7 +676,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 							scope.displayElements.forminput.val(ngModel.$viewValue);
 							// if the editors aren't focused they need to be updated, otherwise they are doing the updating
 							/* istanbul ignore else: don't care */
-							if(document.activeElement !== scope.displayElements.html[0] && document.activeElement !== scope.displayElements.text[0]){
+							if(!scope._elementSelectTriggered && document.activeElement !== scope.displayElements.html[0] && document.activeElement !== scope.displayElements.text[0]){
 								// catch model being null or undefined
 								scope.html = ngModel.$viewValue || '';
 							}
@@ -780,6 +870,24 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 				// because textAngular is bi-directional (which is awesome) we need to also sanitize values going in from the server
 				ngModel.$formatters.push(_sanitize);
 				
+				var selectorClickHandler = function(event){
+					// emit the element-select event, pass the element
+					scope.$emit('ta-element-select', this);
+					event.preventDefault();
+					return false;
+				};
+				
+				//used for updating when inserting wrapped elements
+				scope.$parent['reApplyOnSelectorHandlers' + (attrs.id || '')] = function(){
+					/* istanbul ignore else */
+					if(!_isReadonly) angular.forEach(taSelectableElements, function(selector){
+							// check we don't apply the handler twice
+							element.find(selector)
+								.off('click', selectorClickHandler)
+								.on('click', selectorClickHandler);
+						});
+				};
+				
 				// changes to the model variable from outside the html/text inputs
 				ngModel.$render = function(){
 					// catch model being null or undefined
@@ -807,12 +915,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 							// if in WYSIWYG and readOnly we kill the use of links by clicking
 							if(!_isReadonly){
 								angular.forEach(taSelectableElements, function(selector){
-									element.find(selector).on('click', function(e){
-										// emit the element-select event, pass the element
-										scope.$emit('ta-element-select', this);
-										e.preventDefault();
-										return false;
-									});
+									element.find(selector).on('click', selectorClickHandler);
 								});
 							}
 						}else if(element[0].tagName.toLowerCase() !== 'textarea' && element[0].tagName.toLowerCase() !== 'input'){
@@ -862,6 +965,10 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 							if(element.attr('contenteditable') !== undefined && element.attr('contenteditable')){
 								element.removeAttr('contenteditable');
 							}
+							// turn ON selector click handlers
+							angular.forEach(taSelectableElements, function(selector){
+								element.find(selector).on('click', selectorClickHandler);
+							});
 						}else{
 							// we changed to NOT readOnly mode (taReadonly='false')
 							if(element[0].tagName.toLowerCase() === 'textarea' || element[0].tagName.toLowerCase() === 'input'){
@@ -869,8 +976,20 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 							}else if(_isContentEditable){
 								element.attr('contenteditable', 'true');
 							}
+							// remove the selector click handlers
+							angular.forEach(taSelectableElements, function(selector){
+								element.find(selector).off('click', selectorClickHandler);
+							});
 						}
 						_isReadonly = newVal;
+					});
+				}
+				
+				// Initialise the selectableElements
+				// if in WYSIWYG and readOnly we kill the use of links by clicking
+				if(_isContentEditable && !_isReadonly){
+					angular.forEach(taSelectableElements, function(selector){
+						element.find(selector).on('click', selectorClickHandler);
 					});
 				}
 			}
@@ -1194,7 +1313,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 							// search through the taTools to see if a match for the tag is made.
 							// if there is, see if the tool is on a registered toolbar and not disabled.
 							// NOTE: This can trigger on MULTIPLE tools simultaneously.
-							var result = true;
+							var result = false;
 							element = angular.element(element);
 							angular.forEach(taTools, function(tool, name){
 								if(
