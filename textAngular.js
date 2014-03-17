@@ -391,7 +391,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 			iconclass: 'fa fa-link',
 			action: function(){
 				var urlLink;
-				urlLink = $window.prompt("Please enter an URL to insert", 'http://');
+				urlLink = $window.prompt("Please enter a URL to insert", 'http://');
 				if(urlLink && urlLink !== '' && urlLink !== 'http://'){
 					return this.$editor().wrapSelection('createLink', urlLink, true);
 				}
