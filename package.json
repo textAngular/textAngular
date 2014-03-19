@@ -33,7 +33,6 @@
     "requirejs": "~2.1.10",
     "karma-requirejs": "~0.2.1",
     "phantomjs": "1.9.1-0",
-    "istanbul": "~0.2.6",
     "karma": "~0.10.9"
   },
   "scripts": {

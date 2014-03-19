@@ -310,6 +310,117 @@ describe('taBind', function () {
 		});
 	});
 	
+	describe('emits the ta-drop-event event correctly', function(){
+		afterEach(inject(function($timeout){
+			try{
+				$timeout.flush();
+			}catch(e){}
+		}));
+		describe('without read-only attr', function(){
+			var $rootScope, element;
+			beforeEach(inject(function (_$compile_, _$rootScope_) {
+				$rootScope = _$rootScope_;
+				$rootScope.html = '<p>Test Contents</p>';
+				element = _$compile_('<div ta-bind contenteditable="contenteditable" ng-model="html"></div>')($rootScope);
+				$rootScope.$digest();
+			}));
+			it('should fire on drop event', function(){
+				var success = false;
+				$rootScope.$on('ta-drop-event', function(){
+					success = true;
+				});
+				element.triggerHandler('drop');
+				$rootScope.$digest();
+				expect(success).toBe(true);
+			});
+			it('should fire on drop event only once', function(){
+				var count = 0;
+				$rootScope.$on('ta-drop-event', function(){
+					count++;
+				});
+				element.triggerHandler('drop');
+				$rootScope.$digest();
+				element.triggerHandler('drop');
+				$rootScope.$digest();
+				// as we don't flush the $timeout it should never reset to being able to send another event
+				expect(count).toBe(1);
+			});
+			it('should fire on drop event again after timeout', inject(function($timeout){
+				var count = 0;
+				$rootScope.$on('ta-drop-event', function(){
+					count++;
+				});
+				element.triggerHandler('drop');
+				$rootScope.$digest();
+				$timeout.flush();
+				element.triggerHandler('drop');
+				$rootScope.$digest();
+				// as we don't flush the $timeout it should never reset to being able to send another event
+				expect(count).toBe(2);
+			}));
+		});
+		describe('with read-only attr initially false', function(){
+			var $rootScope, element;
+			beforeEach(inject(function (_$compile_, _$rootScope_) {
+				$rootScope = _$rootScope_;
+				$rootScope.html = '<p>Test Contents</p>';
+				$rootScope.readonly = false;
+				element = _$compile_('<div ta-bind contenteditable="contenteditable" ta-readonly="readonly" ng-model="html"></div>')($rootScope);
+				$rootScope.$digest();
+			}));
+			it('should fire on drop event', function(){
+				var success = false;
+				$rootScope.$on('ta-drop-event', function(){
+					success = true;
+				});
+				element.triggerHandler('drop');
+				$rootScope.$digest();
+				expect(success).toBe(true);
+			});
+			it('should not fire on drop event when changed to readonly mode', function(){
+				$rootScope.readonly = true;
+				$rootScope.$digest();
+				var success = false;
+				$rootScope.$on('ta-drop-event', function(){
+					success = true;
+				});
+				element.triggerHandler('drop');
+				$rootScope.$digest();
+				expect(success).toBe(false);
+			});
+		});
+		describe('with read-only attr initially true', function(){
+			var $rootScope, element;
+			beforeEach(inject(function (_$compile_, _$rootScope_) {
+				$rootScope = _$rootScope_;
+				$rootScope.html = '<p>Test Contents</p>';
+				$rootScope.readonly = true;
+				element = _$compile_('<div ta-bind contenteditable="contenteditable" ta-readonly="readonly" ng-model="html"></div>')($rootScope);
+				$rootScope.$digest();
+			}));
+			it('should not fire on drop event', function(){
+				var success = false;
+				$rootScope.$on('ta-drop-event', function(){
+					success = true;
+				});
+				element.triggerHandler('drop');
+				$rootScope.$digest();
+				expect(success).toBe(false);
+			});
+			it('should fire on drop event when changed to not readonly mode', function(){
+				$rootScope.readonly = false;
+				$rootScope.$digest();
+				var success = false;
+				$rootScope.$on('ta-drop-event', function(){
+					success = true;
+				});
+				element.triggerHandler('drop');
+				$rootScope.$digest();
+				expect(success).toBe(true);
+			});
+		});
+	});
+	
 	describe('emits the ta-element-select event correctly', function(){
 		var $rootScope, element;
 		beforeEach(inject(function (_$compile_, _$rootScope_) {

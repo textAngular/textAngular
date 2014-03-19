@@ -85,7 +85,8 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 			sheet.deleteRule(index);
 		}
 	}
-	
+	// this global var is used to prevent multiple fires of the drop event. Needs to be global to the textAngular file.
+	var dropFired = false;
 	var textAngular = angular.module("textAngular", ['ngSanitize']); //This makes ngSanitize required
 
 	// Here we set up the global display defaults, to set your own use a angular $provider#decorator.
@@ -111,7 +112,21 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 			textEditorSetup: function($element){ /* Do some processing here */ },
 			// raw html
 			htmlEditorSetup: function($element){ /* Do some processing here */ }
-		}
+		},
+		defaultFileDropHandler:
+			/* istanbul ignore next: untestable image processing */
+			function(file, insertAction){
+				var reader = new FileReader();
+				if(file.type.substring(0, 5) === 'image'){
+					reader.onload = function() {
+						if(reader.result !== '') insertAction('<img src="' + reader.result + '"/>');
+					};
+	
+					reader.readAsDataURL(file);
+					return true;
+				}
+				return false;
+			}
 	});
 	
 	// This is the element selector string that is used to catch click events within a taBind, prevents the default and $emits a 'ta-element-select' event
@@ -383,6 +398,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 				if (urlPrompt && urlPrompt !== '' && urlPrompt !== 'http://') {
 					// get the video ID
 					var ids = urlPrompt.match(/(\?|&)v=[^&]*/);
+					/* istanbul ignore else: if it's invalid don't worry - though probably should show some kind of error message */
 					if(ids.length > 0){
 						// create the embed link
 						var urlLink = "http://www.youtube.com/embed/" + ids[0].substring(3);
@@ -454,8 +470,8 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 	}]);
 
 	textAngular.directive("textAngular", [
-		'$compile', '$timeout', 'taOptions', 'taSanitize', 'textAngularManager', '$window', '$animate',
-		function($compile, $timeout, taOptions, taSanitize, textAngularManager, $window, $animate){
+		'$compile', '$timeout', 'taOptions', 'taSanitize', 'textAngularManager', '$window', '$animate', '$log',
+		function($compile, $timeout, taOptions, taSanitize, textAngularManager, $window, $animate, $log){
 			return {
 				require: '?ngModel',
 				scope: {},
@@ -491,7 +507,10 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 					// optional setup functions
 					if(attrs.taTextEditorSetup)			scope.setup.textEditorSetup = scope.$parent.$eval(attrs.taTextEditorSetup);
 					if(attrs.taHtmlEditorSetup)			scope.setup.htmlEditorSetup = scope.$parent.$eval(attrs.taHtmlEditorSetup);
-
+					// optional fileDropHandler function
+					if(attrs.taFileDrop)				scope.fileDropHandler = scope.$parent.$eval(attrs.taFileDrop);
+					else								scope.fileDropHandler = scope.defaultFileDropHandler;
+					
 					_originalContents = element[0].innerHTML;
 					// clear the original content
 					element[0].innerHTML = '';
@@ -727,6 +746,29 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 						_toolbars.triggerElementSelect(event, element);
 					});
 					
+					scope.$on('ta-drop-event', function(event, element, dropEvent){
+						scope.displayElements.text[0].focus();
+						if(dropEvent.originalEvent.dataTransfer && dropEvent.originalEvent.dataTransfer.files && dropEvent.originalEvent.dataTransfer.files.length > 0){
+							var insertAction = function(html){
+								// html MUST be a string representation of HTML
+								if(html && html !== '') scope.wrapSelection('insertHTML', html);
+							};
+							angular.forEach(dropEvent.originalEvent.dataTransfer.files, function(file){
+								// taking advantage of boolean execution, if the fileDropHandler returns true, nothing else after it is executed
+								// If it is false then execute the defaultFileDropHandler if the fileDropHandler is NOT the default one
+								try{
+									return scope.fileDropHandler(file, insertAction) ||
+										(scope.fileDropHandler !== scope.defaultFileDropHandler &&
+										scope.defaultFileDropHandler(file, insertAction));
+								}catch(error){
+									$log.error(error);
+								}
+							});
+							dropEvent.preventDefault();
+							dropEvent.stopPropagation();
+						}
+					});
+					
 					// the following is for applying the active states to the tools that support it
 					scope._bUpdateSelectedStyles = false;
 					// loop through all the tools polling their activeState function if it exists
@@ -883,6 +925,14 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 					event.preventDefault();
 					return false;
 				};
+				var fileDropHandler = function(event){
+					// emit the drop event, pass the element, preventing should be done elsewhere
+					if(!dropFired){
+						dropFired = true;
+						scope.$emit('ta-drop-event', this, event);
+						$timeout(function(){dropFired = false;}, 100);
+					}
+				};
 				
 				//used for updating when inserting wrapped elements
 				scope.$parent['reApplyOnSelectorHandlers' + (attrs.id || '')] = function(){
@@ -924,6 +974,9 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 								angular.forEach(taSelectableElements, function(selector){
 									element.find(selector).on('click', selectorClickHandler);
 								});
+								element.on('drop', fileDropHandler);
+							}else{
+								element.off('drop', fileDropHandler);
 							}
 						}else if(element[0].tagName.toLowerCase() !== 'textarea' && element[0].tagName.toLowerCase() !== 'input'){
 							// make sure the end user can SEE the html code as a display.
@@ -976,6 +1029,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 							angular.forEach(taSelectableElements, function(selector){
 								element.find(selector).on('click', selectorClickHandler);
 							});
+							element.off('drop', fileDropHandler);
 						}else{
 							// we changed to NOT readOnly mode (taReadonly='false')
 							if(element[0].tagName.toLowerCase() === 'textarea' || element[0].tagName.toLowerCase() === 'input'){
@@ -987,6 +1041,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 							angular.forEach(taSelectableElements, function(selector){
 								element.find(selector).off('click', selectorClickHandler);
 							});
+							element.on('drop', fileDropHandler);
 						}
 						_isReadonly = newVal;
 					});
@@ -998,6 +1053,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 					angular.forEach(taSelectableElements, function(selector){
 						element.find(selector).on('click', selectorClickHandler);
 					});
+					element.on('drop', fileDropHandler);
 				}
 			}
 		};
