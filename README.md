@@ -104,3 +104,4 @@ Including those from:
 * [kencaron](https://github.com/kencaron)
 * [gintau](https://github.com/gintau)
 * [uxtx](https://github.com/uxtx)
+* [simon-jouet](https://github.com/simon-jouet)

@@ -947,7 +947,7 @@ describe('textAngular', function(){
 			it('default inserts returned html', inject(function($compile, $rootScope, taOptions, $document){
 				$rootScope.htmlcontent = '';
 				taOptions.defaultFileDropHandler = function(file, insertAction){
-					insertAction('<img/>');
+					insertAction('insertHtml', '<img/>');
 					return true;
 				};
 				element = $compile('<text-angular name="test" ng-model="htmlcontent"></text-angular>')($rootScope);
@@ -961,7 +961,7 @@ describe('textAngular', function(){
 			it('attr function inserts returned html', inject(function($compile, $rootScope, taOptions, $document){
 				$rootScope.htmlcontent = '';
 				$rootScope.testhandler = function(file, insertAction){
-					insertAction('<img/>');
+					insertAction('insertHtml', '<img/>');
 					return true;
 				};
 				element = $compile('<text-angular name="test" ta-file-drop="testhandler" ng-model="htmlcontent"></text-angular>')($rootScope);
@@ -975,11 +975,11 @@ describe('textAngular', function(){
 			it('attr function overrides default', inject(function($compile, $rootScope, taOptions, $document){
 				$rootScope.htmlcontent = '';
 				taOptions.defaultFileDropHandler = function(file, insertAction){
-					insertAction('<wrong/>');
+					insertAction('insertHtml', '<wrong/>');
 					return true;
 				};
 				$rootScope.testhandler = function(file, insertAction){
-					insertAction('<img/>');
+					insertAction('insertHtml', '<img/>');
 					return true;
 				};
 				element = $compile('<text-angular name="test" ta-file-drop="testhandler" ng-model="htmlcontent"></text-angular>')($rootScope);
@@ -993,7 +993,7 @@ describe('textAngular', function(){
 			it('default inserted if attr function returns false', inject(function($compile, $rootScope, taOptions, $document){
 				$rootScope.htmlcontent = '';
 				taOptions.defaultFileDropHandler = function(file, insertAction){
-					insertAction('<img/>');
+					insertAction('insertHtml', '<img/>');
 					return true;
 				};
 				$rootScope.testhandler = function(file, insertAction){
@@ -1008,75 +1008,6 @@ describe('textAngular', function(){
 				element.remove();
 			}));
 		});
-		
-		describe('test insertAction error catching in place', function(){
-			it('insert string', inject(function($compile, $rootScope, taOptions, $document){
-				$rootScope.htmlcontent = '';
-				$rootScope.testhandler = function(file, insertAction){
-					insertAction('<img/>');
-					return true;
-				};
-				element = $compile('<text-angular name="test" ta-file-drop="testhandler" ng-model="htmlcontent"></text-angular>')($rootScope);
-				$document.find('body').append(element);
-				$rootScope.$digest();
-				element.find('.ta-text').triggerHandler({type: 'drop', originalEvent: {dataTransfer: {files: ['test'], types: ['files']}}});
-				$rootScope.$digest();
-				expect(element.find('.ta-text').html()).toBe('<p><img><br></p>');
-				element.remove();
-			}));
-			it('pass nothing', inject(function($compile, $rootScope, taOptions, $document){
-				$rootScope.htmlcontent = '';
-				$rootScope.testhandler = function(file, insertAction){
-					insertAction();
-					return true;
-				};
-				element = $compile('<text-angular name="test" ta-file-drop="testhandler" ng-model="htmlcontent"></text-angular>')($rootScope);
-				$document.find('body').append(element);
-				$rootScope.$digest();
-				element.find('.ta-text').triggerHandler({type: 'drop', originalEvent: {dataTransfer: {files: ['test'], types: ['files']}}});
-				$rootScope.$digest();
-				expect(element.find('.ta-text').html()).toBe('<p><br></p>');
-				element.remove();
-			}));
-			it('pass empty string does nothing', inject(function($compile, $rootScope, taOptions, $document){
-				$rootScope.htmlcontent = '';
-				$rootScope.testhandler = function(file, insertAction){
-					insertAction('');
-					return true;
-				};
-				element = $compile('<text-angular name="test" ta-file-drop="testhandler" ng-model="htmlcontent"></text-angular>')($rootScope);
-				$document.find('body').append(element);
-				$rootScope.$digest();
-				element.find('.ta-text').triggerHandler({type: 'drop', originalEvent: {dataTransfer: {files: ['test'], types: ['files']}}});
-				$rootScope.$digest();
-				expect(element.find('.ta-text').html()).toBe('<p><br></p>');
-				element.remove();
-			}));
-		});
-		
-		/*
-				scope.displayElements.text[0].focus();
-						if(dropEvent.originalEvent.dataTransfer && dropEvent.originalEvent.dataTransfer.files && dropEvent.originalEvent.dataTransfer.files.length > 0){
-							This function not tested
-							var insertAction = function(html){
-								// if angular object passed back
-								if(html && angular.isElement(html)) html = angular.element(html)[0].outerHtml;
-								if(html && html !== '') scope.wrapSelection('insertHTML', html);
-							};
-							angular.forEach(dropEvent.originalEvent.dataTransfer.files, function(file, index){
-								// taking advantage of boolean execution, if the fileDropHandler returns true, nothing else after it is executed
-								// If it is false then execute the defaultFileDropHandler if the fileDropHandler is NOT the default one
-								try{
-						--->			return scope.fileDropHandler(dropEvent.originalEvent.dataTransfer.types[index], file, insertAction) ||
-						--->				(scope.fileDropHandler !== scope.defaultFileDropHandler &&
-						--->				scope.defaultFileDropHandler(dropEvent.originalEvent.dataTransfer.types[index], file, insertAction));
-								}catch(error){}
-							});
-							dropEvent.preventDefault();
-							dropEvent.stopPropagation();
-						}
-					});
-		*/
 	});
 	
 	describe('Multiple Editors same toolbar', function(){

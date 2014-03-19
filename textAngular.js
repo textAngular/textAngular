@@ -119,7 +119,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 				var reader = new FileReader();
 				if(file.type.substring(0, 5) === 'image'){
 					reader.onload = function() {
-						if(reader.result !== '') insertAction('<img src="' + reader.result + '"/>');
+						if(reader.result !== '') insertAction('insertImage', reader.result);
 					};
 	
 					reader.readAsDataURL(file);
@@ -749,17 +749,13 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 					scope.$on('ta-drop-event', function(event, element, dropEvent){
 						scope.displayElements.text[0].focus();
 						if(dropEvent.originalEvent.dataTransfer && dropEvent.originalEvent.dataTransfer.files && dropEvent.originalEvent.dataTransfer.files.length > 0){
-							var insertAction = function(html){
-								// html MUST be a string representation of HTML
-								if(html && html !== '') scope.wrapSelection('insertHTML', html);
-							};
 							angular.forEach(dropEvent.originalEvent.dataTransfer.files, function(file){
 								// taking advantage of boolean execution, if the fileDropHandler returns true, nothing else after it is executed
 								// If it is false then execute the defaultFileDropHandler if the fileDropHandler is NOT the default one
 								try{
-									return scope.fileDropHandler(file, insertAction) ||
+									return scope.fileDropHandler(file, scope.wrapSelection) ||
 										(scope.fileDropHandler !== scope.defaultFileDropHandler &&
-										scope.defaultFileDropHandler(file, insertAction));
+										scope.defaultFileDropHandler(file, scope.wrapSelection));
 								}catch(error){
 									$log.error(error);
 								}
