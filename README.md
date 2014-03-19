@@ -63,7 +63,7 @@ Download the code from [https://github.com/fraywing/textAngular/releases/latest]
 ```
 OR
 ```html
-<text-angular ng-model="htmlVariable"></div>
+<text-angular ng-model="htmlVariable"></text-angular>
 ```
 This acts similar to a regular AngularJS / form input if you give it a name attribute, allowing for form submission and AngularJS form validation.
 
