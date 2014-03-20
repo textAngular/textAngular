@@ -6,14 +6,15 @@ module.exports = function (grunt) {
 	grunt.loadNpmTasks('grunt-contrib-clean');
 	grunt.loadNpmTasks('grunt-istanbul-coverage');
 	grunt.loadNpmTasks('grunt-karma');
+	grunt.loadNpmTasks('grunt-karma-coveralls');
 	
 	// Default task.
-	grunt.registerTask('default', ['uglify','test']);
-	grunt.registerTask('test', ['clean', 'jshint', 'karma', 'coverage']);
+	grunt.registerTask('default', ['uglify', 'clean', 'test']);
+	grunt.registerTask('test', ['jshint', 'karma', 'coverage', 'coveralls']);
 	
 	var testConfig = function (configFile, customOptions) {
 		var options = { configFile: configFile, keepalive: true };
-		var travisOptions = process.env.TRAVIS && { browsers: ['Firefox'], reporters: 'dots' };
+		var travisOptions = process.env.TRAVIS && { browsers: ['PhantomJS'], reporters: ['dots','coverage'] };
 		return grunt.util._.extend(options, customOptions, travisOptions);
 	};
 	
@@ -37,6 +38,13 @@ module.exports = function (grunt) {
 			},
 			dir: ''
 		  }
+		},
+		coveralls: {
+			options: {
+				debug: true,
+				coverage_dir: 'coverage',
+				force: true
+			}
 		},
 		karma: {
 		  unit: {
