@@ -1053,7 +1053,28 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 				}
 			}
 		};
-	}]).factory('taFixChrome', function(){
+	}]).directive('taMaxText', function(){
+		return {
+			require: 'ngModel',
+			link: function(scope, elem, attrs, ctrl){
+				var max = parseInt(scope.$eval(attrs.taMaxText));
+				function validator (viewValue){
+					var source = angular.element('<div/>');
+					source.html(viewValue);
+					var length = source.text().length;
+					if (length <= max){
+						ctrl.$setValidity('taMaxText', true);
+						return viewValue;
+					}
+					else{
+						ctrl.$setValidity('taMaxText', false);
+						return undefined;
+					}
+				}
+				ctrl.$parsers.unshift(validator);
+			}
+		};
+	}).factory('taFixChrome', function(){
 		// get whaterever rubbish is inserted in chrome
 		// should be passed an html string, returns an html string
 		var taFixChrome = function(html){
