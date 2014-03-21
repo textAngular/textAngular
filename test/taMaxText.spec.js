@@ -28,25 +28,44 @@ describe('taMaxText', function(){
 		}).toThrow('Max text must be an integer');
 	});
 
-	it('should fail when text exceeds limit', function(){
-		var $scope = $rootScope.$new();
-		var form = angular.element('<form name="form"><input type="text" ng-model="model.html" ta-max-text="11" name="html" /></form>');
-		$scope.model = { html : null };
-		$compile(form)($scope);
-		$scope.$digest();
-		$scope.form.html.$setViewValue('<strong>textAngular_</strong>');
+	describe('when validating', function(){
+		var $scope;
+		beforeEach(function(){
+			$scope = $rootScope.$new();
+			$scope.maxText = 10;
+			var form = angular.element('<form name="form"><input type="text" ng-model="model.html" ta-max-text="{{maxText + 1}}" name="html" /></form>');
+			$scope.model = { html : null };
+			$compile(form)($scope);
+			$scope.$digest();
+		});
 
-		expect($scope.form.html.$error.taMaxText).toBe(true);
-	});
+		it('should fail when text exceeds limit', function(){
+			$scope.form.html.$setViewValue('<strong>textAngular_</strong>');
+			expect($scope.form.html.$error.taMaxText).toBe(true);
+		});
 
-	it('should pass when text is within limit', function(){
-		var $scope = $rootScope.$new();
-		var form = angular.element('<form name="form"><input type="text" ng-model="model.html" ta-max-text="11" name="html" /></form>');
-		$scope.model = { html : null };
-		$compile(form)($scope);
-		$scope.$digest();
-		$scope.form.html.$setViewValue('<strong>textAngular</strong>');
+		it('should pass when text is within limit', function(){
+			$scope.form.html.$setViewValue('<strong>textAngular</strong>');
+			expect($scope.form.html.$error.taMaxText).toBe(false);
+		});
 
-		expect($scope.form.html.$error.taMaxText).toBe(false);
+		it('behaviour should change when max text limit is changed', function(){
+			$scope.form.html.$setViewValue('<strong>textAngular_</strong>');
+			expect($scope.form.html.$error.taMaxText).toBe(true);
+			$scope.$apply(function(){
+				$scope.maxText = 11;
+			});
+			expect($scope.form.html.$error.taMaxText).toBe(false);
+		});
+
+		it('should fail when max text limit is changed to non numeric value', function(){
+			$scope.form.html.$setViewValue('<strong>textAngular_</strong>');
+			expect($scope.form.html.$error.taMaxText).toBe(true);
+			expect(function() {
+				$scope.$apply(function(){
+					$scope.maxText = 'worldspawn';
+				});
+			}).toThrow('Max text must be an integer');
+		});
 	});
 });

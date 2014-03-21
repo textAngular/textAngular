@@ -1061,6 +1061,15 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 				if (isNaN(max)){
 					throw('Max text must be an integer');
 				}
+				attrs.$observe('taMaxText', function(value){
+					max = parseInt(value);
+					if (isNaN(max)){
+						throw('Max text must be an integer');
+					}
+					if (ctrl.$viewValue && ctrl.$viewValue.length){//retrigger the validation if theres a value
+						ctrl.$setViewValue(ctrl.$viewValue);
+					}
+				});
 				function validator (viewValue){
 					var source = angular.element('<div/>');
 					source.html(viewValue);
