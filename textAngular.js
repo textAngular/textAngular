@@ -1066,7 +1066,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 					if (isNaN(max)){
 						throw('Max text must be an integer');
 					}
-					if (ctrl.$viewValue && ctrl.$viewValue.length){//retrigger the validation if theres a value
+					if (ctrl.$dirty){
 						ctrl.$setViewValue(ctrl.$viewValue);
 					}
 				});
