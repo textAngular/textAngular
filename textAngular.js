@@ -1055,6 +1055,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 		};
 	}]).directive('taMaxText', function(){
 		return {
+			restrict: 'A',
 			require: 'ngModel',
 			link: function(scope, elem, attrs, ctrl){
 				var max = parseInt(scope.$eval(attrs.taMaxText));
