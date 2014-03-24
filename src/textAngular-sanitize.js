@@ -465,6 +465,16 @@ function validStyles(styleAttr){
 					|| value === 'center'
 					|| value === 'justify'
 				)
+			||
+				key === 'float' && (
+					value === 'left'
+					|| value === 'right'
+					|| value === 'none'
+				)
+			||
+				(key === 'width' || key === 'height') && (
+					value.match(/[0-9\.]*(px|em|rem|%)/)
+				)
 			) result += key + ': ' + value + ';';
 		}
 	});

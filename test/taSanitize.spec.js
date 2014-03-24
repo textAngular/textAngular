@@ -92,13 +92,74 @@ describe('taSanitize', function(){
 			}));
 		});
 		
+		describe('validated float attribute', function(){
+			it('left', inject(function(taSanitize){
+				var result = angular.element(taSanitize('<div style="float: left;"></div>'));
+				expect(result.attr('style')).toBe('float: left;');
+			}));
+			it('right', inject(function(taSanitize){
+				var result = angular.element(taSanitize('<div style="float: right;"></div>'));
+				expect(result.attr('style')).toBe('float: right;');
+			}));
+			it('bad value not accepted', inject(function(taSanitize){
+				var result = taSanitize('<div style="float: execute(alert(\'test\'));"></div>');
+				expect(result).toBe('<div></div>');
+			}));
+		});
+		
+		describe('validated height attribute', function(){
+			it('px', inject(function(taSanitize){
+				var result = angular.element(taSanitize('<div style="height: 100px;"></div>'));
+				expect(result.attr('style')).toBe('height: 100px;');
+			}));
+			it('px', inject(function(taSanitize){
+				var result = angular.element(taSanitize('<div style="height: 100%;"></div>'));
+				expect(result.attr('style')).toBe('height: 100%;');
+			}));
+			it('em', inject(function(taSanitize){
+				var result = angular.element(taSanitize('<div style="height: 100em;"></div>'));
+				expect(result.attr('style')).toBe('height: 100em;');
+			}));
+			it('rem', inject(function(taSanitize){
+				var result = angular.element(taSanitize('<div style="height: 100rem;"></div>'));
+				expect(result.attr('style')).toBe('height: 100rem;');
+			}));
+			it('bad value not accepted', inject(function(taSanitize){
+				var result = taSanitize('<div style="height: execute(alert(\'test\'));"></div>');
+				expect(result).toBe('<div></div>');
+			}));
+		});
+		
+		describe('validated width attribute', function(){
+			it('px', inject(function(taSanitize){
+				var result = angular.element(taSanitize('<div style="width: 100px;"></div>'));
+				expect(result.attr('style')).toBe('width: 100px;');
+			}));
+			it('px', inject(function(taSanitize){
+				var result = angular.element(taSanitize('<div style="width: 100%;"></div>'));
+				expect(result.attr('style')).toBe('width: 100%;');
+			}));
+			it('em', inject(function(taSanitize){
+				var result = angular.element(taSanitize('<div style="width: 100em;"></div>'));
+				expect(result.attr('style')).toBe('width: 100em;');
+			}));
+			it('rem', inject(function(taSanitize){
+				var result = angular.element(taSanitize('<div style="width: 100rem;"></div>'));
+				expect(result.attr('style')).toBe('width: 100rem;');
+			}));
+			it('bad value not accepted', inject(function(taSanitize){
+				var result = taSanitize('<div style="width: execute(alert(\'test\'));"></div>');
+				expect(result).toBe('<div></div>');
+			}));
+		});
+		
 		describe('un-validated are removed', function(){
 			it('removes non whitelisted values', inject(function(taSanitize){
-				var result = taSanitize('<div style="height: 12px;"></div>');
+				var result = taSanitize('<div style="max-height: 12px;"></div>');
 				expect(result).toBe('<div></div>');
 			}));
 			it('removes non whitelisted values leaving valid values', inject(function(taSanitize){
-				var result = angular.element(taSanitize('<div style="text-align: left; height: 12px;"></div>'));
+				var result = angular.element(taSanitize('<div style="text-align: left; max-height: 12px;"></div>'));
 				expect(result.attr('style')).toBe('text-align: left;');
 			}));
 		});

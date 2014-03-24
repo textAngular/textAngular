@@ -1,7 +1,7 @@
 {
   "name": "textAngular",
   "filename": "textAngular.min.js",
-  "version": "1.2.0",
+  "version": "1.2.1-pre1",
   "description": "A radically powerful Text-Editor/Wysiwyg editor for Angular.js",
   "maintainers": [{"name": "Fraywing"},{"name": "SimeonC"}],
   "keywords": [
@@ -12,7 +12,7 @@
   ],
   "license": "MIT",
   "homepage": "http://textangular.com",
-  "main": "./textAngular.js",
+  "main": "./dist/textAngular.min.js",
   "dependencies": {},
   "devDependencies": {
     "bower": "*",
@@ -33,7 +33,7 @@
     "karma": "~0.10.9"
   },
   "scripts": {
-    "test": "grunt test --verbose",
+    "test": "grunt travis-test --verbose",
     "postinstall": "./node_modules/bower/bin/bower install --allow-root"
   },
   "repository": {

@@ -10,7 +10,8 @@ module.exports = function (grunt) {
 	
 	// Default task.
 	grunt.registerTask('default', ['uglify', 'clean', 'test']);
-	grunt.registerTask('test', ['jshint', 'karma', 'coverage', 'coveralls']);
+	grunt.registerTask('test', ['jshint', 'karma', 'coverage']);
+	grunt.registerTask('travis-test', ['jshint', 'karma', 'coverage', 'coveralls']);
 	
 	var testConfig = function (configFile, customOptions) {
 		var options = { configFile: configFile, keepalive: true };
@@ -31,8 +32,8 @@ module.exports = function (grunt) {
 			  'functions': 100
 			},*/
 			thresholds: {
-			  'statements': -14,
-			  'branches': -18,
+			  'statements': -15,
+			  'branches': -19,
 			  'lines': 100,
 			  'functions': -2
 			},
@@ -52,7 +53,7 @@ module.exports = function (grunt) {
 		  }
 		},
 		jshint: {
-		  files: ['textAngular.js', 'test/*.spec.js'],// don't hint the textAngularSanitize as they will fail
+		  files: ['src/textAngular.js', 'src/textAngularSetup.js', 'test/*.spec.js'],// don't hint the textAngularSanitize as they will fail
 		  options: {
 			eqeqeq: true,
 			immed: true,
@@ -68,12 +69,13 @@ module.exports = function (grunt) {
 		uglify: {
 			options: {
 				mangle: true,
-				compress: true
+				compress: true,
+				wrap: true
 			},
 			my_target: {
 				files: {
-					'textAngular.min.js': ['textAngular.js'],
-					'textAngular-sanitize.min.js': ['textAngular-sanitize.js']
+					'dist/textAngular.min.js': ['src/textAngularSetup.js','src/textAngular.js'],
+					'dist/textAngular-sanitize.min.js': ['src/textAngular-sanitize.js']
 				}
 			}
 		}

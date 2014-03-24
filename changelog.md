@@ -1,5 +1,11 @@
 ###Changelog
 
+2014-03-24 v1.2.1-pre1
+
+- Moved setup functions into a seperate file, textAngularSetup.js. This file must be included before textAngular.js file. Using the defaults and textAngular.min.js causes no changes.
+- Adding the Image and Link click popup functions.
+- Adding ability to drag and drop files into the editor.
+
 2014-02-28 v1.2.0
 
 - Lots and Lots of changes, too many to list. Structural changes and added functionality. Supports down to IE8 and all other browsers.

@@ -17,8 +17,9 @@ module.exports = function (config) {
 			'bower_components/rangy/rangy-selectionsaverestore.js',
 			'bower_components/angular/angular.min.js',
 			'bower_components/angular-mocks/angular-mocks.js',
-			'textAngular-sanitize.js',
-			'textAngular.js',
+			'src/textAngular-sanitize.js',
+			'src/textAngularSetup.js',
+			'src/textAngular.js',
 			'test/**/*.spec.js'
 		],
 
@@ -28,7 +29,8 @@ module.exports = function (config) {
 		],
 
 		preprocessors: {
-			'textAngular.js': ['coverage']
+			'src/textAngular.js': ['coverage'],
+			'src/textAngularSetup.js': ['coverage']
 		},
 
 		// test results reporter to use

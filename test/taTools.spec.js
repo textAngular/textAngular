@@ -419,4 +419,90 @@ describe('taTools test tool actions', function(){
 			});
 		});
 	});
+	
+	describe('test image popover logic', function(){
+		beforeEach(module('textAngular'));
+		beforeEach(inject(function (_$compile_, _$rootScope_, $document, textAngularManager, _$window_) {
+			$window = _$window_;
+			$window.prompt = function(){ return ''; };
+			$rootScope = _$rootScope_;
+			element = _$compile_('<text-angular name="test"><p>Test Content<img src="testuri"/></p></text-angular>')($rootScope);
+			$document.find('body').append(element);
+			$rootScope.$digest();
+			editorScope = textAngularManager.retrieveEditor('test').scope;
+		}));
+		afterEach(function(){
+			element.remove();
+		});
+		
+		it('opens on click', function(){
+			element.find('.ta-text p img').triggerHandler('click');
+			expect(editorScope.displayElements.popover.hasClass('in')).toBe(true);
+		});
+		
+		it('has correct content', function(){
+			element.find('.ta-text p img').triggerHandler('click');
+			var contents = editorScope.displayElements.popoverContainer.contents();
+			expect(contents.find('button').length).toBe(8);
+		});
+		// Note that this is just some phantomJS oddness that causes us to have to define the px value not %
+		it('has functioning 100% button', function(){
+			element.find('.ta-text p img').triggerHandler('click');
+			editorScope.displayElements.popoverContainer.find('button').eq(0).triggerHandler('click');
+			$rootScope.$digest();
+			expect(element.find('.ta-text p img').css('width')).toBe('384px');
+		});
+		
+		it('has functioning 50% button', function(){
+			element.find('.ta-text p img').triggerHandler('click');
+			editorScope.displayElements.popoverContainer.find('button').eq(1).triggerHandler('click');
+			$rootScope.$digest();
+			expect(element.find('.ta-text p img').css('width')).toBe('192px');
+		});
+		
+		it('has functioning 25% button', function(){
+			element.find('.ta-text p img').triggerHandler('click');
+			editorScope.displayElements.popoverContainer.find('button').eq(2).triggerHandler('click');
+			$rootScope.$digest();
+			expect(element.find('.ta-text p img').css('width')).toBe('96px');
+		});
+		
+		it('has functioning reset-size button', function(){
+			element.find('.ta-text p img').triggerHandler('click');
+			editorScope.displayElements.popoverContainer.find('button').eq(3).triggerHandler('click');
+			$rootScope.$digest();
+			expect(element.find('.ta-text p img').css('width')).toBe('0px');
+		});
+		
+		it('has functioning float-left button', function(){
+			element.find('.ta-text p img').triggerHandler('click');
+			editorScope.displayElements.popoverContainer.find('button').eq(4).triggerHandler('click');
+			$rootScope.$digest();
+			expect(element.find('.ta-text p img').css('float')).toBe('left');
+		});
+		
+		it('has functioning float-none button', function(){
+			element.find('.ta-text p img').triggerHandler('click');
+			editorScope.displayElements.popoverContainer.find('button').eq(4).triggerHandler('click');
+			$rootScope.$digest();
+			element.find('.ta-text p img').triggerHandler('click');
+			editorScope.displayElements.popoverContainer.find('button').eq(5).triggerHandler('click');
+			$rootScope.$digest();
+			expect(element.find('.ta-text p img').css('float')).toBe('none');
+		});
+		
+		it('has functioning float-right button', function(){
+			element.find('.ta-text p img').triggerHandler('click');
+			editorScope.displayElements.popoverContainer.find('button').eq(6).triggerHandler('click');
+			$rootScope.$digest();
+			expect(element.find('.ta-text p img').css('float')).toBe('right');
+		});
+		
+		it('has functioning remove button', function(){
+			element.find('.ta-text p img').triggerHandler('click');
+			editorScope.displayElements.popoverContainer.find('button').eq(7).triggerHandler('click');
+			$rootScope.$digest();
+			expect(element.find('.ta-text p img').length).toBe(0);
+		});
+	});
 });
