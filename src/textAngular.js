@@ -85,6 +85,20 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 			sheet.deleteRule(index);
 		}
 	}
+	
+	// recursive function that returns an array of angular.elements that have the passed attribute set on them
+	function getByAttribute(element, attribute){
+		var resultingElements = [];
+		var childNodes = element.children();
+		if(childNodes.length){
+			angular.forEach(childNodes, function(child){
+				resultingElements = resultingElements.concat(getByAttribute(angular.element(child), attribute));
+			});
+		}
+		if(element.attr(attribute) !== undefined) resultingElements.push(element);
+		return resultingElements;
+	}
+	
 	// this global var is used to prevent multiple fires of the drop event. Needs to be global to the textAngular file.
 	var dropFired = false;
 	var textAngular = angular.module("textAngular", ['ngSanitize']); //This makes ngSanitize required
@@ -101,6 +115,13 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 	// these are individually used in an angular.element().find() call. What can go here depends on whether you have full jQuery loaded or just jQLite with angularjs.
 	// div is only used as div.ta-insert-video caught in filter.
 	textAngular.value('taSelectableElements', textAngularSetup.selectableElements);
+	
+	// This is an array of objects with the following options:
+	//				selector: <string> a jqLite or jQuery selector string
+	//				customAttribute: <string> an attribute to search for
+	//				renderLogic: <function(element)>
+	// Both or one of selector and customAttribute must be defined.
+	textAngular.value('taCustomRenderers', textAngularSetup.customDisplayRenderers);
 	
 	// setup the global contstant functions for setting up the toolbar
 
@@ -524,7 +545,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 				}
 			};
 		}
-	]).directive('taBind', ['taSanitize', '$timeout', 'taFixChrome', 'taSelectableElements', function(taSanitize, $timeout, taFixChrome, taSelectableElements){
+	]).directive('taBind', ['taSanitize', '$timeout', 'taFixChrome', 'taSelectableElements', 'taCustomRenderers', function(taSanitize, $timeout, taFixChrome, taSelectableElements, taCustomRenderers){
 		// Uses for this are textarea or input with ng-model and ta-bind='text'
 		// OR any non-form element with contenteditable="contenteditable" ta-bind="html|text" ng-model
 		return {
@@ -673,8 +694,25 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 								element.off('drop', fileDropHandler);
 							}
 						}else if(element[0].tagName.toLowerCase() !== 'textarea' && element[0].tagName.toLowerCase() !== 'input'){
-							// make sure the end user can SEE the html code as a display.
+							// make sure the end user can SEE the html code as a display. This is a read-only display element
 							element[0].innerHTML = val;
+							
+							angular.forEach(taCustomRenderers, function(renderer){
+								var elements = [];
+								// get elements based on what is defined. If both defined do secondary filter in the forEach after using selector string
+								if(renderer.selector && renderer.selector !== '')
+									elements = element.find(renderer.selector);
+								/* istanbul ignore else: shouldn't fire, if it does we're ignoring everything */
+								else if(renderer.customAttribute && renderer.customAttribute !== '')
+									elements = getByAttribute(element, renderer.customAttribute);
+								// process elements if any found
+								angular.forEach(elements, function(_element){
+									_element = angular.element(_element);
+									if(renderer.selector && renderer.selector !== '' && renderer.customAttribute && renderer.customAttribute !== ''){
+										if(_element.attr(renderer.customAttribute) !== undefined) renderer.renderLogic(_element);
+									} else renderer.renderLogic(_element);
+								});
+							});
 						}else{
 							// only for input and textarea inputs
 							element.val(val);
@@ -811,18 +849,6 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 		};
 		return taFixChrome;
 	}).factory('taSanitize', ['$sanitize', function taSanitizeFactory($sanitize){
-		// recursive function that returns an array of angular.elements that have the passed attribute set on them
-		function getByAttribute(element, attribute){
-			var resultingElements = [];
-			var childNodes = element.children();
-			if(childNodes.length){
-				angular.forEach(childNodes, function(child){
-					resultingElements = resultingElements.concat(getByAttribute(angular.element(child), attribute));
-				});
-			}
-			if(element.attr(attribute)) resultingElements.push(element);
-			return resultingElements;
-		}
 		return function taSanitize(unsafe, oldsafe){
 			// unsafe and oldsafe should be valid HTML strings
 			// any exceptions (lets say, color for example) should be made here but with great care
@@ -864,6 +890,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 
 					scope.disabled = true;
 					scope.focussed = false;
+					scope._$element = element;
 					element[0].innerHTML = '';
 					element.addClass("ta-toolbar " + scope.classes.toolbar);
 
@@ -1021,7 +1048,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 				deferred.resolve();
 			}
 		};
-	}]).service('textAngularManager', ['taToolExecuteAction', function(taToolExecuteAction){
+	}]).service('textAngularManager', ['taToolExecuteAction', 'taTools', 'taRegisterTool', function(taToolExecuteAction, taTools, taRegisterTool){
 		// this service is used to manage all textAngular editors and toolbars.
 		// All publicly published functions that modify/need to access the toolbar or editor scopes should be in here
 		// these contain references to all the editors and toolbars that have been initialised in this app
@@ -1104,8 +1131,17 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 							// search through the taTools to see if a match for the tag is made.
 							// if there is, see if the tool is on a registered toolbar and not disabled.
 							// NOTE: This can trigger on MULTIPLE tools simultaneously.
+							var elementHasAttrs = function(_element, attrs){
+								var result = true;
+								for(var i = 0; i < attrs.length; i++) result = result && _element.attr(attrs[i]);
+								return result;
+							};
+							var workerTools = [];
+							var unfilteredTools = {};
 							var result = false;
 							element = angular.element(element);
+							// get all valid tools by element name, keep track if one matches the 
+							var onlyWithAttrsFilter = false;
 							angular.forEach(taTools, function(tool, name){
 								if(
 									tool.onElementSelect &&
@@ -1113,6 +1149,30 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 									tool.onElementSelect.element.toLowerCase() === element[0].tagName.toLowerCase() &&
 									(!tool.onElementSelect.filter || tool.onElementSelect.filter(element))
 								){
+									// this should only end up true if the element matches the only attributes
+									onlyWithAttrsFilter = onlyWithAttrsFilter ||
+										(angular.isArray(tool.onElementSelect.onlyWithAttrs) && elementHasAttrs(element, tool.onElementSelect.onlyWithAttrs));
+									if(!tool.onElementSelect.onlyWithAttrs || elementHasAttrs(element, tool.onElementSelect.onlyWithAttrs)) unfilteredTools[name] = tool;
+								}
+							});
+							// if we matched attributes to filter on, then filter, else continue
+							if(onlyWithAttrsFilter){
+								angular.forEach(unfilteredTools, function(tool, name){
+									if(tool.onElementSelect.onlyWithAttrs && elementHasAttrs(element, tool.onElementSelect.onlyWithAttrs)) workerTools.push({'name': name, 'tool': tool});
+								});
+								// sort most specific (most attrs to find) first
+								workerTools.sort(function(a,b){
+									return b.tool.onElementSelect.onlyWithAttrs.length - a.tool.onElementSelect.onlyWithAttrs.length;
+								});
+							}else{
+								angular.forEach(unfilteredTools, function(tool, name){
+									workerTools.push({'name': name, 'tool': tool});
+								});
+							}
+							// Run the actions on the first filtered tool only
+							if(workerTools.length > 0){
+								var tool = workerTools[0].tool;
+								var name = workerTools[0].name;
 									for(var _t = 0; _t < _toolbars.length; _t++){
 										if(_toolbars[_t].tools[name] !== undefined){
 											tool.onElementSelect.action.call(_toolbars[_t].tools[name], event, element, scope);
@@ -1121,7 +1181,6 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 										}
 									}
 								}
-							});
 							return result;
 						}
 					}

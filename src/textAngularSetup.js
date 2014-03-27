@@ -13,7 +13,25 @@ var textAngularSetup = {
 		insertLink: "Please enter a URL to insert",
 		insertVideo: "Please enter a youtube URL to embed"
 	},
-	selectableElements: ['a','img','div'],
+	selectableElements: ['a','img'],
+	customDisplayRenderers: [
+		{
+			// Parse back out: '<div class="ta-insert-video" ta-insert-video src="' + urlLink + '" allowfullscreen="true" width="300" frameborder="0" height="250"></div>'
+			// To correct video element. For now only support youtube
+			selector: 'img',
+			customAttribute: 'ta-insert-video',
+			renderLogic: function(element){
+				var iframe = angular.element('<iframe></iframe>');
+				var attributes = element.prop("attributes");
+				// loop through element attributes and apply them on iframe
+				angular.forEach(attributes, function(attr) {
+					iframe.attr(attr.name, attr.value);
+				});
+				iframe.attr('src', iframe.attr('ta-insert-video'));
+				element.replaceWith(iframe);
+			}
+		}
+	],
 	options: {
 		toolbar: [
 			['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'pre', 'quote'],
@@ -233,6 +251,97 @@ var textAngularSetup = {
 			}
 		});
 		
+		var imgOnSelectAction = function(event, $element, editorScope){
+			// setup the editor toolbar
+			// Credit to the work at http://hackerwins.github.io/summernote/ for this editbar logic/display
+			var finishEdit = function(){
+				editorScope.updateTaBindtaTextElement();
+				editorScope.hidePopover();
+			};
+			event.preventDefault();
+			editorScope.displayElements.popover.css('width', '375px');
+			var container = editorScope.displayElements.popoverContainer;
+			container.empty();
+			var buttonGroup = angular.element('<div class="btn-group" style="padding-right: 6px;">');
+			var fullButton = angular.element('<button type="button" class="btn btn-default btn-sm btn-small" unselectable="on" tabindex="-1">100% </button>');
+			fullButton.on('click', function(event){
+				event.preventDefault();
+				$element.css({
+					'width': '100%',
+					'height': ''
+				});
+				finishEdit();
+			});
+			var halfButton = angular.element('<button type="button" class="btn btn-default btn-sm btn-small" unselectable="on" tabindex="-1">50% </button>');
+			halfButton.on('click', function(event){
+				event.preventDefault();
+				$element.css({
+					'width': '50%',
+					'height': ''
+				});
+				finishEdit();
+			});
+			var quartButton = angular.element('<button type="button" class="btn btn-default btn-sm btn-small" unselectable="on" tabindex="-1">25% </button>');
+			quartButton.on('click', function(event){
+				event.preventDefault();
+				$element.css({
+					'width': '25%',
+					'height': ''
+				});
+				finishEdit();
+			});
+			var resetButton = angular.element('<button type="button" class="btn btn-default btn-sm btn-small" unselectable="on" tabindex="-1">Reset</button>');
+			resetButton.on('click', function(event){
+				event.preventDefault();
+				$element.css({
+					width: '',
+					height: ''
+				});
+				finishEdit();
+			});
+			buttonGroup.append(fullButton);
+			buttonGroup.append(halfButton);
+			buttonGroup.append(quartButton);
+			buttonGroup.append(resetButton);
+			container.append(buttonGroup);
+			
+			buttonGroup = angular.element('<div class="btn-group" style="padding-right: 6px;">');
+			var floatLeft = angular.element('<button type="button" class="btn btn-default btn-sm btn-small" unselectable="on" tabindex="-1"><i class="fa fa-align-left"></i></button>');
+			floatLeft.on('click', function(event){
+				event.preventDefault();
+				$element.css('float', 'left');
+				finishEdit();
+			});
+			var floatRight = angular.element('<button type="button" class="btn btn-default btn-sm btn-small" unselectable="on" tabindex="-1"><i class="fa fa-align-right"></i></button>');
+			floatRight.on('click', function(event){
+				event.preventDefault();
+				$element.css('float', 'right');
+				finishEdit();
+			});
+			var floatNone = angular.element('<button type="button" class="btn btn-default btn-sm btn-small" unselectable="on" tabindex="-1"><i class="fa fa-align-justify"></i></button>');
+			floatNone.on('click', function(event){
+				event.preventDefault();
+				$element.css('float', '');
+				finishEdit();
+			});
+			buttonGroup.append(floatLeft);
+			buttonGroup.append(floatNone);
+			buttonGroup.append(floatRight);
+			container.append(buttonGroup);
+			
+			buttonGroup = angular.element('<div class="btn-group">');
+			var remove = angular.element('<button type="button" class="btn btn-default btn-sm btn-small" unselectable="on" tabindex="-1"><i class="fa fa-trash-o"></i></button>');
+			remove.on('click', function(event){
+				event.preventDefault();
+				$element.remove();
+				finishEdit();
+			});
+			buttonGroup.append(remove);
+			container.append(buttonGroup);
+			
+			editorScope.showPopover($element);
+		};
+		
 		taRegisterTool('insertImage', {
 			iconclass: 'fa fa-picture-o',
 			action: function(){
@@ -244,96 +353,7 @@ var textAngularSetup = {
 			},
 			onElementSelect: {
 				element: 'img',
-				action: function(event, $element, editorScope){
-					// setup the editor toolbar
-					// Credit to the work at http://hackerwins.github.io/summernote/ for this editbar logic/display
-					var finishEdit = function(){
-						editorScope.updateTaBindtaTextElement();
-						editorScope.hidePopover();
-					};
-					event.preventDefault();
-					editorScope.displayElements.popover.css('width', '375px');
-					var container = editorScope.displayElements.popoverContainer;
-					container.empty();
-					var buttonGroup = angular.element('<div class="btn-group" style="padding-right: 6px;">');
-					var fullButton = angular.element('<button type="button" class="btn btn-default btn-sm btn-small" unselectable="on" tabindex="-1">100% </button>');
-					fullButton.on('click', function(event){
-						event.preventDefault();
-						$element.css({
-							'width': '100%',
-							'height': ''
-						});
-						finishEdit();
-					});
-					var halfButton = angular.element('<button type="button" class="btn btn-default btn-sm btn-small" unselectable="on" tabindex="-1">50% </button>');
-					halfButton.on('click', function(event){
-						event.preventDefault();
-						$element.css({
-							'width': '50%',
-							'height': ''
-						});
-						finishEdit();
-					});
-					var quartButton = angular.element('<button type="button" class="btn btn-default btn-sm btn-small" unselectable="on" tabindex="-1">25% </button>');
-					quartButton.on('click', function(event){
-						event.preventDefault();
-						$element.css({
-							'width': '25%',
-							'height': ''
-						});
-						finishEdit();
-					});
-					var resetButton = angular.element('<button type="button" class="btn btn-default btn-sm btn-small" unselectable="on" tabindex="-1">Reset</button>');
-					resetButton.on('click', function(event){
-						event.preventDefault();
-						$element.css({
-							width: '',
-							height: ''
-						});
-						finishEdit();
-					});
-					buttonGroup.append(fullButton);
-					buttonGroup.append(halfButton);
-					buttonGroup.append(quartButton);
-					buttonGroup.append(resetButton);
-					container.append(buttonGroup);
-					
-					buttonGroup = angular.element('<div class="btn-group" style="padding-right: 6px;">');
-					var floatLeft = angular.element('<button type="button" class="btn btn-default btn-sm btn-small" unselectable="on" tabindex="-1"><i class="fa fa-align-left"></i></button>');
-					floatLeft.on('click', function(event){
-						event.preventDefault();
-						$element.css('float', 'left');
-						finishEdit();
-					});
-					var floatRight = angular.element('<button type="button" class="btn btn-default btn-sm btn-small" unselectable="on" tabindex="-1"><i class="fa fa-align-right"></i></button>');
-					floatRight.on('click', function(event){
-						event.preventDefault();
-						$element.css('float', 'right');
-						finishEdit();
-					});
-					var floatNone = angular.element('<button type="button" class="btn btn-default btn-sm btn-small" unselectable="on" tabindex="-1"><i class="fa fa-align-justify"></i></button>');
-					floatNone.on('click', function(event){
-						event.preventDefault();
-						$element.css('float', '');
-						finishEdit();
-					});
-					buttonGroup.append(floatLeft);
-					buttonGroup.append(floatNone);
-					buttonGroup.append(floatRight);
-					container.append(buttonGroup);
-					
-					buttonGroup = angular.element('<div class="btn-group">');
-					var remove = angular.element('<button type="button" class="btn btn-default btn-sm btn-small" unselectable="on" tabindex="-1"><i class="fa fa-trash-o"></i></button>');
-					remove.on('click', function(event){
-						event.preventDefault();
-						$element.remove();
-						finishEdit();
-					});
-					buttonGroup.append(remove);
-					container.append(buttonGroup);
-					
-					editorScope.showPopover($element);
-				}
+				action: imgOnSelectAction
 			}
 		});
 		taRegisterTool('insertVideo', {
@@ -349,11 +369,16 @@ var textAngularSetup = {
 						// create the embed link
 						var urlLink = "http://www.youtube.com/embed/" + ids[0].substring(3);
 						// create the HTML
-						var embed = '<div class="ta-insert-video" style="padding:20px"><iframe src="' + urlLink + '" allowfullscreen="true" width="300" frameborder="0" height="250"></iframe></div>';
+						var embed = '<img class="ta-insert-video" ta-insert-video="' + urlLink + '" contenteditable="false" src="" allowfullscreen="true" width="300" frameborder="0" height="250"/>';
 						// insert
 						return this.$editor().wrapSelection('insertHTML', embed, true);
 					}
 				}
+			},
+			onElementSelect: {
+				element: 'img',
+				onlyWithAttrs: ['ta-insert-video'],
+				action: imgOnSelectAction
 			}
 		});	
 		taRegisterTool('insertLink', {

@@ -709,7 +709,8 @@ describe('textAngular', function(){
 	describe('Toolbar interaction functions work', function(){
 		beforeEach(module('textAngular'));
 		var editorScope, element, sel, range;
-		beforeEach(inject(function(taRegisterTool, taOptions){
+		beforeEach(inject(function(taRegisterTool, taOptions, taSelectableElements){
+			taSelectableElements.push('i');
 			taRegisterTool('testbutton', {
 				buttontext: 'reactive action',
 				action: function(){
@@ -718,7 +719,7 @@ describe('textAngular', function(){
 				commandKeyCode: 21,
 				activeState: function(){ return true; },
 				onElementSelect: {
-					element: 'a',
+					element: 'i',
 					action: function(event, element, editorScope){
 						element.attr('hit-via-select', 'true');
 						this.$element.attr('hit-via-select', 'true');
@@ -745,9 +746,10 @@ describe('textAngular', function(){
 			range.selectNodeContents(element.find('.ta-text p i')[0]);
 			sel.setSingleRange(range);
 		}));
-		afterEach(function(){
+		afterEach(inject(function(taSelectableElements){
+			taSelectableElements.pop();
 			element.remove();
-		});
+		}));
 		
 		it('should not trigger focus out while an action is processing', inject(function($timeout){
 			element.find('.ta-text').triggerHandler('focus');
@@ -791,21 +793,21 @@ describe('textAngular', function(){
 		
 		describe('ta-element-select event', function(){
 			it('fires correctly on element selector', function(){
-				var triggerElement = element.find('.ta-text a');
+				var triggerElement = element.find('.ta-text i');
 				triggerElement.triggerHandler('click');
 				expect(triggerElement.attr('hit-via-select')).toBe('true');
 			});
 			
 			it('fires correctly when filter returns true', inject(function(taTools){
 				taTools.testbutton.onElementSelect.filter = function(){ return true; };
-				var triggerElement = element.find('.ta-text a');
+				var triggerElement = element.find('.ta-text i');
 				triggerElement.triggerHandler('click');
 				expect(triggerElement.attr('hit-via-select')).toBe('true');
 			}));
 			
 			it('does not fire when filter returns false', inject(function(taTools){
 				taTools.testbutton.onElementSelect.filter = function(){ return false; };
-				var triggerElement = element.find('.ta-text a');
+				var triggerElement = element.find('.ta-text i');
 				triggerElement.triggerHandler('click');
 				expect(triggerElement.attr('hit-via-select')).toBeUndefined();
 			}));

@@ -481,6 +481,15 @@ function validStyles(styleAttr){
 	return result;
 }
 
+// this function is used to manually allow specific attributes on specific tags with certain prerequisites
+function validCustomTag(tag, attrs, lkey, value){
+	// catch the div placeholder for the iframe replacement
+    if (tag === 'img' && attrs['ta-insert-video']){
+        if(lkey === 'ta-insert-video' || lkey === 'allowfullscreen' || lkey === 'frameborder' || (lkey === 'contenteditble' && value === 'false')) return true;
+    }
+    return false;
+}
+
 /**
  * create an HTML/XML writer which writes to buffer
  * @param {Array} buf use buf.jain('') to get out sanitized html string
@@ -506,7 +515,7 @@ function htmlSanitizeWriter(buf, uriValidator){
         angular.forEach(attrs, function(value, key){
           var lkey=angular.lowercase(key);
           var isImage=(tag === 'img' && lkey === 'src') || (lkey === 'background');
-          if ((lkey === 'style' && (value = validStyles(value)) !== '') || validAttrs[lkey] === true &&
+          if ((lkey === 'style' && (value = validStyles(value)) !== '') || validCustomTag(tag, attrs, lkey, value) || validAttrs[lkey] === true &&
             (uriAttrs[lkey] !== true || uriValidator(value, isImage))) {
             out(' ');
             out(key);

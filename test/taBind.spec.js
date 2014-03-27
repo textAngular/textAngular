@@ -470,7 +470,7 @@ describe('taBind', function () {
 			}));
 		});
 	});
-
+	
 	describe('should use taSanitize to', function () {
 		var $rootScope, element;
 		beforeEach(inject(function (_$compile_, _$rootScope_) {
@@ -828,5 +828,97 @@ describe('taBind', function () {
 				});
 			});
 		});
+	});
+	
+	
+	
+	describe('custom renderers', function () {
+		describe('function in display mode', function () {
+			beforeEach(inject(function(taCustomRenderers){
+				taCustomRenderers.push({
+					// Parse back out: '<div class="ta-insert-video" ta-insert-video src="' + urlLink + '" allowfullscreen="true" width="300" frameborder="0" height="250"></div>'
+					// To correct video element. For now only support youtube
+					selector: 'a',
+					renderLogic: function(_element){
+						_element.replaceWith(angular.element('<b></b>'));
+					}
+				});
+				taCustomRenderers.push({
+					// Parse back out: '<div class="ta-insert-video" ta-insert-video src="' + urlLink + '" allowfullscreen="true" width="300" frameborder="0" height="250"></div>'
+					// To correct video element. For now only support youtube
+					customAttribute: 'href',
+					renderLogic: function(_element){
+						_element.replaceWith(angular.element('<i></i>'));
+					}
+				});
+			}));
+			
+			afterEach(inject(function(taCustomRenderers){
+				taCustomRenderers.pop();
+				taCustomRenderers.pop();
+			}));
+			
+			it('should replace with custom code for video renderer', inject(function ($compile, $rootScope) {
+				$rootScope.html = '<p><img class="ta-insert-video" ta-insert-video="http://www.youtube.com/embed/2maA1-mvicY" src="" allowfullscreen="true" width="300" frameborder="0" height="250"/></p>';
+				var element = $compile('<div ta-bind ng-model="html"></div>')($rootScope);
+				$rootScope.$digest();
+				expect(element.find('img').length).toBe(0);
+				expect(element.find('iframe').length).toBe(1);
+			}));
+			
+			it('should not replace with custom code for normal img', inject(function ($compile, $rootScope) {
+				$rootScope.html = '<p><img src=""/></p>';
+				var element = $compile('<div ta-bind ng-model="html"></div>')($rootScope);
+				$rootScope.$digest();
+				expect(element.find('img').length).toBe(1);
+				expect(element.find('iframe').length).toBe(0);
+			}));
+			
+			it('should replace for selector only', inject(function ($compile, $rootScope) {
+				$rootScope.html = '<p><a></a></p>';
+				var element = $compile('<div ta-bind ng-model="html"></div>')($rootScope);
+				$rootScope.$digest();
+				expect(element.find('a').length).toBe(0);
+				expect(element.find('b').length).toBe(1);
+			}));
+			
+			it('should replace for attribute only', inject(function ($compile, $rootScope) {
+				$rootScope.html = '<p><span href></span><b href></b></p>';
+				var element = $compile('<div ta-bind ng-model="html"></div>')($rootScope);
+				$rootScope.$digest();
+				expect(element.find('span').length).toBe(0);
+				expect(element.find('b').length).toBe(0);
+				expect(element.find('i').length).toBe(2);
+			}));
+		});
+		
+		describe('not function in edit mode', function () {
+			it('should exist', inject(function ($compile, $rootScope) {
+				$rootScope.html = '<p><img class="ta-insert-video" ta-insert-video="http://www.youtube.com/embed/2maA1-mvicY" src="" allowfullscreen="true" width="300" frameborder="0" height="250"/></p>';
+				var element = $compile('<div ta-bind contenteditable="true" ng-model="html"></div>')($rootScope);
+				$rootScope.$digest();
+				expect(element.find('img').length).toBe(1);
+				expect(element.find('iframe').length).toBe(0);
+			}));
+		});
+		
+		/*
+			Tests for:
+			
+			angular.forEach(taCustomRenderers, function(renderer){
+			var elements = [];
+			// get elements based on what is defined. If both defined do secondary filter in the forEach after using selector string
+			Iif(renderer.selector && renderer.selector !== '')
+				elements = element.find(renderer.selector);
+			else Eif(renderer.customAttribute && renderer.customAttribute !== '')
+				elements = getByAttribute(element, renderer.customAttribute);
+			// process elements if any found
+			angular.forEach(elements, function(_element){
+				Iif(renderer.selector && renderer.selector !== '' && renderer.customAttribute && renderer.customAttribute !== ''){
+					if(_element.attr(renderer.customAttribute)) renderer.renderLogic(_element);
+				} else renderer.renderLogic(_element);
+			});
+			
+		*/
 	});
 });
