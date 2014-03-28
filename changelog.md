@@ -5,6 +5,8 @@
 - Moved setup functions into a seperate file, textAngularSetup.js. This file must be included before textAngular.js file. Using the defaults and textAngular.min.js causes no changes.
 - Adding the Image and Link click popup functions.
 - Adding ability to drag and drop files into the editor.
+- Manager now can add and remove tools dynamically.
+- Added Custom Renderers adding the ability to use placeholders, eg an image, in the editor and display something else in display mode. Uses factory function `taApplyCustomRenderers` to do this.
 
 2014-02-28 v1.2.0
 

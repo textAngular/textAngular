@@ -416,7 +416,36 @@ describe('textAngularToolbar', function(){
 			}));
 		});
 	});
+	
+	describe('add tool dynamically to toolbar', function(){
+		var $rootScope, element, toolbarScope, manager;
+		beforeEach(inject(function(_$rootScope_, $compile, textAngularManager, taRegisterTool, taOptions){
+			manager = textAngularManager;
+			taOptions.toolbar = [['h1','h2','h3','h4']];
+			$rootScope = _$rootScope_;
+			element = $compile('<text-angular-toolbar name="test1"></text-angular-toolbar>')($rootScope);
+			toolbarScope = textAngularManager.retrieveToolbar('test1');
+			toolbarScope.disabled = false;
+			toolbarScope.focussed = true;
+			$rootScope.$digest();
+		}));
 		
+		it('should add with all values set', function(){
+			toolbarScope.addTool('newtool', {buttontext: 'Test Add Tool'}, 0, 0);
+			expect(element.find('[name="newtool"]').length).toBe(1);
+		});
+		
+		it('should add with group undefined', function(){
+			toolbarScope.addTool('newtool', {buttontext: 'Test Add Tool'}, undefined, 0);
+			expect(element.find('[name="newtool"]').length).toBe(1);
+		});
+		
+		it('should add with index undefined', function(){
+			toolbarScope.addTool('newtool', {buttontext: 'Test Add Tool'}, 0);
+			expect(element.find('[name="newtool"]').length).toBe(1);
+		});
+	});
+	
 	describe('update and reset tools buttons and multi toolbars', function(){
 		var $rootScope, elements, toolbarScopes, manager;
 		beforeEach(inject(function(_$rootScope_, $compile, textAngularManager, taRegisterTool, taOptions){

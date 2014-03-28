@@ -545,7 +545,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 				}
 			};
 		}
-	]).directive('taBind', ['taSanitize', '$timeout', 'taFixChrome', 'taSelectableElements', 'taCustomRenderers', function(taSanitize, $timeout, taFixChrome, taSelectableElements, taCustomRenderers){
+	]).directive('taBind', ['taSanitize', '$timeout', 'taFixChrome', 'taSelectableElements', 'taApplyCustomRenderers', function(taSanitize, $timeout, taFixChrome, taSelectableElements, taApplyCustomRenderers){
 		// Uses for this are textarea or input with ng-model and ta-bind='text'
 		// OR any non-form element with contenteditable="contenteditable" ta-bind="html|text" ng-model
 		return {
@@ -695,24 +695,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 							}
 						}else if(element[0].tagName.toLowerCase() !== 'textarea' && element[0].tagName.toLowerCase() !== 'input'){
 							// make sure the end user can SEE the html code as a display. This is a read-only display element
-							element[0].innerHTML = val;
-							
-							angular.forEach(taCustomRenderers, function(renderer){
-								var elements = [];
-								// get elements based on what is defined. If both defined do secondary filter in the forEach after using selector string
-								if(renderer.selector && renderer.selector !== '')
-									elements = element.find(renderer.selector);
-								/* istanbul ignore else: shouldn't fire, if it does we're ignoring everything */
-								else if(renderer.customAttribute && renderer.customAttribute !== '')
-									elements = getByAttribute(element, renderer.customAttribute);
-								// process elements if any found
-								angular.forEach(elements, function(_element){
-									_element = angular.element(_element);
-									if(renderer.selector && renderer.selector !== '' && renderer.customAttribute && renderer.customAttribute !== ''){
-										if(_element.attr(renderer.customAttribute) !== undefined) renderer.renderLogic(_element);
-									} else renderer.renderLogic(_element);
-								});
-							});
+							element[0].innerHTML = taApplyCustomRenderers(val);
 						}else{
 							// only for input and textarea inputs
 							element.val(val);
@@ -788,6 +771,30 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 					element.on('drop', fileDropHandler);
 				}
 			}
+		};
+	}]).factory('taApplyCustomRenderers', ['taCustomRenderers', function(taCustomRenderers){
+		return function(val){
+			var element = angular.element('<div></div>');
+			element[0].innerHTML = val;
+			
+			angular.forEach(taCustomRenderers, function(renderer){
+				var elements = [];
+				// get elements based on what is defined. If both defined do secondary filter in the forEach after using selector string
+				if(renderer.selector && renderer.selector !== '')
+					elements = element.find(renderer.selector);
+				/* istanbul ignore else: shouldn't fire, if it does we're ignoring everything */
+				else if(renderer.customAttribute && renderer.customAttribute !== '')
+					elements = getByAttribute(element, renderer.customAttribute);
+				// process elements if any found
+				angular.forEach(elements, function(_element){
+					_element = angular.element(_element);
+					if(renderer.selector && renderer.selector !== '' && renderer.customAttribute && renderer.customAttribute !== ''){
+						if(_element.attr(renderer.customAttribute) !== undefined) renderer.renderLogic(_element);
+					} else renderer.renderLogic(_element);
+				});
+			});
+			
+			return element[0].innerHTML;
 		};
 	}]).directive('taMaxText', function(){
 		return {
@@ -1014,12 +1021,29 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 								delete _newTool.display;
 							}
 
-							toolElement = setupToolElement(_newTool, toolInstance);
+							var toolElement = setupToolElement(_newTool, toolInstance);
 							toolInstance.$element.replaceWith(toolElement);
 							toolInstance.$element = toolElement;
 						}
 					};
-
+					
+					// we assume here that all values passed are valid and correct
+					scope.addTool = function(key, _newTool, groupIndex, index){
+						scope.tools[key] = angular.extend(scope.$new(true), taTools[key], defaultChildScope, {name: key});
+						scope.tools[key].$element = setupToolElement(taTools[key], scope.tools[key]);
+						var group;
+						if(groupIndex === undefined) groupIndex = scope.toolbar.length - 1;
+						group = angular.element(element.children()[groupIndex]);
+						
+						if(index === undefined){
+							group.append(scope.tools[key].$element);
+							scope.toolbar[groupIndex][scope.toolbar[groupIndex].length - 1] = key;
+						}else{
+							group.children().eq(index).after(scope.tools[key].$element);
+							scope.toolbar[groupIndex][index] = key;
+						}
+					};
+					
 					textAngularManager.registerToolbar(scope);
 
 					scope.$on('$destroy', function(){
@@ -1173,14 +1197,14 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 							if(workerTools.length > 0){
 								var tool = workerTools[0].tool;
 								var name = workerTools[0].name;
-									for(var _t = 0; _t < _toolbars.length; _t++){
-										if(_toolbars[_t].tools[name] !== undefined){
-											tool.onElementSelect.action.call(_toolbars[_t].tools[name], event, element, scope);
-											result = true;
-											break;
-										}
+								for(var _t = 0; _t < _toolbars.length; _t++){
+									if(_toolbars[_t].tools[name] !== undefined){
+										tool.onElementSelect.action.call(_toolbars[_t].tools[name], event, element, scope);
+										result = true;
+										break;
 									}
 								}
+							}
 							return result;
 						}
 					}
@@ -1257,6 +1281,42 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 			resetToolbarToolDisplay: function(toolbarKey, toolKey){
 				if(toolbars[toolbarKey]) toolbars[toolbarKey].updateToolDisplay(toolKey, taTools[toolKey], true);
 				else throw('textAngular Error: No Toolbar with name "' + toolbarKey + '" exists');
+			},
+			// removes a tool from all toolbars and it's definition
+			removeTool: function(toolKey){
+				delete taTools[toolKey];
+				angular.forEach(toolbars, function(toolbarScope){
+					delete toolbarScope.tools[toolKey];
+					for(var i = 0; i < toolbarScope.toolbar.length; i++){
+						var toolbarIndex;
+						for(var j = 0; j < toolbarScope.toolbar[i].length; j++){
+							if(toolbarScope.toolbar[i][j] === toolKey){
+								toolbarIndex = {
+									group: i,
+									index: j
+								};
+								break;
+							}
+							if(toolbarIndex !== undefined) break;
+						}
+						if(toolbarIndex !== undefined){
+							toolbarScope.toolbar[toolbarIndex.group].slice(toolbarIndex.index, 1);
+							toolbarScope._$element.children().eq(toolbarIndex.group).children().eq(toolbarIndex.index).remove();
+						}
+					}
+				});
+			},
+			// toolkey, toolDefinition are required. If group is not specified will pick the last group, if index isnt defined will append to group
+			addTool: function(toolKey, toolDefinition, group, index){
+				taRegisterTool(toolKey, toolDefinition);
+				angular.forEach(toolbars, function(toolbarScope){
+					toolbarScope.addTool(toolKey, toolDefinition, group, index);
+				});
+			},
+			// adds a Tool but only to one toolbar not all
+			addToolToToolbar: function(toolKey, toolDefinition, toolbarKey, group, index){
+				taRegisterTool(toolKey, toolDefinition);
+				toolbars[toolbarKey].addTool(toolKey, toolDefinition, group, index);
 			},
 			// this is used when externally the html of an editor has been changed and textAngular needs to be notified to update the model.
 			// this will call a $digest if not already happening

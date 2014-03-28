@@ -114,7 +114,33 @@ describe('textAngularManager', function(){
 				});
 			});
 			
-			// TODO: Add and remove functionality
+			describe('dynamically add tool', function(){
+				it('to all toolbars', function(){
+					textAngularManager.addTool('newtool', {buttontext: 'Test Add Tool'}, 0, 0);
+					expect(toolbar1.find('[name="newtool"]').length).toBe(1);
+					expect(toolbar2.find('[name="newtool"]').length).toBe(1);
+				});
+				it('specifically to one toolbar', function(){
+					textAngularManager.addToolToToolbar('newtool', {buttontext: 'Test Add Tool'}, 'test1', 0, 0);
+					expect(toolbar1.find('[name="newtool"]').length).toBe(1);
+					expect(toolbar2.find('[name="newtool"]').length).toBe(0);
+				});
+			});
+			
+			describe('dynamically remove tool', function(){
+				it('from all toolbars', function(){
+					textAngularManager.addTool('newtool', {buttontext: 'Test Add Tool'}, 0, 0);
+					textAngularManager.removeTool('newtool');
+					expect(toolbar1.find('[name="newtool"]').length).toBe(0);
+					expect(toolbar2.find('[name="newtool"]').length).toBe(0);
+				});
+				it('when only on one toolbar', function(){
+					textAngularManager.addToolToToolbar('newtool', {buttontext: 'Test Add Tool'}, 'test1', 0, 0);
+					textAngularManager.removeTool('newtool');
+					expect(toolbar1.find('[name="newtool"]').length).toBe(0);
+					expect(toolbar2.find('[name="newtool"]').length).toBe(0);
+				});
+			});
 		});
 	});
 	
