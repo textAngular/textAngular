@@ -290,6 +290,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 						'ta-bind': 'ta-bind',
 						'ng-model': 'html'
 					});
+					if(attrs.taDefaultWrap) scope.displayElements.text.attr('ta-default-wrap', attrs.taDefaultWrap);
 
 					// add the main elements to the origional element
 					element.append(scope.displayElements.text);
@@ -557,10 +558,16 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 				var _isInputFriendly = _isContentEditable || element[0].tagName.toLowerCase() === 'textarea' || element[0].tagName.toLowerCase() === 'input';
 				var _isReadonly = false;
 				var _focussed = false;
+				
 				// defaults to the paragraph element, but we need the line-break or it doesn't allow you to type into the empty element
 				// non IE is '<p><br/></p>', ie is '<p></p>' as for once IE gets it correct...
+				var _defaultVal;
+				// set the default to be a paragraph value
+				if(attrs.taDefaultWrap === undefined) attrs.taDefaultWrap = 'p';
+				if(attrs.taDefaultWrap === '') _defaultVal = '';
 				/* istanbul ignore next: ie specific test */
-				var _defaultVal = (ie === undefined)? '<p><br></p>' : '<p></p>';
+				else _defaultVal = (ie === undefined)? '<' + attrs.taDefaultWrap + '><br></' + attrs.taDefaultWrap + '>' : '<' + attrs.taDefaultWrap + '></' + attrs.taDefaultWrap + '>';
+				
 				// in here we are undoing the converts used elsewhere to prevent the < > and & being displayed when they shouldn't in the code.
 				var _compileHtml = function(){
 					if(_isContentEditable) return element[0].innerHTML;

@@ -460,6 +460,25 @@ describe('textAngular', function(){
 		});
 	});
 	
+	describe('should respect the ta-default-wrap value', function(){
+		beforeEach(module('textAngular'));
+		it('with ng-model', inject(function($rootScope, $compile){
+			$rootScope.html = '';
+			element = $compile('<text-angular ta-default-wrap="div" name="test" ng-model="htmlcontent"></text-angular>')($rootScope).find('.ta-text');
+			$rootScope.$digest();
+			element.trigger('focus');
+			$rootScope.$digest();
+			expect(element.html()).toBe('<div><br></div>');
+		}));
+		it('without ng-model', inject(function($rootScope, $compile){
+			element = $compile('<text-angular ta-default-wrap="div" name="test"></text-angular>')($rootScope).find('.ta-text');
+			$rootScope.$digest();
+			element.trigger('focus');
+			$rootScope.$digest();
+			expect(element.html()).toBe('<div><br></div>');
+		}));
+	});
+	
 	describe('Updates without ng-model', function(){
 		'use strict';
 		var $rootScope, element;

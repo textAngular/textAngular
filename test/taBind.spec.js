@@ -218,6 +218,33 @@ describe('taBind', function () {
 			});
 			element.find('a').triggerHandler('click');
 		});
+		
+		describe('should respect the ta-default-wrap value', function(){
+			it('default to p element', inject(function($rootScope, $compile){
+				$rootScope.html = '';
+				element = $compile('<div ta-bind contenteditable="contenteditable" ng-model="html"></div>')($rootScope);
+				$rootScope.$digest();
+				element.trigger('focus');
+				$rootScope.$digest();
+				expect(element.html()).toBe('<p><br></p>');
+			}));
+			it('set to other value', inject(function($rootScope, $compile){
+				$rootScope.html = '';
+				element = $compile('<div ta-bind ta-default-wrap="div" contenteditable="contenteditable" ng-model="html"></div>')($rootScope);
+				$rootScope.$digest();
+				element.trigger('focus');
+				$rootScope.$digest();
+				expect(element.html()).toBe('<div><br></div>');
+			}));
+			it('set to blank should not wrap', inject(function($rootScope, $compile){
+				$rootScope.html = '';
+				element = $compile('<div ta-bind ta-default-wrap="" contenteditable="contenteditable" ng-model="html"></div>')($rootScope);
+				$rootScope.$digest();
+				element.trigger('focus');
+				$rootScope.$digest();
+				expect(element.html()).toBe('');
+			}));
+		});
 	});
 
 	describe('should function as an textarea', function () {
