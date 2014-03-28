@@ -283,30 +283,142 @@ describe('taBind', function () {
 	});
 
 	describe('should update from cut and paste events', function () {
-		var $rootScope, element, $timeout;
-		beforeEach(inject(function (_$compile_, _$rootScope_, _$timeout_) {
-			$rootScope = _$rootScope_;
-			$timeout = _$timeout_;
-			$rootScope.html = '<p>Test Contents</p>';
-			element = _$compile_('<textarea ta-bind ng-model="html"></textarea>')($rootScope);
-			$rootScope.$digest();
-		}));
-
-		it('should update model from paste', function () {
-			element.val('<div>Test 2 Content</div>');
-			element.trigger('paste');
-			$rootScope.$digest();
-			$timeout.flush();
-			$rootScope.$digest();
-			expect($rootScope.html).toBe('<div>Test 2 Content</div>');
+		describe('on non-contenteditable', function(){
+			var $rootScope, element, $timeout;
+			beforeEach(inject(function (_$compile_, _$rootScope_, _$timeout_) {
+				$rootScope = _$rootScope_;
+				$timeout = _$timeout_;
+				$rootScope.html = '<p>Test Contents</p>';
+				element = _$compile_('<textarea ta-bind ng-model="html"></textarea>')($rootScope);
+				$rootScope.$digest();
+			}));
+	
+			it('should update model from paste', function () {
+				element.val('<div>Test 2 Content</div>');
+				element.trigger('paste');
+				$rootScope.$digest();
+				$timeout.flush();
+				$rootScope.$digest();
+				expect($rootScope.html).toBe('<div>Test 2 Content</div>');
+			});
+	
+			it('should update model from cut', function () {
+				element.val('<div>Test 2 Content</div>');
+				element.trigger('cut');
+				$timeout.flush();
+				$rootScope.$digest();
+				expect($rootScope.html).toBe('<div>Test 2 Content</div>');
+			});
 		});
-
-		it('should update model from cut', function () {
-			element.val('<div>Test 2 Content</div>');
-			element.trigger('cut');
-			$timeout.flush();
-			$rootScope.$digest();
-			expect($rootScope.html).toBe('<div>Test 2 Content</div>');
+		
+		describe('on content-editable', function () {
+			var $rootScope, element, $timeout;
+			beforeEach(inject(function (_$compile_, _$rootScope_, _$timeout_, $document, $window) {
+				$rootScope = _$rootScope_;
+				$timeout = _$timeout_;
+				$rootScope.html = '<p>Test Contents</p>';
+				element = _$compile_('<div contenteditable="true" ta-bind ng-model="html"></div>')($rootScope);
+				$document.find('body').append(element);
+				$rootScope.$digest();
+				var sel = $window.rangy.getSelection();
+				var range = $window.rangy.createRangyRange();
+				range.selectNodeContents(element.find('p')[0]);
+				sel.setSingleRange(range);
+			}));
+			afterEach(function(){
+				element.remove();
+			});
+			
+			// var text = (e.originalEvent || e).clipboardData.getData('text/plain') || $window.clipboardData.getData('Text');
+			describe('should update model from paste', function () {
+				it('ie based', inject(function($window){
+					$window.clipboardData = {
+						getData: function(){ return 'Test 2 Content'; }
+					};
+					element.trigger('paste');
+					$rootScope.$digest();
+					expect($rootScope.html).toBe('<p>Test 2 Content</p>');
+					$window.clipboardData = undefined;
+				}));
+				
+				it('non-ie based w/o jquery', inject(function($window){
+					var event = jQuery.Event('paste');
+					event.clipboardData = {
+						getData: function(){ return 'Test 3 Content'; }
+					};
+					element.trigger(event);
+					$rootScope.$digest();
+					expect($rootScope.html).toBe('<p>Test 3 Content</p>');
+				}));
+				
+				it('non-ie based w/ jquery', inject(function($window){
+					var event = jQuery.Event('paste');
+					event.originalEvent = {
+						clipboardData: {
+							getData: function(){ return 'Test 3 Content'; }
+						}
+					};
+					element.trigger(event);
+					$rootScope.$digest();
+					expect($rootScope.html).toBe('<p>Test 3 Content</p>');
+				}));
+				
+				it('non-ie based w/o paste content', inject(function($window){
+					element.trigger('paste');
+					$rootScope.$digest();
+					expect($rootScope.html).toBe('<p>Test Contents</p>');
+				}));
+			});
+	
+			it('should update model from cut', function () {
+				element.html('<div>Test 2 Content</div>');
+				element.trigger('cut');
+				$timeout.flush();
+				$rootScope.$digest();
+				expect($rootScope.html).toBe('<div>Test 2 Content</div>');
+			});
+		});
+		
+		describe('on content-editable with readonly', function () {
+			var $rootScope, element, $timeout;
+			beforeEach(inject(function (_$compile_, _$rootScope_, _$timeout_, $document, $window) {
+				$rootScope = _$rootScope_;
+				$timeout = _$timeout_;
+				$rootScope.html = '<p>Test Contents</p>';
+				element = _$compile_('<div contenteditable="true" ta-readonly="true" ta-bind ng-model="html"></div>')($rootScope);
+				$document.find('body').append(element);
+				$rootScope.$digest();
+				var sel = $window.rangy.getSelection();
+				var range = $window.rangy.createRangyRange();
+				range.selectNodeContents(element.find('p')[0]);
+				sel.setSingleRange(range);
+			}));
+			afterEach(function(){
+				element.remove();
+			});
+			
+			// var text = (e.originalEvent || e).clipboardData.getData('text/plain') || $window.clipboardData.getData('Text');
+			describe('should not update model from paste', function () {
+				it('ie based', inject(function($window){
+					$window.clipboardData = {
+						getData: function(){ return 'Test 2 Content'; }
+					};
+					element.trigger('paste');
+					$rootScope.$digest();
+					expect($rootScope.html).toBe('<p>Test Contents</p>');
+					$window.clipboardData = undefined;
+				}));
+				
+				it('non-ie based', inject(function($window){
+					var event = jQuery.Event('paste');
+					event.clipboardData = {
+						getData: function(){ return 'Test 3 Content'; }
+					};
+					element.trigger(event);
+					$rootScope.$digest();
+					expect($rootScope.html).toBe('<p>Test Contents</p>');
+				}));
+			});
 		});
 	});
 	

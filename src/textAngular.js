@@ -545,7 +545,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 				}
 			};
 		}
-	]).directive('taBind', ['taSanitize', '$timeout', 'taFixChrome', 'taSelectableElements', 'taApplyCustomRenderers', function(taSanitize, $timeout, taFixChrome, taSelectableElements, taApplyCustomRenderers){
+	]).directive('taBind', ['taSanitize', '$timeout', '$window', 'taFixChrome', 'taSelectableElements', 'taApplyCustomRenderers', function(taSanitize, $timeout, $window, taFixChrome, taSelectableElements, taApplyCustomRenderers){
 		// Uses for this are textarea or input with ng-model and ta-bind='text'
 		// OR any non-form element with contenteditable="contenteditable" ta-bind="html|text" ng-model
 		return {
@@ -575,19 +575,48 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 
 				//this code is used to update the models when data is entered/deleted
 				if(_isInputFriendly){
-					element.on('paste cut', function(){
-						// timeout to next is needed as otherwise the paste/cut event has not finished actually changing the display
-						if(!_isReadonly) $timeout(function(){
-							ngModel.$setViewValue(_compileHtml());
-						}, 0);
-					});
-
 					if(!_isContentEditable){
+						element.on('paste cut', function(){
+							// timeout to next is needed as otherwise the paste/cut event has not finished actually changing the display
+							if(!_isReadonly) $timeout(function(){
+								ngModel.$setViewValue(_compileHtml());
+							}, 0);
+						});
 						// if a textarea or input just add in change and blur handlers, everything else is done by angulars input directive
 						element.on('change blur', function(){
 							if(!_isReadonly) ngModel.$setViewValue(_compileHtml());
 						});
 					}else{
+						element.on('cut', function(e){
+							// timeout to next is needed as otherwise the paste/cut event has not finished actually changing the display
+							if(!_isReadonly)
+								$timeout(function(){
+									ngModel.$setViewValue(_compileHtml());
+								}, 0);
+							else e.preventDefault();
+						});
+						element.on('paste', function(e){
+							// timeout to next is needed as otherwise the paste/cut event has not finished actually changing the display
+							var text;
+							// for non-ie
+							if(e.clipboardData || (e.originalEvent && e.originalEvent.clipboardData))
+								text = (e.originalEvent || e).clipboardData.getData('text/plain');
+							// for ie
+							else if($window.clipboardData)
+								text = $window.clipboardData.getData('Text');
+							// if theres non text data and we aren't in read-only do default
+							if(!text && !_isReadonly) return true;
+							// prevent the default paste command
+							e.preventDefault();
+							if(!_isReadonly){
+								var _working = angular.element('<div></div>');
+								_working[0].innerHTML = text;
+								// this strips out all HTML tags
+								text = _working.text();
+								document.execCommand('insertText', false, text);
+								ngModel.$setViewValue(_compileHtml());
+							}
+						});
 						// all the code specific to contenteditable divs
 						element.on('keyup', function(){
 							if(!_isReadonly){
