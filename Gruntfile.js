@@ -24,18 +24,11 @@ module.exports = function (grunt) {
 		clean: ["coverage/*"],
 		coverage: {
 		  options: {
-		  	/* Until istanbul version is updated in grunt-istanbul-coverage
 		  	thresholds: {
 			  'statements': 100,
 			  'branches': 100,
 			  'lines': 100,
 			  'functions': 100
-			},*/
-			thresholds: {
-			  'statements': -15,
-			  'branches': -19,
-			  'lines': 100,
-			  'functions': -2
 			},
 			dir: ''
 		  }
