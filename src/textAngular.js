@@ -466,10 +466,10 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 						_toolbars.triggerElementSelect(event, element);
 					});
 					
-					scope.$on('ta-drop-event', function(event, element, dropEvent){
+					scope.$on('ta-drop-event', function(event, element, dropEvent, dataTransfer){
 						scope.displayElements.text[0].focus();
-						if(dropEvent.originalEvent.dataTransfer && dropEvent.originalEvent.dataTransfer.files && dropEvent.originalEvent.dataTransfer.files.length > 0){
-							angular.forEach(dropEvent.originalEvent.dataTransfer.files, function(file){
+						if(dataTransfer && dataTransfer.files && dataTransfer.files.length > 0){
+							angular.forEach(dataTransfer.files, function(file){
 								// taking advantage of boolean execution, if the fileDropHandler returns true, nothing else after it is executed
 								// If it is false then execute the defaultFileDropHandler if the fileDropHandler is NOT the default one
 								try{
@@ -680,7 +680,10 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 					// emit the drop event, pass the element, preventing should be done elsewhere
 					if(!dropFired){
 						dropFired = true;
-						scope.$emit('ta-drop-event', this, event);
+						var dataTransfer;
+						if(event.originalEvent) dataTransfer = event.originalEvent.dataTransfer;
+						else dataTransfer = event.dataTransfer;
+						scope.$emit('ta-drop-event', this, event, dataTransfer);
 						$timeout(function(){dropFired = false;}, 100);
 					}
 				};
