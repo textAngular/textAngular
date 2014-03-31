@@ -61,10 +61,11 @@ describe('textAngular', function(){
 	
 	describe('Add classes via attributes', function(){
 		'use strict';
-		var $rootScope, element;
+		var $rootScope, element, textAngularManager;
 		beforeEach(module('textAngular'));
-		beforeEach(inject(function (_$compile_, _$rootScope_) {
+		beforeEach(inject(function (_$compile_, _$rootScope_, _textAngularManager_) {
 			$rootScope = _$rootScope_;
+			textAngularManager = _textAngularManager_;
 			element = _$compile_('<text-angular name="test" ta-focussed-class="test-focus-class" ta-text-editor-class="test-text-class" ta-html-editor-class="test-html-class"></text-angular>')($rootScope);
 			$rootScope.$digest();
 		}));
@@ -74,7 +75,7 @@ describe('textAngular', function(){
 				expect(!jQuery(element).hasClass('.test-focus-class'));
 			});
 			it('adds focus class when ta-text is focussed', function(){
-				jQuery('.ta-text', element).triggerHandler('focus');
+				textAngularManager.retrieveEditor('test').scope.displayElements.text.triggerHandler('focus');
 				expect(jQuery(element).hasClass('.test-focus-class'));
 			});
 			it('adds focus class when ta-html is focussed', function(){
@@ -82,17 +83,17 @@ describe('textAngular', function(){
 				expect(jQuery(element).hasClass('.test-focus-class'));
 			});
 			it('adds text editor class', function(){
-				expect(jQuery('.ta-text', element).hasClass('.test-text-class'));
+				expect(textAngularManager.retrieveEditor('test').scope.displayElements.text.hasClass('.test-text-class'));
 			});
 			it('adds html editor class', function(){
-				expect(jQuery('.ta-html', element).hasClass('.test-html-class'));
+				expect(textAngularManager.retrieveEditor('test').scope.displayElements.html.hasClass('.test-html-class'));
 			});
 		});
 	});
 	
 	describe('Change classes via decorator', function(){
 		'use strict';
-		var $rootScope, element;
+		var $rootScope, element, textAngularManager;
 		beforeEach(module('textAngular', function($provide){
 			// change all the classes at once
 			$provide.decorator('taOptions', ['$delegate', function(taOptions){
@@ -103,20 +104,21 @@ describe('textAngular', function(){
 				return taOptions;
 			}]);
 		}));
-		beforeEach(inject(function (_$compile_, _$rootScope_) {
+		beforeEach(inject(function (_$compile_, _$rootScope_, _textAngularManager_) {
 			$rootScope = _$rootScope_;
+			textAngularManager = _textAngularManager_;
 			element = _$compile_('<text-angular name="test"></text-angular>')($rootScope);
 			$rootScope.$digest();
 		}));
 		it('should add .test-focus-class instead of default .focussed', function(){
-			jQuery('.ta-text', element).triggerHandler('focus');
+			textAngularManager.retrieveEditor('test').scope.displayElements.text.triggerHandler('focus');
 			expect(jQuery(element).hasClass('.test-focus-class'));
 		});
 		it('adds text editor class', function(){
-			expect(jQuery('.ta-text', element).hasClass('.test-text-class'));
+			expect(textAngularManager.retrieveEditor('test').scope.displayElements.text.hasClass('.test-text-class'));
 		});
 		it('adds html editor class', function(){
-			expect(jQuery('.ta-html', element).hasClass('.test-html-class'));
+			expect(textAngularManager.retrieveEditor('test').scope.displayElements.html.hasClass('.test-html-class'));
 		});
 		it('adds disabled class', function(){
 			expect(jQuery(element).hasClass('.disabled-test'));
@@ -125,20 +127,21 @@ describe('textAngular', function(){
 	
 	describe('Add tabindex attribute', function(){
 		'use strict';
-		var $rootScope, element;
+		var $rootScope, element, textAngularManager;
 		beforeEach(module('textAngular'));
-		beforeEach(inject(function (_$compile_, _$rootScope_) {
+		beforeEach(inject(function (_$compile_, _$rootScope_, _textAngularManager_) {
 			$rootScope = _$rootScope_;
+			textAngularManager = _textAngularManager_;
 			element = _$compile_('<text-angular name="test" tabindex="42"></text-angular>')($rootScope);
 			$rootScope.$digest();
 		}));
 		
 		describe('Check moved across', function () {
 			it('to textEditor', function(){
-				expect(jQuery('.ta-text', element).attr('tabindex')).toBe('42');
+				expect(textAngularManager.retrieveEditor('test').scope.displayElements.text.attr('tabindex')).toBe('42');
 			});
 			it('to htmlEditor', function(){
-				expect(jQuery('.ta-html', element).attr('tabindex')).toBe('42');
+				expect(textAngularManager.retrieveEditor('test').scope.displayElements.html.attr('tabindex')).toBe('42');
 			});
 			it('removed from .ta-root', function(){
 				expect(element.attr('tabindex')).toBeUndefined();
@@ -180,6 +183,47 @@ describe('textAngular', function(){
 		'use strict';
 		var $rootScope, element, editorScope;
 		beforeEach(module('textAngular'));
+		beforeEach(inject(function (_$compile_, _$rootScope_, textAngularManager, $document) {
+			$rootScope = _$rootScope_;
+			element = _$compile_('<text-angular name="test"></text-angular>')($rootScope);
+			$document.find('body').append(element);
+			editorScope = textAngularManager.retrieveEditor('test').scope;$document.find('body').append(element);
+			$rootScope.$digest();
+		}));
+		afterEach(function(){
+			element.remove();
+		});
+		
+		it('initially should hide .ta-html and show .ta-text', function(){
+			expect(jQuery('.ta-text', element[0]).is(':visible')).toBe(true);
+			expect(jQuery('.ta-html', element[0]).is(':visible')).toBe(false);
+		});
+		
+		describe('from WYSIWYG text to RAW HTML view', function () {
+			it('should hide .ta-text and show .ta-html', function(){
+				editorScope.switchView();
+				editorScope.$parent.$digest();
+				expect(jQuery('.ta-text', element[0]).is(':visible')).toBe(false);
+				expect(jQuery('.ta-html', element[0]).is(':visible')).toBe(true);
+			});
+		});
+		
+		describe('from RAW HTML to WYSIWYG text view', function () {
+			it('should hide .ta-html and show .ta-text', function(){
+				editorScope.switchView();
+				editorScope.$parent.$digest();
+				editorScope.switchView();
+				editorScope.$parent.$digest();
+				expect(jQuery('.ta-text', element[0]).is(':visible')).toBe(true);
+				expect(jQuery('.ta-html', element[0]).is(':visible')).toBe(false);
+			});
+		});
+	});
+	
+	describe('Check focussed class adding', function(){
+		'use strict';
+		var $rootScope, element, editorScope;
+		beforeEach(module('textAngular'));
 		beforeEach(inject(function (_$compile_, _$rootScope_, textAngularManager) {
 			$rootScope = _$rootScope_;
 			element = _$compile_('<text-angular name="test"></text-angular>')($rootScope);
@@ -187,61 +231,28 @@ describe('textAngular', function(){
 			editorScope = textAngularManager.retrieveEditor('test').scope;
 		}));
 		
-		it('initially should hide .ta-html and show .ta-text', function(){
-			expect(jQuery('.ta-text', element).is(':visible:focus'));
-			expect(!jQuery('.ta-html', element).is(':visible'));
-		});
-		
-		describe('from WYSIWYG text to RAW HTML view', function () {
-			it('should hide .ta-text and show .ta-html', function(){
-				editorScope.switchView();
-				expect(!jQuery('.ta-text', element).is(':visible'));
-				expect(jQuery('.ta-html', element).is(':visible:focus'));
-			});
-		});
-		
-		describe('from RAW HTML to WYSIWYG text view', function () {
-			it('should hide .ta-html and show .ta-text', function(){
-				editorScope.switchView();
-				editorScope.switchView();
-				expect(jQuery('.ta-text', element).is(':visible:focus'));
-				expect(!jQuery('.ta-html', element).is(':visible'));
-			});
-		});
-	});
-	
-	describe('Check focussed class adding', function(){
-		'use strict';
-		var $rootScope, element;
-		beforeEach(module('textAngular'));
-		beforeEach(inject(function (_$compile_, _$rootScope_) {
-			$rootScope = _$rootScope_;
-			element = _$compile_('<text-angular name="test"></text-angular>')($rootScope);
-			$rootScope.$digest();
-		}));
-		
 		describe('should have added .focussed', function(){
 			it('on trigger focus on ta-text', function(){
-				element.find('.ta-text').triggerHandler('focus');
+				editorScope.displayElements.text.triggerHandler('focus');
 				expect(element.hasClass('focussed'));
 			});
 			it('on trigger focus on ta-html', function(){
-				element.find('.ta-html').triggerHandler('focus');
+				editorScope.displayElements.html.triggerHandler('focus');
 				expect(element.hasClass('focussed'));
 			});
 		});
 		
 		describe('should have removed .focussed', function(){
 			it('on ta-text trigger blur', function(){	
-				element.find('.ta-text').triggerHandler('focus');
+				editorScope.displayElements.text.triggerHandler('focus');
 				$rootScope.$digest();
-				element.find('.ta-text').triggerHandler('blur');
+				editorScope.displayElements.text.triggerHandler('blur');
 				expect(!element.hasClass('focussed'));
 			});
 			it('on ta-html trigger blur', function(){
-				element.find('.ta-html').triggerHandler('focus');
+				editorScope.displayElements.html.triggerHandler('focus');
 				$rootScope.$digest();
-				element.find('.ta-html').triggerHandler('blur');
+				editorScope.displayElements.html.triggerHandler('blur');
 				expect(!element.hasClass('focussed'));
 			});
 		});
@@ -261,12 +272,12 @@ describe('textAngular', function(){
 		}));
 		
 		describe('should have added attribute to', function(){
-			it('ta-text', function(){
-				expect(element.find('.ta-text').attr('testattr')).toBe('trueish');
-			});
-			it('ta-html', function(){
-				expect(element.find('.ta-html').attr('testattr')).toBe('trueish');
-			});
+			it('ta-text', inject(function(textAngularManager){
+				expect(textAngularManager.retrieveEditor('test').scope.displayElements.text.attr('testattr')).toBe('trueish');
+			}));
+			it('ta-html', inject(function(textAngularManager){
+				expect(textAngularManager.retrieveEditor('test').scope.displayElements.html.attr('testattr')).toBe('trueish');
+			}));
 		});
 	});
 	
@@ -281,12 +292,12 @@ describe('textAngular', function(){
 		}));
 		
 		describe('should have added placeholder to', function(){
-			it('.ta-text', function(){
-				expect(element.find('.ta-text').attr('placeholder')).toBe('Test Placeholder');
-			});
-			it('.ta-html', function(){
-				expect(element.find('.ta-html').attr('placeholder')).toBe('Test Placeholder');
-			});
+			it('ta-text', inject(function(textAngularManager){
+				expect(textAngularManager.retrieveEditor('test').scope.displayElements.text.attr('placeholder')).toBe('Test Placeholder');
+			}));
+			it('ta-html', inject(function(textAngularManager){
+				expect(textAngularManager.retrieveEditor('test').scope.displayElements.html.attr('placeholder')).toBe('Test Placeholder');
+			}));
 		});
 	});
 	
@@ -368,11 +379,11 @@ describe('textAngular', function(){
 		});
 		
 		describe('should change on input update', function () {
-			beforeEach(function(){
-				element.find('.ta-text').html('<div>Test Change Content</div>');
-				element.find('.ta-text').triggerHandler('keyup');
+			beforeEach(inject(function(textAngularManager){
+				textAngularManager.retrieveEditor('test').scope.displayElements.text.html('<div>Test Change Content</div>');
+				textAngularManager.retrieveEditor('test').scope.displayElements.text.triggerHandler('keyup');
 				$rootScope.$digest();
-			});
+			}));
 			it('not pristine', function(){
 				expect($rootScope.form.$pristine).toBe(false);
 			});
@@ -394,86 +405,91 @@ describe('textAngular', function(){
 	
 	describe('Basic Initiation without ng-model', function(){
 		'use strict';
-		var $rootScope, element;
+		var $rootScope, element, displayElements;
 		beforeEach(module('textAngular'));
-		beforeEach(inject(function (_$compile_, _$rootScope_) {
+		beforeEach(inject(function (_$compile_, _$rootScope_, textAngularManager) {
 			$rootScope = _$rootScope_;
 			element = _$compile_('<text-angular name="test"><p>Test Content</p></text-angular>')($rootScope);
 			$rootScope.$digest();
+			displayElements = textAngularManager.retrieveEditor('test').scope.displayElements;
 		}));
 		describe('Inserts the current information into the fields', function(){
 			it('populates the WYSIWYG area', function(){
-				expect(jQuery('.ta-text p', element).length).toBe(1);
+				expect(displayElements.text.find('p').length).toBe(1);
 			});
 			it('populates the textarea', function(){
-				expect(jQuery('.ta-html', element).val()).toBe('<p>Test Content</p>');
+				expect(displayElements.html.val()).toBe('<p>Test Content</p>');
 			});
 			it('populates the hidden input value', function(){
-				expect(jQuery('input[type=hidden]', element).val()).toBe('<p>Test Content</p>');
+				expect(displayElements.forminput.val()).toBe('<p>Test Content</p>');
 			});
 		});
 	});
 	
 	describe('Basic Initiation with ng-model', function(){
 		'use strict';
-		var $rootScope, element;
+		var $rootScope, element, displayElements;
 		beforeEach(module('textAngular'));
-		beforeEach(inject(function (_$compile_, _$rootScope_) {
+		beforeEach(inject(function (_$compile_, _$rootScope_, textAngularManager) {
 			$rootScope = _$rootScope_;
 			$rootScope.htmlcontent = '<p>Test Content</p>';
 			element = _$compile_('<text-angular name="test" ng-model="htmlcontent"></text-angular>')($rootScope);
 			$rootScope.$digest();
+			displayElements = textAngularManager.retrieveEditor('test').scope.displayElements;
 		}));
 		describe('Inserts the current information into the fields', function(){
 			it('populates the WYSIWYG area', function(){
-				expect(jQuery('.ta-text p', element).length).toBe(1);
+				expect(displayElements.text.find('p').length).toBe(1);
 			});
 			it('populates the textarea', function(){
-				expect(jQuery('.ta-html', element).val()).toBe('<p>Test Content</p>');
+				expect(displayElements.html.val()).toBe('<p>Test Content</p>');
 			});
 			it('populates the hidden input value', function(){
-				expect(jQuery('input[type=hidden]', element).val()).toBe('<p>Test Content</p>');
+				expect(displayElements.forminput.val()).toBe('<p>Test Content</p>');
 			});
 		});
 	});
 	
 	describe('Basic Initiation with ng-model and originalContents', function(){
 		'use strict';
-		var $rootScope, element;
+		var $rootScope, element, displayElements;
 		beforeEach(module('textAngular'));
-		beforeEach(inject(function (_$compile_, _$rootScope_) {
+		beforeEach(inject(function (_$compile_, _$rootScope_, textAngularManager) {
 			$rootScope = _$rootScope_;
 			$rootScope.htmlcontent = '<p>Test Content</p>';
 			element = _$compile_('<text-angular name="test" ng-model="htmlcontent"><p>Original Content</p></text-angular>')($rootScope);
 			$rootScope.$digest();
+			displayElements = textAngularManager.retrieveEditor('test').scope.displayElements;
 		}));
-		describe('Inserts the current information into the fields overriding the original content', function(){
+		describe('Inserts the current information into the fields', function(){
 			it('populates the WYSIWYG area', function(){
-				expect(jQuery('.ta-text p', element).length).toBe(1);
+				expect(displayElements.text.find('p').length).toBe(1);
 			});
 			it('populates the textarea', function(){
-				expect(jQuery('.ta-html', element).val()).toBe('<p>Test Content</p>');
+				expect(displayElements.html.val()).toBe('<p>Test Content</p>');
 			});
 			it('populates the hidden input value', function(){
-				expect(jQuery('input[type=hidden]', element).val()).toBe('<p>Test Content</p>');
+				expect(displayElements.forminput.val()).toBe('<p>Test Content</p>');
 			});
 		});
 	});
 	
 	describe('should respect the ta-default-wrap value', function(){
 		beforeEach(module('textAngular'));
-		it('with ng-model', inject(function($rootScope, $compile){
+		it('with ng-model', inject(function($rootScope, $compile, textAngularManager){
 			$rootScope.html = '';
-			element = $compile('<text-angular ta-default-wrap="div" name="test" ng-model="htmlcontent"></text-angular>')($rootScope).find('.ta-text');
+			$compile('<text-angular ta-default-wrap="div" name="test" ng-model="htmlcontent"></text-angular>')($rootScope);
+			element = textAngularManager.retrieveEditor('test').scope.displayElements.text;
 			$rootScope.$digest();
-			element.trigger('focus');
+			element.triggerHandler('focus');
 			$rootScope.$digest();
 			expect(element.html()).toBe('<div><br></div>');
 		}));
-		it('without ng-model', inject(function($rootScope, $compile){
-			element = $compile('<text-angular ta-default-wrap="div" name="test"></text-angular>')($rootScope).find('.ta-text');
+		it('without ng-model', inject(function($rootScope, $compile, textAngularManager){
+			$compile('<text-angular ta-default-wrap="div" name="test"></text-angular>')($rootScope);
+			element = textAngularManager.retrieveEditor('test').scope.displayElements.text;
 			$rootScope.$digest();
-			element.trigger('focus');
+			element.triggerHandler('focus');
 			$rootScope.$digest();
 			expect(element.html()).toBe('<div><br></div>');
 		}));
@@ -481,58 +497,60 @@ describe('textAngular', function(){
 	
 	describe('Updates without ng-model', function(){
 		'use strict';
-		var $rootScope, element;
+		var $rootScope, element, displayElements;
 		beforeEach(module('textAngular'));
-		beforeEach(inject(function (_$compile_, _$rootScope_) {
+		beforeEach(inject(function (_$compile_, _$rootScope_, textAngularManager) {
 			$rootScope = _$rootScope_;
 			element = _$compile_('<text-angular name="test"><p>Test Content</p></text-angular>')($rootScope);
 			$rootScope.$digest();
-			jQuery('.ta-text', element).html('<div>Test Change Content</div>');
-			jQuery('.ta-text', element).triggerHandler('keyup');
+			displayElements = textAngularManager.retrieveEditor('test').scope.displayElements;
+			displayElements.text.html('<div>Test Change Content</div>');
+			displayElements.text.triggerHandler('keyup');
 			$rootScope.$digest();
 		}));
 		
 		describe('updates from .ta-text', function(){
 			it('should update .ta-html', function(){
-				expect(jQuery('.ta-html', element).val()).toBe('<div>Test Change Content</div>');
+				expect(displayElements.html.val()).toBe('<div>Test Change Content</div>');
 			});
 			it('should update input[type=hidden]', function(){
-				expect(jQuery('input[type=hidden]', element).val()).toBe('<div>Test Change Content</div>');
+				expect(displayElements.forminput.val()).toBe('<div>Test Change Content</div>');
 			});
 		});
 		
 		describe('updates from .ta-html', function(){
 			it('should update .ta-text', function(){
-				expect(jQuery('.ta-text', element).html()).toBe('<div>Test Change Content</div>');
+				expect(displayElements.text.html()).toBe('<div>Test Change Content</div>');
 			});
 			it('should update input[type=hidden]', function(){
-				expect(jQuery('input[type=hidden]', element).val()).toBe('<div>Test Change Content</div>');
+				expect(displayElements.forminput.val()).toBe('<div>Test Change Content</div>');
 			});
 		});
 	});
 	
 	describe('Updates with ng-model', function(){
 		'use strict';
-		var $rootScope, element;
+		var $rootScope, element, displayElements;
 		beforeEach(module('textAngular'));
-		beforeEach(inject(function (_$compile_, _$rootScope_) {
+		beforeEach(inject(function (_$compile_, _$rootScope_, textAngularManager) {
 			$rootScope = _$rootScope_;
 			$rootScope.htmlcontent = '<p>Test Content</p>';
 			element = _$compile_('<text-angular name="test" ng-model="htmlcontent"></text-angular>')($rootScope);
 			$rootScope.$digest();
 			$rootScope.htmlcontent = '<div>Test Change Content</div>';
 			$rootScope.$digest();
+			displayElements = textAngularManager.retrieveEditor('test').scope.displayElements;
 		}));
 		
 		describe('updates from model to display', function(){
 			it('should update .ta-html', function(){
-				expect(jQuery('.ta-html', element).val()).toBe('<div>Test Change Content</div>');
+				expect(displayElements.html.val()).toBe('<div>Test Change Content</div>');
 			});
 			it('should update .ta-text', function(){
-				expect(jQuery('.ta-text', element).html()).toBe('<div>Test Change Content</div>');
+				expect(displayElements.text.html()).toBe('<div>Test Change Content</div>');
 			});
 			it('should update input[type=hidden]', function(){
-				expect(jQuery('input[type=hidden]', element).val()).toBe('<div>Test Change Content</div>');
+				expect(displayElements.forminput.val()).toBe('<div>Test Change Content</div>');
 			});
 		});
 	});
@@ -540,69 +558,69 @@ describe('textAngular', function(){
 	describe('ng-model should handle undefined and null', function(){
 		'use strict';
 		beforeEach(module('textAngular'));
-		it('should handle initial undefined to empty-string', inject(function ($compile, $rootScope) {
+		it('should handle initial undefined to empty-string', inject(function ($compile, $rootScope, textAngularManager) {
 			$rootScope.htmlcontent = undefined;
 			var element = $compile('<text-angular name="test" ng-model="htmlcontent"></text-angular>')($rootScope);
 			$rootScope.$digest();
-			expect(jQuery('.ta-text', element).html()).toBe('<p><br></p>');
+			expect(textAngularManager.retrieveEditor('test').scope.displayElements.text.html()).toBe('<p><br></p>');
 		}));
 		
-		it('should handle initial null to empty-string', inject(function ($compile, $rootScope) {
+		it('should handle initial null to empty-string', inject(function ($compile, $rootScope, textAngularManager) {
 			$rootScope.htmlcontent = null;
 			var element = $compile('<text-angular name="test" ng-model="htmlcontent"></text-angular>')($rootScope);
 			$rootScope.$digest();
-			expect(jQuery('.ta-text', element).html()).toBe('<p><br></p>');
+			expect(textAngularManager.retrieveEditor('test').scope.displayElements.text.html()).toBe('<p><br></p>');
 		}));
 		
-		it('should handle initial undefined to originalContents', inject(function ($compile, $rootScope) {
+		it('should handle initial undefined to originalContents', inject(function ($compile, $rootScope, textAngularManager) {
 			$rootScope.htmlcontent = undefined;
 			var element = $compile('<text-angular name="test" ng-model="htmlcontent">Test Contents</text-angular>')($rootScope);
 			$rootScope.$digest();
-			expect(jQuery('.ta-text', element).html()).toBe('Test Contents');
+			expect(textAngularManager.retrieveEditor('test').scope.displayElements.text.html()).toBe('Test Contents');
 		}));
 		
-		it('should handle initial null to originalContents', inject(function ($compile, $rootScope) {
+		it('should handle initial null to originalContents', inject(function ($compile, $rootScope, textAngularManager) {
 			$rootScope.htmlcontent = null;
 			var element = $compile('<text-angular name="test" ng-model="htmlcontent">Test Contents</text-angular>')($rootScope);
 			$rootScope.$digest();
-			expect(jQuery('.ta-text', element).html()).toBe('Test Contents');
+			expect(textAngularManager.retrieveEditor('test').scope.displayElements.text.html()).toBe('Test Contents');
 		}));
 		
 		describe('should reset', function(){
-			it('from undefined to empty-string', inject(function ($compile, $rootScope) {
+			it('from undefined to empty-string', inject(function ($compile, $rootScope, textAngularManager) {
 				$rootScope.htmlcontent = 'Test Content';
 				var element = $compile('<text-angular name="test" ng-model="htmlcontent"></text-angular>')($rootScope);
 				$rootScope.$digest();
 				$rootScope.htmlcontent = undefined;
 				$rootScope.$digest();
-				expect(jQuery('.ta-text', element).html()).toBe('<p><br></p>');
+				expect(textAngularManager.retrieveEditor('test').scope.displayElements.text.html()).toBe('<p><br></p>');
 			}));
 			
-			it('from null to empty-string', inject(function ($compile, $rootScope) {
+			it('from null to empty-string', inject(function ($compile, $rootScope, textAngularManager) {
 				$rootScope.htmlcontent = 'Test Content';
 				var element = $compile('<text-angular name="test" ng-model="htmlcontent"></text-angular>')($rootScope);
 				$rootScope.$digest();
 				$rootScope.htmlcontent = null;
 				$rootScope.$digest();
-				expect(jQuery('.ta-text', element).html()).toBe('<p><br></p>');
+				expect(textAngularManager.retrieveEditor('test').scope.displayElements.text.html()).toBe('<p><br></p>');
 			}));
 			
-			it('from undefined to blank/emptystring WITH originalContents', inject(function ($compile, $rootScope) {
+			it('from undefined to blank/emptystring WITH originalContents', inject(function ($compile, $rootScope, textAngularManager) {
 				$rootScope.htmlcontent = 'Test Content1';
 				var element = $compile('<text-angular name="test" ng-model="htmlcontent">Test Contents2</text-angular>')($rootScope);
 				$rootScope.$digest();
 				$rootScope.htmlcontent = undefined;
 				$rootScope.$digest();
-				expect(jQuery('.ta-text', element).html()).toBe('<p><br></p>');
+				expect(textAngularManager.retrieveEditor('test').scope.displayElements.text.html()).toBe('<p><br></p>');
 			}));
 			
-			it('from null to blank/emptystring WITH originalContents', inject(function ($compile, $rootScope) {
+			it('from null to blank/emptystring WITH originalContents', inject(function ($compile, $rootScope, textAngularManager) {
 				$rootScope.htmlcontent = 'Test Content1';
 				var element = $compile('<text-angular name="test" ng-model="htmlcontent">Test Contents2</text-angular>')($rootScope);
 				$rootScope.$digest();
 				$rootScope.htmlcontent = null;
 				$rootScope.$digest();
-				expect(jQuery('.ta-text', element).html()).toBe('<p><br></p>');
+				expect(textAngularManager.retrieveEditor('test').scope.displayElements.text.html()).toBe('<p><br></p>');
 			}));
 		});
 	});
@@ -626,7 +644,7 @@ describe('textAngular', function(){
 				// setup selection
 				sel = window.rangy.getSelection();
 				range = window.rangy.createRangyRange();
-				range.selectNodeContents(element.find('.ta-text p strong')[0]);
+				range.selectNodeContents(editorScope.displayElements.text.find('p').find('strong')[0]);
 				sel.setSingleRange(range);
 			}));
 			afterEach(function(){
@@ -647,7 +665,7 @@ describe('textAngular', function(){
 					expect(sel.toHtml()).toBe('sed do eiusmod tempor incididunt');
 					// change selection
 					var range = window.rangy.createRangyRange();
-					range.selectNodeContents(element.find('.ta-text p i')[0]);
+					range.selectNodeContents(editorScope.displayElements.text.find('p').find('i')[0]);
 					sel.setSingleRange(range);
 					sel.refresh();
 					expect(sel.toHtml()).toBe('consectetur adipisicing');
@@ -669,7 +687,7 @@ describe('textAngular', function(){
 					var resetFunc = editorScope.startAction();
 					editorScope.endAction();
 					var range = window.rangy.createRangyRange();
-					range.selectNodeContents(element.find('.ta-text p i')[0]);
+					range.selectNodeContents(editorScope.displayElements.text.find('p').find('i')[0]);
 					sel.setSingleRange(range);
 					sel.refresh();
 					expect(sel.toHtml()).toBe('consectetur adipisicing');
@@ -707,7 +725,7 @@ describe('textAngular', function(){
 				// setup selection
 				var sel = _rangy.getSelection();
 				var range = _rangy.createRangyRange();
-				range.selectNodeContents(element.find('.ta-text p strong')[0]);
+				range.selectNodeContents(editorScope.displayElements.text.find('p').find('strong')[0]);
 				sel.setSingleRange(range);
 			}));
 			
@@ -762,7 +780,7 @@ describe('textAngular', function(){
 			// setup selection
 			sel = window.rangy.getSelection();
 			range = window.rangy.createRangyRange();
-			range.selectNodeContents(element.find('.ta-text p i')[0]);
+			range.selectNodeContents(editorScope.displayElements.text.find('p').find('i')[0]);
 			sel.setSingleRange(range);
 		}));
 		afterEach(inject(function(taSelectableElements){
@@ -771,31 +789,31 @@ describe('textAngular', function(){
 		}));
 		
 		it('should not trigger focus out while an action is processing', inject(function($timeout){
-			element.find('.ta-text').triggerHandler('focus');
+			editorScope.displayElements.text.triggerHandler('focus');
 			editorScope.$parent.$digest();
 			editorScope.startAction();
-			element.find('.ta-text').triggerHandler('blur');
+			editorScope.displayElements.text.triggerHandler('blur');
 			editorScope.$parent.$digest();
 			$timeout.flush();
-			expect(element.find('button:disabled').length).toBe(0);
+			expect(jQuery(element[0]).find('button:disabled').length).toBe(0);
 		}));
 		
 		it('keypress should call sendKeyCommand', function(){
-			element.find('.ta-text').trigger({type: 'keypress', metaKey: true, which: 21});
+			editorScope.displayElements.text.triggerHandler('keypress', {metaKey: true, which: 21});
 			editorScope.$parent.$digest();
-			expect(element.find('.ta-toolbar button[name=testbutton]').attr('hit-this')).toBe('true');
+			expect(jQuery(element[0]).find('.ta-toolbar button[name=testbutton]').attr('hit-this')).toBe('true');
 		});
 		
 		describe('wrapSelection', function(){
 			it('should wrap the selected text in tags', function(){
 				editorScope.wrapSelection('bold');
-				expect(element.find('.ta-text p b').length).toBe(1);
+				expect(editorScope.displayElements.text.find('p').find('b').length).toBe(1);
 			});
 			
 			it('should unwrap the selected text in tags on re-call', function(){
 				editorScope.wrapSelection('bold');
 				editorScope.wrapSelection('bold');
-				expect(element.find('.ta-text p b').length).toBe(0);
+				expect(editorScope.displayElements.text.find('p').find('b').length).toBe(0);
 			});
 		});
 		
@@ -812,21 +830,21 @@ describe('textAngular', function(){
 		
 		describe('ta-element-select event', function(){
 			it('fires correctly on element selector', function(){
-				var triggerElement = element.find('.ta-text i');
+				var triggerElement = editorScope.displayElements.text.find('i');
 				triggerElement.triggerHandler('click');
 				expect(triggerElement.attr('hit-via-select')).toBe('true');
 			});
 			
 			it('fires correctly when filter returns true', inject(function(taTools){
 				taTools.testbutton.onElementSelect.filter = function(){ return true; };
-				var triggerElement = element.find('.ta-text i');
+				var triggerElement = editorScope.displayElements.text.find('i');
 				triggerElement.triggerHandler('click');
 				expect(triggerElement.attr('hit-via-select')).toBe('true');
 			}));
 			
 			it('does not fire when filter returns false', inject(function(taTools){
 				taTools.testbutton.onElementSelect.filter = function(){ return false; };
-				var triggerElement = element.find('.ta-text i');
+				var triggerElement = editorScope.displayElements.text.find('i');
 				triggerElement.triggerHandler('click');
 				expect(triggerElement.attr('hit-via-select')).toBeUndefined();
 			}));
@@ -834,12 +852,13 @@ describe('textAngular', function(){
 		
 		describe('popover', function(){
 			it('should show the popover', function(){
-				editorScope.showPopover(element.find('.ta-text p i'));
+				editorScope.showPopover(editorScope.displayElements.text.find('p').find('i'));
 				expect(editorScope.displayElements.popover.hasClass('in')).toBe(true);
 			});
 			describe('should hide the popover', function(){
 				beforeEach(inject(function($timeout){
-					editorScope.showPopover(element.find('.ta-text p i'));
+					editorScope.showPopover(editorScope.displayElements.text.find('p').find('i'));
+					editorScope.$parent.$digest();
 					$timeout.flush();
 					editorScope.$parent.$digest();
 				}));
@@ -848,18 +867,24 @@ describe('textAngular', function(){
 					expect(editorScope.displayElements.popover.hasClass('in')).toBe(false);
 				});
 				it('on click in editor', function(){
-					editorScope.displayElements.html.parent().triggerHandler('click');
+					element.triggerHandler('click');
 					editorScope.$parent.$digest();
 					expect(editorScope.displayElements.popover.hasClass('in')).toBe(false);
 				});
 				it('should prevent mousedown from propagating up from popover', function(){
-					var test = false;
-					editorScope.displayElements.popover.on('mousedown', function(e){
-						test = e.isDefaultPrevented();
-					});
-					editorScope.displayElements.popover.triggerHandler('mousedown');
-					editorScope.$parent.$digest();
-					expect(test).toBe(true);
+					var event;
+					if(angular.element === jQuery){
+						event = jQuery.Event('mousedown');
+						editorScope.displayElements.popover.triggerHandler(event);
+						editorScope.$parent.$digest();
+						expect(event.isDefaultPrevented()).toBe(true);
+					}else{
+						var _defaultPrevented = false;
+						event = {preventDefault: function(){ _defaultPrevented = true; }};
+						editorScope.displayElements.popover.triggerHandler('mousedown', event);
+						editorScope.$parent.$digest();
+						expect(_defaultPrevented).toBe(true);
+					}
 				});
 			});
 		});
@@ -876,26 +901,26 @@ describe('textAngular', function(){
 			});
 			
 			it('should change on keypress', function(){
-				range.selectNodeContents(element.find('.ta-text p u')[0]);
+				range.selectNodeContents(editorScope.displayElements.text.find('p').find('u')[0]);
 				sel.setSingleRange(range);
-				element.find('.ta-text').triggerHandler('keypress');
+				editorScope.displayElements.text.triggerHandler('keypress');
 				expect(!iButton.hasClass('active'));
 			});
 			
 			it('should change on keydown and stop on keyup', inject(function($timeout){
-				element.find('.ta-text').triggerHandler('keydown');
-				range.selectNodeContents(element.find('.ta-text p u')[0]);
+				editorScope.displayElements.text.triggerHandler('keydown');
+				range.selectNodeContents(editorScope.displayElements.text.find('p').find('u')[0]);
 				sel.setSingleRange(range);
 				setTimeout(function(){
 					expect(!iButton.hasClass('active'));
 					setTimeout(function(){
 						range = window.rangy.createRangyRange();
-						range.selectNodeContents(element.find('.ta-text p i')[0]);
+						range.selectNodeContents(editorScope.displayElements.text.find('p').find('i')[0]);
 						setTimeout(function(){
 							expect(iButton.hasClass('active'));
-							element.find('.ta-text').triggerHandler('keydown');
+							editorScope.displayElements.text.triggerHandler('keydown');
 							setTimeout(function(){
-								range.selectNodeContents(element.find('.ta-text p u')[0]);
+								range.selectNodeContents(editorScope.displayElements.text.find('p').find('u')[0]);
 								setTimeout(function(){
 									expect(iButton.hasClass('active'));
 								}, 201);
@@ -906,9 +931,9 @@ describe('textAngular', function(){
 			}));
 			
 			it('should change on mouseup', function(){
-				range.selectNodeContents(element.find('.ta-text p u')[0]);
+				range.selectNodeContents(editorScope.displayElements.text.find('p').find('u')[0]);
 				sel.setSingleRange(range);
-				element.find('.ta-text').triggerHandler('mouseup');
+				editorScope.displayElements.text.triggerHandler('mouseup');
 				expect(!iButton.hasClass('active'));
 			});
 		});
@@ -916,6 +941,10 @@ describe('textAngular', function(){
 	
 	describe('File Drop Event', function(){
 		beforeEach(module('textAngular'));
+		var textAngularManager;
+		beforeEach(inject(function(_textAngularManager_){
+			textAngularManager = _textAngularManager_;
+		}));
 		afterEach(inject(function($timeout){
 			try{
 				$timeout.flush();
@@ -929,7 +958,8 @@ describe('textAngular', function(){
 				testvar = true;
 			};
 			element = $compile('<text-angular name="test" ta-file-drop="testhandler" ng-model="htmlcontent"></text-angular>')($rootScope);
-			element.find('.ta-text').triggerHandler({type: 'drop', originalEvent: {dataTransfer: {files: ['test'], types: ['files']}}});
+			if(jQuery === angular.element) textAngularManager.retrieveEditor('test').scope.displayElements.text.triggerHandler({type: 'drop', originalEvent: {dataTransfer: {files: ['test'], types: ['files']}}});
+			else textAngularManager.retrieveEditor('test').scope.displayElements.text.triggerHandler('drop', {originalEvent: {dataTransfer: {files: ['test'], types: ['files']}}});
 			$rootScope.$digest();
 			expect(testvar).toBe(true);
 		}));
@@ -941,7 +971,8 @@ describe('textAngular', function(){
 				testvar = true;
 			};
 			element = $compile('<text-angular name="test" ng-model="htmlcontent"></text-angular>')($rootScope);
-			element.find('.ta-text').triggerHandler({type: 'drop', originalEvent: {dataTransfer: {files: ['test'], types: ['files']}}});
+			if(jQuery === angular.element) textAngularManager.retrieveEditor('test').scope.displayElements.text.triggerHandler({type: 'drop', originalEvent: {dataTransfer: {files: ['test'], types: ['files']}}});
+			else textAngularManager.retrieveEditor('test').scope.displayElements.text.triggerHandler('drop', {originalEvent: {dataTransfer: {files: ['test'], types: ['files']}}});
 			$rootScope.$digest();
 			expect(testvar).toBe(true);
 		}));
@@ -953,14 +984,17 @@ describe('textAngular', function(){
 				testvar = true;
 			};
 			element = $compile('<text-angular name="test" ng-model="htmlcontent"></text-angular>')($rootScope);
-			element.find('.ta-text').triggerHandler({type: 'drop', originalEvent: {dataTransfer: {files: [], types: ['url or something']}}});
+			if(jQuery === angular.element) textAngularManager.retrieveEditor('test').scope.displayElements.text.triggerHandler({type: 'drop', originalEvent: {dataTransfer: {files: [], types: ['url or something']}}});
+			else textAngularManager.retrieveEditor('test').scope.displayElements.text.triggerHandler('drop', {originalEvent: {dataTransfer: {files: [], types: ['url or something']}}});
 			$rootScope.$digest();
 			expect(testvar).toBe(false);
 			expect(function(){
-				element.find('.ta-text').triggerHandler({type: 'drop', originalEvent: {dataTransfer: {}}});
+				if(jQuery === angular.element) textAngularManager.retrieveEditor('test').scope.displayElements.text.triggerHandler({type: 'drop', originalEvent: {dataTransfer: {}}});
+				else textAngularManager.retrieveEditor('test').scope.displayElements.text.triggerHandler('drop', {originalEvent: {dataTransfer: {}}});
 			}).not.toThrow();
 			expect(function(){
-				element.find('.ta-text').triggerHandler({type: 'drop', originalEvent: {}});
+				if(jQuery === angular.element) textAngularManager.retrieveEditor('test').scope.displayElements.text.triggerHandler({type: 'drop', originalEvent: {}});
+				else textAngularManager.retrieveEditor('test').scope.displayElements.text.triggerHandler('drop', {originalEvent: {}});
 			}).not.toThrow();
 		}));
 		
@@ -974,9 +1008,10 @@ describe('textAngular', function(){
 				element = $compile('<text-angular name="test" ng-model="htmlcontent"></text-angular>')($rootScope);
 				$document.find('body').append(element);
 				$rootScope.$digest();
-				element.find('.ta-text').triggerHandler({type: 'drop', originalEvent: {dataTransfer: {files: ['test'], types: ['files']}}});
+				if(jQuery === angular.element) textAngularManager.retrieveEditor('test').scope.displayElements.text.triggerHandler({type: 'drop', originalEvent: {dataTransfer: {files: ['test'], types: ['files']}}});
+			else textAngularManager.retrieveEditor('test').scope.displayElements.text.triggerHandler('drop', {originalEvent: {dataTransfer: {files: ['test'], types: ['files']}}});
 				$rootScope.$digest();
-				expect(element.find('.ta-text').html()).toBe('<p><img><br></p>');
+				expect(textAngularManager.retrieveEditor('test').scope.displayElements.text.html()).toBe('<p><img><br></p>');
 				element.remove();
 			}));
 			it('attr function inserts returned html', inject(function($compile, $rootScope, taOptions, $document){
@@ -988,9 +1023,10 @@ describe('textAngular', function(){
 				element = $compile('<text-angular name="test" ta-file-drop="testhandler" ng-model="htmlcontent"></text-angular>')($rootScope);
 				$document.find('body').append(element);
 				$rootScope.$digest();
-				element.find('.ta-text').triggerHandler({type: 'drop', originalEvent: {dataTransfer: {files: ['test'], types: ['files']}}});
+				if(jQuery === angular.element) textAngularManager.retrieveEditor('test').scope.displayElements.text.triggerHandler({type: 'drop', originalEvent: {dataTransfer: {files: ['test'], types: ['files']}}});
+			else textAngularManager.retrieveEditor('test').scope.displayElements.text.triggerHandler('drop', {originalEvent: {dataTransfer: {files: ['test'], types: ['files']}}});
 				$rootScope.$digest();
-				expect(element.find('.ta-text').html()).toBe('<p><img><br></p>');
+				expect(textAngularManager.retrieveEditor('test').scope.displayElements.text.html()).toBe('<p><img><br></p>');
 				element.remove();
 			}));
 			it('attr function overrides default', inject(function($compile, $rootScope, taOptions, $document){
@@ -1006,9 +1042,10 @@ describe('textAngular', function(){
 				element = $compile('<text-angular name="test" ta-file-drop="testhandler" ng-model="htmlcontent"></text-angular>')($rootScope);
 				$document.find('body').append(element);
 				$rootScope.$digest();
-				element.find('.ta-text').triggerHandler({type: 'drop', originalEvent: {dataTransfer: {files: ['test'], types: ['files']}}});
+				if(jQuery === angular.element) textAngularManager.retrieveEditor('test').scope.displayElements.text.triggerHandler({type: 'drop', originalEvent: {dataTransfer: {files: ['test'], types: ['files']}}});
+			else textAngularManager.retrieveEditor('test').scope.displayElements.text.triggerHandler('drop', {originalEvent: {dataTransfer: {files: ['test'], types: ['files']}}});
 				$rootScope.$digest();
-				expect(element.find('.ta-text').html()).toBe('<p><img><br></p>');
+				expect(textAngularManager.retrieveEditor('test').scope.displayElements.text.html()).toBe('<p><img><br></p>');
 				element.remove();
 			}));
 			it('default inserted if attr function returns false', inject(function($compile, $rootScope, taOptions, $document){
@@ -1023,9 +1060,10 @@ describe('textAngular', function(){
 				element = $compile('<text-angular name="test" ta-file-drop="testhandler" ng-model="htmlcontent"></text-angular>')($rootScope);
 				$document.find('body').append(element);
 				$rootScope.$digest();
-				element.find('.ta-text').triggerHandler({type: 'drop', originalEvent: {dataTransfer: {files: ['test'], types: ['files']}}});
+				if(jQuery === angular.element) textAngularManager.retrieveEditor('test').scope.displayElements.text.triggerHandler({type: 'drop', originalEvent: {dataTransfer: {files: ['test'], types: ['files']}}});
+			else textAngularManager.retrieveEditor('test').scope.displayElements.text.triggerHandler('drop', {originalEvent: {dataTransfer: {files: ['test'], types: ['files']}}});
 				$rootScope.$digest();
-				expect(element.find('.ta-text').html()).toBe('<p><img><br></p>');
+				expect(textAngularManager.retrieveEditor('test').scope.displayElements.text.html()).toBe('<p><img><br></p>');
 				element.remove();
 			}));
 		});
@@ -1044,15 +1082,15 @@ describe('textAngular', function(){
 			$rootScope.$digest();
 		}));
 		
-		it('should re-focus on toolbar when swapping directly from editor to editor', inject(function($timeout){
-			element1.find('.ta-text').triggerHandler('focus');
+		it('should re-focus on toolbar when swapping directly from editor to editor', inject(function($timeout, textAngularManager){
+			textAngularManager.retrieveEditor('test1').scope.displayElements.text.triggerHandler('focus');
 			$rootScope.$digest();
-			expect(toolbar.find('button:not(:disabled)').length).toBe(25);
-			element2.find('.ta-text').triggerHandler('focus');
+			expect(jQuery(toolbar[0]).find('button:not(:disabled)').length).toBe(25);
+			textAngularManager.retrieveEditor('test2').scope.displayElements.text.triggerHandler('focus');
 			$rootScope.$digest();
 			$timeout.flush();
 			// expect none to be disabled
-			expect(toolbar.find('button:not(:disabled)').length).toBe(25);
+			expect(jQuery(toolbar[0]).find('button:not(:disabled)').length).toBe(25);
 		}));
 	});
 });

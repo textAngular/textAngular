@@ -53,8 +53,8 @@ describe('textAngularManager', function(){
 			}));
 			beforeEach(inject(function (_$compile_, _$rootScope_) {
 				$rootScope = _$rootScope_;
-				toolbar1 = _$compile_('<text-angular-toolbar name="test1"></text-angular-toolbar>')($rootScope);
-				toolbar2 = _$compile_('<text-angular-toolbar name="test2"></text-angular-toolbar>')($rootScope);
+				toolbar1 = jQuery(_$compile_('<text-angular-toolbar name="test1"></text-angular-toolbar>')($rootScope)[0]);
+				toolbar2 = jQuery(_$compile_('<text-angular-toolbar name="test2"></text-angular-toolbar>')($rootScope)[0]);
 				$rootScope.$digest();
 			}));
 			
@@ -349,7 +349,7 @@ describe('textAngularManager', function(){
 					});
 					taOptions.toolbar = [['noactivestate','activeonrangyrange','inactiveonrangyrange','onselect','onselectattr','onselectattr_specific']];
 					$rootScope = _$rootScope_;
-					element = _$compile_('<text-angular name="test"><p>Test Content</p></text-angular>')($rootScope);
+					element = jQuery(_$compile_('<text-angular name="test"><p>Test Content</p></text-angular>')($rootScope)[0]);
 					$rootScope.$digest();
 					editorScope = textAngularManager.retrieveEditor('test');
 				}));
@@ -472,7 +472,7 @@ describe('textAngularManager', function(){
 				expect(function(){textAngularManager.refreshEditor('non-editor');}).toThrow('textAngular Error: No Editor with name "non-editor" exists');
 			}));
 			it('should update from text view to model', inject(function(textAngularManager){
-				jQuery('.ta-text', element).append('<div>Test 2 Content</div>');
+				jQuery('.ta-text', element[0]).append('<div>Test 2 Content</div>');
 				textAngularManager.refreshEditor('test');
 				expect($rootScope.htmlcontent).toBe('<p>Test Content</p><div>Test 2 Content</div>');
 			}));

@@ -42,6 +42,15 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 		return ((rv > -1) ? rv : undef);
 	}());
 	
+	// tests against the current jqLite/jquery implementation if this can be an element
+	function validElementString(string){
+		try{
+			return angular.element(string).length !== 0;
+		}catch(any){
+			return false;
+		}
+	}
+	
 	/*
 		Custom stylesheet for the placeholders rules.
 		Credit to: http://davidwalsh.name/add-rules-stylesheets
@@ -169,7 +178,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 	function registerTextAngularTool(name, toolDefinition){
 		if(!name || name === '' || taTools.hasOwnProperty(name)) throw('textAngular Error: A unique name is required for a Tool Definition');
 		if(
-			(toolDefinition.display && (toolDefinition.display === '' || angular.element(toolDefinition.display).length === 0)) ||
+			(toolDefinition.display && (toolDefinition.display === '' || !validElementString(toolDefinition.display))) ||
 			(!toolDefinition.display && !toolDefinition.buttontext && !toolDefinition.iconclass)
 		)
 			throw('textAngular Error: Tool Definition for "' + name + '" does not have a valid display/iconclass/buttontext value');
@@ -250,20 +259,27 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 					scope.displayElements.popover.append(scope.displayElements.popoverContainer);
 					element.append(scope.displayElements.popover);
 					
-					scope.displayElements.popover.on('mousedown', function(e){
+					scope.displayElements.popover.on('mousedown', function(e, eventData){
+						/* istanbul ignore else: this is for catching the jqLite testing*/
+						if(eventData) angular.extend(e, eventData);
 						// this prevents focusout from firing on the editor when clicking anything in the popover
 						e.preventDefault();
 						return false;
 					});
 					
 					// define the popover show and hide functions
-					scope.showPopover = function(element){
-						scope.displayElements.popover.css('top', element[0].offsetTop + element[0].offsetHeight + 'px');
-						scope.displayElements.popover.css('left', element[0].offsetLeft + (element[0].offsetWidth / 2.0) - 152.5 + 'px');
+					scope.showPopover = function(_el){
+						scope.displayElements.popover.css('top', _el[0].offsetTop + _el[0].offsetHeight + 'px');
+						scope.displayElements.popover.css('left', _el[0].offsetLeft + (_el[0].offsetWidth / 2.0) - 152.5 + 'px');
 						scope.displayElements.popover.css('display', 'block');
 						$animate.addClass(scope.displayElements.popover, 'in');
 						$timeout(function(){
-							scope.displayElements.html.parent().one('click', scope.hidePopover);
+							// shim the .one till fixed
+							var _func = function(){
+								element.off('click', _func);
+								scope.hidePopover();
+							};
+							element.on('click', _func);
 						}, 100);
 					};
 					scope.hidePopover = function(){
@@ -519,7 +535,9 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 					scope.displayElements.html.on('keyup', _keyup);
 					scope.displayElements.text.on('keyup', _keyup);
 					// stop updating on key up and update the display/model
-					_keypress = function(event){
+					_keypress = function(event, eventData){
+						/* istanbul ignore else: this is for catching the jqLite testing*/
+						if(eventData) angular.extend(event, eventData);
 						scope.$apply(function(){
 							if(_toolbars.sendKeyCommand(event)){
 								/* istanbul ignore else: don't run if already running */
@@ -602,8 +620,9 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 								}, 0);
 							else e.preventDefault();
 						});
-						element.on('paste', function(e){
-							// timeout to next is needed as otherwise the paste/cut event has not finished actually changing the display
+						element.on('paste', function(e, eventData){
+							/* istanbul ignore else: this is for catching the jqLite testing*/
+							if(eventData) angular.extend(e, eventData);
 							var text;
 							// for non-ie
 							if(e.clipboardData || (e.originalEvent && e.originalEvent.clipboardData))
@@ -676,9 +695,11 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 					event.preventDefault();
 					return false;
 				};
-				var fileDropHandler = function(event){
+				var fileDropHandler = function(event, eventData){
+					/* istanbul ignore else: this is for catching the jqLite testing*/
+					if(eventData) angular.extend(event, eventData);
 					// emit the drop event, pass the element, preventing should be done elsewhere
-					if(!dropFired){
+					if(!dropFired && !_isReadonly){
 						dropFired = true;
 						var dataTransfer;
 						if(event.originalEvent) dataTransfer = event.originalEvent.dataTransfer;
@@ -960,7 +981,9 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 						toolElement.attr('tabindex', '-1');
 						toolElement.attr('ng-click', 'executeAction()');
 						toolElement.attr('ng-class', 'displayActiveToolClass(active)');
-						toolElement.on('mousedown', function(e){
+						toolElement.on('mousedown', function(e, eventData){
+							/* istanbul ignore else: this is for catching the jqLite testing*/
+							if(eventData) angular.extend(e, eventData);
 							// this prevents focusout from firing on the editor when clicking toolbar buttons
 							e.preventDefault();
 							return false;

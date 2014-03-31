@@ -216,7 +216,7 @@ describe('taBind', function () {
 			element.find('a').on('click', function(e){
 				expect(e.isDefaultPrevented());
 			});
-			element.find('a').triggerHandler('click');
+			jQuery(element.find('a')[0]).trigger('click');
 		});
 		
 		describe('should respect the ta-default-wrap value', function(){
@@ -224,7 +224,7 @@ describe('taBind', function () {
 				$rootScope.html = '';
 				element = $compile('<div ta-bind contenteditable="contenteditable" ng-model="html"></div>')($rootScope);
 				$rootScope.$digest();
-				element.trigger('focus');
+				element.triggerHandler('focus');
 				$rootScope.$digest();
 				expect(element.html()).toBe('<p><br></p>');
 			}));
@@ -232,7 +232,7 @@ describe('taBind', function () {
 				$rootScope.html = '';
 				element = $compile('<div ta-bind ta-default-wrap="div" contenteditable="contenteditable" ng-model="html"></div>')($rootScope);
 				$rootScope.$digest();
-				element.trigger('focus');
+				element.triggerHandler('focus');
 				$rootScope.$digest();
 				expect(element.html()).toBe('<div><br></div>');
 			}));
@@ -240,7 +240,7 @@ describe('taBind', function () {
 				$rootScope.html = '';
 				element = $compile('<div ta-bind ta-default-wrap="" contenteditable="contenteditable" ng-model="html"></div>')($rootScope);
 				$rootScope.$digest();
-				element.trigger('focus');
+				element.triggerHandler('focus');
 				$rootScope.$digest();
 				expect(element.html()).toBe('');
 			}));
@@ -261,7 +261,7 @@ describe('taBind', function () {
 		});
 		it('should update model from change', function () {
 			element.val('<div>Test 2 Content</div>');
-			element.trigger('blur');
+			element.triggerHandler('blur');
 			$rootScope.$digest();
 			expect($rootScope.html).toBe('<div>Test 2 Content</div>');
 		});
@@ -292,7 +292,7 @@ describe('taBind', function () {
 		});
 		it('should update model from change', function () {
 			element.val('<div>Test 2 Content</div>');
-			element.trigger('blur');
+			element.triggerHandler('blur');
 			$rootScope.$digest();
 			expect($rootScope.html).toBe('<div>Test 2 Content</div>');
 		});
@@ -322,7 +322,7 @@ describe('taBind', function () {
 	
 			it('should update model from paste', function () {
 				element.val('<div>Test 2 Content</div>');
-				element.trigger('paste');
+				element.triggerHandler('paste');
 				$rootScope.$digest();
 				$timeout.flush();
 				$rootScope.$digest();
@@ -331,7 +331,7 @@ describe('taBind', function () {
 	
 			it('should update model from cut', function () {
 				element.val('<div>Test 2 Content</div>');
-				element.trigger('cut');
+				element.triggerHandler('cut');
 				$timeout.flush();
 				$rootScope.$digest();
 				expect($rootScope.html).toBe('<div>Test 2 Content</div>');
@@ -362,36 +362,26 @@ describe('taBind', function () {
 					$window.clipboardData = {
 						getData: function(){ return 'Test 2 Content'; }
 					};
-					element.trigger('paste');
+					element.triggerHandler('paste');
 					$rootScope.$digest();
 					expect($rootScope.html).toBe('<p>Test 2 Content</p>');
 					$window.clipboardData = undefined;
 				}));
 				
 				it('non-ie based w/o jquery', inject(function($window){
-					var event = jQuery.Event('paste');
-					event.clipboardData = {
-						getData: function(){ return 'Test 3 Content'; }
-					};
-					element.trigger(event);
+					element.triggerHandler('paste', {clipboardData: {getData: function(){ return 'Test 3 Content'; }}});
 					$rootScope.$digest();
 					expect($rootScope.html).toBe('<p>Test 3 Content</p>');
 				}));
 				
 				it('non-ie based w/ jquery', inject(function($window){
-					var event = jQuery.Event('paste');
-					event.originalEvent = {
-						clipboardData: {
-							getData: function(){ return 'Test 3 Content'; }
-						}
-					};
-					element.trigger(event);
+					element.triggerHandler('paste', {originalEvent: {clipboardData: {getData: function(){ return 'Test 3 Content'; } }}});
 					$rootScope.$digest();
 					expect($rootScope.html).toBe('<p>Test 3 Content</p>');
 				}));
 				
 				it('non-ie based w/o paste content', inject(function($window){
-					element.trigger('paste');
+					element.triggerHandler('paste');
 					$rootScope.$digest();
 					expect($rootScope.html).toBe('<p>Test Contents</p>');
 				}));
@@ -399,7 +389,7 @@ describe('taBind', function () {
 	
 			it('should update model from cut', function () {
 				element.html('<div>Test 2 Content</div>');
-				element.trigger('cut');
+				element.triggerHandler('cut');
 				$timeout.flush();
 				$rootScope.$digest();
 				expect($rootScope.html).toBe('<div>Test 2 Content</div>');
@@ -430,18 +420,14 @@ describe('taBind', function () {
 					$window.clipboardData = {
 						getData: function(){ return 'Test 2 Content'; }
 					};
-					element.trigger('paste');
+					element.triggerHandler('paste');
 					$rootScope.$digest();
 					expect($rootScope.html).toBe('<p>Test Contents</p>');
 					$window.clipboardData = undefined;
 				}));
 				
 				it('non-ie based', inject(function($window){
-					var event = jQuery.Event('paste');
-					event.clipboardData = {
-						getData: function(){ return 'Test 3 Content'; }
-					};
-					element.trigger(event);
+					element.triggerHandler('paste', {clipboardData: {getData: function(){ return 'Test 3 Content'; }}});
 					$rootScope.$digest();
 					expect($rootScope.html).toBe('<p>Test Contents</p>');
 				}));
@@ -789,14 +775,14 @@ describe('taBind', function () {
 
 					it('should update model from paste', function () {
 						element.val('<div>Test 2 Content</div>');
-						element.trigger('paste');
+						element.triggerHandler('paste');
 						$rootScope.$digest();
 						expect($rootScope.html).toBe('<p>Test Contents</p>');
 					});
 
 					it('should update model from cut', function () {
 						element.val('<div>Test 2 Content</div>');
-						element.trigger('cut');
+						element.triggerHandler('cut');
 						$rootScope.$digest();
 						expect($rootScope.html).toBe('<p>Test Contents</p>');
 					});
@@ -814,14 +800,14 @@ describe('taBind', function () {
 
 					it('should update model from paste', function () {
 						element.val('<div>Test 2 Content</div>');
-						element.trigger('paste');
+						element.triggerHandler('paste');
 						$rootScope.$digest();
 						expect($rootScope.html).toBe('<p>Test Contents</p>');
 					});
 
 					it('should update model from cut', function () {
 						element.val('<div>Test 2 Content</div>');
-						element.trigger('cut');
+						element.triggerHandler('cut');
 						$rootScope.$digest();
 						expect($rootScope.html).toBe('<p>Test Contents</p>');
 					});
@@ -839,14 +825,14 @@ describe('taBind', function () {
 
 					it('should update model from paste', function () {
 						element.html('<div>Test 2 Content</div>');
-						element.trigger('paste');
+						element.triggerHandler('paste');
 						$rootScope.$digest();
 						expect($rootScope.html).toBe('<p>Test Contents</p>');
 					});
 
 					it('should update model from cut', function () {
 						element.html('<div>Test 2 Content</div>');
-						element.trigger('cut');
+						element.triggerHandler('cut');
 						$rootScope.$digest();
 						expect($rootScope.html).toBe('<p>Test Contents</p>');
 					});
@@ -922,7 +908,7 @@ describe('taBind', function () {
 
 					it('should update model', function () {
 						element.val('<div>Test 2 Content</div>');
-						element.trigger('blur');
+						element.triggerHandler('blur');
 						$rootScope.$digest();
 						expect($rootScope.html).toBe('<p>Test Contents</p>');
 					});
@@ -940,7 +926,7 @@ describe('taBind', function () {
 
 					it('should update model', function () {
 						element.val('<div>Test 2 Content</div>');
-						element.trigger('blur');
+						element.triggerHandler('blur');
 						$rootScope.$digest();
 						expect($rootScope.html).toBe('<p>Test Contents</p>');
 					});
@@ -960,7 +946,7 @@ describe('taBind', function () {
 
 					it('should update model', function () {
 						element.html('<div>Test 2 Content</div>');
-						element.trigger('keyup');
+						element.triggerHandler('keyup');
 						$rootScope.$digest();
 						expect($rootScope.html).toBe('<p>Test Contents</p>');
 					});

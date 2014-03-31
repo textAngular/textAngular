@@ -29,12 +29,12 @@ describe('textAngularToolbar', function(){
 		describe('respects the taToolbar attribute compiled string', function(){
 			it('should output the correct toolbar', inject(function($rootScope, $compile){
 				var element = $compile('<text-angular-toolbar name="test" ta-toolbar="[[\'h1\',\'h2\',\'h3\',\'h4\',\'h5\',\'h6\']]"></text-angular-toolbar>')($rootScope);
-				expect(jQuery('button', element).length).toBe(6);
+				expect(jQuery('button', element[0]).length).toBe(6);
 			}));
 			
 			it('via text-angular should output the correct toolbar', inject(function($rootScope, $compile){
 				var element = $compile('<text-angular name="test" ta-toolbar="[[\'h1\',\'h2\',\'h3\',\'h4\',\'h5\',\'h6\']]"></text-angular>')($rootScope);
-				expect(jQuery('button', element).length).toBe(6);
+				expect(jQuery('button', element[0]).length).toBe(6);
 			}));
 		});
 		
@@ -42,50 +42,50 @@ describe('textAngularToolbar', function(){
 			it('should output the correct toolbar', inject(function($rootScope, $compile){
 				$rootScope.toolbar = [['h1','h2','h3','h4','h5','h6']];
 				var element = $compile('<text-angular-toolbar name="test" ta-toolbar="toolbar"></text-angular-toolbar>')($rootScope);
-				expect(jQuery('button', element).length).toBe(6);
+				expect(jQuery('button', element[0]).length).toBe(6);
 			}));
 			
 			it('via text-angular should output the correct toolbar', inject(function($rootScope, $compile){
 				$rootScope.toolbar = [['h1','h2','h3','h4','h5','h6']];
 				var element = $compile('<text-angular name="test" ta-toolbar="toolbar"></text-angular>')($rootScope);
-				expect(jQuery('button', element).length).toBe(6);
+				expect(jQuery('button', element[0]).length).toBe(6);
 			}));
 		});
 		
 		describe('respects the Class attribute taToolbarClass', function(){
 			it('on the toolbar', inject(function($rootScope, $compile){
 				var element = $compile('<text-angular-toolbar name="test" ta-toolbar-class="test-class"></text-angular-toolbar>')($rootScope);
-				expect(jQuery('.test-class', element).length).toBe(0);
+				expect(jQuery('.test-class', element[0]).length).toBe(0);
 				expect(jQuery(element).hasClass('test-class'));
 			}));
 			
 			it('via text-angular on the toolbar', inject(function($rootScope, $compile){
 				var element = $compile('<text-angular name="test" ta-toolbar-class="test-class"></text-angular>')($rootScope);
-				expect(jQuery('.test-class', element).length).toBe(1);
+				expect(jQuery('.test-class', element[0]).length).toBe(1);
 			}));
 		});
 			
 		describe('respects the Class attribute taToolbarGroupClass', function(){
 			it('on the toolbar group', inject(function($rootScope, $compile){
 				var element = $compile('<text-angular-toolbar name="test" ta-toolbar-group-class="test-class"></text-angular-toolbar>')($rootScope);
-				expect(jQuery('.test-class', element).length).toBe(4);
+				expect(jQuery('.test-class', element[0]).length).toBe(4);
 			}));
 			
 			it('via text-angular on the toolbar group', inject(function($rootScope, $compile){
 				var element = $compile('<text-angular name="test" ta-toolbar-group-class="test-class"></text-angular>')($rootScope);
-				expect(jQuery('.test-class', element).length).toBe(4);
+				expect(jQuery('.test-class', element[0]).length).toBe(4);
 			}));
 		});
 		
 		describe('respects the Class attribute taToolbarButtonClass', function(){
 			it('adds to all buttons', inject(function($rootScope, $compile){
 				var element = $compile('<text-angular-toolbar name="test" ta-toolbar-button-class="test-class"></text-angular-toolbar>')($rootScope);
-				expect(jQuery('button:not(.test-class)', element).length).toBe(0);
+				expect(jQuery('button:not(.test-class)', element[0]).length).toBe(0);
 			}));
 			
 			it('via text-angular adds to all buttons', inject(function($rootScope, $compile){
 				var element = $compile('<text-angular name="test" ta-toolbar-button-class="test-class"></text-angular>')($rootScope);
-				expect(jQuery('button:not(.test-class)', element).length).toBe(0);
+				expect(jQuery('button:not(.test-class)', element[0]).length).toBe(0);
 			}));
 		});
 		
@@ -101,7 +101,7 @@ describe('textAngularToolbar', function(){
 					}
 				});
 				$rootScope.$digest();
-				expect(jQuery('button.test-class', element).length).toBe(1);
+				expect(jQuery('button.test-class', element[0]).length).toBe(1);
 			}));
 			
 			it('via text-angular on an active button', inject(function($rootScope, $compile, textAngularManager){
@@ -115,7 +115,7 @@ describe('textAngularToolbar', function(){
 					}
 				});
 				$rootScope.$digest();
-				expect(jQuery('button.test-class', element).length).toBe(1);
+				expect(jQuery('button.test-class', element[0]).length).toBe(1);
 			}));
 		});
 		
@@ -150,45 +150,46 @@ describe('textAngularToolbar', function(){
 	});
 	
 	describe('enables and disables from editor', function(){
-		var $rootScope, element, $timeout;
-		beforeEach(inject(function (_$compile_, _$rootScope_, _$timeout_) {
+		var $rootScope, element, $timeout, displayElements;
+		beforeEach(inject(function (_$compile_, _$rootScope_, _$timeout_, textAngularManager) {
 			$timeout = _$timeout_;
 			$rootScope = _$rootScope_;
-			element = _$compile_('<text-angular name="test"></text-angular>')($rootScope);
+			_$compile_('<text-angular name="test"></text-angular>')($rootScope);
 			$rootScope.$digest();
+			displayElements = textAngularManager.retrieveEditor('test').scope.displayElements;
 		}));
 		
 		describe('should have activated all buttons', function(){
 			it('on trigger focus on ta-text', function(){
-				element.find('.ta-text').triggerHandler('focus');
+				displayElements.text.triggerHandler('focus');
 				$rootScope.$digest();
-				expect(element.find('button').attr('disabled')).toBeUndefined();
+				expect(jQuery(displayElements.text.parent()).find('button').eq(0).attr('disabled')).toBeUndefined();
 			});
 			it('on trigger focus on ta-html', function(){
-				element.find('.ta-html').triggerHandler('focus');
+				displayElements.html.triggerHandler('focus');
 				$rootScope.$digest();
-				expect(element.find('button').attr('disabled')).toBeUndefined();
+				expect(jQuery(displayElements.html.parent()).find('button').eq(0).attr('disabled')).toBeUndefined();
 			});
 		});
 		
 		describe('should have disabled all buttons', function(){
 			it('on ta-text trigger blur', function(){	
-				element.find('.ta-text').triggerHandler('focus');
+				displayElements.text.triggerHandler('focus');
 				$rootScope.$digest();
-				element.find('.ta-text').triggerHandler('blur');
+				displayElements.text.triggerHandler('blur');
 				$rootScope.$digest();
 				$timeout.flush();
 				$rootScope.$digest();
-				expect(element.find('button').attr('disabled')).toBe('disabled');
+				expect(jQuery(displayElements.text.parent()).find('button').eq(0).attr('disabled')).toBe('disabled');
 			});
 			it('on ta-html trigger blur', function(){
-				element.find('.ta-html').triggerHandler('focus');
+				displayElements.html.triggerHandler('focus');
 				$rootScope.$digest();
-				element.find('.ta-html').triggerHandler('blur');
+				displayElements.html.triggerHandler('blur');
 				$rootScope.$digest();
 				$timeout.flush();
 				$rootScope.$digest();
-				expect(element.find('button').attr('disabled')).toBe('disabled');
+				expect(jQuery(displayElements.html.parent()).find('button').eq(0).attr('disabled')).toBe('disabled');
 			});
 		});
 	});
@@ -218,7 +219,7 @@ describe('textAngularToolbar', function(){
 			toolbarScope.disabled = false;
 			toolbarScope.focussed = true;
 			$rootScope.$digest();
-			element = $('button', element).eq(0);
+			element = element.find('button').eq(0);
 		}));
 		
 		it('should have a name', function(){
@@ -246,10 +247,19 @@ describe('textAngularToolbar', function(){
 		});
 		
 		it('should prevent event on mousedown', function(){
-			element.on('mousedown', function(e){
-				expect(e.isDefaultPrevented());
-			});
-			element.triggerHandler('mousedown');
+			var event;
+			if(angular.element === jQuery){
+				event = jQuery.Event('mousedown');
+				element.triggerHandler(event);
+				$rootScope.$digest();
+				expect(event.isDefaultPrevented()).toBe(true);
+			}else{
+				var _defaultPrevented = false;
+				event = {preventDefault: function(){ _defaultPrevented = true; }};
+				element.triggerHandler('mousedown', event);
+				$rootScope.$digest();
+				expect(_defaultPrevented).toBe(true);
+			}
 		});
 	});
 	
@@ -271,19 +281,19 @@ describe('textAngularToolbar', function(){
 		
 		describe('displaying the button', function(){
 			it('should override everything with the html in the display attribute', function(){
-				expect($('div[name=display]', element).html()).toBe('THIS IS A TEST DIV');
+				expect($('div[name=display]', element[0]).html()).toBe('THIS IS A TEST DIV');
 			});
 			
 			it('should display only buttontext in the button', function(){
-				expect($('button[name=buttontext]', element).html()).toBe('Only Text');
+				expect($('button[name=buttontext]', element[0]).html()).toBe('Only Text');
 			});
 			
 			it('should display only icon in the button', function(){
-				expect($('button[name=iconclass]', element).html()).toBe('<i class="onlyiconclass"></i>');
+				expect($('button[name=iconclass]', element[0]).html()).toBe('<i class="onlyiconclass"></i>');
 			});
 			
 			it('should display both icon and buttontext in the button', function(){
-				expect($('button[name=iconandtext]', element).html()).toBe('<i class="iconclass"></i>&nbsp;good text');
+				expect($('button[name=iconandtext]', element[0]).html()).toBe('<i class="iconclass"></i>&nbsp;good text');
 			});
 		});
 		
@@ -308,19 +318,19 @@ describe('textAngularToolbar', function(){
 			}));
 			
 			it('should override the old display with the html in the new display attribute', function(){
-				expect($('div[name=display]', element).html()).toBe('Replaced Text');
+				expect($('div[name=display]', element[0]).html()).toBe('Replaced Text');
 			});
 			
 			it('should display only new buttontext in the button', function(){
-				expect($('button[name=buttontext]', element).html()).toBe('otherstuff');
+				expect($('button[name=buttontext]', element[0]).html()).toBe('otherstuff');
 			});
 			
 			it('should display only new icon in the button', function(){
-				expect($('button[name=iconclass]', element).html()).toBe('<i class="test-icon-class"></i>');
+				expect($('button[name=iconclass]', element[0]).html()).toBe('<i class="test-icon-class"></i>');
 			});
 			
 			it('should display both new icon and new buttontext in the button', function(){
-				expect($('button[name=iconandtext]', element).html()).toBe('<i class="test-icon-class"></i>&nbsp;otherstuff');
+				expect($('button[name=iconandtext]', element[0]).html()).toBe('<i class="test-icon-class"></i>&nbsp;otherstuff');
 			});
 		});
 		
@@ -345,19 +355,19 @@ describe('textAngularToolbar', function(){
 			}));
 			
 			it('should override the old display with the html in the new display attribute', function(){
-				expect($('div[name=display]', element).html()).toBe('Replaced Text');
+				expect($('div[name=display]', element[0]).html()).toBe('Replaced Text');
 			});
 			
 			it('should display only new buttontext in the button', function(){
-				expect($('button[name=buttontext]', element).html()).toBe('otherstuff');
+				expect($('button[name=buttontext]', element[0]).html()).toBe('otherstuff');
 			});
 			
 			it('should display only new icon in the button', function(){
-				expect($('button[name=iconclass]', element).html()).toBe('<i class="test-icon-class"></i>');
+				expect($('button[name=iconclass]', element[0]).html()).toBe('<i class="test-icon-class"></i>');
 			});
 			
 			it('should display both new icon and new buttontext in the button', function(){
-				expect($('button[name=iconandtext]', element).html()).toBe('<i class="test-icon-class"></i>&nbsp;otherstuff');
+				expect($('button[name=iconandtext]', element[0]).html()).toBe('<i class="test-icon-class"></i>&nbsp;otherstuff');
 			});
 		});
 		
@@ -394,15 +404,15 @@ describe('textAngularToolbar', function(){
 			
 			it('should remove the display attribute and follow the other rules', function(){
 				// note as it is reset this is now a button not a div
-				expect($('button[name=display]', element).html()).toBe('<i class="badclass"></i>&nbsp;This isnt a test');
+				expect($('button[name=display]', element[0]).html()).toBe('<i class="badclass"></i>&nbsp;This isnt a test');
 			});
 			
 			it('should remove the button text', function(){
-				expect($('button[name=buttontext]', element).html()).toBe('<i class="newest-test-class"></i>');
+				expect($('button[name=buttontext]', element[0]).html()).toBe('<i class="newest-test-class"></i>');
 			});
 			
 			it('should remove the icon tag', function(){
-				expect($('button[name=iconclass]', element).html()).toBe('More text to insert');
+				expect($('button[name=iconclass]', element[0]).html()).toBe('More text to insert');
 			});
 			
 			it('should error on attempting to set all 3 to null', inject(function(textAngularManager){
@@ -423,7 +433,7 @@ describe('textAngularToolbar', function(){
 			manager = textAngularManager;
 			taOptions.toolbar = [['h1','h2','h3','h4']];
 			$rootScope = _$rootScope_;
-			element = $compile('<text-angular-toolbar name="test1"></text-angular-toolbar>')($rootScope);
+			element = jQuery($compile('<text-angular-toolbar name="test1"></text-angular-toolbar>')($rootScope)[0]);
 			toolbarScope = textAngularManager.retrieveToolbar('test1');
 			toolbarScope.disabled = false;
 			toolbarScope.focussed = true;
@@ -535,7 +545,7 @@ describe('textAngularToolbar', function(){
 			taRegisterTool('disabled2', {buttontext: 'allways-disabled', disabled: function(){ return true;}});
 			taOptions.toolbar = [['disabled1','disabled2']];
 			$rootScope = _$rootScope_;
-			element = $compile('<text-angular-toolbar name="test"></text-angular-toolbar>')($rootScope);
+			element = jQuery($compile('<text-angular-toolbar name="test"></text-angular-toolbar>')($rootScope)[0]);
 			toolbarScope = textAngularManager.retrieveToolbar('test');
 			toolbarScope.disabled = false;
 			toolbarScope.focussed = true;

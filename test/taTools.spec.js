@@ -74,11 +74,20 @@ describe('taToolsExecuteFunction', function(){
 	});
 });
 
+function buttonByName(element, name){
+	var button;
+	angular.forEach(element.find('button'), function(_b){
+		_b = angular.element(_b);
+		if(_b.attr('name') === name) button = _b;
+	});
+	return button;
+}
+
 describe('taTools test tool actions', function(){
 	'use strict';
 	var $rootScope, element, button, editorScope, $window;
 	var findAndTriggerButton = function(name){
-		var button = element.find('button[name=' + name + ']');
+		var button = buttonByName(element, name);
 		button.scope().executeAction(editorScope);
 		editorScope.endAction();
 		$rootScope.$digest();
@@ -178,14 +187,14 @@ describe('taTools test tool actions', function(){
 			button = findAndTriggerButton('html');
 			$timeout.flush();
 			expect(button.hasClass('active'));
-			expect(!element.find('.ta-text').is(":visible"));
-			expect(element.find('.ta-html').is(":visible"));
-			expect(element.find('.ta-html').is(":focus"));
+			expect(!jQuery('.ta-text').is(":visible"));
+			expect(jQuery('.ta-html').is(":visible"));
+			expect(jQuery('.ta-html').is(":focus"));
 			button = findAndTriggerButton('html'); // retrigger to reset to non html view
 			$timeout.flush();
-			expect(!element.find('.ta-html').is(":visible"));
-			expect(element.find('.ta-text').is(":visible"));
-			expect(element.find('.ta-text').is(":focus"));
+			expect(!jQuery('.ta-html').is(":visible"));
+			expect(jQuery('.ta-text').is(":visible"));
+			expect(jQuery('.ta-text').is(":focus"));
 		}));
 		
 		describe('check untestables don\'t error - ', function(){
@@ -225,7 +234,7 @@ describe('taTools test tool actions', function(){
 			editorScope = textAngularManager.retrieveEditor('test').scope;
 			var sel = $window.rangy.getSelection();
 			var range = $window.rangy.createRangyRange();
-			range.selectNode(element.find('.ta-text')[0].childNodes[0]);
+			range.selectNode(jQuery('.ta-text')[0].childNodes[0]);
 			sel.setSingleRange(range);
 		}));
 		afterEach(function(){
@@ -247,7 +256,7 @@ describe('taTools test tool actions', function(){
 			editorScope = textAngularManager.retrieveEditor('test').scope;
 			var sel = $window.rangy.getSelection();
 			var range = $window.rangy.createRangyRange();
-			range.selectNodeContents(element.find('.ta-text p')[0]);
+			range.selectNodeContents(jQuery('.ta-text p')[0]);
 			sel.setSingleRange(range);
 		}));
 		afterEach(function(){
@@ -270,7 +279,7 @@ describe('taTools test tool actions', function(){
 			editorScope = textAngularManager.retrieveEditor('testclearbutton').scope;
 			var sel = $window.rangy.getSelection();
 			var range = $window.rangy.createRangyRange();
-			range.selectNodeContents(element.find('.ta-text')[0]);
+			range.selectNodeContents(jQuery('.ta-text')[0]);
 			sel.setSingleRange(range);
 		}));
 		afterEach(function(){
@@ -293,8 +302,8 @@ describe('taTools test tool actions', function(){
 		it('doesn\'t remove partially selected list elements, but clears them of formatting', function(){
 			var sel = $window.rangy.getSelection();
 			var range = $window.rangy.createRangyRange();
-			range.setStartBefore(element.find('.ta-text ul li:first-child b')[0]);
-			range.setEndBefore(element.find('.ta-text ul li:last-child')[0]);
+			range.setStartBefore(jQuery('.ta-text ul li:first-child b')[0]);
+			range.setEndBefore(jQuery('.ta-text ul li:last-child')[0]);
 			sel.setSingleRange(range);
 			sel.refresh();
 			findAndTriggerButton('clear');
@@ -304,7 +313,7 @@ describe('taTools test tool actions', function(){
 		it('doesn\'t clear wholly selected list elements, but clears them of formatting', function(){
 			var sel = $window.rangy.getSelection();
 			var range = $window.rangy.createRangyRange();
-			range.selectNodeContents(element.find('.ta-text ul')[0]);
+			range.selectNodeContents(jQuery('.ta-text ul')[0]);
 			sel.setSingleRange(range);
 			sel.refresh();
 			findAndTriggerButton('clear');
@@ -314,8 +323,8 @@ describe('taTools test tool actions', function(){
 		it('doesn\'t clear singly selected list elements, but clears them of formatting', function(){
 			var sel = $window.rangy.getSelection();
 			var range = $window.rangy.createRangyRange();
-			range.selectNodeContents(element.find('.ta-text ul li:first-child')[0]);
-			range.setEndAfter(element.find('.ta-text ul li:first-child')[0]);
+			range.selectNodeContents(jQuery('.ta-text ul li:first-child')[0]);
+			range.setEndAfter(jQuery('.ta-text ul li:first-child')[0]);
 			sel.setSingleRange(range);
 			sel.refresh();
 			findAndTriggerButton('clear');
@@ -325,8 +334,8 @@ describe('taTools test tool actions', function(){
 		it('doesn\'t clear singly selected list elements, but clears them of formatting', function(){
 			var sel = $window.rangy.getSelection();
 			var range = $window.rangy.createRangyRange();
-			range.selectNode(element.find('.ta-text ul li:first-child')[0]);
-			range.setEndAfter(element.find('.ta-text ul li:first-child')[0]);
+			range.selectNode(jQuery('.ta-text ul li:first-child')[0]);
+			range.setEndAfter(jQuery('.ta-text ul li:first-child')[0]);
 			sel.setSingleRange(range);
 			sel.refresh();
 			findAndTriggerButton('clear');
@@ -334,7 +343,7 @@ describe('taTools test tool actions', function(){
 		});
 		
 		it('works without rangy', function(){
-			var button = element.find('button[name=clear]');
+			var button = buttonByName(element, 'clear');
 			var _rangy = button.scope().$window.rangy;
 			button.scope().$window.rangy = undefined;
 			button.scope().executeAction(editorScope);
@@ -357,7 +366,7 @@ describe('taTools test tool actions', function(){
 			editorScope = textAngularManager.retrieveEditor('test').scope;
 			var sel = $window.rangy.getSelection();
 			var range = $window.rangy.createRangyRange();
-			range.selectNodeContents(element.find('.ta-text p')[0]);
+			range.selectNodeContents(jQuery('.ta-text p')[0]);
 			sel.setSingleRange(range);
 		}));
 		afterEach(function(){
@@ -373,7 +382,7 @@ describe('taTools test tool actions', function(){
 		it('creates a link', function(){
 			$window.prompt = function(){ return 'testval'; };
 			findAndTriggerButton('insertLink');
-			expect(element.find('.ta-text p a').attr('href')).toBe('testval');
+			expect(editorScope.displayElements.text.find('p').find('a').attr('href')).toBe('testval');
 		});
 		
 		describe('interacts with the popover', function(){
@@ -383,12 +392,12 @@ describe('taTools test tool actions', function(){
 			});
 			
 			it('opens on click', function(){
-				element.find('.ta-text p a').triggerHandler('click');
+				editorScope.displayElements.text.find('p').find('a').triggerHandler('click');
 				expect(editorScope.displayElements.popover.hasClass('in')).toBe(true);
 			});
 			
 			it('has correct content', function(){
-				element.find('.ta-text p a').triggerHandler('click');
+				editorScope.displayElements.text.find('p').find('a').triggerHandler('click');
 				var contents = editorScope.displayElements.popoverContainer.contents();
 				expect(contents.eq(0)[0].tagName.toLowerCase()).toBe('a');
 				expect(contents.eq(0).html()).toBe('testval');
@@ -396,26 +405,26 @@ describe('taTools test tool actions', function(){
 			});
 			
 			it('has functioning unlink button', function(){
-				element.find('.ta-text p a').triggerHandler('click');
+				editorScope.displayElements.text.find('p').find('a').triggerHandler('click');
 				editorScope.displayElements.popoverContainer.find('button').eq(1).triggerHandler('click');
 				$rootScope.$digest();
-				expect(element.find('.ta-text p a').length).toBe(0);
+				expect(editorScope.displayElements.text.find('p').find('a').length).toBe(0);
 			});
 			
 			it('has functioning edit button', function(){
 				$window.prompt = function(){ return 'newval'; };
-				element.find('.ta-text p a').triggerHandler('click');
+				editorScope.displayElements.text.find('p').find('a').triggerHandler('click');
 				editorScope.displayElements.popoverContainer.find('button').eq(0).triggerHandler('click');
 				$rootScope.$digest();
-				expect(element.find('.ta-text p a').attr('href')).toBe('newval');
+				expect(editorScope.displayElements.text.find('p').find('a').attr('href')).toBe('newval');
 			});
 			
 			it('has functioning edit button when blank passed', function(){
 				$window.prompt = function(){ return ''; };
-				element.find('.ta-text p a').triggerHandler('click');
+				editorScope.displayElements.text.find('p').find('a').triggerHandler('click');
 				editorScope.displayElements.popoverContainer.find('button').eq(0).triggerHandler('click');
 				$rootScope.$digest();
-				expect(element.find('.ta-text p a').attr('href')).toBe('testval');
+				expect(editorScope.displayElements.text.find('p').find('a').attr('href')).toBe('testval');
 			});
 		});
 	});
@@ -436,73 +445,78 @@ describe('taTools test tool actions', function(){
 		});
 		
 		it('opens on click', function(){
-			element.find('.ta-text p img').triggerHandler('click');
+			editorScope.displayElements.text.find('p').find('img').triggerHandler('click');
 			expect(editorScope.displayElements.popover.hasClass('in')).toBe(true);
 		});
 		
 		it('has correct content', function(){
-			element.find('.ta-text p img').triggerHandler('click');
+			editorScope.displayElements.text.find('p').find('img').triggerHandler('click');
 			var contents = editorScope.displayElements.popoverContainer.contents();
 			expect(contents.find('button').length).toBe(8);
 		});
 		// Note that this is just some phantomJS oddness that causes us to have to define the px value not %
 		it('has functioning 100% button', function(){
-			element.find('.ta-text p img').triggerHandler('click');
+			editorScope.displayElements.text.find('p').find('img').triggerHandler('click');
 			editorScope.displayElements.popoverContainer.find('button').eq(0).triggerHandler('click');
 			$rootScope.$digest();
-			expect(element.find('.ta-text p img').css('width')).toBe('384px');
+			if(jQuery === angular.element) expect(editorScope.displayElements.text.find('p').find('img').css('width')).toBe('384px');
+			else expect(editorScope.displayElements.text.find('p').find('img').css('width')).toBe('100%');
 		});
 		
 		it('has functioning 50% button', function(){
-			element.find('.ta-text p img').triggerHandler('click');
+			editorScope.displayElements.text.find('p').find('img').triggerHandler('click');
 			editorScope.displayElements.popoverContainer.find('button').eq(1).triggerHandler('click');
 			$rootScope.$digest();
-			expect(element.find('.ta-text p img').css('width')).toBe('192px');
+			if(jQuery === angular.element) expect(editorScope.displayElements.text.find('p').find('img').css('width')).toBe('192px');
+			else expect(editorScope.displayElements.text.find('p').find('img').css('width')).toBe('50%');
 		});
 		
 		it('has functioning 25% button', function(){
-			element.find('.ta-text p img').triggerHandler('click');
+			editorScope.displayElements.text.find('p').find('img').triggerHandler('click');
 			editorScope.displayElements.popoverContainer.find('button').eq(2).triggerHandler('click');
 			$rootScope.$digest();
-			expect(element.find('.ta-text p img').css('width')).toBe('96px');
+			if(jQuery === angular.element) expect(editorScope.displayElements.text.find('p').find('img').css('width')).toBe('96px');
+			else expect(editorScope.displayElements.text.find('p').find('img').css('width')).toBe('25%');
 		});
 		
 		it('has functioning reset-size button', function(){
-			element.find('.ta-text p img').triggerHandler('click');
+			editorScope.displayElements.text.find('p').find('img').triggerHandler('click');
 			editorScope.displayElements.popoverContainer.find('button').eq(3).triggerHandler('click');
 			$rootScope.$digest();
-			expect(element.find('.ta-text p img').css('width')).toBe('0px');
+			if(jQuery === angular.element) expect(editorScope.displayElements.text.find('p').find('img').css('width')).toBe('0px');
+			else expect(editorScope.displayElements.text.find('p').find('img').css('width')).toBe('');
 		});
 		
 		it('has functioning float-left button', function(){
-			element.find('.ta-text p img').triggerHandler('click');
+			editorScope.displayElements.text.find('p').find('img').triggerHandler('click');
 			editorScope.displayElements.popoverContainer.find('button').eq(4).triggerHandler('click');
 			$rootScope.$digest();
-			expect(element.find('.ta-text p img').css('float')).toBe('left');
+			expect(editorScope.displayElements.text.find('p').find('img').css('float')).toBe('left');
 		});
 		
 		it('has functioning float-none button', function(){
-			element.find('.ta-text p img').triggerHandler('click');
+			editorScope.displayElements.text.find('p').find('img').triggerHandler('click');
 			editorScope.displayElements.popoverContainer.find('button').eq(4).triggerHandler('click');
 			$rootScope.$digest();
-			element.find('.ta-text p img').triggerHandler('click');
+			editorScope.displayElements.text.find('p').find('img').triggerHandler('click');
 			editorScope.displayElements.popoverContainer.find('button').eq(5).triggerHandler('click');
 			$rootScope.$digest();
-			expect(element.find('.ta-text p img').css('float')).toBe('none');
+			if(jQuery === angular.element) expect(editorScope.displayElements.text.find('p').find('img').css('float')).toBe('none');
+			else expect(editorScope.displayElements.text.find('p').find('img').css('float')).toBe('');
 		});
 		
 		it('has functioning float-right button', function(){
-			element.find('.ta-text p img').triggerHandler('click');
+			editorScope.displayElements.text.find('p').find('img').triggerHandler('click');
 			editorScope.displayElements.popoverContainer.find('button').eq(6).triggerHandler('click');
 			$rootScope.$digest();
-			expect(element.find('.ta-text p img').css('float')).toBe('right');
+			expect(editorScope.displayElements.text.find('p').find('img').css('float')).toBe('right');
 		});
 		
 		it('has functioning remove button', function(){
-			element.find('.ta-text p img').triggerHandler('click');
+			editorScope.displayElements.text.find('p').find('img').triggerHandler('click');
 			editorScope.displayElements.popoverContainer.find('button').eq(7).triggerHandler('click');
 			$rootScope.$digest();
-			expect(element.find('.ta-text p img').length).toBe(0);
+			expect(editorScope.displayElements.text.find('p').find('img').length).toBe(0);
 		});
 	});
 });

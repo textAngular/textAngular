@@ -1,4 +1,4 @@
-describe('Adding tools to taTools', function(){
+describe('taRegisterTool Adding tools to taTools', function(){
 	'use strict';
 	beforeEach(module('textAngular'));
 	
