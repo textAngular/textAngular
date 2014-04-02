@@ -34,7 +34,7 @@
   },
   "scripts": {
     "test": "grunt travis-test --verbose",
-    "postinstall": "./node_modules/bower/bin/bower install --allow-root"
+    "postinstall": "node ./node_modules/bower/bin/bower install --allow-root"
   },
   "repository": {
     "type": "git",

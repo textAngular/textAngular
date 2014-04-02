@@ -326,6 +326,15 @@ describe('taBind', function () {
 				$rootScope.$digest();
 				$timeout.flush();
 				$rootScope.$digest();
+				expect($rootScope.html).toBe('<div>Test 2 Content</div>');				
+			});
+
+			it('should update model from paste with ie code', function () {
+				element.val('<div>Test 2 Content</div>');
+				element.triggerHandler('paste');
+				$rootScope.$digest();
+				$timeout.flush();
+				$rootScope.$digest();
 				expect($rootScope.html).toBe('<div>Test 2 Content</div>');
 			});
 	
@@ -359,13 +368,25 @@ describe('taBind', function () {
 			// var text = (e.originalEvent || e).clipboardData.getData('text/plain') || $window.clipboardData.getData('Text');
 			describe('should update model from paste', function () {
 				it('ie based', inject(function($window){
+					var content = 'Test 2 Content';
+					var ok = false;
 					$window.clipboardData = {
-						getData: function(){ return 'Test 2 Content'; }
+						getData: function(){ return content; }
+					};
+					document.selection = {
+						createRange: function() {
+							return {
+								pasteHTML: function(text){
+									ok = text === content;
+								}
+							};
+						}
 					};
 					element.triggerHandler('paste');
 					$rootScope.$digest();
-					expect($rootScope.html).toBe('<p>Test 2 Content</p>');
+					expect(ok).toBe(true);
 					$window.clipboardData = undefined;
+					document.selection = undefined;
 				}));
 				
 				it('non-ie based w/o jquery', inject(function($window){
