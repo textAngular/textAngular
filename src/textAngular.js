@@ -639,7 +639,13 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 								_working[0].innerHTML = text;
 								// this strips out all HTML tags
 								text = _working.text();
-								document.execCommand('insertText', false, text);
+								if (document.selection){
+									var range = document.selection.createRange();
+									range.pasteHTML(text);
+								}
+								else{
+									document.execCommand('insertText', false, text);
+								}
 								ngModel.$setViewValue(_compileHtml());
 							}
 						});
