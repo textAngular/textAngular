@@ -255,6 +255,10 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 					// optional setup functions
 					if(attrs.taTextEditorSetup)			scope.setup.textEditorSetup = scope.$parent.$eval(attrs.taTextEditorSetup);
 					if(attrs.taHtmlEditorSetup)			scope.setup.htmlEditorSetup = scope.$parent.$eval(attrs.taHtmlEditorSetup);
+					
+					// optional setup function to set the minHeight that is allowed to be reached
+					if(attrs.minHeight)					scope.minHeight = attrs.minHeight;
+
 					// optional fileDropHandler function
 					if(attrs.taFileDrop)				scope.fileDropHandler = scope.$parent.$eval(attrs.taFileDrop);
 					else								scope.fileDropHandler = scope.defaultFileDropHandler;
@@ -474,6 +478,41 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 						if(newValue !== oldValue){
 							if(attrs.ngModel && ngModel.$viewValue !== newValue) ngModel.$setViewValue(newValue);
 							scope.displayElements.forminput.val(newValue);
+
+							// Handle textArea height
+							var elementHeight = Number(scope.displayElements.text.css('height').replace("px","")),
+								scrollHeight = scope.displayElements.text[0].scrollHeight;
+
+							// Compare and set new height
+							if (elementHeight < scrollHeight) {
+								scope.displayElements.text.css('height', scrollHeight + 'px');
+							} else if (scrollHeight < elementHeight) {
+								if (scope.minHeight === undefined) {
+									scope.displayElements.text.css('height', scrollHeight + 'px');
+									return true;
+								}
+
+								if (scrollHeight > scope.minHeight) {
+									scope.displayElements.text.css('height', Math.max(scrollHeight, scope.minHeight) + 'px');
+									return true;
+								}
+							}
+						}
+					});
+
+
+					// Watch element height and make sure that the element is reduced to the correct height (this event will do something only when removing text)
+					scope.$watch(function(){return scope.displayElements.text.height(); }, function(newValue, oldValue) {
+						if(newValue !== oldValue) {
+							var elementHeight =  Number(scope.displayElements.text.css('height').replace("px","")),
+								scrollHeight = scope.displayElements.text[0].scrollHeight;
+
+							if (scrollHeight > elementHeight || (scope.minHeight !== undefined && scrollHeight < scope.minHeight)) return false;
+
+							$timeout(function (){
+								scope.displayElements.text.css("height", scrollHeight);
+							})
+
 						}
 					});
 
