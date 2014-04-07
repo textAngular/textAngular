@@ -419,7 +419,7 @@ var textAngularSetup = {
 					reLinkButton.on('click', function(event){
 						event.preventDefault();
 						var urlLink = $window.prompt(taTranslations.insertLink, $element.attr('href'));
-						if(urlLink !== ''){
+						if(urlLink && urlLink !== '' && urlLink !== 'http://'){
 							$element.attr('href', urlLink);
 							editorScope.updateTaBindtaTextElement();
 						}
