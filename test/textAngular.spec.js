@@ -699,20 +699,20 @@ describe('textAngular', function(){
 			});
 		});
 		
-		describe('should work without rangy loaded', function(){
+		describe('should work without rangy save-selection loaded', function(){
 			var _rangy;
 			beforeEach(function(){
 				// used for testing
-				_rangy = window.rangy;
-				window.rangy = undefined;
+				_rangy = window.rangy.saveSelection;
+				window.rangy.saveSelection = undefined;
 			});
 			afterEach(function(){
-				window.rangy = _rangy;
+				window.rangy.saveSelection = _rangy;
 			});
 			beforeEach(module('textAngular'));
 			
 			it('should NOT have rangy loaded with save-restore module', function(){
-				expect(window.rangy).not.toBeDefined();
+				expect(window.rangy.saveSelection).not.toBeDefined();
 			});
 			
 			var editorScope, element;
@@ -723,8 +723,8 @@ describe('textAngular', function(){
 				$rootScope.$digest();
 				editorScope = textAngularManager.retrieveEditor('test').scope;
 				// setup selection
-				var sel = _rangy.getSelection();
-				var range = _rangy.createRangyRange();
+				var sel = window.rangy.getSelection();
+				var range = window.rangy.createRangyRange();
 				range.selectNodeContents(editorScope.displayElements.text.find('p').find('strong')[0]);
 				sel.setSingleRange(range);
 			}));

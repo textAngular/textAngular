@@ -577,6 +577,8 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 				var _isReadonly = false;
 				var _focussed = false;
 				
+				if(_isContentEditable && !$window.rangy) throw('textAngular Error: For taBind to function correctly as a contenteditable you need to include rangy-core.js from https://code.google.com/p/rangy/');
+				
 				// defaults to the paragraph element, but we need the line-break or it doesn't allow you to type into the empty element
 				// non IE is '<p><br/></p>', ie is '<p></p>' as for once IE gets it correct...
 				var _defaultVal;
@@ -650,9 +652,35 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 							}
 						});
 						// all the code specific to contenteditable divs
-						element.on('keyup', function(){
+						element.on('keyup', function(event, eventData){
+							/* istanbul ignore else: this is for catching the jqLite testing*/
+							if(eventData) angular.extend(event, eventData);
 							if(!_isReadonly){
-								ngModel.$setViewValue(_compileHtml());
+								var range;
+								// if enter - insert new taDefaultWrap, if shift+enter insert <br/>
+								if(_defaultVal !== '' && event.keyCode === 13){
+									if(!event.shiftKey){
+										// new paragraph, br should be caught correctly
+										var selection = $window.rangy.getSelection();
+										if(selection.anchorNode.tagName.toLowerCase() !== attrs.taDefaultWrap && selection.anchorNode.tagName.toLowerCase() !== 'li' && (selection.anchorNode.innerHTML.trim() === '' || selection.anchorNode.innerHTML.trim() === '<br>')){
+											var _new = angular.element(_defaultVal);
+											angular.element(selection.anchorNode).replaceWith(_new);
+											range = $window.rangy.createRange();
+											range.selectNodeContents(_new[0]);
+											range.collapse(true);
+											$window.rangy.getSelection().setSingleRange(range);
+										}
+									}
+								}
+								var val = _compileHtml();
+								if(_defaultVal !== '' && val.trim() === ''){
+									element[0].innerHTML = _defaultVal;
+									range = $window.rangy.createRange();
+									range.selectNodeContents(element.children()[0]);
+									range.collapse(true);
+									$window.rangy.getSelection().setSingleRange(range);
+								}
+								ngModel.$setViewValue(val);
 							}
 						});
 

@@ -48,7 +48,7 @@ img[ta-insert-video]{
   <button ng-click="disabled = !disabled" unselectable>Disable text-angular Toggle</button>
   <div text-angular-toolbar name="htmlcontenttools"></div>
   <div text-angular="text-angular" name="htmlcontent" ng-model="data.htmlcontent3" ta-disabled='disabled' placeholder='Placeholder Text ONe' ta-target-toolbars='htmlcontenttools,statictoolbar'></div>
-  <text-angular ng-if="canEdit" name="htmlcontent2" ng-model="data.htmlcontent" ta-disabled='disabled' placeholder='Placeholder Text' ta-target-toolbars='htmlcontenttools,statictoolbar'></text-angular>
+  <text-angular ng-if="canEdit" name="htmlcontent2" ng-model="data.htmlcontent" ta-disabled='disabled' placeholder='Placeholder Text' ta-default-wrap="p" ta-target-toolbars='htmlcontenttools,statictoolbar'></text-angular>
   <button ng-click="canEdit = !canEdit">Can Edit</button>
   <h1>Raw HTML in a text area</h1>
   <textarea ng-model="data.htmlcontent" style="width: 100%"></textarea>
@@ -61,10 +61,11 @@ img[ta-insert-video]{
   <p>Note: although we support classes and styles, angularjs' ng-bind-html directive will strip out all style attributes.</p>
   
   
-  <form>
+  <form name="validationForm">
     <label for="name">Name:</label> <input type="text" tabindex="1" id="name" ng-model="name">
     <label for="website">Website:</label> <input type="url" tabindex="2" id="website" ng-model="website">
-    Bio: <div text-angular ng-model="bio" tabindex="3"></div>
+    formValid: {{validationForm.testValidation.$pristine}} {{validationForm.testValidation.$valid}} {{validationForm.testValidation.$dirty}} {{validationForm.testValidation.$invalid}}
+    Bio: <div text-angular name="testValidation" ng-model="bio" tabindex="3" placeholder="test placeholder" required></div>
 </form>
   
   <h1>Option to masquerade as a fancy text-area - complete with form submission and optional ngModel</h1>

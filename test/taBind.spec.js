@@ -2,7 +2,31 @@ describe('taBind', function () {
 	'use strict';
 	beforeEach(module('textAngular'));
 	var $rootScope;
-
+	
+	describe('requires rangy', function(){
+		var rangyTemp;
+		beforeEach(inject(function($window){
+			rangyTemp = $window.rangy;
+			$window.rangy = undefined;
+		}));
+		afterEach(inject(function($window){
+			$window.rangy = rangyTemp;
+		}));
+		it('not as non contenteditable', inject(function ($compile, $rootScope, $window) {
+			expect(function () {
+				$compile('<div ta-bind ng-model="test"></div>')($rootScope);
+				$rootScope.$digest();
+			}).not.toThrow();
+		}));
+		
+		it('as contenteditable', inject(function ($compile, $rootScope, $window) {
+			expect(function () {
+				$compile('<div contenteditable="true" ta-bind ng-model="test"></div>')($rootScope);
+				$rootScope.$digest();
+			}).toThrow('textAngular Error: For taBind to function correctly as a contenteditable you need to include rangy-core.js from https://code.google.com/p/rangy/');
+		}));
+	});
+	
 	it('should require ngModel', inject(function (_$compile_, _$rootScope_) {
 		expect(function () {
 			_$compile_('<div ta-bind></div>')(_$rootScope_);
@@ -220,30 +244,135 @@ describe('taBind', function () {
 		});
 		
 		describe('should respect the ta-default-wrap value', function(){
-			it('default to p element', inject(function($rootScope, $compile){
-				$rootScope.html = '';
-				element = $compile('<div ta-bind contenteditable="contenteditable" ng-model="html"></div>')($rootScope);
-				$rootScope.$digest();
-				element.triggerHandler('focus');
-				$rootScope.$digest();
-				expect(element.html()).toBe('<p><br></p>');
-			}));
-			it('set to other value', inject(function($rootScope, $compile){
-				$rootScope.html = '';
-				element = $compile('<div ta-bind ta-default-wrap="div" contenteditable="contenteditable" ng-model="html"></div>')($rootScope);
-				$rootScope.$digest();
-				element.triggerHandler('focus');
-				$rootScope.$digest();
-				expect(element.html()).toBe('<div><br></div>');
-			}));
-			it('set to blank should not wrap', inject(function($rootScope, $compile){
-				$rootScope.html = '';
-				element = $compile('<div ta-bind ta-default-wrap="" contenteditable="contenteditable" ng-model="html"></div>')($rootScope);
-				$rootScope.$digest();
-				element.triggerHandler('focus');
-				$rootScope.$digest();
-				expect(element.html()).toBe('');
-			}));
+			describe('on focus', function(){
+				it('default to p element', inject(function($rootScope, $compile){
+					$rootScope.html = '';
+					element = $compile('<div ta-bind contenteditable="contenteditable" ng-model="html"></div>')($rootScope);
+					$rootScope.$digest();
+					element.triggerHandler('focus');
+					$rootScope.$digest();
+					expect(element.html()).toBe('<p><br></p>');
+				}));
+				it('set to other value', inject(function($rootScope, $compile){
+					$rootScope.html = '';
+					element = $compile('<div ta-bind ta-default-wrap="div" contenteditable="contenteditable" ng-model="html"></div>')($rootScope);
+					$rootScope.$digest();
+					element.triggerHandler('focus');
+					$rootScope.$digest();
+					expect(element.html()).toBe('<div><br></div>');
+				}));
+				it('set to blank should not wrap', inject(function($rootScope, $compile){
+					$rootScope.html = '';
+					element = $compile('<div ta-bind ta-default-wrap="" contenteditable="contenteditable" ng-model="html"></div>')($rootScope);
+					$rootScope.$digest();
+					element.triggerHandler('focus');
+					$rootScope.$digest();
+					expect(element.html()).toBe('');
+				}));
+			});
+			describe('on keyup', function(){
+				it('default to p element', inject(function($rootScope, $compile){
+					$rootScope.html = '';
+					element = $compile('<div ta-bind contenteditable="contenteditable" ng-model="html"></div>')($rootScope);
+					$rootScope.$digest();
+					element.triggerHandler('keyup');
+					$rootScope.$digest();
+					expect(element.html()).toBe('<p><br></p>');
+				}));
+				it('set to other value', inject(function($rootScope, $compile){
+					$rootScope.html = '';
+					element = $compile('<div ta-bind ta-default-wrap="div" contenteditable="contenteditable" ng-model="html"></div>')($rootScope);
+					$rootScope.$digest();
+					element.triggerHandler('keyup');
+					$rootScope.$digest();
+					expect(element.html()).toBe('<div><br></div>');
+				}));
+				it('set to blank should not wrap', inject(function($rootScope, $compile){
+					$rootScope.html = '';
+					element = $compile('<div ta-bind ta-default-wrap="" contenteditable="contenteditable" ng-model="html"></div>')($rootScope);
+					$rootScope.$digest();
+					element.triggerHandler('keyup');
+					$rootScope.$digest();
+					expect(element.html()).toBe('');
+				}));
+			});
+			describe('on enter press', function(){
+				it('replace inserted with default wrap', inject(function($rootScope, $compile, $window, $document){
+					$rootScope.html = '<p><br></p>';
+					element = $compile('<div ta-bind ta-default-wrap="b" contenteditable="contenteditable" ng-model="html"></div>')($rootScope);
+					$document.find('body').append(element);
+					$rootScope.$digest();
+					var range = $window.rangy.createRangyRange();
+					range.selectNodeContents(element.children()[0]);
+					$window.rangy.getSelection().setSingleRange(range);
+					var event;
+					if(angular.element === jQuery){
+						event = jQuery.Event('keyup');
+						event.keyCode = 13;
+						element.triggerHandler(event);
+					}else{
+						event = {keyCode: 13};
+						element.triggerHandler('keyup', event);
+					}
+					$rootScope.$digest();
+					expect(element.html()).toBe('<b><br></b>');
+					element.remove();
+				}));
+				it('NOT replace inserted with default wrap when shift', inject(function($rootScope, $compile, $window, $document){
+					$rootScope.html = '<p><br></p>';
+					element = $compile('<div ta-bind ta-default-wrap="b" contenteditable="contenteditable" ng-model="html"></div>')($rootScope);
+					$document.find('body').append(element);
+					$rootScope.$digest();
+					var range = $window.rangy.createRangyRange();
+					range.selectNodeContents(element.children()[0]);
+					$window.rangy.getSelection().setSingleRange(range);
+					var event;
+					if(angular.element === jQuery){
+						event = jQuery.Event('keyup');
+						event.keyCode = 13;
+						event.shiftKey = true;
+						element.triggerHandler(event);
+					}else{
+						event = {keyCode: 13, shiftKey: true};
+						element.triggerHandler('keyup', event);
+					}
+					$rootScope.$digest();
+					expect(element.html()).toBe('<p><br></p>');
+					element.remove();
+				}));
+				it('NOT replace inserted with default wrap when a li', inject(function($rootScope, $compile, $window, $document){
+					$rootScope.html = '<li><br></li>';
+					element = $compile('<div ta-bind ta-default-wrap="b" contenteditable="contenteditable" ng-model="html"></div>')($rootScope);
+					$document.find('body').append(element);
+					$rootScope.$digest();
+					var range = $window.rangy.createRangyRange();
+					range.selectNodeContents(element.children()[0]);
+					$window.rangy.getSelection().setSingleRange(range);
+					var event;
+					if(angular.element === jQuery){
+						event = jQuery.Event('keyup');
+						event.keyCode = 13;
+						element.triggerHandler(event);
+					}else{
+						event = {keyCode: 13};
+						element.triggerHandler('keyup', event);
+					}
+					$rootScope.$digest();
+					expect(element.html()).toBe('<li><br></li>');
+					element.remove();
+				}));
+				it('should replace inserted with default wrap when empty', inject(function($rootScope, $compile, $window, $document){
+					$rootScope.html = '<p><br></p>';
+					element = $compile('<div ta-bind ta-default-wrap="b" contenteditable="contenteditable" ng-model="html"></div>')($rootScope);
+					$document.find('body').append(element);
+					$rootScope.$digest();
+					element[0].innerHTML = '';
+					element.triggerHandler('keyup');
+					$rootScope.$digest();
+					expect(element.html()).toBe('<b><br></b>');
+					element.remove();
+				}));
+			});
 		});
 	});
 
@@ -1047,24 +1176,5 @@ describe('taBind', function () {
 				expect(element.find('iframe').length).toBe(0);
 			}));
 		});
-		
-		/*
-			Tests for:
-			
-			angular.forEach(taCustomRenderers, function(renderer){
-			var elements = [];
-			// get elements based on what is defined. If both defined do secondary filter in the forEach after using selector string
-			Iif(renderer.selector && renderer.selector !== '')
-				elements = element.find(renderer.selector);
-			else Eif(renderer.customAttribute && renderer.customAttribute !== '')
-				elements = getByAttribute(element, renderer.customAttribute);
-			// process elements if any found
-			angular.forEach(elements, function(_element){
-				Iif(renderer.selector && renderer.selector !== '' && renderer.customAttribute && renderer.customAttribute !== ''){
-					if(_element.attr(renderer.customAttribute)) renderer.renderLogic(_element);
-				} else renderer.renderLogic(_element);
-			});
-			
-		*/
 	});
 });
