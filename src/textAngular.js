@@ -9,6 +9,26 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 
 (function(){ // encapsulate all variables so they don't become global vars
 	"Use Strict";
+	
+	// fix a webkit bug, see: https://gist.github.com/shimondoodkin/1081133
+	/* istanbul ignore next: Browser Un-Focus fix for webkit */
+	if(/AppleWebKit\/([\d.]+)/.exec(navigator.userAgent)) { // detect webkit
+		var refocus_prevtarget = null;
+		var refocusContentEditable = function() {
+			var curelement=window.event.target;
+			if(refocus_prevtarget) { // if we have a previous element
+				// if previous element was contentEditable and the next isn't then:
+				if(refocus_prevtarget.contentEditable === 'true' && curelement.contentEditable !== 'true') {
+					document.getElementById('textAngular-editableFix-010203040506070809').setSelectionRange(0, 0); // set caret focus to an element that handles caret focus correctly.
+					curelement.focus(); // focus the wanted element.
+				}
+			}
+			refocus_prevtarget=curelement;
+		};
+		document.addEventListener("click", refocusContentEditable, false); // add global click handler
+		document.body.innerHTML += '<input id="textAngular-editableFix-010203040506070809" style="width:1px;height:1px;border:none;margin:0;padding:0;position:absolute; top: -10000; left: -10000;" unselectable="on" tabIndex="-1">';
+	}
+	
 	// IE version detection - http://stackoverflow.com/questions/4169160/javascript-ie-detection-why-not-use-simple-conditional-comments
 	// We need this as IE sometimes plays funny tricks with the contenteditable.
 	// ----------------------------------------------------------
