@@ -1,4 +1,4 @@
-textAngular v1.2.0
+textAngular v1.2.1-pre2
 ===========
 
 [![Build Status](https://travis-ci.org/fraywing/textAngular.png?branch=master)](https://travis-ci.org/fraywing/textAngular) [![Coverage Status](https://coveralls.io/repos/fraywing/textAngular/badge.png)](https://coveralls.io/r/fraywing/textAngular)
@@ -8,8 +8,9 @@ Demo is available at: http://www.textangular.com
 
 ## Requirements
 
-1. `AngularJS` ≥ `1.2.x` ;
-2. `Angular Sanitize` ≥ `1.2.x`.
+1. `AngularJS` ≥ `1.2.x`
+2. `Angular Sanitize` ≥ `1.2.x`
+3. `Rangy-core` ≥ `1.x` [https://code.google.com/p/rangy/](https://code.google.com/p/rangy/)
 
 ### Optional requirements
 

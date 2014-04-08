@@ -1,5 +1,11 @@
 ###Changelog
 
+2014-04-08 v1.2.1-pre2
+
+- Fixed up ta-default-wrap. This now requires rangy-core.js
+- Fixed an IE Paste issue.
+- Fixed a webkit bug causing contenteditables not to loose focus.
+
 2014-03-24 v1.2.1-pre1
 
 - Moved setup functions into a seperate file, textAngularSetup.js. This file must be included before textAngular.js file. Using the defaults and textAngular.min.js causes no changes.
