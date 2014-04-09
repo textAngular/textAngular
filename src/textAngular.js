@@ -11,21 +11,26 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 	"Use Strict";
 	
 	// fix a webkit bug, see: https://gist.github.com/shimondoodkin/1081133
+	// this is set true when a blur occurs as the blur of the ta-bind triggers before the click
+	var globalContentEditableBlur = false;
 	/* istanbul ignore next: Browser Un-Focus fix for webkit */
 	if(/AppleWebKit\/([\d.]+)/.exec(navigator.userAgent)) { // detect webkit
-		var refocus_prevtarget = null;
-		var refocusContentEditable = function() {
-			var curelement=window.event.target;
-			if(refocus_prevtarget) { // if we have a previous element
-				// if previous element was contentEditable and the next isn't then:
-				if(refocus_prevtarget.contentEditable === 'true' && curelement.contentEditable !== 'true') {
+		document.addEventListener("click", function(){
+			var curelement = window.event.target;
+			if(globalContentEditableBlur && curelement !== null){
+				var isEditable = false;
+				var tempEl = curelement;
+				while(tempEl !== null && tempEl.tagName.toLowerCase() !== 'html' && !isEditable){
+					isEditable = tempEl.contentEditable === 'true';
+					tempEl = tempEl.parentNode;
+				}
+				if(!isEditable){
 					document.getElementById('textAngular-editableFix-010203040506070809').setSelectionRange(0, 0); // set caret focus to an element that handles caret focus correctly.
 					curelement.focus(); // focus the wanted element.
 				}
 			}
-			refocus_prevtarget=curelement;
-		};
-		document.addEventListener("click", refocusContentEditable, false); // add global click handler
+			globalContentEditableBlur = false;
+		}, false); // add global click handler
 		document.body.innerHTML += '<input id="textAngular-editableFix-010203040506070809" style="width:1px;height:1px;border:none;margin:0;padding:0;position:absolute; top: -10000; left: -10000;" unselectable="on" tabIndex="-1">';
 	}
 	
@@ -94,7 +99,10 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 	
 	// use as: addCSSRule(document.styleSheets[0], "header", "float: left");
 	function addCSSRule(selector, rules) {
-		var insertIndex = Math.max(sheet.rules.length - 1, 0);
+		var insertIndex;
+		/* istanbul ignore else: firefox catch */
+		if(sheet.rules) insertIndex = Math.max(sheet.rules.length - 1, 0);
+		else if(sheet.cssRules) insertIndex = Math.max(sheet.cssRules.length - 1, 0);
 		/* istanbul ignore else: untestable IE option */
 		if(sheet.insertRule) {
 			sheet.insertRule(selector + "{" + rules + "}", insertIndex);
@@ -883,6 +891,12 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 						element.find(selector).on('click', selectorClickHandler);
 					});
 					element.on('drop', fileDropHandler);
+					element.on('blur', function(e){
+						/* istanbul ignore next: webkit fix */
+						if(/AppleWebKit\/([\d.]+)/.exec(navigator.userAgent)) { // detect webkit
+							globalContentEditableBlur = true;
+						}
+					});
 				}
 			}
 		};
