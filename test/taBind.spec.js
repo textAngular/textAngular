@@ -18,13 +18,6 @@ describe('taBind', function () {
 				$rootScope.$digest();
 			}).not.toThrow();
 		}));
-		
-		it('as contenteditable', inject(function ($compile, $rootScope, $window) {
-			expect(function () {
-				$compile('<div contenteditable="true" ta-bind ng-model="test"></div>')($rootScope);
-				$rootScope.$digest();
-			}).toThrow('textAngular Error: For taBind to function correctly as a contenteditable you need to include rangy-core.js from https://code.google.com/p/rangy/');
-		}));
 	});
 	
 	it('should require ngModel', inject(function (_$compile_, _$rootScope_) {

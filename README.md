@@ -10,7 +10,6 @@ Demo is available at: http://www.textangular.com
 
 1. `AngularJS` ≥ `1.2.x`
 2. `Angular Sanitize` ≥ `1.2.x`
-3. `Rangy-core` ≥ `1.x` [https://code.google.com/p/rangy/](https://code.google.com/p/rangy/)
 
 ### Optional requirements
 

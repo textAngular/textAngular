@@ -67,6 +67,14 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 		return ((rv > -1) ? rv : undef);
 	}());
 	
+	// Thanks to answer in http://stackoverflow.com/questions/2308134/trim-in-javascript-not-working-in-ie
+	/* istanbul ignore next: trim shim for older browsers */
+	if(typeof String.prototype.trim !== 'function') {
+		String.prototype.trim = function() {
+			return this.replace(/^\s\s*/, '').replace(/\s\s*$/, ''); 
+		};
+	}
+	
 	// tests against the current jqLite/jquery implementation if this can be an element
 	function validElementString(string){
 		try{
@@ -80,47 +88,51 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 		Custom stylesheet for the placeholders rules.
 		Credit to: http://davidwalsh.name/add-rules-stylesheets
 	*/
-	var sheet = (function() {
-		// Create the <style> tag
-		var style = document.createElement("style");
+	var sheet, addCSSRule, removeCSSRule;
+	/* istanbul ignore else: IE <8 test*/
+	if(ie > 8 || ie === undefined){
+		sheet = (function() {
+			// Create the <style> tag
+			var style = document.createElement("style");
+			
+			// Add a media (and/or media query) here if you'd like!
+			// style.setAttribute("media", "screen")
+			// style.setAttribute("media", "@media only screen and (max-width : 1024px)")
+			
+			/* istanbul ignore else : WebKit hack :( */
+			if(/AppleWebKit\/([\d.]+)/.exec(navigator.userAgent)) style.appendChild(document.createTextNode(""));
+			
+			// Add the <style> element to the page
+			document.head.appendChild(style);
+			
+			return style.sheet;
+		})();
 		
-		// Add a media (and/or media query) here if you'd like!
-		// style.setAttribute("media", "screen")
-		// style.setAttribute("media", "@media only screen and (max-width : 1024px)")
+		// use as: addCSSRule(document.styleSheets[0], "header", "float: left");
+		addCSSRule = function(selector, rules) {
+			var insertIndex;
+			/* istanbul ignore else: firefox catch */
+			if(sheet.rules) insertIndex = Math.max(sheet.rules.length - 1, 0);
+			else if(sheet.cssRules) insertIndex = Math.max(sheet.cssRules.length - 1, 0);
+			/* istanbul ignore else: untestable IE option */
+			if(sheet.insertRule) {
+				sheet.insertRule(selector + "{" + rules + "}", insertIndex);
+			}
+			else {
+				sheet.addRule(selector, rules, insertIndex);
+			}
+			// return the index of the stylesheet rule
+			return insertIndex;
+		};
 		
-		// WebKit hack :(
-		style.appendChild(document.createTextNode(""));
-		
-		// Add the <style> element to the page
-		document.head.appendChild(style);
-		
-		return style.sheet;
-	})();
-	
-	// use as: addCSSRule(document.styleSheets[0], "header", "float: left");
-	function addCSSRule(selector, rules) {
-		var insertIndex;
-		/* istanbul ignore else: firefox catch */
-		if(sheet.rules) insertIndex = Math.max(sheet.rules.length - 1, 0);
-		else if(sheet.cssRules) insertIndex = Math.max(sheet.cssRules.length - 1, 0);
-		/* istanbul ignore else: untestable IE option */
-		if(sheet.insertRule) {
-			sheet.insertRule(selector + "{" + rules + "}", insertIndex);
-		}
-		else {
-			sheet.addRule(selector, rules, insertIndex);
-		}
-		// return the index of the stylesheet rule
-		return insertIndex;
-	}
-	
-	function removeCSSRule(index){
-		/* istanbul ignore else: untestable IE option */
-		if(sheet.removeRule){
-			sheet.removeRule(index);
-		}else{
-			sheet.deleteRule(index);
-		}
+		removeCSSRule = function(index){
+			/* istanbul ignore else: untestable IE option */
+			if(sheet.removeRule){
+				sheet.removeRule(index);
+			}else{
+				sheet.deleteRule(index);
+			}
+		};
 	}
 	
 	// recursive function that returns an array of angular.elements that have the passed attribute set on them
@@ -183,7 +195,6 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 			activestate: [function(commonElement)]?
 					this function is called on every caret movement, if it returns true then the class taOptions.classes.toolbarButtonActive
 					will be applied to the `display` element, else the class will be removed
-					If the rangy library is loaded commonElement will be an angular.element object that contains ALL of the selection.
 			disabled: [function()]?
 					if this function returns true then the tool will have the class taOptions.classes.disabled applied to it, else it will be removed
 		Other functions available on the scope are:
@@ -219,15 +230,15 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 	textAngular.value('taTools', taTools);
 
 	// configure initial textAngular tools here via taRegisterTool
-	textAngular.run(['taRegisterTool', '$window', 'taTranslations', function(taRegisterTool, $window, taTranslations){
+	textAngular.run(['taRegisterTool', '$window', 'taTranslations', 'taSelection', function(taRegisterTool, $window, taTranslations, taSelection){
 		// clear taTools variable. Just catches testing and any other time that this config may run multiple times...
 		angular.forEach(taTools, function(value, key){ delete taTools[key];	});
-		textAngularSetup.registerToolsFunction(taRegisterTool, $window, taTranslations);
+		textAngularSetup.registerToolsFunction(taRegisterTool, $window, taTranslations, taSelection);
 	}]);
 
 	textAngular.directive("textAngular", [
-		'$compile', '$timeout', 'taOptions', 'taSanitize', 'textAngularManager', '$window', '$animate', '$log',
-		function($compile, $timeout, taOptions, taSanitize, textAngularManager, $window, $animate, $log){
+		'$compile', '$timeout', 'taOptions', 'taSanitize', 'taSelection', 'textAngularManager', '$window', '$document', '$animate', '$log',
+		function($compile, $timeout, taOptions, taSanitize, taSelection, textAngularManager, $window, $document, $animate, $log){
 			return {
 				require: '?ngModel',
 				scope: {},
@@ -244,7 +255,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 						wrapSelection: function(command, opt, isSelectableElementTool){
 							// catch errors like FF erroring when you try to force an undo with nothing done
 							try{
-								document.execCommand(command, false, opt);
+								$document[0].execCommand(command, false, opt);
 							}catch(e){}
 							if(isSelectableElementTool){
 								// re-apply the selectable tool events
@@ -412,7 +423,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 					scope.displayElements.text.on('focus', _focusin);
 					_focusout = function(e){
 						// if we are NOT runnig an action and have NOT focussed again on the text etc then fire the blur events
-						if(!scope._actionRunning && document.activeElement !== scope.displayElements.html[0] && document.activeElement !== scope.displayElements.text[0]){
+						if(!scope._actionRunning && $document[0].activeElement !== scope.displayElements.html[0] && $document[0].activeElement !== scope.displayElements.text[0]){
 							element.removeClass(scope.classes.focussed);
 							_toolbars.unfocus();
 							// to prevent multiple apply error defer to next seems to work.
@@ -427,7 +438,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 					// Setup the default toolbar tools, this way allows the user to add new tools like plugins.
 					// This is on the editor for future proofing if we find a better way to do this.
 					scope.queryFormatBlockState = function(command){
-						return command.toLowerCase() === document.queryCommandValue('formatBlock').toLowerCase();
+						return command.toLowerCase() === $document[0].queryCommandValue('formatBlock').toLowerCase();
 					};
 					scope.switchView = function(){
 						scope.showHtml = !scope.showHtml;
@@ -466,7 +477,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 							scope.displayElements.forminput.val(ngModel.$viewValue);
 							// if the editors aren't focused they need to be updated, otherwise they are doing the updating
 							/* istanbul ignore else: don't care */
-							if(!scope._elementSelectTriggered && document.activeElement !== scope.displayElements.html[0] && document.activeElement !== scope.displayElements.text[0]){
+							if(!scope._elementSelectTriggered && $document[0].activeElement !== scope.displayElements.html[0] && $document[0].activeElement !== scope.displayElements.text[0]){
 								// catch model being null or undefined
 								scope.html = ngModel.$viewValue || '';
 							}
@@ -533,13 +544,11 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 					scope._bUpdateSelectedStyles = false;
 					// loop through all the tools polling their activeState function if it exists
 					scope.updateSelectedStyles = function(){
-						var _ranges;
-						// test if rangy exists and if the common element ISN'T the root ta-text node
-						if($window.rangy && $window.rangy.getSelection &&
-							(_ranges = $window.rangy.getSelection().getAllRanges()).length === 1 &&
-							_ranges[0].commonAncestorContainer.parentNode !== scope.displayElements.text[0]
+						var _selection;
+						// test if the common element ISN'T the root ta-text node
+						if((_selection = taSelection.getSelectionElement().parentNode) !== scope.displayElements.text[0]
 						){
-							_toolbars.updateSelectedStyles(angular.element(_ranges[0].commonAncestorContainer.parentNode));
+							_toolbars.updateSelectedStyles(angular.element(_selection));
 						}else _toolbars.updateSelectedStyles();
 						// used to update the active state when a key is held down, ie the left arrow
 						if(scope._bUpdateSelectedStyles) $timeout(scope.updateSelectedStyles, 200);
@@ -592,7 +601,8 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 				}
 			};
 		}
-	]).directive('taBind', ['taSanitize', '$timeout', '$window', 'taFixChrome', 'taSelectableElements', 'taApplyCustomRenderers', function(taSanitize, $timeout, $window, taFixChrome, taSelectableElements, taApplyCustomRenderers){
+	]).directive('taBind', ['taSanitize', '$timeout', '$window', '$document', 'taFixChrome', 'taSelection', 'taSelectableElements', 'taApplyCustomRenderers',
+					function(taSanitize, $timeout, $window, $document, taFixChrome, taSelection, taSelectableElements, taApplyCustomRenderers){
 		// Uses for this are textarea or input with ng-model and ta-bind='text'
 		// OR any non-form element with contenteditable="contenteditable" ta-bind="html|text" ng-model
 		return {
@@ -604,8 +614,6 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 				var _isInputFriendly = _isContentEditable || element[0].tagName.toLowerCase() === 'textarea' || element[0].tagName.toLowerCase() === 'input';
 				var _isReadonly = false;
 				var _focussed = false;
-				
-				if(_isContentEditable && !$window.rangy) throw('textAngular Error: For taBind to function correctly as a contenteditable you need to include rangy-core.js from https://code.google.com/p/rangy/');
 				
 				// defaults to the paragraph element, but we need the line-break or it doesn't allow you to type into the empty element
 				// non IE is '<p><br/></p>', ie is '<p></p>' as for once IE gets it correct...
@@ -669,44 +677,38 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 								_working[0].innerHTML = text;
 								// this strips out all HTML tags
 								text = _working.text();
-								if (document.selection){
-									var range = document.selection.createRange();
+								if ($document[0].selection){
+									var range = $document[0].selection.createRange();
 									range.pasteHTML(text);
 								}
 								else{
-									document.execCommand('insertText', false, text);
+									$document[0].execCommand('insertText', false, text);
 								}
 								ngModel.$setViewValue(_compileHtml());
 							}
 						});
+						
 						// all the code specific to contenteditable divs
 						element.on('keyup', function(event, eventData){
 							/* istanbul ignore else: this is for catching the jqLite testing*/
 							if(eventData) angular.extend(event, eventData);
 							if(!_isReadonly){
-								var range;
 								// if enter - insert new taDefaultWrap, if shift+enter insert <br/>
 								if(_defaultVal !== '' && event.keyCode === 13){
 									if(!event.shiftKey){
 										// new paragraph, br should be caught correctly
-										var selection = $window.rangy.getSelection();
-										if(selection.anchorNode.tagName.toLowerCase() !== attrs.taDefaultWrap && selection.anchorNode.tagName.toLowerCase() !== 'li' && (selection.anchorNode.innerHTML.trim() === '' || selection.anchorNode.innerHTML.trim() === '<br>')){
+										var selection = taSelection.getSelectionElement();
+										if(selection.tagName.toLowerCase() !== attrs.taDefaultWrap && selection.tagName.toLowerCase() !== 'li' && (selection.innerHTML.trim() === '' || selection.innerHTML.trim() === '<br>')){
 											var _new = angular.element(_defaultVal);
-											angular.element(selection.anchorNode).replaceWith(_new);
-											range = $window.rangy.createRange();
-											range.selectNodeContents(_new[0]);
-											range.collapse(true);
-											$window.rangy.getSelection().setSingleRange(range);
+											angular.element(selection).replaceWith(_new);
+											taSelection.setSelectionToElementStart(_new[0]);
 										}
 									}
 								}
 								var val = _compileHtml();
 								if(_defaultVal !== '' && val.trim() === ''){
 									element[0].innerHTML = _defaultVal;
-									range = $window.rangy.createRange();
-									range.selectNodeContents(element.children()[0]);
-									range.collapse(true);
-									$window.rangy.getSelection().setSingleRange(range);
+									taSelection.setSelectionToElementStart(element.children()[0]);
 								}
 								ngModel.$setViewValue(val);
 							}
@@ -723,7 +725,8 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 							ngModel.$render();
 						});
 						
-						if(attrs.placeholder){
+						// Placeholders not supported on ie 8 and below
+						if(attrs.placeholder && (ie > 8 || ie === undefined)){
 							var ruleIndex;
 							if(attrs.id) ruleIndex = addCSSRule('#' + attrs.id + '.placeholder-text:before', 'content: "' + attrs.placeholder + '"');
 							else throw('textAngular Error: An unique ID is required for placeholders to work');
@@ -787,7 +790,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 					// catch model being null or undefined
 					var val = ngModel.$viewValue || '';
 					// if the editor isn't focused it needs to be updated, otherwise it's receiving user input
-					if(document.activeElement !== element[0]){
+					if($document[0].activeElement !== element[0]){
 						// Not focussed
 						if(_isContentEditable){
 							// WYSIWYG Mode
@@ -891,7 +894,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 						element.find(selector).on('click', selectorClickHandler);
 					});
 					element.on('drop', fileDropHandler);
-					element.on('blur', function(e){
+					element.on('blur', function(){
 						/* istanbul ignore next: webkit fix */
 						if(/AppleWebKit\/([\d.]+)/.exec(navigator.userAgent)) { // detect webkit
 							globalContentEditableBlur = true;
@@ -1254,13 +1257,12 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 								toolbarScope.focussed = false;
 							});
 						},
-						updateSelectedStyles: function(rangyRange){
-							// rangyRange will only be populated if the rangy library is included
+						updateSelectedStyles: function(selectedElement){
 							// update the active state of all buttons on liked toolbars
 							angular.forEach(_toolbars, function(toolbarScope){
 								angular.forEach(toolbarScope.tools, function(toolScope){
 									if(toolScope.activeState){
-										toolScope.active = toolScope.activeState(rangyRange);
+										toolScope.active = toolScope.activeState(selectedElement);
 									}
 								});
 							});
@@ -1456,6 +1458,64 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 					/* istanbul ignore else: phase catch */
 					if(!editors[name].scope.$$phase) editors[name].scope.$digest();
 				}else throw('textAngular Error: No Editor with name "' + name + '" exists');
+			}
+		};
+	}]).service('taSelection', ['$window', '$document', function($window, $document){
+		/* istanbul ignore next: all browser specifics and PhantomJS dosen't seem to support half of it */
+		return {
+			// Some basic selection functions
+			getSelectionElement: function () {
+				var range, sel, container;
+				if ($document.selection && $document.selection.createRange) {
+					// IE case
+					range = $document.selection.createRange();
+					return range.parentElement();
+				} else if ($window.getSelection) {
+					sel = $window.getSelection();
+					if (sel.getRangeAt) {
+						if (sel.rangeCount > 0) {
+							range = sel.getRangeAt(0);
+						}
+					} else {
+						// Old WebKit selection object has no getRangeAt, so
+						// create a range from other selection properties
+						range = $document.createRange();
+						range.setStart(sel.anchorNode, sel.anchorOffset);
+						range.setEnd(sel.focusNode, sel.focusOffset);
+			
+						// Handle the case when the selection was selected backwards (from the end to the start in the document)
+						if (range.collapsed !== sel.isCollapsed) {
+							range.setStart(sel.focusNode, sel.focusOffset);
+							range.setEnd(sel.anchorNode, sel.anchorOffset);
+						}
+					}
+			
+					if (range) {
+						container = range.commonAncestorContainer;
+			
+						// Check if the container is a text node and return its parent if so
+						return container.nodeType === 3 ? container.parentNode : container;
+					}   
+				}
+			},
+			setSelectionToElementStart: function (el){
+				if ($document.createRange && $window.getSelection) {
+					var range = $document.createRange();
+					range.selectNodeContents(el);
+					range.setStart(el, 0);
+					range.setEnd(el, 0);
+					
+					var sel = $window.getSelection();
+					sel.removeAllRanges();
+					sel.addRange(range);
+				} else if ($document.selection && $document.body.createTextRange) {
+					var textRange = $document.body.createTextRange();
+					textRange.moveToElementText(el);
+					textRange.collapse(true);
+					textRange.moveEnd("character", 0);
+					textRange.moveStart("character", 0);
+					textRange.select();
+				}
 			}
 		};
 	}]);

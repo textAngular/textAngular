@@ -341,17 +341,6 @@ describe('taTools test tool actions', function(){
 			findAndTriggerButton('clear');
 			expect($rootScope.htmlcontent).toBe('<p class="test-class" style="text-align: left;">Test Content <b>that</b> <u>should</u> be cleared</p><h1>Test Other Tags</h1><ul><li>Test 1</li><li>Test 2</li></ul>');
 		});
-		
-		it('works without rangy', function(){
-			var button = buttonByName(element, 'clear');
-			var _rangy = button.scope().$window.rangy;
-			button.scope().$window.rangy = undefined;
-			button.scope().executeAction(editorScope);
-			editorScope.endAction();
-			$rootScope.$digest();
-			expect($rootScope.htmlcontent).toBe('<p class="test-class">Test Content that should be cleared</p><p>Test Other Tags</p><ul><li>Test 1</li></ul><ul><li>Test 2</li></ul><p></p>');
-			button.scope().$window.rangy = _rangy;
-		});
 	});
 	
 	describe('test link functions and button', function(){

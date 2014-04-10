@@ -1,5 +1,10 @@
 ###Changelog
 
+2014-04-08 v1.2.1-pre3
+
+- Fixing a change focus bug introduced in v1.2.1-pre2
+- Changing the code so ta-bind no longer requires rangy-core.js, making it an optional requirement again.
+
 2014-04-08 v1.2.1-pre2
 
 - Fixed up ta-default-wrap. This now requires rangy-core.js
