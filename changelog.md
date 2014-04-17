@@ -1,5 +1,9 @@
 ###Changelog
 
+2014-04-08 v1.2.1-pre4
+
+- Fixing IE bugs with ta-default-wrap.
+
 2014-04-08 v1.2.1-pre3
 
 - Fixing a change focus bug introduced in v1.2.1-pre2

@@ -2,7 +2,7 @@
 textAngular
 Author : Austin Anderson
 License : 2013 MIT
-Version 1.2.0
+Version 1.2.1-pre4
 
 See README.md or https://github.com/fraywing/textAngular/wiki for requirements and use.
 */
@@ -617,12 +617,25 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 				
 				// defaults to the paragraph element, but we need the line-break or it doesn't allow you to type into the empty element
 				// non IE is '<p><br/></p>', ie is '<p></p>' as for once IE gets it correct...
-				var _defaultVal;
+				var _defaultVal, _defaultTest;
 				// set the default to be a paragraph value
 				if(attrs.taDefaultWrap === undefined) attrs.taDefaultWrap = 'p';
-				if(attrs.taDefaultWrap === '') _defaultVal = '';
 				/* istanbul ignore next: ie specific test */
-				else _defaultVal = (ie === undefined)? '<' + attrs.taDefaultWrap + '><br></' + attrs.taDefaultWrap + '>' : '<' + attrs.taDefaultWrap + '></' + attrs.taDefaultWrap + '>';
+				if(attrs.taDefaultWrap === ''){
+					_defaultVal = '';
+					_defaultTest = (ie === undefined)? '<div><br></div>' : (ie >= 11)? '<p><br></p>' : (ie <= 8)? '<P>&nbsp;</P>' : '<p>&nbsp;</p>';
+				}else{
+					_defaultVal = (ie === undefined || ie >= 11)?
+						'<' + attrs.taDefaultWrap + '><br></' + attrs.taDefaultWrap + '>' :
+						(ie <= 8)?
+							'<' + attrs.taDefaultWrap.toUpperCase() + '></' + attrs.taDefaultWrap.toUpperCase() + '>' :
+							'<' + attrs.taDefaultWrap + '></' + attrs.taDefaultWrap + '>';
+					_defaultTest = (ie === undefined || ie >= 11)?
+						'<' + attrs.taDefaultWrap + '><br></' + attrs.taDefaultWrap + '>' :
+						(ie <= 8)?
+							'<' + attrs.taDefaultWrap.toUpperCase() + '>&nbsp;</' + attrs.taDefaultWrap.toUpperCase() + '>' :
+							'<' + attrs.taDefaultWrap + '>&nbsp;</' + attrs.taDefaultWrap + '>';
+				}
 				
 				// in here we are undoing the converts used elsewhere to prevent the < > and & being displayed when they shouldn't in the code.
 				var _compileHtml = function(){
@@ -719,7 +732,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 							var val = _compileHtml();
 							/* istanbul ignore else: if readonly don't update model */
 							if(!_isReadonly){
-								if(val === _defaultVal) ngModel.$setViewValue('');
+								if(val === _defaultTest) ngModel.$setViewValue('');
 								else ngModel.$setViewValue(_compileHtml());
 							}
 							ngModel.$render();
