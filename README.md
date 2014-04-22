@@ -28,8 +28,8 @@ Demo is available at: http://www.textangular.com
 Run `bower install textAngular` from the command line.
 Include script tags similar to the following:
 ```html
-<script src='/bower_components/textAngular/dist/textAngular-sanitize.min.js'></script>
-<script src='/bower_components/textAngular/dist/textAngular.min.js'></script>
+<script src='/bower_components/textAngular/textAngular-sanitize.min.js'></script>
+<script src='/bower_components/textAngular/textAngular.min.js'></script>
 ```
 
 **Via CDNJS:**
