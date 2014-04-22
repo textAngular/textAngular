@@ -6,6 +6,8 @@ textAngular v1.2.1-pre4
 
 Demo is available at: http://www.textangular.com
 
+#### This readme is for the v1.2.1-preX releases, if you are looking for the v1.2.0 readme go here: https://github.com/fraywing/textAngular/tree/v1.2.0
+
 ## Requirements
 
 1. `AngularJS` ≥ `1.2.x`
