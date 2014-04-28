@@ -472,7 +472,7 @@ describe('textAngularManager', function(){
 				expect(function(){textAngularManager.refreshEditor('non-editor');}).toThrow('textAngular Error: No Editor with name "non-editor" exists');
 			}));
 			it('should update from text view to model', inject(function(textAngularManager){
-				jQuery('.ta-text', element[0]).append('<div>Test 2 Content</div>');
+				jQuery('.ta-text .ta-bind', element[0]).append('<div>Test 2 Content</div>');
 				textAngularManager.refreshEditor('test');
 				expect($rootScope.htmlcontent).toBe('<p>Test Content</p><div>Test 2 Content</div>');
 			}));

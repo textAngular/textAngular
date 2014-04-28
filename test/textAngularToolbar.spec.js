@@ -180,7 +180,7 @@ describe('textAngularToolbar', function(){
 				$rootScope.$digest();
 				$timeout.flush();
 				$rootScope.$digest();
-				expect(jQuery(displayElements.text.parent()).find('button').eq(0).attr('disabled')).toBe('disabled');
+				expect(jQuery(displayElements.text.parent().parent()).find('button').eq(0).attr('disabled')).toBe('disabled');
 			});
 			it('on ta-html trigger blur', function(){
 				displayElements.html.triggerHandler('focus');

@@ -13,16 +13,22 @@ describe('taBind', function () {
 			$window.rangy = rangyTemp;
 		}));
 		it('not as non contenteditable', inject(function ($compile, $rootScope, $window) {
-			expect(function () {
-				$compile('<div ta-bind ng-model="test"></div>')($rootScope);
-				$rootScope.$digest();
-			}).not.toThrow();
+			var element = $compile('<div ta-bind ng-model="test"></div>')($rootScope);
+			$rootScope.$digest();
+			expect(element.attr('class')).toBe('ng-scope ng-isolate-scope ng-pristine ng-valid ta-bind');
 		}));
 	});
 	
 	it('should require ngModel', inject(function (_$compile_, _$rootScope_) {
 		expect(function () {
 			_$compile_('<div ta-bind></div>')(_$rootScope_);
+			$rootScope.$digest();
+		}).toThrow();
+	}));
+	
+	it('should add ta-bind class', inject(function (_$compile_, _$rootScope_) {
+		expect(function () {
+			_$compile_('<div ta-bind ng-model="test"></div>')(_$rootScope_);
 			$rootScope.$digest();
 		}).toThrow();
 	}));
@@ -42,10 +48,10 @@ describe('taBind', function () {
 				$rootScope.html = '';
 				var element = $compile('<div ta-bind id="test" contenteditable="true" ng-model="html" placeholder="Add Comment"></div>')($rootScope);
 				$rootScope.$digest();
-				expect(document.styleSheets[1].rules.length).toBe(1);
+				expect(document.styleSheets[2].rules.length).toBe(1);
 				element.scope().$destroy();
 				$rootScope.$digest();
-				expect(document.styleSheets[1].rules.length).toBe(0);
+				expect(document.styleSheets[2].rules.length).toBe(0);
 			}));
 		});
 		

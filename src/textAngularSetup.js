@@ -71,7 +71,7 @@ var textAngularSetup = {
 			}
 	},
 	// configure initial textAngular tools here via taRegisterTool
-	registerToolsFunction: function(taRegisterTool, $window, taTranslations, taSelection){
+	registerTools: ['taRegisterTool', '$window', 'taTranslations', 'taSelection', function(taRegisterTool, $window, taTranslations, taSelection){
 		taRegisterTool("html", {
 			buttontext: taTranslations.toggleHTML,
 			action: function(){
@@ -334,6 +334,7 @@ var textAngularSetup = {
 			container.append(buttonGroup);
 			
 			editorScope.showPopover($element);
+			editorScope.showResizeOverlay($element);
 		};
 		
 		taRegisterTool('insertImage', {
@@ -434,5 +435,5 @@ var textAngularSetup = {
 				}
 			}
 		});
-	}
+	}]
 };

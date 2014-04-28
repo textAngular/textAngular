@@ -234,7 +234,7 @@ describe('taTools test tool actions', function(){
 			editorScope = textAngularManager.retrieveEditor('test').scope;
 			var sel = $window.rangy.getSelection();
 			var range = $window.rangy.createRangyRange();
-			range.selectNode(jQuery('.ta-text')[0].childNodes[0]);
+			range.selectNode(jQuery('.ta-text .ta-bind')[0].childNodes[0]);
 			sel.setSingleRange(range);
 		}));
 		afterEach(function(){
@@ -279,7 +279,7 @@ describe('taTools test tool actions', function(){
 			editorScope = textAngularManager.retrieveEditor('testclearbutton').scope;
 			var sel = $window.rangy.getSelection();
 			var range = $window.rangy.createRangyRange();
-			range.selectNodeContents(jQuery('.ta-text')[0]);
+			range.selectNodeContents(jQuery('.ta-text > .ta-bind')[0]);
 			sel.setSingleRange(range);
 		}));
 		afterEach(function(){
@@ -448,7 +448,7 @@ describe('taTools test tool actions', function(){
 			editorScope.displayElements.text.find('p').find('img').triggerHandler('click');
 			editorScope.displayElements.popoverContainer.find('button').eq(0).triggerHandler('click');
 			$rootScope.$digest();
-			if(jQuery === angular.element) expect(editorScope.displayElements.text.find('p').find('img').css('width')).toBe('384px');
+			if(jQuery === angular.element) expect(editorScope.displayElements.text.find('p').find('img').css('width')).toBe('345px');
 			else expect(editorScope.displayElements.text.find('p').find('img').css('width')).toBe('100%');
 		});
 		
@@ -456,7 +456,7 @@ describe('taTools test tool actions', function(){
 			editorScope.displayElements.text.find('p').find('img').triggerHandler('click');
 			editorScope.displayElements.popoverContainer.find('button').eq(1).triggerHandler('click');
 			$rootScope.$digest();
-			if(jQuery === angular.element) expect(editorScope.displayElements.text.find('p').find('img').css('width')).toBe('192px');
+			if(jQuery === angular.element) expect(editorScope.displayElements.text.find('p').find('img').css('width')).toBe('172px');
 			else expect(editorScope.displayElements.text.find('p').find('img').css('width')).toBe('50%');
 		});
 		
@@ -464,7 +464,7 @@ describe('taTools test tool actions', function(){
 			editorScope.displayElements.text.find('p').find('img').triggerHandler('click');
 			editorScope.displayElements.popoverContainer.find('button').eq(2).triggerHandler('click');
 			$rootScope.$digest();
-			if(jQuery === angular.element) expect(editorScope.displayElements.text.find('p').find('img').css('width')).toBe('96px');
+			if(jQuery === angular.element) expect(editorScope.displayElements.text.find('p').find('img').css('width')).toBe('86px');
 			else expect(editorScope.displayElements.text.find('p').find('img').css('width')).toBe('25%');
 		});
 		
