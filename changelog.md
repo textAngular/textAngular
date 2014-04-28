@@ -1,5 +1,14 @@
 ###Changelog
 
+2014-05-01 v1.2.1-pre5
+
+- ADD Included some css built into the editor - no need for extra stylesheets unless you want to override.
+- CHANGE The registerTools function to be the entire signature so directives can be included as wanted.
+- ADD resizeOverlay functionality, includes a new scroll window that the ta-text editor nests inside to make positioning better (TODO: tests).
+- FIX ta-default-wrap in chrome bug.
+- ADD Class .ta-bind to all ta-bind directive elements.
+- FIX ta-default-wrap and other funkyness with ul/ol tags, #155.
+
 2014-04-08 v1.2.1-pre4
 
 - Fixing IE bugs with ta-default-wrap.

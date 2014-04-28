@@ -270,8 +270,8 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 	textAngular.run(textAngularSetup.registerTools);
 
 	textAngular.directive("textAngular", [
-		'$compile', '$timeout', 'taOptions', 'taSanitize', 'taSelection', 'textAngularManager', '$window', '$document', '$animate', '$log',
-		function($compile, $timeout, taOptions, taSanitize, taSelection, textAngularManager, $window, $document, $animate, $log){
+		'$compile', '$timeout', 'taOptions', 'taSanitize', 'taSelection', 'taExecCommand', 'textAngularManager', '$window', '$document', '$animate', '$log',
+		function($compile, $timeout, taOptions, taSanitize, taSelection, taExecCommand, textAngularManager, $window, $document, $animate, $log){
 			return {
 				require: '?ngModel',
 				scope: {},
@@ -281,7 +281,8 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 					var _keydown, _keyup, _keypress, _mouseup, _focusin, _focusout,
 						_originalContents, _toolbars,
 						_serial = Math.floor(Math.random() * 10000000000000000),
-						_name = (attrs.name) ? attrs.name : 'textAngularEditor' + _serial;
+						_name = (attrs.name) ? attrs.name : 'textAngularEditor' + _serial,
+						_taExecCommand;
 					
 					var oneEvent = function(_element, event, action){
 						$timeout(function(){
@@ -294,14 +295,15 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 						}, 100);
 					};
 					
+					if(attrs.taDefaultWrap === undefined) _taExecCommand = taExecCommand((ie <= 8)? 'P' : 'p');
+					else if(attrs.taDefaultWrap === '') _taExecCommand = taExecCommand((ie === undefined)? 'div' : (ie <= 8)? 'P' : 'p');
+					else _taExecCommand = taExecCommand((ie <= 8)? attrs.taDefaultWrap.toUpperCase() : attrs.taDefaultWrap);
 					// get the settings from the defaults and add our specific functions that need to be on the scope
 					angular.extend(scope, angular.copy(taOptions), {
 						// wraps the selection in the provided tag / execCommand function. Should only be called in WYSIWYG mode.
 						wrapSelection: function(command, opt, isSelectableElementTool){
 							// catch errors like FF erroring when you try to force an undo with nothing done
-							try{
-								$document[0].execCommand(command, false, opt);
-							}catch(e){}
+							_taExecCommand(command, false, opt);
 							if(isSelectableElementTool){
 								// re-apply the selectable tool events
 								scope['reApplyOnSelectorHandlerstaTextElement' + _serial]();
@@ -739,7 +741,74 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 				}
 			};
 		}
-	]).directive('taBind', ['taSanitize', '$timeout', '$window', '$document', 'taFixChrome', 'taSelection', 'taSelectableElements', 'taApplyCustomRenderers',
+	]).factory('taExecCommand', ['taSelection', '$document', function(taSelection, $document){
+		var BLOCKELEMENTS = /(address|article|aside|audio|blockquote|canvas|dd|div|dl|fieldset|figcaption|figure|footer|form|h1|h2|h3|h4|h5|h6|header|hgroup|hr|noscript|ol|output|p|pre|section|table|tfoot|ul|video)/ig;
+		return function(taDefaultWrap){
+			return function(command, showUI, options){
+				var children, i, $target;
+				var selectedElement = taSelection.getSelectionElement();
+				var $selected = angular.element(selectedElement);
+				if(selectedElement !== undefined && !$selected.hasClass('ta-bind')){
+					if(command.toLowerCase() === 'insertorderedlist' || command.toLowerCase() === 'insertunorderedlist'){
+						var selfTag = (command.toLowerCase() === 'insertorderedlist')? 'ol' : 'ul';
+						if(selectedElement.tagName.toLowerCase() === selfTag){
+							// if all selected then we should remove the list
+							// grab all li elements and convert to taDefaultWrap tags
+							children = $selected.find('li');
+							for(i = children.length - 1; i >= 0; i--){
+								$target = angular.element('<' + taDefaultWrap + '>' + angular.element(children[i]).html() + '</' + taDefaultWrap + '>');
+								$selected.after($target);
+							}
+							$selected.remove();
+							taSelection.setSelectionToElementEnd($target[0]);
+							return;
+						}else if(selectedElement.tagName.toLowerCase() === 'li' && $selected.parent()[0].tagName.toLowerCase() === selfTag && $selected.parent().children().length === 1){
+							// catch for the previous statement if only one li exists
+							$target = angular.element('<' + taDefaultWrap + '>' + $selected.html() + '</' + taDefaultWrap + '>');
+							$selected.parent().after($target);
+							$selected.parent().remove();
+							taSelection.setSelectionToElementEnd($target[0]);
+							return;
+						}else if(selectedElement.tagName.toLowerCase() === 'li' && $selected.parent()[0].tagName.toLowerCase() !== selfTag && $selected.parent().children().length === 1){
+							// catch for the previous statement if only one li exists
+							$target = angular.element('<' + selfTag + '>' + $selected.parent().html() + '</' + selfTag + '>');
+							$selected.parent().after($target);
+							$selected.parent().remove();
+							taSelection.setSelectionToElementEnd($target.find('li')[0]);
+							return;
+						}else if(selectedElement.tagName.match(BLOCKELEMENTS)){
+							// if it's one of those block elements we have to change the contents
+							// if it's a ol/ul we are changing from one to the other
+							if(selectedElement.tagName.toLowerCase() === 'ol' || selectedElement.tagName.toLowerCase() === 'ul'){
+								$selected.after('<' + selfTag + '>' + $selected.html() + '</' + selfTag + '>');
+								$target = $selected.next();
+								$selected.remove();
+							}else{
+								var html = $selected.html();
+								if($selected.html().match(BLOCKELEMENTS)){
+									html = '';
+									children = $selected.children();
+									for(i = children.length - 1; i >= 0; i--){
+										html += '<li>' + angular.element(children[i]).html() + '</li>';
+									}
+								}else{
+									html = '<li>' + html + '</li>';
+								}
+								$selected.after('<' + selfTag + '>' + html + '</' + selfTag + '>');
+								$target = $selected.next();
+								$selected.remove();
+							}
+							taSelection.setSelectionToElementEnd($target[0]);
+							return;
+						}
+					}
+				}
+				try{
+					$document[0].execCommand(command, showUI, options);
+				}catch(e){console.log(e);}
+			};
+		};
+	}]).directive('taBind', ['taSanitize', '$timeout', '$window', '$document', 'taFixChrome', 'taSelection', 'taSelectableElements', 'taApplyCustomRenderers',
 					function(taSanitize, $timeout, $window, $document, taFixChrome, taSelection, taSelectableElements, taApplyCustomRenderers){
 		// Uses for this are textarea or input with ng-model and ta-bind='text'
 		// OR any non-form element with contenteditable="contenteditable" ta-bind="html|text" ng-model
@@ -1669,6 +1738,22 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 					textRange.collapse(true);
 					textRange.moveEnd("character", 0);
 					textRange.moveStart("character", 0);
+					textRange.select();
+				}
+			},
+			setSelectionToElementEnd: function (el){
+				if (_document.createRange && $window.getSelection) {
+					var range = _document.createRange();
+					range.selectNodeContents(el);
+					range.collapse(false);
+					
+					var sel = $window.getSelection();
+					sel.removeAllRanges();
+					sel.addRange(range);
+				} else if (_document.selection && _document.body.createTextRange) {
+					var textRange = _document.body.createTextRange();
+					textRange.moveToElementText(el);
+					textRange.collapse(false);
 					textRange.select();
 				}
 			}
