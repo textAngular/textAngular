@@ -256,6 +256,9 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 							// catch errors like FF erroring when you try to force an undo with nothing done
 							try{
 								$document[0].execCommand(command, false, opt);
+								if(command=='createLink'){
+									$("body").find('a[href="'+opt+'"]').attr('target', '_blank');
+								}
 							}catch(e){}
 							if(isSelectableElementTool){
 								// re-apply the selectable tool events
