@@ -3,34 +3,17 @@ describe('taBind', function () {
 	beforeEach(module('textAngular'));
 	var $rootScope;
 	
-	describe('requires rangy', function(){
-		var rangyTemp;
-		beforeEach(inject(function($window){
-			rangyTemp = $window.rangy;
-			$window.rangy = undefined;
-		}));
-		afterEach(inject(function($window){
-			$window.rangy = rangyTemp;
-		}));
-		it('not as non contenteditable', inject(function ($compile, $rootScope, $window) {
-			var element = $compile('<div ta-bind ng-model="test"></div>')($rootScope);
-			$rootScope.$digest();
-			expect(element.attr('class')).toBe('ng-scope ng-isolate-scope ng-pristine ng-valid ta-bind');
-		}));
-	});
-	
-	it('should require ngModel', inject(function (_$compile_, _$rootScope_) {
+	it('should require ngModel', inject(function ($compile, $rootScope) {
 		expect(function () {
-			_$compile_('<div ta-bind></div>')(_$rootScope_);
+			$compile('<div ta-bind></div>')($rootScope);
 			$rootScope.$digest();
 		}).toThrow();
 	}));
 	
-	it('should add ta-bind class', inject(function (_$compile_, _$rootScope_) {
-		expect(function () {
-			_$compile_('<div ta-bind ng-model="test"></div>')(_$rootScope_);
-			$rootScope.$digest();
-		}).toThrow();
+	it('should add ta-bind class', inject(function ($compile, $rootScope) {
+		var element = $compile('<div ta-bind ng-model="test"></div>')($rootScope);
+		$rootScope.$digest();
+		expect(element.attr('class')).toBe('ng-scope ng-isolate-scope ng-pristine ng-valid ta-bind');
 	}));
 
 	describe('should respect HTML5 placeholder', function () {
