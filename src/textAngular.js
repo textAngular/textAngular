@@ -31,9 +31,8 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 			}
 			globalContentEditableBlur = false;
 		}, false); // add global click handler
-		document.body.innerHTML += '<input id="textAngular-editableFix-010203040506070809" style="width:1px;height:1px;border:none;margin:0;padding:0;position:absolute; top: -10000; left: -10000;" unselectable="on" tabIndex="-1">';
+		angular.element(document.body).append('<input id="textAngular-editableFix-010203040506070809" style="width:1px;height:1px;border:none;margin:0;padding:0;position:absolute; top: -10000; left: -10000;" unselectable="on" tabIndex="-1">');
 	}
-	
 	// IE version detection - http://stackoverflow.com/questions/4169160/javascript-ie-detection-why-not-use-simple-conditional-comments
 	// We need this as IE sometimes plays funny tricks with the contenteditable.
 	// ----------------------------------------------------------
@@ -364,15 +363,25 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 					
 					// define the popover show and hide functions
 					scope.showPopover = function(_el){
-						scope.displayElements.popover.css('top', _el[0].offsetTop + _el[0].offsetHeight + 'px');
-						scope.displayElements.popover.css('left', _el[0].offsetLeft + (_el[0].offsetWidth / 2.0) - 152.5 + 'px');
+						scope.reflowPopover(_el);
 						scope.displayElements.popover.css('display', 'block');
 						$animate.addClass(scope.displayElements.popover, 'in');
-						oneEvent(element, 'click', function(){scope.hidePopover();});
+						oneEvent(element, 'click keyup', function(){scope.hidePopover();});
 					};
 					scope.reflowPopover = function(_el){
-						scope.displayElements.popover.css('top', _el[0].offsetTop + _el[0].offsetHeight + 'px');
-						scope.displayElements.popover.css('left', _el[0].offsetLeft + (_el[0].offsetWidth / 2.0) - 152.5 + 'px');
+						if(scope.displayElements.text[0].offsetHeight - 51 > _el[0].offsetTop){
+							scope.displayElements.popover.css('top', _el[0].offsetTop + _el[0].offsetHeight + 'px');
+							scope.displayElements.popover.removeClass('top').addClass('bottom');
+						}else{
+							scope.displayElements.popover.css('top', _el[0].offsetTop - 54 + 'px');
+							scope.displayElements.popover.removeClass('bottom').addClass('top');
+						}
+						scope.displayElements.popover.css('left', Math.max(0,
+							Math.min(
+								scope.displayElements.text[0].offsetWidth - 305,
+								_el[0].offsetLeft + (_el[0].offsetWidth / 2.0) - 152.5
+							)
+						) + 'px');
 					};
 					scope.hidePopover = function(){
 						$animate.removeClass(scope.displayElements.popover, 'in', /* istanbul ignore next: dosen't test with mocked animate */ function(){
@@ -409,7 +418,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 							scope.hidePopover();
 							var scrollTop = scope.displayElements.scrollWindow[0].scrollTop;
 							console.log(scrollTop);
-							var ratio = _el.offsetHeight / _el.offsetWidth;
+							var ratio = _el[0].offsetHeight / _el[0].offsetWidth;
 							var mousemove = function(event){
 								// calculate new size
 								var pos = {
@@ -778,7 +787,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 		return function(taDefaultWrap){
 			taDefaultWrap = taBrowserTag(taDefaultWrap);
 			return function(command, showUI, options){
-				var children, i, $target, html;
+				var i, $target, html;
 				var selectedElement = taSelection.getSelectionElement();
 				var $selected = angular.element(selectedElement);
 				if(selectedElement !== undefined){
