@@ -1,9 +1,10 @@
 describe('taExecCommand', function(){
 	'use strict';
+	var $element;
 	beforeEach(module('textAngular'));
 	//mock for easier testing
 	describe('normal function', function(){
-		var $element, $document, contents, _tempExec;
+		var $document, contents, _tempExec;
 		beforeEach(inject(function(_$document_){
 			$document = _$document_;
 			contents = angular.element('<div>');
@@ -33,8 +34,123 @@ describe('taExecCommand', function(){
 		});
 	});
 	
+	describe('handles formatBlock correctly', function(){
+		beforeEach(function(){
+			module(function($provide){
+				$provide.value('taSelection', {
+					element: undefined,
+					getSelectionElement: function (){ return this.element; },
+					getOnlySelectedElements: function(){ return this.element.childNodes; },
+					setSelectionToElementStart: function (){ return; },
+					setSelectionToElementEnd: function (){ return; }
+				});
+			});
+		});
+		// in li element
+		// in non-block element, ie <b>
+		// in block element, <p>
+		// multiple selected including text elements
+		// only text selected (collapsed range selection)
+		
+		// all wrap and unwrap
+		describe('wraps elements', function(){
+			describe('doesn\'t split lists', function(){
+				it('li selected', inject(function(taExecCommand, taSelection){
+					$element = angular.element('<div class="ta-bind"><ul><li>Test</li></ul></div>');
+					taSelection.element = $element.find('li')[0];
+					taExecCommand()('formatBlock', false, '<BLOCKQUOTE>');
+					expect($element.html()).toBe('<blockquote><ul><li>Test</li></ul></blockquote>');
+				}));
+				it('ul selected', inject(function(taExecCommand, taSelection){
+					$element = angular.element('<div class="ta-bind"><ul><li>Test</li></ul></div>');
+					taSelection.element = $element.find('ul')[0];
+					taExecCommand()('formatBlock', false, '<BLOCKQUOTE>');
+					expect($element.html()).toBe('<blockquote><ul><li>Test</li></ul></blockquote>');
+				}));
+				it('ol selected', inject(function(taExecCommand, taSelection){
+					$element = angular.element('<div class="ta-bind"><ol><li>Test</li></ol></div>');
+					taSelection.element = $element.find('ol')[0];
+					taExecCommand()('formatBlock', false, '<BLOCKQUOTE>');
+					expect($element.html()).toBe('<blockquote><ol><li>Test</li></ol></blockquote>');
+				}));
+			});
+			describe('wraps non-list elements', function(){
+				beforeEach(inject(function($document){
+					$element = angular.element('<div class="ta-bind"><p><b>Test</b></p></div>');
+					$document.find('body').append($element);
+				}));
+				afterEach(inject(function($document){
+					$element.remove();
+				}));
+				it('no selection - single space', inject(function(taExecCommand, taSelection){
+					taSelection.element = $element.find('b')[0];
+					taSelection.getOnlySelectedElements = function(){ return []; };
+					taExecCommand()('formatBlock', false, '<BLOCKQUOTE>');
+					expect($element.html()).toBe('<blockquote><p><b>Test</b></p></blockquote>');
+				}));
+			});
+		});
+		describe('unwraps elements', function(){
+			describe('doesn\'t split lists', function(){
+				it('li selected', inject(function(taExecCommand, taSelection){
+					$element = angular.element('<div class="ta-bind"><blockquote><ul><li>Test</li></ul></blockquote></div>');
+					taSelection.element = $element.find('li')[0];
+					taExecCommand()('formatBlock', false, '<BLOCKQUOTE>');
+					expect($element.html()).toBe('<ul><li>Test</li></ul>');
+				}));
+				it('ul selected', inject(function(taExecCommand, taSelection){
+					$element = angular.element('<div class="ta-bind"><blockquote><ul><li>Test</li></ul></blockquote></div>');
+					taSelection.element = $element.find('ul')[0];
+					taExecCommand()('formatBlock', false, '<BLOCKQUOTE>');
+					expect($element.html()).toBe('<ul><li>Test</li></ul>');
+				}));
+				it('ol selected', inject(function(taExecCommand, taSelection){
+					$element = angular.element('<div class="ta-bind"><blockquote><ol><li>Test</li></ol></blockquote></div>');
+					taSelection.element = $element.find('ol')[0];
+					taExecCommand()('formatBlock', false, '<BLOCKQUOTE>');
+					expect($element.html()).toBe('<ol><li>Test</li></ol>');
+				}));
+			});
+			describe('unwraps non-list elements', function(){
+				beforeEach(inject(function($document){
+					$element = angular.element('<div class="ta-bind"><blockquote><p><b>Test</b></p></blockquote></div>');
+					$document.find('body').append($element);
+				}));
+				afterEach(inject(function($document){
+					$element.remove();
+				}));
+				it('no selection - single space', inject(function(taExecCommand, taSelection){
+					taSelection.element = $element.find('b')[0];
+					taSelection.getOnlySelectedElements = function(){ return []; };
+					taExecCommand()('formatBlock', false, '<BLOCKQUOTE>');
+					expect($element.html()).toBe('<p><b>Test</b></p>');
+				}));
+				it('inline selected', inject(function(taExecCommand, taSelection){
+					taSelection.element = $element.find('b')[0];
+					taSelection.getOnlySelectedElements = function(){ return taSelection.element.childNodes; };
+					taExecCommand()('formatBlock', false, '<BLOCKQUOTE>');
+					expect($element.html()).toBe('<p><b>Test</b></p>');
+				}));
+				it('block selected', inject(function(taExecCommand, taSelection){
+					taSelection.element = $element.find('p')[0];
+					taSelection.getOnlySelectedElements = function(){ return taSelection.element; };
+					taExecCommand()('formatBlock', false, '<BLOCKQUOTE>');
+					expect($element.html()).toBe('<p><b>Test</b></p>');
+				}));
+			});
+			describe('unwraps text elements', function(){
+				it('just text element', inject(function(taExecCommand, taSelection){
+					$element = angular.element('<div class="ta-bind"><blockquote><p>Test</p></blockquote></div>');
+					taSelection.element = $element.find('p')[0];
+					taExecCommand()('formatBlock', false, '<BLOCKQUOTE>');
+					expect($element.html()).toBe('<p>Test</p>');
+				}));
+			});
+		});
+	});
+	
 	describe('handles lists correctly', function(){
-		var taSelectionMock, $element, $document, contents;
+		var taSelectionMock, $document, contents;
 		beforeEach(function(){
 			taSelectionMock = {
 				element: undefined,

@@ -409,23 +409,25 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 						});
 						scope.displayElements.resize.info.text(_el.offsetWidth + ' x ' + _el.offsetHeight);
 					};
+					/* istanbul ignore next: pretty sure phantomjs won't test this */
 					scope.showResizeOverlay = function(_el){
 						var resizeMouseDown = function(event){
 							var startPosition = {
-								left: _el[0].offsetLeft,
-								top: _el[0].offsetTop
+								width: parseInt(_el.attr('width')),
+								height: parseInt(_el.attr('height')),
+								x: event.clientX,
+								y: event.clientY
 							};
+							if(startPosition.width === undefined) startPosition.width = _el[0].offsetWidth;
+							if(startPosition.height === undefined) startPosition.height = _el[0].offsetHeight;
 							scope.hidePopover();
-							var scrollTop = scope.displayElements.scrollWindow[0].scrollTop;
-							console.log(scrollTop);
-							var ratio = _el[0].offsetHeight / _el[0].offsetWidth;
+							var ratio = startPosition.height / startPosition.width;
 							var mousemove = function(event){
 								// calculate new size
 								var pos = {
-									x: event.clientX - startPosition.left,
-									y: event.clientY - startPosition.top - scrollTop
+									x: Math.max(0, startPosition.width + (event.clientX - startPosition.x)),
+									y: Math.max(0, startPosition.height + (event.clientY - startPosition.y))
 								};
-								console.log(pos);
 								var applyImageSafeCSS = function(_el, css){
 									_el = angular.element(_el);
 									if(_el[0].tagName.toLowerCase() === 'img'){
@@ -456,9 +458,9 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 								// reflow the popover tooltip
 								scope.reflowResizeOverlay(_el);
 							};
-							scope.displayElements.resize.overlay.on('mousemove', mousemove);
+							$document.find('body').on('mousemove', mousemove);
 							oneEvent(scope.displayElements.resize.overlay, 'mouseup', function(){
-								scope.displayElements.resize.overlay.off('mousemove', mousemove);
+								$document.find('body').off('mousemove', mousemove);
 								scope.showPopover(_el);
 							});
 							event.stopPropagation();
@@ -470,6 +472,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 						scope.reflowResizeOverlay(_el);
 						oneEvent(element, 'click', function(){scope.hideResizeOverlay();});
 					};
+					/* istanbul ignore next: pretty sure phantomjs won't test this */
 					scope.hideResizeOverlay = function(){
 						scope.displayElements.resize.overlay.css('display', '');
 					};
@@ -692,8 +695,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 					scope.updateSelectedStyles = function(){
 						var _selection;
 						// test if the common element ISN'T the root ta-text node
-						if((_selection = taSelection.getSelectionElement().parentNode) !== scope.displayElements.text[0]
-						){
+						if((_selection = taSelection.getSelectionElement()) !== undefined && _selection.parentNode !== scope.displayElements.text[0]){
 							_toolbars.updateSelectedStyles(angular.element(_selection));
 						}else _toolbars.updateSelectedStyles();
 						// used to update the active state when a key is held down, ie the left arrow
@@ -756,20 +758,21 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 		};
 	}]).factory('taExecCommand', ['taSelection', 'taBrowserTag', '$document', function(taSelection, taBrowserTag, $document){
 		var BLOCKELEMENTS = /(address|article|aside|audio|blockquote|canvas|dd|div|dl|fieldset|figcaption|figure|footer|form|h1|h2|h3|h4|h5|h6|header|hgroup|hr|noscript|ol|output|p|pre|section|table|tfoot|ul|video)/ig;
+		var LISTELEMENTS = /(ul|li|ol)/ig;
 		var listToDefault = function(listElement, defaultWrap){
 			var $target;
 			// if all selected then we should remove the list
 			// grab all li elements and convert to taDefaultWrap tags
 			var children = listElement.find('li');
 			for(i = children.length - 1; i >= 0; i--){
-				$target = angular.element('<' + defaultWrap + '>' + angular.element(children[i]).html() + '</' + defaultWrap + '>');
+				$target = angular.element('<' + defaultWrap + '>' + children[i].innerHTML + '</' + defaultWrap + '>');
 				listElement.after($target);
 			}
 			listElement.remove();
 			taSelection.setSelectionToElementEnd($target[0]);
 		};
 		var listToList = function(listElement, newListTag){
-			var $target = angular.element('<' + newListTag + '>' + listElement.html() + '</' + newListTag + '>');
+			var $target = angular.element('<' + newListTag + '>' + listElement[0].innerHTML + '</' + newListTag + '>');
 			listElement.after($target);
 			listElement.remove();
 			taSelection.setSelectionToElementEnd($target.find('li')[0]);
@@ -777,7 +780,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 		var childElementsToList = function(elements, listElement, newListTag){
 			var html = '';
 			for(i = elements.length - 1; i >= 0; i--){
-				html += '<' + taBrowserTag('li') + '>' + angular.element(elements[i]).html() + '</' + taBrowserTag('li') + '>';
+				html += '<' + taBrowserTag('li') + '>' + elements[i].innerHTML + '</' + taBrowserTag('li') + '>';
 			}
 			var $target = angular.element('<' + newListTag + '>' + html + '</' + newListTag + '>');
 			listElement.after($target);
@@ -787,37 +790,39 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 		return function(taDefaultWrap){
 			taDefaultWrap = taBrowserTag(taDefaultWrap);
 			return function(command, showUI, options){
-				var i, $target, html;
+				var i, $target, html, _nodes;
+				var defaultWrapper = angular.element('<' + taDefaultWrap + '>');
 				var selectedElement = taSelection.getSelectionElement();
 				var $selected = angular.element(selectedElement);
 				if(selectedElement !== undefined){
+					var tagName = selectedElement.tagName.toLowerCase();
 					if(command.toLowerCase() === 'insertorderedlist' || command.toLowerCase() === 'insertunorderedlist'){
 						var selfTag = taBrowserTag((command.toLowerCase() === 'insertorderedlist')? 'ol' : 'ul');
-						if(selectedElement.tagName.toLowerCase() === selfTag){
+						if(tagName === selfTag){
 							// if all selected then we should remove the list
 							// grab all li elements and convert to taDefaultWrap tags
 							return listToDefault($selected, taDefaultWrap);
-						}else if(selectedElement.tagName.toLowerCase() === 'li' && $selected.parent()[0].tagName.toLowerCase() === selfTag && $selected.parent().children().length === 1){
+						}else if(tagName === 'li' && $selected.parent()[0].tagName.toLowerCase() === selfTag && $selected.parent().children().length === 1){
 							// catch for the previous statement if only one li exists
 							return listToDefault($selected.parent(), taDefaultWrap);
-						}else if(selectedElement.tagName.toLowerCase() === 'li' && $selected.parent()[0].tagName.toLowerCase() !== selfTag && $selected.parent().children().length === 1){
+						}else if(tagName === 'li' && $selected.parent()[0].tagName.toLowerCase() !== selfTag && $selected.parent().children().length === 1){
 							// catch for the previous statement if only one li exists
 							return listToList($selected.parent(), selfTag);
-						}else if(selectedElement.tagName.match(BLOCKELEMENTS) && !$selected.hasClass('ta-bind')){
+						}else if(tagName.match(BLOCKELEMENTS) && !$selected.hasClass('ta-bind')){
 							// if it's one of those block elements we have to change the contents
 							// if it's a ol/ul we are changing from one to the other
-							if(selectedElement.tagName.toLowerCase() === 'ol' || selectedElement.tagName.toLowerCase() === 'ul'){
+							if(tagName === 'ol' || tagName === 'ul'){
 								return listToList($selected, selfTag);
 							}else{
-								if($selected.html().match(BLOCKELEMENTS)){
+								if(selectedElement.innerHTML.match(BLOCKELEMENTS)){
 									return childElementsToList($selected.children(), $selected, selfTag);
 								}else{
-									return childElementsToList(angular.element('<div>' + $selected.html() + '</div>'), $selected, selfTag);
+									return childElementsToList(angular.element('<div>' + selectedElement.innerHTML + '</div>'), $selected, selfTag);
 								}
 							}
-						}else if(selectedElement.tagName.match(BLOCKELEMENTS)){
+						}else if(tagName.match(BLOCKELEMENTS)){
 							// if we get here then all the contents of the ta-bind are selected
-							var _nodes = taSelection.getOnlySelectedElements();
+							_nodes = taSelection.getOnlySelectedElements();
 							if(_nodes.length === 1 && (_nodes[0].tagName.toLowerCase() === 'ol' || _nodes[0].tagName.toLowerCase() === 'ul')){
 								if(_nodes[0].tagName.toLowerCase() === selfTag){
 									// remove
@@ -832,7 +837,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 									/* istanbul ignore else: catch for real-world can't make it occur in testing */
 									if(_nodes[i].nodeType !== 3){
 										var $n = angular.element(_nodes[i]);
-										html += '<' + taBrowserTag('li') + '>' + $n.html() + '</' + taBrowserTag('li') + '>';
+										html += '<' + taBrowserTag('li') + '>' + $n[0].innerHTML + '</' + taBrowserTag('li') + '>';
 										$nodes.unshift($n);
 									}
 								}
@@ -843,6 +848,57 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 							taSelection.setSelectionToElementEnd($target[0]);
 							return;
 						}
+					}else if(command.toLowerCase() === 'formatblock'){
+						if(tagName === 'li') $target = $selected.parent();
+						else $target = $selected;
+						// find the first blockElement
+						while(!$target[0].tagName.match(BLOCKELEMENTS)){
+							$target = $target.parent();
+						}
+						if(tagName === options.toLowerCase().replace(/[<>]/ig, '')){
+							// $target is wrap element
+							defaultWrapper.append($target[0].innerHTML);
+							$target.after(defaultWrapper);
+							$target.remove();
+							$target = defaultWrapper;
+						}else if($target.parent()[0].tagName.toLowerCase() === options.toLowerCase().replace(/[<>]/ig, '') && !$target.parent().hasClass('ta-bind')){
+							//unwrap logic for parent
+							var blockElement = $target.parent();
+							var contents = blockElement.contents();
+							for(i = 0; i < contents.length; i ++){
+								/* istanbul ignore next: can't test - some wierd thing with how phantomjs works */
+								if(blockElement.parent().hasClass('ta-bind') && contents[i].nodeType === 3){
+									defaultWrapper = angular.element('<' + taDefaultWrap + '>');
+									defaultWrapper[0].innerHTML = contents[i].outerHTML;
+									contents[i] = defaultWrapper[0];
+								}
+								blockElement.parent()[0].insertBefore(contents[i], blockElement[0]);
+							}
+							blockElement.remove();
+						}else if(tagName.match(LISTELEMENTS)){
+							// wrapping a list element
+							$target.wrap(options);
+						}else{
+							// default wrap behaviour
+							_nodes = taSelection.getOnlySelectedElements();
+							if(_nodes.length === 0) _nodes = [$target[0]];
+							html = '';
+							if(_nodes.length === 1 && _nodes[0].nodeType === 3){
+								_nodes[0] = _nodes[0].parentNode;
+								while(!_nodes[0].tagName.match(BLOCKELEMENTS)){
+									_nodes[0] = _nodes[0].parentNode;
+								}
+							}
+							for(i = 0; i < _nodes.length; i++){
+								html += _nodes[i].outerHTML;
+							}
+							$target = angular.element(options);
+							$target[0].innerHTML = html;
+							_nodes[0].parentNode.insertBefore($target[0],_nodes[0]);
+							angular.forEach(_nodes, function(node){ node.parentNode.removeChild(node); });
+						}
+						taSelection.setSelectionToElementEnd($target[0]);
+						return;
 					}
 				}
 				try{
@@ -1753,12 +1809,13 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 			// Iterate nodes until we hit the end container
 			var rangeNodes = [];
 			while (node && node !== endNode) {
-				rangeNodes.push( node = nextNode(node) );
+				node = nextNode(node);
+				if(node.parentNode === range.commonAncestorContainer) rangeNodes.push(node);
 			}
 			// Add partially selected nodes at the start of the range
 			node = range.startContainer;
 			while (node && node !== range.commonAncestorContainer) {
-				rangeNodes.unshift(node);
+				if(node.parentNode === range.commonAncestorContainer) rangeNodes.unshift(node);
 				node = node.parentNode;
 			}
 			return rangeNodes;
