@@ -8,6 +8,7 @@
 - FIX ta-default-wrap in chrome bug.
 - ADD Class .ta-bind to all ta-bind directive elements.
 - FIX ta-default-wrap and other funkyness with ul/ol tags, #155.
+- FIX some execCommand bugs by adding taExecCommand.
 
 2014-04-08 v1.2.1-pre4
 
