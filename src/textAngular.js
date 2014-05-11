@@ -790,7 +790,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 		return function(taDefaultWrap){
 			taDefaultWrap = taBrowserTag(taDefaultWrap);
 			return function(command, showUI, options){
-				var i, $target, html, _nodes;
+				var i, $target, html, _nodes, next;
 				var defaultWrapper = angular.element('<' + taDefaultWrap + '>');
 				var selectedElement = taSelection.getSelectionElement();
 				var $selected = angular.element(selectedElement);
@@ -848,19 +848,32 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 							taSelection.setSelectionToElementEnd($target[0]);
 							return;
 						}
-					}else if(command.toLowerCase() === 'formatblock'){
+					}else if(command.toLowerCase() === 'formatblock' && 'blockquote' === options.toLowerCase().replace(/[<>]/ig, '')){
 						if(tagName === 'li') $target = $selected.parent();
 						else $target = $selected;
 						// find the first blockElement
 						while(!$target[0].tagName.match(BLOCKELEMENTS)){
 							$target = $target.parent();
+							tagName = $target[0].tagName.toLowerCase();
 						}
 						if(tagName === options.toLowerCase().replace(/[<>]/ig, '')){
 							// $target is wrap element
-							defaultWrapper.append($target[0].innerHTML);
-							$target.after(defaultWrapper);
-							$target.remove();
-							$target = defaultWrapper;
+							_nodes = $target.children();
+							var hasBlock = false;
+							for(i = 0; i < _nodes.length; i++){
+								hasBlock = hasBlock || _nodes[i].tagName.match(BLOCKELEMENTS);
+							}
+							if(hasBlock){
+								$target.after(_nodes);
+								next = $target.next();
+								$target.remove();
+								$target = next;
+							}else{
+								defaultWrapper.append($target[0].childNodes);
+								$target.after(defaultWrapper);
+								$target.remove();
+								$target = defaultWrapper;
+							}
 						}else if($target.parent()[0].tagName.toLowerCase() === options.toLowerCase().replace(/[<>]/ig, '') && !$target.parent().hasClass('ta-bind')){
 							//unwrap logic for parent
 							var blockElement = $target.parent();
@@ -884,10 +897,11 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 							if(_nodes.length === 0) _nodes = [$target[0]];
 							html = '';
 							if(_nodes.length === 1 && _nodes[0].nodeType === 3){
-								_nodes[0] = _nodes[0].parentNode;
-								while(!_nodes[0].tagName.match(BLOCKELEMENTS)){
-									_nodes[0] = _nodes[0].parentNode;
+								var _node = _nodes[0].parentNode;
+								while(!_node.tagName.match(BLOCKELEMENTS)){
+									_node = _node.parentNode;
 								}
+								_nodes = [_node];
 							}
 							for(i = 0; i < _nodes.length; i++){
 								html += _nodes[i].outerHTML;

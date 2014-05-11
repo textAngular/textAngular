@@ -34,7 +34,7 @@ describe('taExecCommand', function(){
 		});
 	});
 	
-	describe('handles formatBlock correctly', function(){
+	describe('handles formatBlock BLOCKQUOTE correctly', function(){
 		beforeEach(function(){
 			module(function($provide){
 				$provide.value('taSelection', {
@@ -75,18 +75,22 @@ describe('taExecCommand', function(){
 				}));
 			});
 			describe('wraps non-list elements', function(){
-				beforeEach(inject(function($document){
+				it('no selection - single space', inject(function($document, taExecCommand, taSelection){
 					$element = angular.element('<div class="ta-bind"><p><b>Test</b></p></div>');
 					$document.find('body').append($element);
-				}));
-				afterEach(inject(function($document){
-					$element.remove();
-				}));
-				it('no selection - single space', inject(function(taExecCommand, taSelection){
 					taSelection.element = $element.find('b')[0];
 					taSelection.getOnlySelectedElements = function(){ return []; };
 					taExecCommand()('formatBlock', false, '<BLOCKQUOTE>');
 					expect($element.html()).toBe('<blockquote><p><b>Test</b></p></blockquote>');
+					$element.remove();
+				}));
+				it('nested selection', inject(function($document, taExecCommand, taSelection){
+					$element = angular.element('<div class="ta-bind"><p><i><b>Test</b></i></p></div>');
+					$document.find('body').append($element);
+					taSelection.element = $element.find('b')[0];
+					taExecCommand()('formatBlock', false, '<BLOCKQUOTE>');
+					expect($element.html()).toBe('<blockquote><p><i><b>Test</b></i></p></blockquote>');
+					$element.remove();
 				}));
 			});
 		});
@@ -132,18 +136,24 @@ describe('taExecCommand', function(){
 					expect($element.html()).toBe('<p><b>Test</b></p>');
 				}));
 				it('block selected', inject(function(taExecCommand, taSelection){
-					taSelection.element = $element.find('p')[0];
+					taSelection.element = $element.find('blockquote')[0];
 					taSelection.getOnlySelectedElements = function(){ return taSelection.element; };
 					taExecCommand()('formatBlock', false, '<BLOCKQUOTE>');
 					expect($element.html()).toBe('<p><b>Test</b></p>');
 				}));
 			});
-			describe('unwraps text elements', function(){
-				it('just text element', inject(function(taExecCommand, taSelection){
-					$element = angular.element('<div class="ta-bind"><blockquote><p>Test</p></blockquote></div>');
-					taSelection.element = $element.find('p')[0];
+			describe('unwraps inline elements', function(){
+				it('just inline element', inject(function(taExecCommand, taSelection){
+					$element = angular.element('<div class="ta-bind"><blockquote><b>Test</b></blockquote></div>');
+					taSelection.element = $element.find('b')[0];
 					taExecCommand()('formatBlock', false, '<BLOCKQUOTE>');
-					expect($element.html()).toBe('<p>Test</p>');
+					expect($element.html()).toBe('<p><b>Test</b></p>');
+				}));
+				it('inline and text element', inject(function(taExecCommand, taSelection){
+					$element = angular.element('<div class="ta-bind"><blockquote>Other <b>Test</b></blockquote></div>');
+					taSelection.element = $element.find('blockquote')[0];
+					taExecCommand()('formatBlock', false, '<BLOCKQUOTE>');
+					expect($element.html()).toBe('<p>Other <b>Test</b></p>');
 				}));
 			});
 		});

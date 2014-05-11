@@ -58,7 +58,7 @@ Download the code from [https://github.com/fraywing/textAngular/releases/latest]
 ### Usage
 
 1. Include `textAngular-sanitize.js` or `textAngular-sanitize.min.js` in your project using script tags
-2. Include `textAngularSetup.js` then `textAngular.js` or `textAngular.min.js`
+2. Include `textAngularSetup.js` then `textAngular.js` or `textAngular.min.js` (textAngularSetup.js is included inside textAngular.min.js)
 3. Add a dependency to `textAngular` in your app module, for example: ```angular.module('myModule', ['textAngular'])```.
 4. Create an element to hold the editor and add an `ng-model="htmlVariable"` attribute where `htmtlVariable` is the scope variable that will hold the HTML entered into the editor:
 ```html
