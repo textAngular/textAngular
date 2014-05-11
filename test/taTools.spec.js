@@ -1,3 +1,4 @@
+var val;
 describe('taToolsExecuteFunction', function(){
 	var scope, startActionResult, editor, $rootScope;
 	beforeEach(module('textAngular'));
@@ -448,32 +449,36 @@ describe('taTools test tool actions', function(){
 			editorScope.displayElements.text.find('p').find('img').triggerHandler('click');
 			editorScope.displayElements.popoverContainer.find('button').eq(0).triggerHandler('click');
 			$rootScope.$digest();
-			if(jQuery === angular.element) expect(editorScope.displayElements.text.find('p').find('img').css('width')).toBe('345px');
-			else expect(editorScope.displayElements.text.find('p').find('img').css('width')).toBe('100%');
+			val = editorScope.displayElements.text.find('p').find('img').css('width');
+			if(jQuery === angular.element) expect(val === '345px' || val === '344px').toBe(true);
+			else expect(val).toBe('100%');
 		});
 		
 		it('has functioning 50% button', function(){
 			editorScope.displayElements.text.find('p').find('img').triggerHandler('click');
 			editorScope.displayElements.popoverContainer.find('button').eq(1).triggerHandler('click');
 			$rootScope.$digest();
-			if(jQuery === angular.element) expect(editorScope.displayElements.text.find('p').find('img').css('width')).toBe('172px');
-			else expect(editorScope.displayElements.text.find('p').find('img').css('width')).toBe('50%');
+			val = editorScope.displayElements.text.find('p').find('img').css('width');
+			if(jQuery === angular.element) expect(val).toBe('172px');
+			else expect(val).toBe('50%');
 		});
 		
 		it('has functioning 25% button', function(){
 			editorScope.displayElements.text.find('p').find('img').triggerHandler('click');
 			editorScope.displayElements.popoverContainer.find('button').eq(2).triggerHandler('click');
 			$rootScope.$digest();
-			if(jQuery === angular.element) expect(editorScope.displayElements.text.find('p').find('img').css('width')).toBe('86px');
-			else expect(editorScope.displayElements.text.find('p').find('img').css('width')).toBe('25%');
+			val = editorScope.displayElements.text.find('p').find('img').css('width');
+			if(jQuery === angular.element) expect(val).toBe('86px');
+			else expect(val).toBe('25%');
 		});
 		
 		it('has functioning reset-size button', function(){
 			editorScope.displayElements.text.find('p').find('img').triggerHandler('click');
 			editorScope.displayElements.popoverContainer.find('button').eq(3).triggerHandler('click');
 			$rootScope.$digest();
-			if(jQuery === angular.element) expect(editorScope.displayElements.text.find('p').find('img').css('width')).toBe('0px');
-			else expect(editorScope.displayElements.text.find('p').find('img').css('width')).toBe('');
+			val = editorScope.displayElements.text.find('p').find('img').css('width');
+			if(jQuery === angular.element) expect(val).toBe('0px');
+			else expect(val).toBe('');
 		});
 		
 		it('has functioning float-left button', function(){
