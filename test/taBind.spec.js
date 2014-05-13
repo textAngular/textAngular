@@ -781,6 +781,13 @@ describe('taBind', function () {
 				_$rootScope_.$digest();
 				expect(element.attr('contenteditable')).not.toBeDefined();
 			}));
+			it('has the .ta-readonly class', inject(function (_$compile_, _$rootScope_) {
+				_$rootScope_.html = '<p>Test Contents</p>';
+				_$rootScope_.readonly = true;
+				var element = _$compile_('<div ta-bind contenteditable="true" ta-readonly="readonly" ng-model="html"></div>')(_$rootScope_);
+				_$rootScope_.$digest();
+				expect(element.hasClass('ta-readonly')).toBe(true);
+			}));
 		});
 
 		describe('initially false', function () {
@@ -811,6 +818,13 @@ describe('taBind', function () {
 				var element = _$compile_('<div ta-bind ta-readonly="readonly" ng-model="html"></div>')(_$rootScope_);
 				_$rootScope_.$digest();
 				expect(element.attr('contenteditable')).not.toBeDefined();
+			}));
+			it('does not have .ta-readonly class', inject(function (_$compile_, _$rootScope_) {
+				_$rootScope_.html = '<p>Test Contents</p>';
+				_$rootScope_.readonly = false;
+				var element = _$compile_('<div ta-bind contenteditable="true" ta-readonly="readonly" ng-model="html"></div>')(_$rootScope_);
+				_$rootScope_.$digest();
+				expect(element.hasClass('ta-readonly')).toBe(false);
 			}));
 		});
 
@@ -852,6 +866,15 @@ describe('taBind', function () {
 				_$rootScope_.$digest();
 				expect(element.attr('contenteditable')).not.toBeDefined();
 			}));
+			it('adds the .ta-readonly class', inject(function (_$compile_, _$rootScope_) {
+				_$rootScope_.html = '<p>Test Contents</p>';
+				_$rootScope_.readonly = false;
+				var element = _$compile_('<div ta-bind contenteditable="true" ta-readonly="readonly" ng-model="html"></div>')(_$rootScope_);
+				_$rootScope_.$digest();
+				_$rootScope_.readonly = true;
+				_$rootScope_.$digest();
+				expect(element.hasClass('ta-readonly')).toBe(true);
+			}));
 		});
 
 		describe('changed to false', function () {
@@ -890,6 +913,15 @@ describe('taBind', function () {
 				_$rootScope_.readonly = false;
 				_$rootScope_.$digest();
 				expect(element.attr('contenteditable')).not.toBeDefined();
+			}));
+			it('removes the .ta-readonly class', inject(function (_$compile_, _$rootScope_) {
+				_$rootScope_.html = '<p>Test Contents</p>';
+				_$rootScope_.readonly = true;
+				var element = _$compile_('<div ta-bind contenteditable="true" ta-readonly="readonly" ng-model="html"></div>')(_$rootScope_);
+				_$rootScope_.$digest();
+				_$rootScope_.readonly = false;
+				_$rootScope_.$digest();
+				expect(element.hasClass('ta-readonly')).toBe(false);
 			}));
 		});
 

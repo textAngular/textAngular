@@ -1172,6 +1172,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 					//set initial value
 					_isReadonly = scope.$parent.$eval(attrs.taReadonly);
 					if(_isReadonly){
+						element.addClass('ta-readonly');
 						// we changed to readOnly mode (taReadonly='true')
 						if(element[0].tagName.toLowerCase() === 'textarea' || element[0].tagName.toLowerCase() === 'input'){
 							element.attr('disabled', 'disabled');
@@ -1180,6 +1181,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 							element.removeAttr('contenteditable');
 						}
 					}else{
+						element.removeClass('ta-readonly');
 						// we changed to NOT readOnly mode (taReadonly='false')
 						if(element[0].tagName.toLowerCase() === 'textarea' || element[0].tagName.toLowerCase() === 'input'){
 							element.removeAttr('disabled');
@@ -1192,6 +1194,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 					scope.$parent.$watch(attrs.taReadonly, function(newVal, oldVal){
 						if(oldVal === newVal) return;
 						if(newVal){
+							element.addClass('ta-readonly');
 							// we changed to readOnly mode (taReadonly='true')
 							if(element[0].tagName.toLowerCase() === 'textarea' || element[0].tagName.toLowerCase() === 'input'){
 								element.attr('disabled', 'disabled');
@@ -1205,6 +1208,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 							});
 							element.off('drop', fileDropHandler);
 						}else{
+							element.removeClass('ta-readonly');
 							// we changed to NOT readOnly mode (taReadonly='false')
 							if(element[0].tagName.toLowerCase() === 'textarea' || element[0].tagName.toLowerCase() === 'input'){
 								element.removeAttr('disabled');
