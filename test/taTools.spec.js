@@ -477,7 +477,7 @@ describe('taTools test tool actions', function(){
 			editorScope.displayElements.popoverContainer.find('button').eq(3).triggerHandler('click');
 			$rootScope.$digest();
 			val = editorScope.displayElements.text.find('p').find('img').css('width');
-			if(jQuery === angular.element) expect(val).toBe('0px');
+			if(jQuery === angular.element) expect(val === '0px' || val === '4px').toBe(true); // catch a phantomJS inconsistency
 			else expect(val).toBe('');
 		});
 		

@@ -179,27 +179,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 	
 	// this global var is used to prevent multiple fires of the drop event. Needs to be global to the textAngular file.
 	var dropFired = false;
-	var textAngular = angular.module("textAngular", ['ngSanitize']); //This makes ngSanitize required
-	
-	/* istanbul ignore next: untestable in Karma due to loading patterns */
-	if(textAngularSetup === undefined){
-		throw('textAngular Error: Setup Options are not defined, see textAngularSetup.js for example.');
-	}
-	
-	// Here we set up the global display defaults, to set your own use a angular $provider#decorator.
-	textAngular.value('taOptions', textAngularSetup.options);
-	
-	// This is the element selector string that is used to catch click events within a taBind, prevents the default and $emits a 'ta-element-select' event
-	// these are individually used in an angular.element().find() call. What can go here depends on whether you have full jQuery loaded or just jQLite with angularjs.
-	// div is only used as div.ta-insert-video caught in filter.
-	textAngular.value('taSelectableElements', textAngularSetup.selectableElements);
-	
-	// This is an array of objects with the following options:
-	//				selector: <string> a jqLite or jQuery selector string
-	//				customAttribute: <string> an attribute to search for
-	//				renderLogic: <function(element)>
-	// Both or one of selector and customAttribute must be defined.
-	textAngular.value('taCustomRenderers', textAngularSetup.customDisplayRenderers);
+	var textAngular = angular.module("textAngular", ['ngSanitize', 'textAngularSetup']); //This makes ngSanitize required
 	
 	// setup the global contstant functions for setting up the toolbar
 
@@ -253,20 +233,13 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 		taTools[name] = toolDefinition;
 	}
 
-	textAngular.constant('taTranslations', textAngularSetup.translationStrings);
-
 	textAngular.constant('taRegisterTool', registerTextAngularTool);
 	textAngular.value('taTools', taTools);
-
-	// configure initial textAngular tools here via taRegisterTool
-	// we grab the original function and replace it with our own
-	var registerToolsFunction = textAngularSetup.registerTools[textAngularSetup.registerTools.length - 1];
-	textAngularSetup.registerTools[textAngularSetup.registerTools.length - 1] = function(){
+	
+	textAngular.config([function(){
 		// clear taTools variable. Just catches testing and any other time that this config may run multiple times...
 		angular.forEach(taTools, function(value, key){ delete taTools[key];	});
-		registerToolsFunction.apply(this, arguments);
-	};
-	textAngular.run(textAngularSetup.registerTools);
+	}]);
 
 	textAngular.directive("textAngular", [
 		'$compile', '$timeout', 'taOptions', 'taSanitize', 'taSelection', 'taExecCommand', 'textAngularManager', '$window', '$document', '$animate', '$log',
