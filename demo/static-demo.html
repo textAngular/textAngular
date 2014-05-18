@@ -5,7 +5,7 @@
 
   <meta charset="UTF-8">
 
-  <title>textAngular 1.2.0 Demo</title>
+  <title>textAngular 1.2.1 Demo</title>
 
   <meta name="robots" content="noindex">
 
@@ -44,7 +44,10 @@ img[ta-insert-video]{
   <h1>Editor</h1>
   <button ng-click="disabled = !disabled" unselectable>Disable text-angular Toggle</button>
   <div text-angular-toolbar name="htmlcontenttools"></div>
-  <div text-angular="text-angular" name="htmlcontent" ng-model="data.htmlcontent3" ta-disabled='disabled' placeholder='Placeholder Text ONe' ta-target-toolbars='htmlcontenttools,statictoolbar'></div>
+  <div ng-if="true">
+	  <div text-angular="text-angular" name="htmlcontent" ng-model="data.htmlcontent3" ta-disabled='disabled' placeholder='Placeholder Text ONe' ta-target-toolbars='htmlcontenttools,statictoolbar'></div>
+	  <textarea ng-model="data.htmlcontent3" style="width: 100%"></textarea>
+  </div>
   <text-angular ng-if="canEdit" name="htmlcontent2" ng-model="data.htmlcontent" ta-disabled='disabled' placeholder='Placeholder Text' ta-default-wrap="p" ta-target-toolbars='htmlcontenttools,statictoolbar'></text-angular>
   <button ng-click="canEdit = !canEdit">Can Edit</button>
   <h1>Raw HTML in a text area</h1>
@@ -71,8 +74,10 @@ img[ta-insert-video]{
 </div>
   <script src='../bower_components/angular/angular.js'></script>
   <script src='../src/textAngular-sanitize.js'></script>
-  <script src='../src/textAngularSetup.js'></script>
-  <script src='../src/textAngular.js'></script><!-- <script src='../dist/textAngular.min.js'></script> -->
+  <!--
+<script src='../src/textAngularSetup.js'></script>
+  <script src='../src/textAngular.js'></script>
+--><script src='../dist/textAngular.min.js'></script>
 
   <script type="text/javascript">
   	'use strict';

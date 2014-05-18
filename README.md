@@ -1,4 +1,4 @@
-textAngular v1.2.1-pre5
+textAngular v1.2.1
 ===========
 
 [![Build Status](https://travis-ci.org/fraywing/textAngular.png?branch=master)](https://travis-ci.org/fraywing/textAngular) [![Coverage Status](https://coveralls.io/repos/fraywing/textAngular/badge.png)](https://coveralls.io/r/fraywing/textAngular)
@@ -6,7 +6,7 @@ textAngular v1.2.1-pre5
 
 Demo is available at: http://www.textangular.com
 
-#### This readme is for the v1.2.1-preX releases, if you are looking for the v1.2.0 readme go here: https://github.com/fraywing/textAngular/tree/v1.2.0
+#### This readme is for the v1.2.1 release, if you are looking for the v1.2.0 readme go here: https://github.com/fraywing/textAngular/tree/v1.2.0
 
 ## Requirements
 

@@ -1,5 +1,14 @@
 ###Changelog
 
+2014-05-19 v1.2.1
+
+- Release
+
+2014-05-12 v1.2.1-pre6
+
+- FIX some FormatBlock issues.
+- Add .ta-bind class to the ta-bind directive.
+
 2014-05-01 v1.2.1-pre5
 
 - ADD Included some css built into the editor - no need for extra stylesheets unless you want to override.
