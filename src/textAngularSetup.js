@@ -13,7 +13,7 @@ textAngularSetup.value('taOptions',  {
 	toolbar: [
 		['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'pre', 'quote'],
 		['bold', 'italics', 'underline', 'ul', 'ol', 'redo', 'undo', 'clear'],
-		['justifyLeft','justifyCenter','justifyRight'],
+		['justifyLeft','justifyCenter','justifyRight','indent','outdent'],
 		['html', 'insertImage', 'insertLink', 'insertVideo']
 	],
 	classes: {
@@ -203,6 +203,22 @@ textAngularSetup.run(['taRegisterTool', '$window', 'taTranslations', 'taSelectio
 			return result;
 		}
 	});
+	taRegisterTool('indent', {
+        	iconclass: 'fa fa-indent',
+        	tooltiptext: 'Indent',
+        	action: function(){
+            		return this.$editor().wrapSelection("indent", null);
+        	},
+        	activeState: function(){ return this.$editor().queryFormatBlockState('blockquote'); }
+    	});
+    	taRegisterTool('outdent', {
+        	iconclass: 'fa fa-outdent',
+        	tooltiptext: 'Outdent',
+        	action: function(){
+            		return this.$editor().wrapSelection("outdent", null);
+        	},
+        	activeState: function(){return false;}
+    	);
 	taRegisterTool('italics', {
 		iconclass: 'fa fa-italic',
 		action: function(){
