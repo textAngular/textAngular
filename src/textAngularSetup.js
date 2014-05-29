@@ -210,14 +210,14 @@ textAngularSetup.run(['taRegisterTool', '$window', 'taTranslations', 'taSelectio
 			return this.$editor().wrapSelection("indent", null);
 		},
 		activeState: function(){
-			return false; 
+			return this.$editor().queryFormatBlockState('blockquote'); 
 		}
 	});
 	taRegisterTool('outdent', {
 		iconclass: 'fa fa-outdent',
 		tooltiptext: 'Outdent',
 		action: function(){
-			turn this.$editor().wrapSelection("outdent", null);
+			return this.$editor().wrapSelection("outdent", null);
 		},
 		activeState: function(){
 			return false;
