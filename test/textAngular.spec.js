@@ -766,7 +766,7 @@ describe('textAngular', function(){
 			taOptions.toolbar = [
 				['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'pre', 'quote', 'testbutton'],
 				['bold', 'italics', 'underline', 'ul', 'ol', 'redo', 'undo', 'clear'],
-				['justifyLeft','justifyCenter','justifyRight'],
+				['justifyLeft','justifyCenter','justifyRight','indent','outdent'],
 				['html', 'insertImage', 'insertLink', 'unlink']
 			];
 		}));
@@ -1085,12 +1085,12 @@ describe('textAngular', function(){
 		it('should re-focus on toolbar when swapping directly from editor to editor', inject(function($timeout, textAngularManager){
 			textAngularManager.retrieveEditor('test1').scope.displayElements.text.triggerHandler('focus');
 			$rootScope.$digest();
-			expect(jQuery(toolbar[0]).find('button:not(:disabled)').length).toBe(25);
+			expect(jQuery(toolbar[0]).find('button:not(:disabled)').length).toBe(27);
 			textAngularManager.retrieveEditor('test2').scope.displayElements.text.triggerHandler('focus');
 			$rootScope.$digest();
 			$timeout.flush();
 			// expect none to be disabled
-			expect(jQuery(toolbar[0]).find('button:not(:disabled)').length).toBe(25);
+			expect(jQuery(toolbar[0]).find('button:not(:disabled)').length).toBe(27);
 		}));
 	});
 });

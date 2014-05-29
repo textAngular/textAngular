@@ -184,6 +184,16 @@ describe('taTools test tool actions', function(){
 			expect(button.hasClass('active'));
 		});
 		
+		it('indent button should function correctly', function(){
+			button = findAndTriggerButton('indent');
+			expect(button.hasClass('active'));
+		});
+		
+		it('outdent button should function correctly', function(){
+			button = findAndTriggerButton('outdent');
+			expect(button.hasClass('active'));
+		});
+		
 		it('html button should function correctly', inject(function($timeout){
 			button = findAndTriggerButton('html');
 			$timeout.flush();
