@@ -13,7 +13,7 @@ describe('textAngularToolbar', function(){
 		taOptions.toolbar = [
 			['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'pre', 'quote', 'active'],
 			['bold', 'italics', 'underline', 'ul', 'ol', 'redo', 'undo', 'clear'],
-			['justifyLeft','justifyCenter','justifyRight'],
+			['justifyLeft','justifyCenter','justifyRight','indent','outdent'],
 			['html', 'insertImage', 'insertLink', 'unlink']
 		];
 	}));
