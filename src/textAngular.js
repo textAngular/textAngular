@@ -195,12 +195,14 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 					restoreSelection is only defined if the rangy library is included and it can be called as `restoreSelection()` to restore the users
 					selection in the WYSIWYG editor.
 			display: [string]?
-					Optional, an HTML element to be displayed as the buton. The `scope` of the button is the tool definition object with some additional functions
+					Optional, an HTML element to be displayed as the button. The `scope` of the button is the tool definition object with some additional functions
 					If set this will cause buttontext and iconclass to be ignored
 			buttontext: [string]?
 					if this is defined it will replace the contents of the element contained in the `display` element
 			iconclass: [string]?
 					if this is defined an icon (<i>) will be appended to the `display` element with this string as it's class
+			tooltiptext: [string]?
+					Optional, a plain text description of the action, used for the title attribute of the action button in the toolbar by default.
 			activestate: [function(commonElement)]?
 					this function is called on every caret movement, if it returns true then the class taOptions.classes.toolbarButtonActive
 					will be applied to the `display` element, else the class will be removed
@@ -1363,6 +1365,11 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 						toolElement.attr('tabindex', '-1');
 						toolElement.attr('ng-click', 'executeAction()');
 						toolElement.attr('ng-class', 'displayActiveToolClass(active)');
+
+						if (toolDefinition && toolDefinition.tooltiptext) {
+							toolElement.attr('title', toolDefinition.tooltiptext);
+						}
+
 						toolElement.on('mousedown', function(e, eventData){
 							/* istanbul ignore else: this is for catching the jqLite testing*/
 							if(eventData) angular.extend(e, eventData);
