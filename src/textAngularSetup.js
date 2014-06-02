@@ -12,7 +12,7 @@ textAngularSetup = angular.module('textAngularSetup', []);
 textAngularSetup.value('taOptions',  {
 	toolbar: [
 		['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'pre', 'quote'],
-		['bold', 'italics', 'underline', 'ul', 'ol', 'redo', 'undo', 'clear'],
+		['bold', 'italics', 'underline', 'mark', 'ul', 'ol', 'redo', 'undo', 'clear'],
 		['justifyLeft','justifyCenter','justifyRight','indent','outdent'],
 		['html', 'insertImage', 'insertLink', 'insertVideo']
 	],
@@ -114,7 +114,7 @@ textAngularSetup.run(['taRegisterTool', '$window', 'taTranslations', 'taSelectio
 		action: function(){
 			return this.$editor().wrapSelection("formatBlock", "<P>");
 		},
-		activeState: function(){ return this.$editor().queryFormatBlockState('p'); }
+		//activeState: function(){ return this.$editor().queryFormatBlockState('p'); }
 	});
 	taRegisterTool('pre', {
 		buttontext: 'pre',
@@ -162,10 +162,23 @@ textAngularSetup.run(['taRegisterTool', '$window', 'taTranslations', 'taSelectio
 			return this.$editor().wrapSelection("bold", null);
 		},
 		activeState: function(){
-			return document.queryCommandState('bold');
+		    return document.queryCommandState('bold');
 		},
 		commandKeyCode: 98
 	});
+    taRegisterTool('mark', {
+        highlightColor: 'rgb(255, 255, 0)',
+        isHighlighted: false,
+        iconclass: 'fa fa-flash',
+        action: function(){
+            var color = this.isHighlighted ? 'transparent' : this.highlightColor;
+            this.isHighlighted = !this.isHighlighted;
+            return this.$editor().wrapSelection("BackColor", color);
+        },
+        activeState: function() {
+            return document.queryCommandValue('BackColor') === this.highlightColor;
+        }
+    });
 	taRegisterTool('justifyLeft', {
 		iconclass: 'fa fa-align-left',
 		action: function(){
