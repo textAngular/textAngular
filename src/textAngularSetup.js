@@ -105,12 +105,14 @@ textAngularSetup.run(['taRegisterTool', '$window', 'taTranslations', 'taSelectio
 	angular.forEach(['h1','h2','h3','h4','h5','h6'], function(h){
 		taRegisterTool(h.toLowerCase(), {
 			buttontext: h.toUpperCase(),
+            titletext: 'Heading',
 			action: headerAction,
 			activeState: _retActiveStateFunction(h.toLowerCase())
 		});
 	});
 	taRegisterTool('p', {
 		buttontext: 'P',
+        titletext: 'Paragraph',
 		action: function(){
 			return this.$editor().wrapSelection("formatBlock", "<P>");
 		},
@@ -118,6 +120,7 @@ textAngularSetup.run(['taRegisterTool', '$window', 'taTranslations', 'taSelectio
 	});
 	taRegisterTool('pre', {
 		buttontext: 'pre',
+        titletext: 'Pre',
 		action: function(){
 			return this.$editor().wrapSelection("formatBlock", "<PRE>");
 		},
@@ -125,6 +128,7 @@ textAngularSetup.run(['taRegisterTool', '$window', 'taTranslations', 'taSelectio
 	});
 	taRegisterTool('ul', {
 		iconclass: 'fa fa-list-ul',
+        titletext: 'Unordered List',
 		action: function(){
 			return this.$editor().wrapSelection("insertUnorderedList", null);
 		},
@@ -132,6 +136,7 @@ textAngularSetup.run(['taRegisterTool', '$window', 'taTranslations', 'taSelectio
 	});
 	taRegisterTool('ol', {
 		iconclass: 'fa fa-list-ol',
+        titletext: 'Ordered List',
 		action: function(){
 			return this.$editor().wrapSelection("insertOrderedList", null);
 		},
@@ -139,6 +144,7 @@ textAngularSetup.run(['taRegisterTool', '$window', 'taTranslations', 'taSelectio
 	});
 	taRegisterTool('quote', {
 		iconclass: 'fa fa-quote-right',
+        titletext: 'Quote',
 		action: function(){
 			return this.$editor().wrapSelection("formatBlock", "<BLOCKQUOTE>");
 		},
@@ -146,18 +152,21 @@ textAngularSetup.run(['taRegisterTool', '$window', 'taTranslations', 'taSelectio
 	});
 	taRegisterTool('undo', {
 		iconclass: 'fa fa-undo',
+        titletext: 'Undo',
 		action: function(){
 			return this.$editor().wrapSelection("undo", null);
 		}
 	});
 	taRegisterTool('redo', {
 		iconclass: 'fa fa-repeat',
+        titletext: 'Redo',
 		action: function(){
 			return this.$editor().wrapSelection("redo", null);
 		}
 	});
 	taRegisterTool('bold', {
 		iconclass: 'fa fa-bold',
+        titletext: 'Bold',
 		action: function(){
 			return this.$editor().wrapSelection("bold", null);
 		},
@@ -168,6 +177,7 @@ textAngularSetup.run(['taRegisterTool', '$window', 'taTranslations', 'taSelectio
 	});
 	taRegisterTool('justifyLeft', {
 		iconclass: 'fa fa-align-left',
+        titletext: 'Justify Left',
 		action: function(){
 			return this.$editor().wrapSelection("justifyLeft", null);
 		},
@@ -181,6 +191,7 @@ textAngularSetup.run(['taRegisterTool', '$window', 'taTranslations', 'taSelectio
 	});
 	taRegisterTool('justifyRight', {
 		iconclass: 'fa fa-align-right',
+        titletext: 'Justify Right',
 		action: function(){
 			return this.$editor().wrapSelection("justifyRight", null);
 		},
@@ -193,6 +204,7 @@ textAngularSetup.run(['taRegisterTool', '$window', 'taTranslations', 'taSelectio
 	});
 	taRegisterTool('justifyCenter', {
 		iconclass: 'fa fa-align-center',
+        titletext: 'Justify Center',
 		action: function(){
 			return this.$editor().wrapSelection("justifyCenter", null);
 		},
@@ -205,6 +217,7 @@ textAngularSetup.run(['taRegisterTool', '$window', 'taTranslations', 'taSelectio
 	});
 	taRegisterTool('indent', {
 		iconclass: 'fa fa-indent',
+        titletext: 'Indent',
 		tooltiptext: 'Indent',
 		action: function(){
 			return this.$editor().wrapSelection("indent", null);
@@ -215,6 +228,7 @@ textAngularSetup.run(['taRegisterTool', '$window', 'taTranslations', 'taSelectio
 	});
 	taRegisterTool('outdent', {
 		iconclass: 'fa fa-outdent',
+        titletext: 'Outdent',
 		tooltiptext: 'Outdent',
 		action: function(){
 			return this.$editor().wrapSelection("outdent", null);
@@ -225,6 +239,7 @@ textAngularSetup.run(['taRegisterTool', '$window', 'taTranslations', 'taSelectio
 	});
 	taRegisterTool('italics', {
 		iconclass: 'fa fa-italic',
+        titletext: 'Italic',
 		action: function(){
 			return this.$editor().wrapSelection("italic", null);
 		},
@@ -235,6 +250,7 @@ textAngularSetup.run(['taRegisterTool', '$window', 'taTranslations', 'taSelectio
 	});
 	taRegisterTool('underline', {
 		iconclass: 'fa fa-underline',
+        titletext: 'Underline',
 		action: function(){
 			return this.$editor().wrapSelection("underline", null);
 		},
@@ -245,6 +261,7 @@ textAngularSetup.run(['taRegisterTool', '$window', 'taTranslations', 'taSelectio
 	});
 	taRegisterTool('clear', {
 		iconclass: 'fa fa-ban',
+        titletext: 'Clear',
 		action: function(deferred, restoreSelection){
 			this.$editor().wrapSelection("removeFormat", null);
 			var possibleNodes = angular.element(taSelection.getSelectionElement());
@@ -372,6 +389,7 @@ textAngularSetup.run(['taRegisterTool', '$window', 'taTranslations', 'taSelectio
 	
 	taRegisterTool('insertImage', {
 		iconclass: 'fa fa-picture-o',
+        titletext: 'Insert Image',
 		action: function(){
 			var imageLink;
 			imageLink = $window.prompt(taTranslations.insertImage, 'http://');
@@ -386,6 +404,7 @@ textAngularSetup.run(['taRegisterTool', '$window', 'taTranslations', 'taSelectio
 	});
 	taRegisterTool('insertVideo', {
 		iconclass: 'fa fa-youtube-play',
+        titletext: 'Insert Video',
 		action: function(){
 			var urlPrompt;
 			urlPrompt = $window.prompt(taTranslations.insertVideo, 'http://');
@@ -411,6 +430,7 @@ textAngularSetup.run(['taRegisterTool', '$window', 'taTranslations', 'taSelectio
 	});	
 	taRegisterTool('insertLink', {
 		iconclass: 'fa fa-link',
+        titletext: 'Insert Link',
 		action: function(){
 			var urlLink;
 			urlLink = $window.prompt(taTranslations.insertLink, 'http://');
