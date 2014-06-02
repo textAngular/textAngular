@@ -1355,8 +1355,10 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 						}
 						else toolElement = angular.element("<button type='button'>");
 
+
 						toolElement.addClass(scope.classes.toolbarButton);
 						toolElement.attr('name', toolScope.name);
+                        toolElement.attr('title', toolScope.titletext);
 						// important to not take focus from the main text/html entry
 						toolElement.attr('unselectable', 'on');
 						toolElement.attr('ng-disabled', 'isDisabled()');
