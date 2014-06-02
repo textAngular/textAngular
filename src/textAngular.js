@@ -689,19 +689,21 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 					// stop updating on key up and update the display/model
 					_keyup = function() {
 						scope._bUpdateSelectedStyles = false;
+                        updateToolbarsWordCount() ;
+					};
 
-                        window.tam = textAngularManager ;
+                    var updateToolbarsWordCount = function() {
                         var toolbars = textAngularManager.getToolbar() ;
                         for(var t in toolbars) {
                             toolbars[t]._updateWordCount(_countWords()) ;
                         }
-					};
+                    };
 
                     var _countWords = function() {
                         var divWithText = scope.displayElements.text ;
                         var text = divWithText[0].innerText ;
                         return text.split(/\b\w+\b/).length - 1 ;
-                    } ;
+                    };
 
                     scope._countWords = _countWords ;
 
@@ -734,6 +736,8 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 					};
 					scope.displayElements.html.on('mouseup', _mouseup);
 					scope.displayElements.text.on('mouseup', _mouseup);
+
+                    updateToolbarsWordCount() ;
 				}
 			};
 		}
@@ -1509,13 +1513,11 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 						textAngularManager.unregisterToolbar(scope.name);
 					});
 
-                    var wcElement = angular.element("<div id=\"toolbarWC\"></div>");
+                    var wcElement = angular.element("<div id=\"toolbarWC\" style=\"display:inline-block\"></div>");
                     element.append(wcElement) ;
 
                     scope._updateWordCount = function(number) {
-                        var words = number ;
-                        wcElement[0].innerText = words ;
-                        console.log("numberOfWords", words) ;
+                        wcElement[0].innerText = number ;
                     } ;
 				}
 			};
