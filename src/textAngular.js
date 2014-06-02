@@ -1513,11 +1513,11 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 						textAngularManager.unregisterToolbar(scope.name);
 					});
 
-                    var wcElement = angular.element("<div id=\"toolbarWC\" style=\"display:inline-block\"></div>");
+                    var wcElement = angular.element("<div id=\"toolbarWC\" style=\"display:block; width:100px;\"></div>");
                     element.append(wcElement) ;
 
                     scope._updateWordCount = function(number) {
-                        wcElement[0].innerText = number ;
+                        wcElement[0].innerText = "Words : " + number ;
                     } ;
 				}
 			};
