@@ -241,6 +241,34 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 		angular.forEach(taTools, function(value, key){ delete taTools[key];	});
 	}]);
 
+    function dec2hex ( textString ) {
+        return (textString+0).toString(16).toUpperCase();
+    }
+    function dec2char ( n ) {
+        // converts a single string representing a decimal number to a character
+        // note that no checking is performed to ensure that this is just a hex number, eg. no spaces etc
+        // dec: string, the dec codepoint to be converted
+        var result = '';
+        if (n <= 0xFFFF) { result += String.fromCharCode(n); }
+        else if (n <= 0x10FFFF) {
+            n -= 0x10000
+            result += String.fromCharCode(0xD800 | (n >> 10)) + String.fromCharCode(0xDC00 | (n & 0x3FF));
+        }
+        else { result += 'dec2char error: Code point out of range: '+dec2hex(n); }
+        return result;
+    }
+    function convertDecNCR2Char ( str ) {
+        // converts a string containing &#...; escapes to a string of characters
+        // str: string, the input
+
+        // convert up to 6 digit escapes to characters
+        str = str.replace(/&#([0-9]{1,7});/g,
+            function(matchstr, parens) {
+                return dec2char(parens);
+            }
+        );
+        return str;
+    }
 	textAngular.directive("textAngular", [
 		'$compile', '$timeout', 'taOptions', 'taSanitize', 'taSelection', 'taExecCommand', 'textAngularManager', '$window', '$document', '$animate', '$log',
 		function($compile, $timeout, taOptions, taSanitize, taSelection, taExecCommand, textAngularManager, $window, $document, $animate, $log){
@@ -613,7 +641,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 					// changes from taBind back up to here
 					scope.$watch('html', function(newValue, oldValue){
 						if(newValue !== oldValue){
-							if(attrs.ngModel && ngModel.$viewValue !== newValue) ngModel.$setViewValue(newValue);
+							if(attrs.ngModel && ngModel.$viewValue !== newValue) ngModel.$setViewValue(convertDecNCR2Char(newValue));
 							scope.displayElements.forminput.val(newValue);
 						}
 					});
@@ -933,8 +961,8 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 				
 				// in here we are undoing the converts used elsewhere to prevent the < > and & being displayed when they shouldn't in the code.
 				var _compileHtml = function(){
-					if(_isContentEditable) return element[0].innerHTML;
-					if(_isInputFriendly) return element.val();
+                    if(_isContentEditable) return convertDecNCR2Char(element[0].innerHTML);
+                    if(_isInputFriendly) return convertDecNCR2Char(element.val());
 					throw ('textAngular Error: attempting to update non-editable taBind');
 				};
 
@@ -1053,7 +1081,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 				// catch DOM XSS via taSanitize
 				// Sanitizing both ways is identical
 				var _sanitize = function(unsafe){
-					return (ngModel.$oldViewValue = taSanitize(taFixChrome(unsafe), ngModel.$oldViewValue));
+                    return (ngModel.$oldViewValue = convertDecNCR2Char(taSanitize(taFixChrome(unsafe), ngModel.$oldViewValue)));
 				};
 
 				// parsers trigger from the above keyup function or any other time that the viewValue is updated and parses it for storage in the ngModel
