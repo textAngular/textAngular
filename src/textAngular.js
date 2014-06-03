@@ -241,6 +241,9 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 		angular.forEach(taTools, function(value, key){ delete taTools[key];	});
 	}]);
 
+    function dec2hex ( textString ) {
+        return (textString+0).toString(16).toUpperCase();
+    }
     function dec2char ( n ) {
         // converts a single string representing a decimal number to a character
         // note that no checking is performed to ensure that this is just a hex number, eg. no spaces etc
