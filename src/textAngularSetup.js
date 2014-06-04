@@ -14,7 +14,8 @@ textAngularSetup.value('taOptions',  {
 		['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'pre', 'quote'],
 		['bold', 'italics', 'underline', 'ul', 'ol', 'redo', 'undo', 'clear'],
 		['justifyLeft','justifyCenter','justifyRight','indent','outdent'],
-		['html', 'insertImage', 'insertLink', 'insertVideo']
+		['html', 'insertImage', 'insertLink', 'insertVideo'],
+		['wordCount']
 	],
 	classes: {
 		focussed: "focussed",
@@ -108,6 +109,9 @@ textAngularSetup.run(['taRegisterTool', '$window', 'taTranslations', 'taSelectio
 			action: headerAction,
 			activeState: _retActiveStateFunction(h.toLowerCase())
 		});
+	});
+	taRegisterTool('wordCount', {
+		buttontext: 'word count: ',
 	});
 	taRegisterTool('p', {
 		buttontext: 'P',
