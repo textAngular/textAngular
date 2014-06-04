@@ -149,6 +149,30 @@ describe('textAngular', function(){
 		});
 	});
 	
+	describe('Use serial attribute', function(){
+		'use strict';
+		var $rootScope, element, textAngularManager;
+		beforeEach(module('textAngular'));
+		beforeEach(inject(function (_$compile_, _$rootScope_, _textAngularManager_) {
+			$rootScope = _$rootScope_;
+			textAngularManager = _textAngularManager_;
+			element = _$compile_('<text-angular serial="test"></text-angular>')($rootScope);
+			$rootScope.$digest();
+		}));
+		
+		describe('generates id\'s and name attributes', function () {
+			it('name of editor', function(){
+				expect(textAngularManager.retrieveEditor('textAngularEditortest')).not.toBeUndefined();
+			});
+			it('to textEditor', function(){
+				expect(textAngularManager.retrieveEditor('textAngularEditortest').scope.displayElements.text.attr('id')).toBe('taTextElementtest');
+			});
+			it('to htmlEditor', function(){
+				expect(textAngularManager.retrieveEditor('textAngularEditortest').scope.displayElements.html.attr('id')).toBe('taHtmlElementtest');
+			});
+		});
+	});
+	
 	describe('Disable the editor', function(){
 		'use strict';
 		var $rootScope, element;
