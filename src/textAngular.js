@@ -8,7 +8,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 */
 
 (function(){ // encapsulate all variables so they don't become global vars
-	"Use Strict";
+	"use strict";
 	
 	// fix a webkit bug, see: https://gist.github.com/shimondoodkin/1081133
 	// this is set true when a blur occurs as the blur of the ta-bind triggers before the click
@@ -87,7 +87,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 		Custom stylesheet for the placeholders rules.
 		Credit to: http://davidwalsh.name/add-rules-stylesheets
 	*/
-	var sheet, addCSSRule, removeCSSRule;
+	var sheet, addCSSRule, removeCSSRule, _addCSSRule, _removeCSSRule;
 	/* istanbul ignore else: IE <8 test*/
 	if(ie > 8 || ie === undefined){
 		var topsheet = (function() {
@@ -733,7 +733,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 		var BLOCKELEMENTS = /(address|article|aside|audio|blockquote|canvas|dd|div|dl|fieldset|figcaption|figure|footer|form|h1|h2|h3|h4|h5|h6|header|hgroup|hr|noscript|ol|output|p|pre|section|table|tfoot|ul|video)/ig;
 		var LISTELEMENTS = /(ul|li|ol)/ig;
 		var listToDefault = function(listElement, defaultWrap){
-			var $target;
+			var $target, i;
 			// if all selected then we should remove the list
 			// grab all li elements and convert to taDefaultWrap tags
 			var children = listElement.find('li');
@@ -751,7 +751,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 			taSelection.setSelectionToElementEnd($target.find('li')[0]);
 		};
 		var childElementsToList = function(elements, listElement, newListTag){
-			var html = '';
+			var html = '', i;
 			for(i = elements.length - 1; i >= 0; i--){
 				html += '<' + taBrowserTag('li') + '>' + elements[i].innerHTML + '</' + taBrowserTag('li') + '>';
 			}
@@ -1775,7 +1775,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 	/* istanbul ignore next: all browser specifics and PhantomJS dosen't seem to support half of it */
 	function($window, $document){
 		// need to dereference the document else the calls don't work correctly
-		_document = $document[0];
+		var _document = $document[0];
 		var nextNode = function(node) {
 			if (node.hasChildNodes()) {
 				return node.firstChild;
