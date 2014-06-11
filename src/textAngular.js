@@ -730,8 +730,8 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 			else return (ie <= 8)? tag.toUpperCase() : tag;
 		};
 	}]).factory('taExecCommand', ['taSelection', 'taBrowserTag', '$document', function(taSelection, taBrowserTag, $document){
-		var BLOCKELEMENTS = /(address|article|aside|audio|blockquote|canvas|dd|div|dl|fieldset|figcaption|figure|footer|form|h1|h2|h3|h4|h5|h6|header|hgroup|hr|noscript|ol|output|p|pre|section|table|tfoot|ul|video)/ig;
-		var LISTELEMENTS = /(ul|li|ol)/ig;
+		var BLOCKELEMENTS = /^(address|article|aside|audio|blockquote|canvas|dd|div|dl|fieldset|figcaption|figure|footer|form|h1|h2|h3|h4|h5|h6|header|hgroup|hr|noscript|ol|output|p|pre|section|table|tfoot|ul|video)$/ig;
+		var LISTELEMENTS = /^(ul|li|ol)$/ig;
 		var listToDefault = function(listElement, defaultWrap){
 			var $target;
 			// if all selected then we should remove the list
@@ -787,7 +787,13 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 							if(tagName === 'ol' || tagName === 'ul'){
 								return listToList($selected, selfTag);
 							}else{
-								if(selectedElement.innerHTML.match(BLOCKELEMENTS)){
+								var childBlockElements = false;
+								angular.forEach($selected.children(), function(elem){
+									if(elem.tagName.match(BLOCKELEMENTS)) {
+										childBlockElements = true;
+									}
+								});
+								if(childBlockElements){
 									return childElementsToList($selected.children(), $selected, selfTag);
 								}else{
 									return childElementsToList(angular.element('<div>' + selectedElement.innerHTML + '</div>'), $selected, selfTag);

@@ -276,6 +276,36 @@ describe('taExecCommand', function(){
 					expect(element.html()).toBe('<ul><li>To the List!</li></ul>');
 				}));
 			});
+			describe('element with block tagname as text', function(){
+				beforeEach(inject(function(taSelection){
+					element = angular.element('<div><p>This is not a div</p></div>');
+					taSelection.element = element.children()[0];
+				}));
+				it('to ol', inject(function(taSelection, taExecCommand){
+					taExecCommand()('insertorderedlist', false, null);
+					expect(element.html()).toBe('<ol><li>This is not a div</li></ol>');
+				}));
+				
+				it('to ul', inject(function(taSelection, taExecCommand){
+					taExecCommand()('insertunorderedlist', false, null);
+					expect(element.html()).toBe('<ul><li>This is not a div</li></ul>');
+				}));
+			});
+			describe('element containing span', function(){
+				beforeEach(inject(function(taSelection){
+					element = angular.element('<div><p>To the List!<span></span></p></div>');
+					taSelection.element = element.children()[0];
+				}));
+				it('to ol', inject(function(taSelection, taExecCommand){
+					taExecCommand()('insertorderedlist', false, null);
+					expect(element.html()).toBe('<ol><li>To the List!<span></span></li></ol>');
+				}));
+				
+				it('to ul', inject(function(taSelection, taExecCommand){
+					taExecCommand()('insertunorderedlist', false, null);
+					expect(element.html()).toBe('<ul><li>To the List!<span></span></li></ul>');
+				}));
+			});
 			describe('multi element selected', function(){
 				beforeEach(inject(function(taSelection){
 					element = angular.element('<div class="ta-bind"><p>To the List!</p><p>To the List 2!</p></div>');
