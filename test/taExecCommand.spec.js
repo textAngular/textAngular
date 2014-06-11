@@ -40,7 +40,7 @@ describe('taExecCommand', function(){
 				$provide.value('taSelection', {
 					element: undefined,
 					getSelectionElement: function (){ return this.element; },
-					getOnlySelectedElements: function(){ return this.element.childNodes; },
+					getOnlySelectedElements: function(){ return [].slice.call(this.element.childNodes); },
 					setSelectionToElementStart: function (){ return; },
 					setSelectionToElementEnd: function (){ return; }
 				});
@@ -90,6 +90,14 @@ describe('taExecCommand', function(){
 					taSelection.element = $element.find('b')[0];
 					taExecCommand()('formatBlock', false, '<BLOCKQUOTE>');
 					expect($element.html()).toBe('<blockquote><p><i><b>Test</b></i></p></blockquote>');
+					$element.remove();
+				}));
+				it('selection with mixed nodes', inject(function($document, taExecCommand, taSelection){
+					$element = angular.element('<div class="ta-bind"><p>Some <b>test</b> content</p></div>');
+					$document.find('body').append($element);
+					taSelection.element = $element.find('b')[0];
+					taExecCommand()('formatBlock', false, '<BLOCKQUOTE>');
+					expect($element.html()).toBe('<blockquote><p>Some <b>test</b> content</p></blockquote>');
 					$element.remove();
 				}));
 			});
@@ -155,6 +163,70 @@ describe('taExecCommand', function(){
 					taExecCommand()('formatBlock', false, '<BLOCKQUOTE>');
 					expect($element.html()).toBe('<p>Other <b>Test</b></p>');
 				}));
+			});
+		});
+	});
+
+	describe('handles formatBlock correctly for other elements', function(){
+		var $document, taExecCommand, taSelection;
+		beforeEach(function(){
+			module(function($provide){
+				$provide.value('taSelection', {
+					element: undefined,
+					getSelectionElement: function (){ return this.element; },
+					getOnlySelectedElements: function(){ return [].slice.call(this.element.childNodes); },
+					setSelectionToElementStart: function (){ return; },
+					setSelectionToElementEnd: function (){ return; }
+				});
+			});
+		});
+		beforeEach(inject(function(_$document_, _taExecCommand_, _taSelection_){
+			$document = _$document_;
+			taExecCommand = _taExecCommand_;
+			taSelection = _taSelection_;
+		}));
+		function setupElement(html){
+			$element = angular.element(html);
+			$document.find('body').append($element);
+		}
+		afterEach(function(){
+			$element.remove();
+		});
+
+		describe('heading tags', function(){
+			it('can be unwrapped', function(){
+				setupElement('<div class="ta-bind"><h1><b>Test</b></h1></div>');
+				taSelection.element = $element.find('b')[0];
+				taExecCommand()('formatBlock', false, '<H1>');
+				expect($element.html()).toBe('<p><b>Test</b></p>');
+			});
+			describe('wrapping', function(){
+				it('single block element', function(){
+					setupElement('<div class="ta-bind"><p>Test</p></div>');
+					taSelection.element = $element.find('p')[0];
+					taExecCommand()('formatBlock', false, '<H1>');
+					expect($element.html()).toBe('<h1>Test</h1>');
+				});
+				it('single block element with an inline element', function(){
+					setupElement('<div class="ta-bind"><p><b>Test</b></p></div>');
+					taSelection.element = $element.find('p')[0];
+					taExecCommand()('formatBlock', false, '<H1>');
+					expect($element.html()).toBe('<h1><b>Test</b></h1>');
+				});
+				it('replaces each selected block element', function(){
+					setupElement('<div class="ta-bind"><p><b>Test</b></p><p>Line two</p><p>Line three</p></div>');
+					taSelection.element = $element[0];
+					// Select the first two p elements
+					taSelection.getOnlySelectedElements = function(){ return [].slice.call(this.element.childNodes, 0, 2) };
+					taExecCommand()('formatBlock', false, '<H1>');
+					expect($element.html()).toBe('<h1><b>Test</b></h1><h1>Line two</h1><p>Line three</p>');
+				});
+				it('wraps all nodes for mixed nodes', function(){
+					setupElement('<div class="ta-bind"><em>Italic</em>text<p><b>Test</b> content</p>In between<p>Line two</p></div>');
+					taSelection.element = $element[0];
+					taExecCommand()('formatBlock', false, '<H1>');
+					expect($element.html()).toBe('<h1><em>Italic</em>text<p><b>Test</b> content</p>In between<p>Line two</p></h1>');
+				});
 			});
 		});
 	});
