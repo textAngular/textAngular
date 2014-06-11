@@ -217,7 +217,7 @@ describe('taExecCommand', function(){
 					setupElement('<div class="ta-bind"><p><b>Test</b></p><p>Line two</p><p>Line three</p></div>');
 					taSelection.element = $element[0];
 					// Select the first two p elements
-					taSelection.getOnlySelectedElements = function(){ return [].slice.call(this.element.childNodes, 0, 2) };
+					taSelection.getOnlySelectedElements = function(){ return [].slice.call(this.element.childNodes, 0, 2); };
 					taExecCommand()('formatBlock', false, '<H1>');
 					expect($element.html()).toBe('<h1><b>Test</b></h1><h1>Line two</h1><p>Line three</p>');
 				});
@@ -310,6 +310,21 @@ describe('taExecCommand', function(){
 				beforeEach(inject(function(taSelection){
 					element = angular.element('<div class="ta-bind"><p>To the List!</p><p>To the List 2!</p></div>');
 					taSelection.element = element[0];
+				}));
+				it('to ol', inject(function(taSelection, taExecCommand){
+					taExecCommand()('insertorderedlist', false, null);
+					expect(element.html()).toBe('<ol><li>To the List!</li><li>To the List 2!</li></ol>');
+				}));
+				
+				it('to ul', inject(function(taSelection, taExecCommand){
+					taExecCommand()('insertunorderedlist', false, null);
+					expect(element.html()).toBe('<ul><li>To the List!</li><li>To the List 2!</li></ul>');
+				}));
+			});
+			describe('multi element selected within block element', function(){
+				beforeEach(inject(function(taSelection){
+					element = angular.element('<div class="ta-bind"><blockquote><p>To the List!</p><p>To the List 2!</p></blockquote></div>');
+					taSelection.element = element.find('blockquote')[0];
 				}));
 				it('to ol', inject(function(taSelection, taExecCommand){
 					taExecCommand()('insertorderedlist', false, null);

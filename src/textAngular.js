@@ -752,7 +752,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 		};
 		var childElementsToList = function(elements, listElement, newListTag){
 			var html = '';
-			for(i = elements.length - 1; i >= 0; i--){
+			for(i = 0; i < elements.length; i++){
 				html += '<' + taBrowserTag('li') + '>' + elements[i].innerHTML + '</' + taBrowserTag('li') + '>';
 			}
 			var $target = angular.element('<' + newListTag + '>' + html + '</' + newListTag + '>');
@@ -828,7 +828,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 							return;
 						}
 					}else if(command.toLowerCase() === 'formatblock'){
-						var optionsTagName = options.toLowerCase().replace(/[<>]/ig, '')
+						var optionsTagName = options.toLowerCase().replace(/[<>]/ig, '');
 						if(tagName === 'li') $target = $selected.parent();
 						else $target = $selected;
 						// find the first blockElement
@@ -890,12 +890,12 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 							if(angular.element(_nodes[0]).hasClass('ta-bind')){
 								$target = angular.element(options);
 								$target[0].innerHTML = _nodes[0].innerHTML;
-								_nodes[0].innerHTML = $target[0].outerHTML
+								_nodes[0].innerHTML = $target[0].outerHTML;
 							}else if(optionsTagName === 'blockquote'){
 								// blockquotes wrap other block elements
-								html = ''
+								html = '';
 								for(i = 0; i < _nodes.length; i++){
-									html += _nodes[i].outerHTML
+									html += _nodes[i].outerHTML;
 								}
 								$target = angular.element(options);
 								$target[0].innerHTML = html;
