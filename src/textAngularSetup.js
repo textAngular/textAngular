@@ -78,11 +78,13 @@ textAngularSetup.value('taCustomRenderers', [
 ]);
 
 textAngularSetup.constant('taTranslations', {
-	toggleHTML: "Toggle HTML",
-	insertImage: "Please enter a image URL to insert",
-	insertLink: "Please enter a URL to insert",
-	insertVideo: "Please enter a youtube URL to embed",
+	// moved to sub-elements
+	//toggleHTML: "Toggle HTML",
+	//insertImage: "Please enter a image URL to insert",
+	//insertLink: "Please enter a URL to insert",
+	//insertVideo: "Please enter a youtube URL to embed",
 	html: {
+		buttontext: 'Toggle HTML',
 		tooltip: 'Toggle html / Rich Text'
 	},
 	// tooltip for heading - might be worth splitting
@@ -136,32 +138,31 @@ textAngularSetup.constant('taTranslations', {
 	},
 	clear: {
 		tooltip: 'Clear formatting'
-	}
+	},
 	/* the following are already present
 		IMHO it would be beneficial to group the text strings for an action in a group
 		e.g.
-	insertImage {
+	*/
+	insertImage: {
 		dialogPrompt: 'Please enter a image URL to insert',
 		tooltip: 'Insert image',
 		hotkey: 'the - possibly language dependent hotkey ... for some future implementation'
-	}
-	,
-	insertImage: {
-		tooltip: 'Insert image'
 	},
 	insertVideo: {
-		tooltip: 'Insert video'
+		tooltip: 'Insert video',
+		dialogPrompt: 'Please enter a youtube URL to embed'
 	},
 	insertLink: {
-		tooltip: 'Insert / edit link'
+		tooltip: 'Insert / edit link',
+		dialogPrompt: "Please enter a URL to insert"
 	}
-	*/
+
 
 });
 
 textAngularSetup.run(['taRegisterTool', '$window', 'taTranslations', 'taSelection', function(taRegisterTool, $window, taTranslations, taSelection){
 	taRegisterTool("html", {
-		buttontext: taTranslations.toggleHTML,
+		buttontext: taTranslations.html.buttontext,
 		tooltiptext: taTranslations.html.tooltip,
 		action: function(){
 			this.$editor().switchView();
@@ -467,7 +468,7 @@ textAngularSetup.run(['taRegisterTool', '$window', 'taTranslations', 'taSelectio
 		tooltiptext: taTranslations.insertImage.tooltip,
 		action: function(){
 			var imageLink;
-			imageLink = $window.prompt(taTranslations.insertImage, 'http://');
+			imageLink = $window.prompt(taTranslations.insertImage.dialogPrompt, 'http://');
 			if(imageLink && imageLink !== '' && imageLink !== 'http://'){
 				return this.$editor().wrapSelection('insertImage', imageLink, true);
 			}
@@ -482,7 +483,7 @@ textAngularSetup.run(['taRegisterTool', '$window', 'taTranslations', 'taSelectio
 		tooltiptext: taTranslations.insertVideo.tooltip,
 		action: function(){
 			var urlPrompt;
-			urlPrompt = $window.prompt(taTranslations.insertVideo, 'http://');
+			urlPrompt = $window.prompt(taTranslations.insertVideo.dialogPrompt, 'http://');
 			if (urlPrompt && urlPrompt !== '' && urlPrompt !== 'http://') {
 				// get the video ID
 				var ids = urlPrompt.match(/(\?|&)v=[^&]*/);
@@ -508,7 +509,7 @@ textAngularSetup.run(['taRegisterTool', '$window', 'taTranslations', 'taSelectio
 		iconclass: 'fa fa-link',
 		action: function(){
 			var urlLink;
-			urlLink = $window.prompt(taTranslations.insertLink, 'http://');
+			urlLink = $window.prompt(taTranslations.insertLink.dialogPrompt, 'http://');
 			if(urlLink && urlLink !== '' && urlLink !== 'http://'){
 				return this.$editor().wrapSelection('createLink', urlLink, true);
 			}
@@ -541,7 +542,7 @@ textAngularSetup.run(['taRegisterTool', '$window', 'taTranslations', 'taSelectio
 				var reLinkButton = angular.element('<button type="button" class="btn btn-default btn-sm btn-small" tabindex="-1" unselectable="on"><i class="fa fa-edit icon-edit"></i></button>');
 				reLinkButton.on('click', function(event){
 					event.preventDefault();
-					var urlLink = $window.prompt(taTranslations.insertLink, $element.attr('href'));
+					var urlLink = $window.prompt(taTranslations.insertLink.dialogPrompt, $element.attr('href'));
 					if(urlLink && urlLink !== '' && urlLink !== 'http://'){
 						$element.attr('href', urlLink);
 						editorScope.updateTaBindtaTextElement();
