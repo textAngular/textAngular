@@ -139,10 +139,6 @@ textAngularSetup.constant('taTranslations', {
 	clear: {
 		tooltip: 'Clear formatting'
 	},
-	/* the following are already present
-		IMHO it would be beneficial to group the text strings for an action in a group
-		e.g.
-	*/
 	insertImage: {
 		dialogPrompt: 'Please enter a image URL to insert',
 		tooltip: 'Insert image',
