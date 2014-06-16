@@ -254,7 +254,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 					// all these vars should not be accessable outside this directive
 					var _keydown, _keyup, _keypress, _mouseup, _focusin, _focusout,
 						_originalContents, _toolbars,
-						_serial = Math.floor(Math.random() * 10000000000000000),
+						_serial = (attrs.serial) ? attrs.serial : Math.floor(Math.random() * 10000000000000000),
 						_name = (attrs.name) ? attrs.name : 'textAngularEditor' + _serial,
 						_taExecCommand;
 					

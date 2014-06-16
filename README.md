@@ -21,7 +21,7 @@ Demo is available at: http://www.textangular.com
 
 ### Where to get it
 
-**NOTE:** If you are using `angular-sanitize` anywhere you need to pick one of `angular-sanitize` OR `textAngular-sanitize` as the latter is our fork of the `angular-sanitize` file so loading both may cause conflicts or unexpected behaviour.
+**NOTE:** Our `textAngular-sanitize.js` and angular.js's `angular-sanitize.js` are the SAME file, you must include one or the other but not both. We highly recommend using `textAngular-sanitize.js` as it loosens some parts of the sanitizer that are far too strict for our uses and adds some more features we need.
 
 **Via Bower:**
 
@@ -36,8 +36,8 @@ Include script tags similar to the following:
 
 Include script tags similar to the following:
 ```html
-<script src='http://cdnjs.cloudflare.com/ajax/libs/textAngular/1.2.0/textAngular-sanitize.min.js'></script>
-<script src='http://cdnjs.cloudflare.com/ajax/libs/textAngular/1.2.0/textAngular.min.js'></script>
+<script src='http://cdnjs.cloudflare.com/ajax/libs/textAngular/1.2.1/textAngular-sanitize.min.js'></script>
+<script src='http://cdnjs.cloudflare.com/ajax/libs/textAngular/1.2.1/textAngular.min.js'></script>
 ```
 
 **Via jsDelivr:**
@@ -58,7 +58,7 @@ Download the code from [https://github.com/fraywing/textAngular/releases/latest]
 ### Usage
 
 1. Include `textAngular-sanitize.js` or `textAngular-sanitize.min.js` in your project using script tags
-2. Include `textAngularSetup.js` then `textAngular.js` or `textAngular.min.js` (textAngularSetup.js is included inside textAngular.min.js)
+2. Include `textAngularSetup.js` and `textAngular.js` or `textAngular.min.js` (textAngularSetup.js is included inside textAngular.min.js)
 3. Add a dependency to `textAngular` in your app module, for example: ```angular.module('myModule', ['textAngular'])```.
 4. Create an element to hold the editor and add an `ng-model="htmlVariable"` attribute where `htmtlVariable` is the scope variable that will hold the HTML entered into the editor:
 ```html
@@ -72,7 +72,7 @@ This acts similar to a regular AngularJS / form input if you give it a name attr
 
 Have fun!
  
-**Important Note:** Though textAngular supports the use of all attributes in it's input, please note that angulars ng-bind-html **WILL** strip out all of your style attributes.
+**Important Note:** Though textAngular supports the use of all attributes in it's input, please note that angulars ng-bind-html **WILL** strip out all of your style attributes if you are using `angular-sanitize.js`.
 
 For Additional options see the [github Wiki](https://github.com/fraywing/textAngular/wiki).
 
@@ -96,18 +96,4 @@ This project is licensed under the [MIT license](http://opensource.org/licenses/
 
 Special thanks to all the contributions thus far! 
 
-Including those from:
-
-* [SimeonC](https://github.com/SimeonC)
-* [slobo](https://github.com/slobo)
-* [edouard-lopez](https://github.com/edouard-lopez)
-* [108ium](https://github.com/108ium)
-* [nadeeshacabral](https://github.com/nadeeshacabral) 
-* [netbubu17](https://github.com/netbubu17)
-* [worldspawn](https://github.com/worldspawn)
-* [JonathanGawrych](https://github.com/JonathanGawrych)
-* [kanakiyajay](https://github.com/kanakiyajay)
-* [kencaron](https://github.com/kencaron)
-* [gintau](https://github.com/gintau)
-* [uxtx](https://github.com/uxtx)
-* [simon-jouet](https://github.com/simon-jouet)
+For a full list see: https://github.com/fraywing/textAngular/graphs/contributors
