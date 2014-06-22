@@ -11,7 +11,6 @@ Demo is available at: http://www.textangular.com
 ## Requirements
 
 1. `AngularJS` ≥ `1.2.x`
-2. `Angular Sanitize` ≥ `1.2.x`
 
 ### Optional requirements
 
