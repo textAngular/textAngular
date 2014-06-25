@@ -140,7 +140,7 @@ textAngularSetup.constant('taTranslations', {
 		tooltip: 'Clear formatting'
 	},
 	insertImage: {
-		dialogPrompt: 'Please enter a image URL to insert',
+		dialogPrompt: 'Please enter an image URL to insert',
 		tooltip: 'Insert image',
 		hotkey: 'the - possibly language dependent hotkey ... for some future implementation'
 	},
