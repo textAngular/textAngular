@@ -43,7 +43,7 @@ Include script tags similar to the following:
 
 Include script tag similar to the following: (For details on how this works see: [https://github.com/jsdelivr/jsdelivr#load-multiple-files-with-single-http-request](https://github.com/jsdelivr/jsdelivr#load-multiple-files-with-single-http-request))
 ```html
-<script src='http://cdn.jsdelivr.net/g/angular.textangular@1.2.0(textAngular-sanitize.min.js+textAngular.min.js)'></script>
+<script src='http://cdn.jsdelivr.net/g/angular.textangular@1.2.1(textAngular-sanitize.min.js+textAngular.min.js)'></script>
 ```
 
 **Via Github**
