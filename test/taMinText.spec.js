@@ -44,6 +44,11 @@ describe('taMinText', function(){
 			expect($scope.form.html.$error.taMinText).toBe(true);
 		});
 
+		it('should pass when text is empty', function(){
+			$scope.form.html.$setViewValue('<strong></strong>');
+			expect($scope.form.html.$error.taMinText).toBe(false);
+		});
+
 		it('should pass when text is above limit', function(){
 			$scope.form.html.$setViewValue('<strong>textAngular_</strong>');
 			expect($scope.form.html.$error.taMinText).toBe(false);
