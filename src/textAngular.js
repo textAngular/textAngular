@@ -1679,16 +1679,19 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 									workerTools.push({'name': name, 'tool': tool});
 								});
 							}
-							// Run the actions on the first filtered tool only
+							// Run the actions on the first visible filtered tool only
 							if(workerTools.length > 0){
-								var tool = workerTools[0].tool;
-								var name = workerTools[0].name;
-								for(var _t = 0; _t < _toolbars.length; _t++){
-									if(_toolbars[_t].tools[name] !== undefined){
-										tool.onElementSelect.action.call(_toolbars[_t].tools[name], event, element, scope);
-										result = true;
-										break;
+								for(var _i = 0; _i < workerTools.length; _i++){
+									var tool = workerTools[_i].tool;
+									var name = workerTools[_i].name;
+									for(var _t = 0; _t < _toolbars.length; _t++){
+										if(_toolbars[_t].tools[name] !== undefined){
+											tool.onElementSelect.action.call(_toolbars[_t].tools[name], event, element, scope);
+											result = true;
+											break;
+										}
 									}
+									if(result) break; 
 								}
 							}
 							return result;
