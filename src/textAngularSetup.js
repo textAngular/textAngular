@@ -6,10 +6,10 @@ Version 1.2.1
 
 See README.md or https://github.com/fraywing/textAngular/wiki for requirements and use.
 */
-textAngularSetup = angular.module('textAngularSetup', []);
+angular.module('textAngularSetup', [])
 	
 // Here we set up the global display defaults, to set your own use a angular $provider#decorator.
-textAngularSetup.value('taOptions',  {
+.value('taOptions',  {
 	toolbar: [
 		['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'pre', 'quote'],
 		['bold', 'italics', 'underline', 'ul', 'ol', 'redo', 'undo', 'clear'],
@@ -46,19 +46,19 @@ textAngularSetup.value('taOptions',  {
 			}
 			return false;
 		}
-});
+})
 
 // This is the element selector string that is used to catch click events within a taBind, prevents the default and $emits a 'ta-element-select' event
 // these are individually used in an angular.element().find() call. What can go here depends on whether you have full jQuery loaded or just jQLite with angularjs.
 // div is only used as div.ta-insert-video caught in filter.
-textAngularSetup.value('taSelectableElements', ['a','img']);
+.value('taSelectableElements', ['a','img'])
 
 // This is an array of objects with the following options:
 //				selector: <string> a jqLite or jQuery selector string
 //				customAttribute: <string> an attribute to search for
 //				renderLogic: <function(element)>
 // Both or one of selector and customAttribute must be defined.
-textAngularSetup.value('taCustomRenderers', [
+.value('taCustomRenderers', [
 	{
 		// Parse back out: '<div class="ta-insert-video" ta-insert-video src="' + urlLink + '" allowfullscreen="true" width="300" frameborder="0" height="250"></div>'
 		// To correct video element. For now only support youtube
@@ -75,9 +75,9 @@ textAngularSetup.value('taCustomRenderers', [
 			element.replaceWith(iframe);
 		}
 	}
-]);
+])
 
-textAngularSetup.constant('taTranslations', {
+.constant('taTranslations', {
 	// moved to sub-elements
 	//toggleHTML: "Toggle HTML",
 	//insertImage: "Please enter a image URL to insert",
@@ -152,11 +152,8 @@ textAngularSetup.constant('taTranslations', {
 		tooltip: 'Insert / edit link',
 		dialogPrompt: "Please enter a URL to insert"
 	}
-
-
-});
-
-textAngularSetup.run(['taRegisterTool', '$window', 'taTranslations', 'taSelection', function(taRegisterTool, $window, taTranslations, taSelection){
+})
+.run(['taRegisterTool', '$window', 'taTranslations', 'taSelection', function(taRegisterTool, $window, taTranslations, taSelection){
 	taRegisterTool("html", {
 		buttontext: taTranslations.html.buttontext,
 		tooltiptext: taTranslations.html.tooltip,
