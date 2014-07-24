@@ -734,14 +734,14 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 			else return (ie <= 8)? tag.toUpperCase() : tag;
 		};
 	}]).factory('taExecCommand', ['taSelection', 'taBrowserTag', '$document', function(taSelection, taBrowserTag, $document){
-		var BLOCKELEMENTS = /(address|article|aside|audio|blockquote|canvas|dd|div|dl|fieldset|figcaption|figure|footer|form|h1|h2|h3|h4|h5|h6|header|hgroup|hr|noscript|ol|output|p|pre|section|table|tfoot|ul|video)/ig;
-		var LISTELEMENTS = /(ul|li|ol)/ig;
+		var BLOCKELEMENTS = /^(address|article|aside|audio|blockquote|canvas|dd|div|dl|fieldset|figcaption|figure|footer|form|h1|h2|h3|h4|h5|h6|header|hgroup|hr|noscript|ol|output|p|pre|section|table|tfoot|ul|video)$/ig;
+		var LISTELEMENTS = /^(ul|li|ol)$/ig;
 		var listToDefault = function(listElement, defaultWrap){
 			var $target;
 			// if all selected then we should remove the list
 			// grab all li elements and convert to taDefaultWrap tags
 			var children = listElement.find('li');
-			for(i = children.length - 1; i >= 0; i--){
+			for(var i = children.length - 1; i >= 0; i--){
 				$target = angular.element('<' + defaultWrap + '>' + children[i].innerHTML + '</' + defaultWrap + '>');
 				listElement.after($target);
 			}
@@ -756,7 +756,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 		};
 		var childElementsToList = function(elements, listElement, newListTag){
 			var html = '';
-			for(i = elements.length - 1; i >= 0; i--){
+			for(var i = 0; i < elements.length; i++){
 				html += '<' + taBrowserTag('li') + '>' + elements[i].innerHTML + '</' + taBrowserTag('li') + '>';
 			}
 			var $target = angular.element('<' + newListTag + '>' + html + '</' + newListTag + '>');
@@ -791,10 +791,16 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 							if(tagName === 'ol' || tagName === 'ul'){
 								return listToList($selected, selfTag);
 							}else{
-								if(selectedElement.innerHTML.match(BLOCKELEMENTS)){
+								var childBlockElements = false;
+								angular.forEach($selected.children(), function(elem){
+									if(elem.tagName.match(BLOCKELEMENTS)) {
+										childBlockElements = true;
+									}
+								});
+								if(childBlockElements){
 									return childElementsToList($selected.children(), $selected, selfTag);
 								}else{
-									return childElementsToList(angular.element('<div>' + selectedElement.innerHTML + '</div>'), $selected, selfTag);
+									return childElementsToList([angular.element('<div>' + selectedElement.innerHTML + '</div>')[0]], $selected, selfTag);
 								}
 							}
 						}else if(tagName.match(BLOCKELEMENTS)){
@@ -825,7 +831,8 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 							taSelection.setSelectionToElementEnd($target[0]);
 							return;
 						}
-					}else if(command.toLowerCase() === 'formatblock' && 'blockquote' === options.toLowerCase().replace(/[<>]/ig, '')){
+					}else if(command.toLowerCase() === 'formatblock'){
+						var optionsTagName = options.toLowerCase().replace(/[<>]/ig, '');
 						if(tagName === 'li') $target = $selected.parent();
 						else $target = $selected;
 						// find the first blockElement
@@ -833,7 +840,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 							$target = $target.parent();
 							tagName = $target[0].tagName.toLowerCase();
 						}
-						if(tagName === options.toLowerCase().replace(/[<>]/ig, '')){
+						if(tagName === optionsTagName){
 							// $target is wrap element
 							_nodes = $target.children();
 							var hasBlock = false;
@@ -851,7 +858,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 								$target.remove();
 								$target = defaultWrapper;
 							}
-						}else if($target.parent()[0].tagName.toLowerCase() === options.toLowerCase().replace(/[<>]/ig, '') && !$target.parent().hasClass('ta-bind')){
+						}else if($target.parent()[0].tagName.toLowerCase() === optionsTagName && !$target.parent().hasClass('ta-bind')){
 							//unwrap logic for parent
 							var blockElement = $target.parent();
 							var contents = blockElement.contents();
@@ -872,21 +879,44 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 							// default wrap behaviour
 							_nodes = taSelection.getOnlySelectedElements();
 							if(_nodes.length === 0) _nodes = [$target[0]];
-							html = '';
-							if(_nodes.length === 1 && _nodes[0].nodeType === 3){
-								var _node = _nodes[0].parentNode;
-								while(!_node.tagName.match(BLOCKELEMENTS)){
-									_node = _node.parentNode;
+							// find the parent block element if any of the nodes are inline or text
+							var inlineNodePresent = false;
+							angular.forEach(_nodes, function(node){
+								if(node.nodeType === 3 || !node.tagName.match(BLOCKELEMENTS)){
+									inlineNodePresent = true;
 								}
-								_nodes = [_node];
+							});
+							if(inlineNodePresent){
+								while(_nodes[0].nodeType === 3 || !_nodes[0].tagName.match(BLOCKELEMENTS)){
+									_nodes = [_nodes[0].parentNode];
+								}
 							}
-							for(i = 0; i < _nodes.length; i++){
-								html += _nodes[i].outerHTML;
+							if(angular.element(_nodes[0]).hasClass('ta-bind')){
+								$target = angular.element(options);
+								$target[0].innerHTML = _nodes[0].innerHTML;
+								_nodes[0].innerHTML = $target[0].outerHTML;
+							}else if(optionsTagName === 'blockquote'){
+								// blockquotes wrap other block elements
+								html = '';
+								for(i = 0; i < _nodes.length; i++){
+									html += _nodes[i].outerHTML;
+								}
+								$target = angular.element(options);
+								$target[0].innerHTML = html;
+								_nodes[0].parentNode.insertBefore($target[0],_nodes[0]);
+								angular.forEach(_nodes, function(node){
+									node.parentNode.removeChild(node);
+								});
 							}
-							$target = angular.element(options);
-							$target[0].innerHTML = html;
-							_nodes[0].parentNode.insertBefore($target[0],_nodes[0]);
-							angular.forEach(_nodes, function(node){ node.parentNode.removeChild(node); });
+							else {
+								// regular block elements replace other block elements
+								for(i = 0; i < _nodes.length; i++){
+									$target = angular.element(options);
+									$target[0].innerHTML = _nodes[i].innerHTML;
+									_nodes[i].parentNode.insertBefore($target[0],_nodes[i]);
+									_nodes[i].parentNode.removeChild(_nodes[i]);
+								}
+							}
 						}
 						taSelection.setSelectionToElementEnd($target[0]);
 						return;
