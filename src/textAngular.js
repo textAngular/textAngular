@@ -150,10 +150,10 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 		};
 
 		// add generic styling for the editor
-		_addCSSRule(topsheet, '.ta-scroll-window.form-control', "height: 300px; overflow: auto; font-family: inherit; font-size: 100%; position: relative; padding: 0;");
+		_addCSSRule(topsheet, '.ta-scroll-window.form-control', "height: auto; min-height: 300px; overflow: auto; font-family: inherit; font-size: 100%; position: relative; padding: 0;");
 		_addCSSRule(topsheet, '.ta-root.focussed .ta-scroll-window.form-control', 'border-color: #66afe9; outline: 0; -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 8px rgba(102, 175, 233, 0.6);');
 		_addCSSRule(topsheet, '.ta-editor.ta-html', "min-height: 300px; height: auto; overflow: auto; font-family: inherit; font-size: 100%;");
-		_addCSSRule(topsheet, '.ta-scroll-window .ta-bind', "height: auto; min-height: 300px; padding: 6px 12px;");
+		_addCSSRule(topsheet, '.ta-scroll-window > .ta-bind', "height: auto; min-height: 300px; padding: 6px 12px;");
 
 		// add the styling for the awesomness of the resizer
 		_addCSSRule(topsheet, '.ta-root .ta-resizer-handle-overlay', 'z-index: 100; position: absolute; display: none;');
