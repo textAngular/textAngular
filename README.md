@@ -44,7 +44,7 @@ Include script tags similar to the following:
 
 Include script tag similar to the following: (For details on how this works see: [https://github.com/jsdelivr/jsdelivr#load-multiple-files-with-single-http-request](https://github.com/jsdelivr/jsdelivr#load-multiple-files-with-single-http-request))
 ```html
-<script src='http://cdn.jsdelivr.net/g/angular.textangular@1.2.0(textAngular-sanitize.min.js+textAngular.min.js)'></script>
+<script src='http://cdn.jsdelivr.net/g/angular.textangular@1.2.1(textAngular-sanitize.min.js+textAngular.min.js)'></script>
 ```
 
 **Via Github**
@@ -82,6 +82,11 @@ textAngular uses ```execCommand``` for the rich-text functionality.
 That being said, its still a fairly experimental browser feature-set, and may not behave the same in all browsers - see http://tifftiff.de/contenteditable/compliance_test.html for a full compliance list.
 It has been tested to work on Chrome, Safari, Opera, Firefox and Internet Explorer 8+.
 If you find something, please let me know - throw me a message, or submit a issue request!
+
+### FAQ
+
+1. **Youtube Insert embeds a ```<img>``` tag and aren't showing the video.**<br/>
+The problems with iFrames are that they are a security risk so the sanitizer by default strips them out. Instead of changing the sanitizer to allow iFrames we use a placeholder for youtube videos which has the added advantage of allowing you to edit their size and placement in the editor. To display the youtube videos when you aren't in the editor use the following html: ```<div ta-bind ng-model="data.htmlcontent"></div>```. This invokes our custom renderers to convert the ```<img>``` tags back into the youtube video you expect.
 
 ## Developer Notes
 
