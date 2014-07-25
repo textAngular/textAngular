@@ -1,5 +1,11 @@
 ###Changelog
 
+2014-07-26 v1.2.2
+
+- FIX #190, #201, #206, #223, #224, 
+- Merge #209, #204
+- Add option to disable sanitizer #233
+
 2014-05-19 v1.2.1
 
 - Release

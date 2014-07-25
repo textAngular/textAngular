@@ -1,4 +1,4 @@
-textAngular v1.2.1
+textAngular v1.2.2
 ===========
 
 [![Build Status](https://travis-ci.org/fraywing/textAngular.png?branch=master)](https://travis-ci.org/fraywing/textAngular) [![Coverage Status](https://coveralls.io/repos/fraywing/textAngular/badge.png)](https://coveralls.io/r/fraywing/textAngular)
@@ -6,7 +6,7 @@ textAngular v1.2.1
 
 Demo is available at: http://www.textangular.com
 
-#### This readme is for the v1.2.1 release, if you are looking for the v1.2.0 readme go here: https://github.com/fraywing/textAngular/tree/v1.2.0
+#### This readme is for the v1.2.x release, if you are looking for the v1.2.0 readme go here: https://github.com/fraywing/textAngular/tree/v1.2.0
 
 ## Requirements
 
@@ -35,15 +35,15 @@ Include script tags similar to the following:
 
 Include script tags similar to the following:
 ```html
-<script src='http://cdnjs.cloudflare.com/ajax/libs/textAngular/1.2.1/textAngular-sanitize.min.js'></script>
-<script src='http://cdnjs.cloudflare.com/ajax/libs/textAngular/1.2.1/textAngular.min.js'></script>
+	<script src='http://cdnjs.cloudflare.com/ajax/libs/textAngular/1.2.2/textAngular-sanitize.min.js'></script>
+<script src='http://cdnjs.cloudflare.com/ajax/libs/textAngular/1.2.2/textAngular.min.js'></script>
 ```
 
 **Via jsDelivr:**
 
 Include script tag similar to the following: (For details on how this works see: [https://github.com/jsdelivr/jsdelivr#load-multiple-files-with-single-http-request](https://github.com/jsdelivr/jsdelivr#load-multiple-files-with-single-http-request))
 ```html
-<script src='http://cdn.jsdelivr.net/g/angular.textangular@1.2.1(textAngular-sanitize.min.js+textAngular.min.js)'></script>
+<script src='http://cdn.jsdelivr.net/g/angular.textangular@1.2.2(textAngular-sanitize.min.js+textAngular.min.js)'></script>
 ```
 
 **Via Github**
