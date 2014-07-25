@@ -1,6 +1,9 @@
 describe('taBind', function () {
 	'use strict';
 	beforeEach(module('textAngular'));
+	afterEach(inject(function($document){
+		$document.find('body').html('');
+	}));
 	var $rootScope;
 	
 	it('should require ngModel', inject(function ($compile, $rootScope) {
@@ -13,7 +16,7 @@ describe('taBind', function () {
 	it('should add ta-bind class', inject(function ($compile, $rootScope) {
 		var element = $compile('<div ta-bind ng-model="test"></div>')($rootScope);
 		$rootScope.$digest();
-		expect(element.attr('class')).toBe('ng-scope ng-isolate-scope ng-pristine ng-valid ta-bind');
+		expect(element.hasClass('ta-bind')).toBe(true);
 	}));
 
 	describe('should respect HTML5 placeholder', function () {
@@ -1189,6 +1192,170 @@ describe('taBind', function () {
 				expect(element.find('img').length).toBe(1);
 				expect(element.find('iframe').length).toBe(0);
 			}));
+		});
+	});
+	
+	describe('form validation', function(){
+		var element;
+		beforeEach(module('textAngular'));
+		
+		describe('basic', function(){
+			beforeEach(inject(function (_$compile_, _$rootScope_, $document) {
+				$rootScope = _$rootScope_;
+				$rootScope.html = '';
+				var _form = angular.element('<form name="form"></form>');
+				element = angular.element('<div ta-bind name="test" contenteditable="true" ng-model="html"></div>');
+				_form.append(element);
+				$document.find('body').append(_$compile_(_form)($rootScope));
+				$rootScope.$digest();
+			}));
+			
+			describe('should start with', function () {
+				it('pristine', function(){
+					expect($rootScope.form.$pristine).toBe(true);
+				});
+				it('field pristine', function(){
+					expect($rootScope.form.test.$pristine).toBe(true);
+				});
+				it('valid', function(){
+					expect($rootScope.form.$valid).toBe(true);
+				});
+				it('field valid', function(){
+					expect($rootScope.form.test.$valid).toBe(true);
+				});
+			});
+			
+			describe('should NOT change on direct model change', function () {
+				beforeEach(function(){
+					$rootScope.html = '<div>Test Change Content</div>';
+					$rootScope.$digest();
+				});
+				it('pristine', function(){
+					expect($rootScope.form.$pristine).toBe(true);
+				});
+				it('field pristine', function(){
+					expect($rootScope.form.test.$pristine).toBe(true);
+				});
+				it('valid', function(){
+					expect($rootScope.form.$valid).toBe(true);
+				});
+				it('field valid', function(){
+					expect($rootScope.form.test.$valid).toBe(true);
+				});
+			});
+			
+			describe('should change on input update', function () {
+				beforeEach(inject(function(textAngularManager){
+					element.html('<div>Test Change Content</div>');
+					element.triggerHandler('keyup');
+					$rootScope.$digest();
+				}));
+				it('not pristine', function(){
+					expect($rootScope.form.$pristine).toBe(false);
+				});
+				it('field not pristine', function(){
+					expect($rootScope.form.test.$pristine).toBe(false);
+				});
+				it('valid', function(){
+					expect($rootScope.form.$valid).toBe(true);
+				});
+				it('field valid', function(){
+					expect($rootScope.form.test.$valid).toBe(true);
+				});
+			});
+			
+			describe('should change on blur', function () {
+				beforeEach(inject(function(textAngularManager){
+					element.html('<div>Test Change Content</div>');
+					element.triggerHandler('blur');
+					$rootScope.$digest();
+				}));
+				it('not pristine', function(){
+					expect($rootScope.form.$pristine).toBe(false);
+				});
+				it('field not pristine', function(){
+					expect($rootScope.form.test.$pristine).toBe(false);
+				});
+				it('valid', function(){
+					expect($rootScope.form.$valid).toBe(true);
+				});
+				it('field valid', function(){
+					expect($rootScope.form.test.$valid).toBe(true);
+				});
+			});
+		});
+		describe('with errors', function(){
+			beforeEach(inject(function (_$compile_, _$rootScope_, $document) {
+				$rootScope = _$rootScope_;
+				$rootScope.html = '';
+				var _form = angular.element('<form name="form"></form>');
+				element = angular.element('<div ta-bind name="test" contenteditable="true" ng-model="html" required></div>');
+				_form.append(element);
+				$document.find('body').append(_$compile_(_form)($rootScope));
+				$rootScope.$digest();
+			}));
+			
+			describe('should start with', function () {
+				it('ng-required', function(){
+					expect($rootScope.form.test.$error.required).toBe(true);
+				});
+				it('invalid', function(){
+					expect($rootScope.form.$invalid).toBe(true);
+				});
+				it('infield valid', function(){
+					expect($rootScope.form.test.$invalid).toBe(true);
+				});
+			});
+			
+			describe('should change on direct model change', function () {
+				beforeEach(function(){
+					$rootScope.html = '<div>Test Change Content</div>';
+					$rootScope.$digest();
+				});
+				it('ng-required', function(){
+					expect($rootScope.form.test.$error.required).toBe(false);
+				});
+				it('valid', function(){
+					expect($rootScope.form.$valid).toBe(true);
+				});
+				it('field valid', function(){
+					expect($rootScope.form.test.$valid).toBe(true);
+				});
+			});
+			
+			describe('should change on input update', function () {
+				beforeEach(inject(function(textAngularManager){
+					element.html('<div>Test Change Content</div>');
+					element.triggerHandler('keyup');
+					$rootScope.$digest();
+				}));
+				it('ng-required', function(){
+					expect($rootScope.form.test.$error.required).toBe(false);
+				});
+				it('valid', function(){
+					expect($rootScope.form.$valid).toBe(true);
+				});
+				it('field valid', function(){
+					expect($rootScope.form.test.$valid).toBe(true);
+				});
+			});
+			
+			describe('should change on blur', function () {
+				beforeEach(inject(function(textAngularManager){
+					element.html('<div>Test Change Content</div>');
+					element.triggerHandler('blur');
+					$rootScope.$digest();
+				}));
+				it('ng-required', function(){
+					expect($rootScope.form.test.$error.required).toBe(false);
+				});
+				it('valid', function(){
+					expect($rootScope.form.$valid).toBe(true);
+				});
+				it('field valid', function(){
+					expect($rootScope.form.test.$valid).toBe(true);
+				});
+			});
 		});
 	});
 });

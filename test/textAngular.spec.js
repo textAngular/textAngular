@@ -357,68 +357,172 @@ describe('textAngular', function(){
 	/*
 		Form validation tests
 	*/
-		
+	
 	describe('form validation', function(){
 		'use strict';
 		var $rootScope, element;
 		beforeEach(module('textAngular'));
-		beforeEach(inject(function (_$compile_, _$rootScope_) {
-			$rootScope = _$rootScope_;
-			$rootScope.htmlcontent = '<p>Test Content</p>';
-			element = _$compile_('<form name="form"><text-angular name="test" ng-model="htmlcontent"></text-angular></form>')($rootScope);
-			$rootScope.$digest();
-		}));
-		describe('should start with', function () {
-			it('pristine', function(){
-				expect($rootScope.form.$pristine).toBe(true);
-			});
-			it('not dirty', function(){
-				expect($rootScope.form.$dirty).toBe(false);
-			});
-			it('field pristine', function(){
-				expect($rootScope.form.test.$pristine).toBe(true);
-			});
-			it('field not dirty', function(){
-				expect($rootScope.form.test.$dirty).toBe(false);
-			});
-		});
 		
-		describe('should NOT change on direct model change', function () {
-			beforeEach(function(){
-				$rootScope.htmlcontent = '<div>Test Change Content</div>';
-				$rootScope.$digest();
-			});
-			it('pristine', function(){
-				expect($rootScope.form.$pristine).toBe(true);
-			});
-			it('not dirty', function(){
-				expect($rootScope.form.$dirty).toBe(false);
-			});
-			it('field pristine', function(){
-				expect($rootScope.form.test.$pristine).toBe(true);
-			});
-			it('field not dirty', function(){
-				expect($rootScope.form.test.$dirty).toBe(false);
-			});
-		});
-		
-		describe('should change on input update', function () {
-			beforeEach(inject(function(textAngularManager){
-				textAngularManager.retrieveEditor('test').scope.displayElements.text.html('<div>Test Change Content</div>');
-				textAngularManager.retrieveEditor('test').scope.displayElements.text.triggerHandler('keyup');
+		describe('basic', function(){
+			beforeEach(inject(function (_$compile_, _$rootScope_, _$window_, $document, textAngularManager) {
+				$window = _$window_;
+				$rootScope = _$rootScope_;
+				$rootScope.html = '';
+				var _form = angular.element('<form name="form"></form>');
+				element = angular.element('<text-angular name="test" ng-model="html"></text-angular>');
+				_form.append(element);
+				$document.find('body').append(_$compile_(_form)($rootScope));
+				element = textAngularManager.retrieveEditor('test').scope.displayElements.text;
 				$rootScope.$digest();
 			}));
-			it('not pristine', function(){
-				expect($rootScope.form.$pristine).toBe(false);
+			
+			describe('should start with', function () {
+				it('pristine', function(){
+					expect($rootScope.form.$pristine).toBe(true);
+				});
+				it('field pristine', function(){
+					expect($rootScope.form.test.$pristine).toBe(true);
+				});
+				it('valid', function(){
+					expect($rootScope.form.$valid).toBe(true);
+				});
+				it('field valid', function(){
+					expect($rootScope.form.test.$valid).toBe(true);
+				});
 			});
-			it('dirty', function(){
-				expect($rootScope.form.$dirty).toBe(true);
+			
+			describe('should NOT change on direct model change', function () {
+				beforeEach(function(){
+					$rootScope.htmlcontent = '<div>Test Change Content</div>';
+					$rootScope.$digest();
+				});
+				it('pristine', function(){
+					expect($rootScope.form.$pristine).toBe(true);
+				});
+				it('field pristine', function(){
+					expect($rootScope.form.test.$pristine).toBe(true);
+				});
+				it('valid', function(){
+					expect($rootScope.form.$valid).toBe(true);
+				});
+				it('field valid', function(){
+					expect($rootScope.form.test.$valid).toBe(true);
+				});
 			});
-			it('field not pristine', function(){
-				expect($rootScope.form.test.$pristine).toBe(false);
+			
+			describe('should change on input update', function () {
+				beforeEach(inject(function(textAngularManager){
+					element.html('<div>Test Change Content</div>');
+					element.triggerHandler('keyup');
+					$rootScope.$digest();
+				}));
+				it('not pristine', function(){
+					expect($rootScope.form.$pristine).toBe(false);
+				});
+				it('field not pristine', function(){
+					expect($rootScope.form.test.$pristine).toBe(false);
+				});
+				it('valid', function(){
+					expect($rootScope.form.$valid).toBe(true);
+				});
+				it('field valid', function(){
+					expect($rootScope.form.test.$valid).toBe(true);
+				});
 			});
-			it('field dirty', function(){
-				expect($rootScope.form.test.$dirty).toBe(true);
+			
+			describe('should change on blur', function () {
+				beforeEach(inject(function(textAngularManager){
+					element.html('<div>Test Change Content</div>');
+					element.triggerHandler('blur');
+					$rootScope.$digest();
+				}));
+				it('not pristine', function(){
+					expect($rootScope.form.$pristine).toBe(false);
+				});
+				it('field not pristine', function(){
+					expect($rootScope.form.test.$pristine).toBe(false);
+				});
+				it('valid', function(){
+					expect($rootScope.form.$valid).toBe(true);
+				});
+				it('field valid', function(){
+					expect($rootScope.form.test.$valid).toBe(true);
+				});
+			});
+		});
+		describe('with errors', function(){
+			beforeEach(inject(function (_$compile_, _$rootScope_, _$window_, $document, textAngularManager) {
+				$window = _$window_;
+				$rootScope = _$rootScope_;
+				$rootScope.html = '';
+				var _form = angular.element('<form name="form"></form>');
+				element = angular.element('<text-angular name="test" ng-model="html" required></text-angular>');
+				_form.append(element);
+				$document.find('body').append(_$compile_(_form)($rootScope));
+				element = textAngularManager.retrieveEditor('test').scope.displayElements.text;
+				$rootScope.$digest();
+			}));
+			
+			describe('should start with', function () {
+				it('ng-required', function(){
+					expect($rootScope.form.test.$error.required).toBe(true);
+				});
+				it('valid', function(){
+					expect($rootScope.form.$invalid).toBe(true);
+				});
+				it('field valid', function(){
+					expect($rootScope.form.test.$invalid).toBe(true);
+				});
+			});
+			
+			describe('should change on direct model change', function () {
+				beforeEach(function(){
+					$rootScope.html = '<div>Test Change Content</div>';
+					$rootScope.$digest();
+				});
+				it('ng-required', function(){
+					expect($rootScope.form.test.$error.required).toBe(false);
+				});
+				it('valid', function(){
+					expect($rootScope.form.$valid).toBe(true);
+				});
+				it('field valid', function(){
+					expect($rootScope.form.test.$valid).toBe(true);
+				});
+			});
+			
+			describe('should change on input update', function () {
+				beforeEach(inject(function(textAngularManager){
+					element.html('<div>Test Change Content</div>');
+					element.triggerHandler('keyup');
+					$rootScope.$digest();
+				}));
+				it('ng-required', function(){
+					expect($rootScope.form.test.$error.required).toBe(false);
+				});
+				it('valid', function(){
+					expect($rootScope.form.$valid).toBe(true);
+				});
+				it('field valid', function(){
+					expect($rootScope.form.test.$valid).toBe(true);
+				});
+			});
+			
+			describe('should change on blur', function () {
+				beforeEach(inject(function(textAngularManager){
+					element.html('<div>Test Change Content</div>');
+					element.triggerHandler('blur');
+					$rootScope.$digest();
+				}));
+				it('ng-required', function(){
+					expect($rootScope.form.test.$error.required).toBe(false);
+				});
+				it('valid', function(){
+					expect($rootScope.form.$valid).toBe(true);
+				});
+				it('field valid', function(){
+					expect($rootScope.form.test.$valid).toBe(true);
+				});
 			});
 		});
 	});
@@ -456,8 +560,8 @@ describe('textAngular', function(){
 		beforeEach(module('textAngular'));
 		beforeEach(inject(function (_$compile_, _$rootScope_, textAngularManager) {
 			$rootScope = _$rootScope_;
-			$rootScope.htmlcontent = '<p>Test Content</p>';
-			element = _$compile_('<text-angular name="test" ng-model="htmlcontent"></text-angular>')($rootScope);
+			$rootScope.html = '<p>Test Content</p>';
+			element = _$compile_('<text-angular name="test" ng-model="html"></text-angular>')($rootScope);
 			$rootScope.$digest();
 			displayElements = textAngularManager.retrieveEditor('test').scope.displayElements;
 		}));
@@ -480,8 +584,8 @@ describe('textAngular', function(){
 		beforeEach(module('textAngular'));
 		beforeEach(inject(function (_$compile_, _$rootScope_, textAngularManager) {
 			$rootScope = _$rootScope_;
-			$rootScope.htmlcontent = '<p>Test Content</p>';
-			element = _$compile_('<text-angular name="test" ng-model="htmlcontent"><p>Original Content</p></text-angular>')($rootScope);
+			$rootScope.html = '<p>Test Content</p>';
+			element = _$compile_('<text-angular name="test" ng-model="html"><p>Original Content</p></text-angular>')($rootScope);
 			$rootScope.$digest();
 			displayElements = textAngularManager.retrieveEditor('test').scope.displayElements;
 		}));
@@ -502,7 +606,7 @@ describe('textAngular', function(){
 		beforeEach(module('textAngular'));
 		it('with ng-model', inject(function($rootScope, $compile, textAngularManager){
 			$rootScope.html = '';
-			$compile('<text-angular ta-default-wrap="div" name="test" ng-model="htmlcontent"></text-angular>')($rootScope);
+			$compile('<text-angular ta-default-wrap="div" name="test" ng-model="html"></text-angular>')($rootScope);
 			element = textAngularManager.retrieveEditor('test').scope.displayElements.text;
 			$rootScope.$digest();
 			element.triggerHandler('focus');
@@ -558,10 +662,10 @@ describe('textAngular', function(){
 		beforeEach(module('textAngular'));
 		beforeEach(inject(function (_$compile_, _$rootScope_, textAngularManager) {
 			$rootScope = _$rootScope_;
-			$rootScope.htmlcontent = '<p>Test Content</p>';
-			element = _$compile_('<text-angular name="test" ng-model="htmlcontent"></text-angular>')($rootScope);
+			$rootScope.html = '<p>Test Content</p>';
+			element = _$compile_('<text-angular name="test" ng-model="html"></text-angular>')($rootScope);
 			$rootScope.$digest();
-			$rootScope.htmlcontent = '<div>Test Change Content</div>';
+			$rootScope.html = '<div>Test Change Content</div>';
 			$rootScope.$digest();
 			displayElements = textAngularManager.retrieveEditor('test').scope.displayElements;
 		}));
@@ -583,66 +687,66 @@ describe('textAngular', function(){
 		'use strict';
 		beforeEach(module('textAngular'));
 		it('should handle initial undefined to empty-string', inject(function ($compile, $rootScope, textAngularManager) {
-			$rootScope.htmlcontent = undefined;
-			var element = $compile('<text-angular name="test" ng-model="htmlcontent"></text-angular>')($rootScope);
+			$rootScope.html = undefined;
+			var element = $compile('<text-angular name="test" ng-model="html"></text-angular>')($rootScope);
 			$rootScope.$digest();
 			expect(textAngularManager.retrieveEditor('test').scope.displayElements.text.html()).toBe('<p><br></p>');
 		}));
 		
 		it('should handle initial null to empty-string', inject(function ($compile, $rootScope, textAngularManager) {
-			$rootScope.htmlcontent = null;
-			var element = $compile('<text-angular name="test" ng-model="htmlcontent"></text-angular>')($rootScope);
+			$rootScope.html = null;
+			var element = $compile('<text-angular name="test" ng-model="html"></text-angular>')($rootScope);
 			$rootScope.$digest();
 			expect(textAngularManager.retrieveEditor('test').scope.displayElements.text.html()).toBe('<p><br></p>');
 		}));
 		
 		it('should handle initial undefined to originalContents', inject(function ($compile, $rootScope, textAngularManager) {
-			$rootScope.htmlcontent = undefined;
-			var element = $compile('<text-angular name="test" ng-model="htmlcontent">Test Contents</text-angular>')($rootScope);
+			$rootScope.html = undefined;
+			var element = $compile('<text-angular name="test" ng-model="html">Test Contents</text-angular>')($rootScope);
 			$rootScope.$digest();
 			expect(textAngularManager.retrieveEditor('test').scope.displayElements.text.html()).toBe('Test Contents');
 		}));
 		
 		it('should handle initial null to originalContents', inject(function ($compile, $rootScope, textAngularManager) {
-			$rootScope.htmlcontent = null;
-			var element = $compile('<text-angular name="test" ng-model="htmlcontent">Test Contents</text-angular>')($rootScope);
+			$rootScope.html = null;
+			var element = $compile('<text-angular name="test" ng-model="html">Test Contents</text-angular>')($rootScope);
 			$rootScope.$digest();
 			expect(textAngularManager.retrieveEditor('test').scope.displayElements.text.html()).toBe('Test Contents');
 		}));
 		
 		describe('should reset', function(){
 			it('from undefined to empty-string', inject(function ($compile, $rootScope, textAngularManager) {
-				$rootScope.htmlcontent = 'Test Content';
-				var element = $compile('<text-angular name="test" ng-model="htmlcontent"></text-angular>')($rootScope);
+				$rootScope.html = 'Test Content';
+				var element = $compile('<text-angular name="test" ng-model="html"></text-angular>')($rootScope);
 				$rootScope.$digest();
-				$rootScope.htmlcontent = undefined;
+				$rootScope.html = undefined;
 				$rootScope.$digest();
 				expect(textAngularManager.retrieveEditor('test').scope.displayElements.text.html()).toBe('<p><br></p>');
 			}));
 			
 			it('from null to empty-string', inject(function ($compile, $rootScope, textAngularManager) {
-				$rootScope.htmlcontent = 'Test Content';
-				var element = $compile('<text-angular name="test" ng-model="htmlcontent"></text-angular>')($rootScope);
+				$rootScope.html = 'Test Content';
+				var element = $compile('<text-angular name="test" ng-model="html"></text-angular>')($rootScope);
 				$rootScope.$digest();
-				$rootScope.htmlcontent = null;
+				$rootScope.html = null;
 				$rootScope.$digest();
 				expect(textAngularManager.retrieveEditor('test').scope.displayElements.text.html()).toBe('<p><br></p>');
 			}));
 			
 			it('from undefined to blank/emptystring WITH originalContents', inject(function ($compile, $rootScope, textAngularManager) {
-				$rootScope.htmlcontent = 'Test Content1';
-				var element = $compile('<text-angular name="test" ng-model="htmlcontent">Test Contents2</text-angular>')($rootScope);
+				$rootScope.html = 'Test Content1';
+				var element = $compile('<text-angular name="test" ng-model="html">Test Contents2</text-angular>')($rootScope);
 				$rootScope.$digest();
-				$rootScope.htmlcontent = undefined;
+				$rootScope.html = undefined;
 				$rootScope.$digest();
 				expect(textAngularManager.retrieveEditor('test').scope.displayElements.text.html()).toBe('<p><br></p>');
 			}));
 			
 			it('from null to blank/emptystring WITH originalContents', inject(function ($compile, $rootScope, textAngularManager) {
-				$rootScope.htmlcontent = 'Test Content1';
-				var element = $compile('<text-angular name="test" ng-model="htmlcontent">Test Contents2</text-angular>')($rootScope);
+				$rootScope.html = 'Test Content1';
+				var element = $compile('<text-angular name="test" ng-model="html">Test Contents2</text-angular>')($rootScope);
 				$rootScope.$digest();
-				$rootScope.htmlcontent = null;
+				$rootScope.html = null;
 				$rootScope.$digest();
 				expect(textAngularManager.retrieveEditor('test').scope.displayElements.text.html()).toBe('<p><br></p>');
 			}));
@@ -660,8 +764,8 @@ describe('textAngular', function(){
 			});
 			var editorScope, element, sel, range;
 			beforeEach(inject(function($compile, $rootScope, textAngularManager, $document){
-				$rootScope.htmlcontent = '<p>Lorem ipsum dolor sit amet, <i>consectetur adipisicing</i> elit, <strong>sed do eiusmod tempor incididunt</strong> ut labore et dolore magna aliqua.</p>';
-				element = $compile('<text-angular name="test" ng-model="htmlcontent">Test Contents2</text-angular>')($rootScope);
+				$rootScope.html = '<p>Lorem ipsum dolor sit amet, <i>consectetur adipisicing</i> elit, <strong>sed do eiusmod tempor incididunt</strong> ut labore et dolore magna aliqua.</p>';
+				element = $compile('<text-angular name="test" ng-model="html">Test Contents2</text-angular>')($rootScope);
 				$document.find('body').append(element);
 				$rootScope.$digest();
 				editorScope = textAngularManager.retrieveEditor('test').scope;
@@ -741,8 +845,8 @@ describe('textAngular', function(){
 			
 			var editorScope, element;
 			beforeEach(inject(function($compile, $rootScope, textAngularManager, $document){
-				$rootScope.htmlcontent = '<p>Lorem ipsum dolor sit amet, <i>consectetur adipisicing</i> elit, <strong>sed do eiusmod tempor incididunt</strong> ut labore et dolore magna aliqua.</p>';
-				element = $compile('<text-angular name="test" ng-model="htmlcontent">Test Contents2</text-angular>')($rootScope);
+				$rootScope.html = '<p>Lorem ipsum dolor sit amet, <i>consectetur adipisicing</i> elit, <strong>sed do eiusmod tempor incididunt</strong> ut labore et dolore magna aliqua.</p>';
+				element = $compile('<text-angular name="test" ng-model="html">Test Contents2</text-angular>')($rootScope);
 				$document.find('body').append(element);
 				$rootScope.$digest();
 				editorScope = textAngularManager.retrieveEditor('test').scope;
@@ -795,8 +899,8 @@ describe('textAngular', function(){
 			];
 		}));
 		beforeEach(inject(function($compile, $rootScope, textAngularManager, $document){
-			$rootScope.htmlcontent = '<p>Lorem ipsum <u>dolor sit amet<u>, consectetur <i>adipisicing elit, sed do eiusmod tempor incididunt</i> ut labore et <a>dolore</a> magna aliqua.</p>';
-			element = $compile('<text-angular name="test" ng-model="htmlcontent">Test Contents2</text-angular>')($rootScope);
+			$rootScope.html = '<p>Lorem ipsum <u>dolor sit amet<u>, consectetur <i>adipisicing elit, sed do eiusmod tempor incididunt</i> ut labore et <a>dolore</a> magna aliqua.</p>';
+			element = $compile('<text-angular name="test" ng-model="html">Test Contents2</text-angular>')($rootScope);
 			$document.find('body').append(element);
 			editorScope = textAngularManager.retrieveEditor('test').scope;
 			textAngularManager.retrieveEditor('test').editorFunctions.focus();
@@ -976,12 +1080,12 @@ describe('textAngular', function(){
 		}));
 		
 		it('should respect the function set in the attribute', inject(function($compile, $rootScope){
-			$rootScope.htmlcontent = '';
+			$rootScope.html = '';
 			var testvar = false;
 			$rootScope.testhandler = function(){
 				testvar = true;
 			};
-			element = $compile('<text-angular name="test" ta-file-drop="testhandler" ng-model="htmlcontent"></text-angular>')($rootScope);
+			element = $compile('<text-angular name="test" ta-file-drop="testhandler" ng-model="html"></text-angular>')($rootScope);
 			if(jQuery === angular.element) textAngularManager.retrieveEditor('test').scope.displayElements.text.triggerHandler({type: 'drop', originalEvent: {dataTransfer: {files: ['test'], types: ['files']}}});
 			else textAngularManager.retrieveEditor('test').scope.displayElements.text.triggerHandler('drop', {originalEvent: {dataTransfer: {files: ['test'], types: ['files']}}});
 			$rootScope.$digest();
@@ -989,12 +1093,12 @@ describe('textAngular', function(){
 		}));
 		
 		it('when no attribute should use the default handler in taOptions', inject(function($compile, $rootScope, taOptions){
-			$rootScope.htmlcontent = '';
+			$rootScope.html = '';
 			var testvar = false;
 			taOptions.defaultFileDropHandler = function(){
 				testvar = true;
 			};
-			element = $compile('<text-angular name="test" ng-model="htmlcontent"></text-angular>')($rootScope);
+			element = $compile('<text-angular name="test" ng-model="html"></text-angular>')($rootScope);
 			if(jQuery === angular.element) textAngularManager.retrieveEditor('test').scope.displayElements.text.triggerHandler({type: 'drop', originalEvent: {dataTransfer: {files: ['test'], types: ['files']}}});
 			else textAngularManager.retrieveEditor('test').scope.displayElements.text.triggerHandler('drop', {originalEvent: {dataTransfer: {files: ['test'], types: ['files']}}});
 			$rootScope.$digest();
@@ -1002,12 +1106,12 @@ describe('textAngular', function(){
 		}));
 		
 		it('handler not fired when no files and no errors', inject(function($compile, $rootScope, taOptions){
-			$rootScope.htmlcontent = '';
+			$rootScope.html = '';
 			var testvar = false;
 			taOptions.defaultFileDropHandler = function(){
 				testvar = true;
 			};
-			element = $compile('<text-angular name="test" ng-model="htmlcontent"></text-angular>')($rootScope);
+			element = $compile('<text-angular name="test" ng-model="html"></text-angular>')($rootScope);
 			if(jQuery === angular.element) textAngularManager.retrieveEditor('test').scope.displayElements.text.triggerHandler({type: 'drop', originalEvent: {dataTransfer: {files: [], types: ['url or something']}}});
 			else textAngularManager.retrieveEditor('test').scope.displayElements.text.triggerHandler('drop', {originalEvent: {dataTransfer: {files: [], types: ['url or something']}}});
 			$rootScope.$digest();
@@ -1024,12 +1128,12 @@ describe('textAngular', function(){
 		
 		describe('check handler return values respected', function(){
 			it('default inserts returned html', inject(function($compile, $rootScope, taOptions, $document){
-				$rootScope.htmlcontent = '';
+				$rootScope.html = '';
 				taOptions.defaultFileDropHandler = function(file, insertAction){
 					insertAction('insertHtml', '<img/>');
 					return true;
 				};
-				element = $compile('<text-angular name="test" ng-model="htmlcontent"></text-angular>')($rootScope);
+				element = $compile('<text-angular name="test" ng-model="html"></text-angular>')($rootScope);
 				$document.find('body').append(element);
 				$rootScope.$digest();
 				if(jQuery === angular.element) textAngularManager.retrieveEditor('test').scope.displayElements.text.triggerHandler({type: 'drop', originalEvent: {dataTransfer: {files: ['test'], types: ['files']}}});
@@ -1039,12 +1143,12 @@ describe('textAngular', function(){
 				element.remove();
 			}));
 			it('attr function inserts returned html', inject(function($compile, $rootScope, taOptions, $document){
-				$rootScope.htmlcontent = '';
+				$rootScope.html = '';
 				$rootScope.testhandler = function(file, insertAction){
 					insertAction('insertHtml', '<img/>');
 					return true;
 				};
-				element = $compile('<text-angular name="test" ta-file-drop="testhandler" ng-model="htmlcontent"></text-angular>')($rootScope);
+				element = $compile('<text-angular name="test" ta-file-drop="testhandler" ng-model="html"></text-angular>')($rootScope);
 				$document.find('body').append(element);
 				$rootScope.$digest();
 				if(jQuery === angular.element) textAngularManager.retrieveEditor('test').scope.displayElements.text.triggerHandler({type: 'drop', originalEvent: {dataTransfer: {files: ['test'], types: ['files']}}});
@@ -1054,7 +1158,7 @@ describe('textAngular', function(){
 				element.remove();
 			}));
 			it('attr function overrides default', inject(function($compile, $rootScope, taOptions, $document){
-				$rootScope.htmlcontent = '';
+				$rootScope.html = '';
 				taOptions.defaultFileDropHandler = function(file, insertAction){
 					insertAction('insertHtml', '<wrong/>');
 					return true;
@@ -1063,7 +1167,7 @@ describe('textAngular', function(){
 					insertAction('insertHtml', '<img/>');
 					return true;
 				};
-				element = $compile('<text-angular name="test" ta-file-drop="testhandler" ng-model="htmlcontent"></text-angular>')($rootScope);
+				element = $compile('<text-angular name="test" ta-file-drop="testhandler" ng-model="html"></text-angular>')($rootScope);
 				$document.find('body').append(element);
 				$rootScope.$digest();
 				if(jQuery === angular.element) textAngularManager.retrieveEditor('test').scope.displayElements.text.triggerHandler({type: 'drop', originalEvent: {dataTransfer: {files: ['test'], types: ['files']}}});
@@ -1073,7 +1177,7 @@ describe('textAngular', function(){
 				element.remove();
 			}));
 			it('default inserted if attr function returns false', inject(function($compile, $rootScope, taOptions, $document){
-				$rootScope.htmlcontent = '';
+				$rootScope.html = '';
 				taOptions.defaultFileDropHandler = function(file, insertAction){
 					insertAction('insertHtml', '<img/>');
 					return true;
@@ -1081,7 +1185,7 @@ describe('textAngular', function(){
 				$rootScope.testhandler = function(file, insertAction){
 					return false;
 				};
-				element = $compile('<text-angular name="test" ta-file-drop="testhandler" ng-model="htmlcontent"></text-angular>')($rootScope);
+				element = $compile('<text-angular name="test" ta-file-drop="testhandler" ng-model="html"></text-angular>')($rootScope);
 				$document.find('body').append(element);
 				$rootScope.$digest();
 				if(jQuery === angular.element) textAngularManager.retrieveEditor('test').scope.displayElements.text.triggerHandler({type: 'drop', originalEvent: {dataTransfer: {files: ['test'], types: ['files']}}});
@@ -1099,10 +1203,10 @@ describe('textAngular', function(){
 		var element1, element2, toolbar, $rootScope;
 		beforeEach(inject(function($compile, _$rootScope_){
 			$rootScope = _$rootScope_;
-			$rootScope.htmlcontent = '<p>Lorem ipsum <u>dolor sit amet<u>, consectetur <i>adipisicing elit, sed do eiusmod tempor incididunt</i> ut labore et dolore magna aliqua.</p>';
+			$rootScope.html = '<p>Lorem ipsum <u>dolor sit amet<u>, consectetur <i>adipisicing elit, sed do eiusmod tempor incididunt</i> ut labore et dolore magna aliqua.</p>';
 			toolbar = $compile('<text-angular-toolbar name="toolbar"></text-angular-toolbar>')($rootScope);
-			element1 = $compile('<text-angular name="test1" ng-model="htmlcontent" ta-target-toolbars="toolbar"></text-angular>')($rootScope);
-			element2 = $compile('<text-angular name="test2" ng-model="htmlcontent" ta-target-toolbars="toolbar"></text-angular>')($rootScope);
+			element1 = $compile('<text-angular name="test1" ng-model="html" ta-target-toolbars="toolbar"></text-angular>')($rootScope);
+			element2 = $compile('<text-angular name="test2" ng-model="html" ta-target-toolbars="toolbar"></text-angular>')($rootScope);
 			$rootScope.$digest();
 		}));
 		

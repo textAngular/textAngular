@@ -608,6 +608,13 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 								scope.html = ngModel.$viewValue || '';
 							}
 						};
+						// trigger the validation calls
+						var _validity = function(value){
+							if(attrs.required) ngModel.$setValidity('required', !(!value || value.trim() === ''));
+							return value;
+						};
+						ngModel.$parsers.push(_validity);
+						ngModel.$formatters.push(_validity);
 					}else{
 						// if no ngModel then update from the contents of the origional html.
 						scope.displayElements.forminput.val(_originalContents);
@@ -940,7 +947,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 				var _isInputFriendly = _isContentEditable || element[0].tagName.toLowerCase() === 'textarea' || element[0].tagName.toLowerCase() === 'input';
 				var _isReadonly = false;
 				var _focussed = false;
-
+				
 				// defaults to the paragraph element, but we need the line-break or it doesn't allow you to type into the empty element
 				// non IE is '<p><br/></p>', ie is '<p></p>' as for once IE gets it correct...
 				var _defaultVal, _defaultTest;
@@ -971,12 +978,20 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 					if(_isInputFriendly) return element.val();
 					throw ('textAngular Error: attempting to update non-editable taBind');
 				};
-
+				
+				var _setViewValue = function(val){
+					if(!val) val = _compileHtml();
+					if(val === _defaultTest){
+						// this avoids us from tripping the ng-pristine flag if we click in and out with out typing
+						if(ngModel.$viewValue !== '') ngModel.$setViewValue('');
+					}else ngModel.$setViewValue(val);
+				};
+				
 				//used for updating when inserting wrapped elements
 				scope.$parent['updateTaBind' + (attrs.id || '')] = function(){
-					if(!_isReadonly) ngModel.$setViewValue(_compileHtml());
+					if(!_isReadonly) _setViewValue();
 				};
-
+				
 				//this code is used to update the models when data is entered/deleted
 				if(_isInputFriendly){
 					if(!_isContentEditable){
@@ -995,7 +1010,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 							// timeout to next is needed as otherwise the paste/cut event has not finished actually changing the display
 							if(!_isReadonly)
 								$timeout(function(){
-									ngModel.$setViewValue(_compileHtml());
+									_setViewValue();
 								}, 0);
 							else e.preventDefault();
 						});
@@ -1025,7 +1040,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 								else{
 									$document[0].execCommand('insertText', false, text);
 								}
-								ngModel.$setViewValue(_compileHtml());
+								_setViewValue();
 							}
 						});
 
@@ -1051,17 +1066,15 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 									element[0].innerHTML = _defaultVal;
 									taSelection.setSelectionToElementStart(element.children()[0]);
 								}
-								ngModel.$setViewValue(val);
+								_setViewValue(val);
 							}
 						});
 
 						element.on('blur', function(){
 							_focussed = false;
-							var val = _compileHtml();
 							/* istanbul ignore else: if readonly don't update model */
 							if(!_isReadonly){
-								if(val === _defaultTest) ngModel.$setViewValue('');
-								else ngModel.$setViewValue(_compileHtml());
+								_setViewValue();
 							}
 							ngModel.$render();
 						});
@@ -1083,17 +1096,24 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 						});
 					}
 				}
-
+				
 				// catch DOM XSS via taSanitize
 				// Sanitizing both ways is identical
 				var _sanitize = function(unsafe){
 					return (ngModel.$oldViewValue = taSanitize(taFixChrome(unsafe), ngModel.$oldViewValue));
 				};
-
+				
+				// trigger the validation calls
+				var _validity = function(value){
+					if(attrs.required) ngModel.$setValidity('required', !(!value || value.trim() === _defaultTest || value.trim() === ''));
+					return value;
+				};
 				// parsers trigger from the above keyup function or any other time that the viewValue is updated and parses it for storage in the ngModel
 				ngModel.$parsers.push(_sanitize);
+				ngModel.$parsers.push(_validity);
 				// because textAngular is bi-directional (which is awesome) we need to also sanitize values going in from the server
 				ngModel.$formatters.push(_sanitize);
+				ngModel.$formatters.push(_validity);
 
 				var selectorClickHandler = function(event){
 					// emit the element-select event, pass the element
@@ -1174,7 +1194,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 						}
 					}
 				};
-
+				
 				if(attrs.taReadonly){
 					//set initial value
 					_isReadonly = scope.$parent.$eval(attrs.taReadonly);
