@@ -246,8 +246,8 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 	}]);
 
 	textAngular.directive("textAngular", [
-		'$compile', '$timeout', 'taOptions', 'taSanitize', 'taSelection', 'taExecCommand', 'textAngularManager', '$window', '$document', '$animate', '$log',
-		function($compile, $timeout, taOptions, taSanitize, taSelection, taExecCommand, textAngularManager, $window, $document, $animate, $log){
+		'$compile', '$timeout', 'taOptions', 'taSelection', 'taExecCommand', 'textAngularManager', '$window', '$document', '$animate', '$log',
+		function($compile, $timeout, taOptions, taSelection, taExecCommand, textAngularManager, $window, $document, $animate, $log){
 			return {
 				require: '?ngModel',
 				scope: {},
@@ -471,7 +471,12 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 					});
 					scope.displayElements.scrollWindow.attr({'ng-hide': 'showHtml'});
 					if(attrs.taDefaultWrap) scope.displayElements.text.attr('ta-default-wrap', attrs.taDefaultWrap);
-
+					
+					if(attrs.taUnsafeSanitizer){
+						scope.displayElements.text.attr('ta-unsafe-sanitizer', attrs.taUnsafeSanitizer);
+						scope.displayElements.html.attr('ta-unsafe-sanitizer', attrs.taUnsafeSanitizer);
+					}
+					
 					// add the main elements to the origional element
 					scope.displayElements.scrollWindow.append(scope.displayElements.text);
 					element.append(scope.displayElements.scrollWindow);
@@ -939,8 +944,8 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 				}catch(e){}
 			};
 		};
-	}]).directive('taBind', ['taSanitize', '$timeout', '$window', '$document', 'taFixChrome', 'taBrowserTag', 'taSelection', 'taSelectableElements', 'taApplyCustomRenderers',
-					function(taSanitize, $timeout, $window, $document, taFixChrome, taBrowserTag, taSelection, taSelectableElements, taApplyCustomRenderers){
+	}]).directive('taBind', ['taSanitize', '$timeout', '$window', '$document', 'taFixChrome', 'taBrowserTag', 'taSelection', 'taSelectableElements', 'taApplyCustomRenderers', 'taOptions',
+					function(taSanitize, $timeout, $window, $document, taFixChrome, taBrowserTag, taSelection, taSelectableElements, taApplyCustomRenderers, taOptions){
 		// Uses for this are textarea or input with ng-model and ta-bind='text'
 		// OR any non-form element with contenteditable="contenteditable" ta-bind="html|text" ng-model
 		return {
@@ -952,6 +957,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 				var _isInputFriendly = _isContentEditable || element[0].tagName.toLowerCase() === 'textarea' || element[0].tagName.toLowerCase() === 'input';
 				var _isReadonly = false;
 				var _focussed = false;
+				var _disableSanitizer = attrs.taUnsafeSanitizer || taOptions.disableSanitizer;
 				
 				// defaults to the paragraph element, but we need the line-break or it doesn't allow you to type into the empty element
 				// non IE is '<p><br/></p>', ie is '<p></p>' as for once IE gets it correct...
@@ -1114,7 +1120,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 				// catch DOM XSS via taSanitize
 				// Sanitizing both ways is identical
 				var _sanitize = function(unsafe){
-					return (ngModel.$oldViewValue = taSanitize(taFixChrome(unsafe), ngModel.$oldViewValue));
+					return (ngModel.$oldViewValue = taSanitize(taFixChrome(unsafe), ngModel.$oldViewValue, _disableSanitizer));
 				};
 				
 				// trigger the validation calls
@@ -1403,7 +1409,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 		};
 		return taFixChrome;
 	}).factory('taSanitize', ['$sanitize', function taSanitizeFactory($sanitize){
-		return function taSanitize(unsafe, oldsafe){
+		return function taSanitize(unsafe, oldsafe, ignore){
 			// unsafe and oldsafe should be valid HTML strings
 			// any exceptions (lets say, color for example) should be made here but with great care
 			// setup unsafe element for modification
@@ -1415,10 +1421,12 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 			});
 
 			// get the html string back
-			unsafe = unsafeElement[0].innerHTML;
 			var safe;
+			unsafe = unsafeElement[0].innerHTML;
 			try {
 				safe = $sanitize(unsafe);
+				// do this afterwards, then the $sanitizer should still throw for bad markup
+				if(ignore) safe = unsafe;
 			} catch (e){
 				safe = oldsafe || '';
 			}

@@ -164,4 +164,16 @@ describe('taSanitize', function(){
 			}));
 		});
 	});
+	
+	describe('allow disabling of sanitizer', function(){
+		it('should return the oldsafe passed in if bad html', inject(function(taSanitize, $sce){
+			var result = taSanitize('<broken><test', 'safe', true);
+			expect(result).toBe('safe');
+		}));
+		
+		it('should allow html not allowed by sanitizer', inject(function(taSanitize, $sce){
+			var result = taSanitize('<bad-tag></bad-tag>', '', true);
+			expect(result).toBe('<bad-tag></bad-tag>');
+		}));
+	});
 });
