@@ -18,7 +18,24 @@ describe('taBind', function () {
 		$rootScope.$digest();
 		expect(element.hasClass('ta-bind')).toBe(true);
 	}));
-
+	
+	it('should prevent mousedown from propagating up from contenteditable', inject(function($compile, $rootScope){
+		var element = $compile('<div ta-bind contenteditable="true" ng-model="test"></div>')($rootScope);
+		var event;
+		if(angular.element === jQuery){
+			event = jQuery.Event('mousedown');
+			element.triggerHandler(event);
+			$rootScope.$digest();
+			expect(event.isPropagationStopped()).toBe(true);
+		}else{
+			var _stopPropagation = false;
+			event = {stopPropagation: function(){ _stopPropagation = true; }};
+			element.triggerHandler('mousedown', event);
+			$rootScope.$digest();
+			expect(_stopPropagation).toBe(true);
+		}
+	}));
+	
 	describe('should respect HTML5 placeholder', function () {
 		describe('and require an id', function(){
 			it('should error', inject(function ($compile, $rootScope) {

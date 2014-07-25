@@ -254,7 +254,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 				restrict: "EA",
 				link: function(scope, element, attrs, ngModel){
 					// all these vars should not be accessable outside this directive
-					var _keydown, _keyup, _keypress, _mouseup, _focusin, _focusout,
+					var _keydown, _keyup, _keypress, _mouseup, _mousedown, _focusin, _focusout,
 						_originalContents, _toolbars,
 						_serial = (attrs.serial) ? attrs.serial : Math.floor(Math.random() * 10000000000000000),
 						_name = (attrs.name) ? attrs.name : 'textAngularEditor' + _serial,
@@ -1093,6 +1093,13 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 						element.on('focus', function(){
 							_focussed = true;
 							ngModel.$render();
+						});
+						
+						// prevent propagation on mousedown in editor, see #206
+						element.on('mousedown', function(event, eventData){
+							/* istanbul ignore else: this is for catching the jqLite testing*/
+							if(eventData) angular.extend(event, eventData);
+							event.stopPropagation(); 
 						});
 					}
 				}
