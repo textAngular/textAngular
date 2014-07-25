@@ -1300,6 +1300,27 @@ describe('taBind', function () {
 					expect($rootScope.form.test.$valid).toBe(true);
 				});
 			});
+			
+			describe('should NOT change on blur with no content difference', function () {
+				beforeEach(function(){
+					$rootScope.html = '<div>Test Change Content</div>';
+					$rootScope.$digest();
+					element.triggerHandler('blur');
+					$rootScope.$digest();
+				});
+				it('pristine', function(){
+					expect($rootScope.form.$pristine).toBe(true);
+				});
+				it('field pristine', function(){
+					expect($rootScope.form.test.$pristine).toBe(true);
+				});
+				it('valid', function(){
+					expect($rootScope.form.$valid).toBe(true);
+				});
+				it('field valid', function(){
+					expect($rootScope.form.test.$valid).toBe(true);
+				});
+			});
 		});
 		describe('with errors', function(){
 			beforeEach(inject(function (_$compile_, _$rootScope_, $document) {

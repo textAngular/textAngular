@@ -984,7 +984,9 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 					if(val === _defaultTest){
 						// this avoids us from tripping the ng-pristine flag if we click in and out with out typing
 						if(ngModel.$viewValue !== '') ngModel.$setViewValue('');
-					}else ngModel.$setViewValue(val);
+					}else{
+						if(ngModel.$viewValue !== val) ngModel.$setViewValue(val);
+					}
 				};
 				
 				//used for updating when inserting wrapped elements
@@ -1152,7 +1154,11 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 								.on('click', selectorClickHandler);
 						});
 				};
-
+				
+				var _setInnerHTML = function(newval){
+					element[0].innerHTML = newval;
+				};
+				
 				// changes to the model variable from outside the html/text inputs
 				ngModel.$render = function(){
 					// catch model being null or undefined
@@ -1167,15 +1173,14 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 									// blank
 									if(_focussed) element.removeClass('placeholder-text');
 									else element.addClass('placeholder-text');
-									element[0].innerHTML = _defaultVal;
+									_setInnerHTML(_defaultVal);
 								}else{
 									// not-blank
 									element.removeClass('placeholder-text');
-									element[0].innerHTML = val;
+									_setInnerHTML(val);
 								}
 							}else{
-								if(val === '') element[0].innerHTML = _defaultVal;
-								else element[0].innerHTML = val;
+								_setInnerHTML((val === '') ? _defaultVal : val);
 							}
 							// if in WYSIWYG and readOnly we kill the use of links by clicking
 							if(!_isReadonly){
@@ -1188,7 +1193,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 							}
 						}else if(element[0].tagName.toLowerCase() !== 'textarea' && element[0].tagName.toLowerCase() !== 'input'){
 							// make sure the end user can SEE the html code as a display. This is a read-only display element
-							element[0].innerHTML = taApplyCustomRenderers(val);
+							_setInnerHTML(taApplyCustomRenderers(val));
 						}else{
 							// only for input and textarea inputs
 							element.val(val);
