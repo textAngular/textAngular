@@ -203,7 +203,7 @@ angular.module('textAngularSetup', [])
 		action: function(){
 			return this.$editor().wrapSelection("insertUnorderedList", null);
 		},
-		activeState: function(){ return document.queryCommandState('insertUnorderedList'); }
+		activeState: function(){ return this.$editor().queryCommandState('insertUnorderedList'); }
 	});
 	taRegisterTool('ol', {
 		iconclass: 'fa fa-list-ol',
@@ -211,7 +211,7 @@ angular.module('textAngularSetup', [])
 		action: function(){
 			return this.$editor().wrapSelection("insertOrderedList", null);
 		},
-		activeState: function(){ return document.queryCommandState('insertOrderedList'); }
+		activeState: function(){ return this.$editor().queryCommandState('insertOrderedList'); }
 	});
 	taRegisterTool('quote', {
 		iconclass: 'fa fa-quote-right',
@@ -242,7 +242,7 @@ angular.module('textAngularSetup', [])
 			return this.$editor().wrapSelection("bold", null);
 		},
 		activeState: function(){
-			return document.queryCommandState('bold');
+			return this.$editor().queryCommandState('bold');
 		},
 		commandKeyCode: 98
 	});
@@ -255,8 +255,8 @@ angular.module('textAngularSetup', [])
 		activeState: function(commonElement){
 			var result = false;
 			if(commonElement) result = commonElement.css('text-align') === 'left' || commonElement.attr('align') === 'left' ||
-				(commonElement.css('text-align') !== 'right' && commonElement.css('text-align') !== 'center' && !document.queryCommandState('justifyRight') && !document.queryCommandState('justifyCenter'));
-			result = result || document.queryCommandState('justifyLeft');
+				(commonElement.css('text-align') !== 'right' && commonElement.css('text-align') !== 'center' && !this.$editor().queryCommandState('justifyRight') && !this.$editor().queryCommandState('justifyCenter'));
+			result = result || this.$editor().queryCommandState('justifyLeft');
 			return result;
 		}
 	});
@@ -269,7 +269,7 @@ angular.module('textAngularSetup', [])
 		activeState: function(commonElement){
 			var result = false;
 			if(commonElement) result = commonElement.css('text-align') === 'right';
-			result = result || document.queryCommandState('justifyRight');
+			result = result || this.$editor().queryCommandState('justifyRight');
 			return result;
 		}
 	});
@@ -282,7 +282,7 @@ angular.module('textAngularSetup', [])
 		activeState: function(commonElement){
 			var result = false;
 			if(commonElement) result = commonElement.css('text-align') === 'center';
-			result = result || document.queryCommandState('justifyCenter');
+			result = result || this.$editor().queryCommandState('justifyCenter');
 			return result;
 		}
 	});
@@ -313,7 +313,7 @@ angular.module('textAngularSetup', [])
 			return this.$editor().wrapSelection("italic", null);
 		},
 		activeState: function(){
-			return document.queryCommandState('italic');
+			return this.$editor().queryCommandState('italic');
 		},
 		commandKeyCode: 105
 	});
@@ -324,7 +324,7 @@ angular.module('textAngularSetup', [])
 			return this.$editor().wrapSelection("underline", null);
 		},
 		activeState: function(){
-			return document.queryCommandState('underline');
+			return this.$editor().queryCommandState('underline');
 		},
 		commandKeyCode: 117
 	});

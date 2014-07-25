@@ -564,7 +564,12 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 					// Setup the default toolbar tools, this way allows the user to add new tools like plugins.
 					// This is on the editor for future proofing if we find a better way to do this.
 					scope.queryFormatBlockState = function(command){
-						return command.toLowerCase() === $document[0].queryCommandValue('formatBlock').toLowerCase();
+						// $document[0].queryCommandValue('formatBlock') errors in Firefox if we call this when focussed on the textarea
+						return !scope.showHtml && command.toLowerCase() === $document[0].queryCommandValue('formatBlock').toLowerCase();
+					};
+					scope.queryCommandState = function(command){
+						// $document[0].queryCommandValue('formatBlock') errors in Firefox if we call this when focussed on the textarea
+						return (!scope.showHtml) ? $document[0].queryCommandState(command) : '';
 					};
 					scope.switchView = function(){
 						scope.showHtml = !scope.showHtml;
@@ -1502,7 +1507,8 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 					scope._parent = {
 						disabled: true,
 						showHtml: false,
-						queryFormatBlockState: function(){ return false; }
+						queryFormatBlockState: function(){ return false; },
+						queryCommandState: function(){ return false; }
 					};
 					var defaultChildScope = {
 						$window: $window,

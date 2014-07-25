@@ -948,11 +948,23 @@ describe('textAngular', function(){
 		describe('queryFormatBlockState', function(){
 			it('should return true if formatted', function(){
 				editorScope.wrapSelection("formatBlock", "<PRE>");
-				expect(editorScope.queryFormatBlockState('PRE'));
+				expect(editorScope.queryFormatBlockState('PRE')).toBe(true);
 			});
 			it('should return false if un-formatted', function(){
-				editorScope.wrapSelection("formatBlock", "<PRE>");
-				expect(editorScope.queryFormatBlockState('p'));
+				expect(editorScope.queryFormatBlockState('PRE')).toBe(false);
+			});
+		});
+		
+		describe('queryCommandState', function(){
+			it('should return value if not showHtml', function(){
+				editorScope.showHtml = false;
+				editorScope.$parent.$digest();
+				expect(editorScope.queryCommandState('bold')).not.toBe('');
+			});
+			it('should return empty if showHtml', function(){
+				editorScope.showHtml = true;
+				editorScope.$parent.$digest();
+				expect(editorScope.queryCommandState('bold')).toBe('');
 			});
 		});
 		
