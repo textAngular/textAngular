@@ -311,7 +311,8 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 						text: angular.element("<div></div>"),
 						// other toolbased elements
 						scrollWindow: angular.element("<div class='ta-scroll-window'></div>"),
-						popover: angular.element('<div class="popover fade bottom" style="max-width: none; width: 305px;"><div class="arrow"></div></div>'),
+						popover: angular.element('<div class="popover fade bottom" style="max-width: none; width: 305px;"></div>'),
+						popoverArrow: angular.element('<div class="arrow"></div>'),
 						popoverContainer: angular.element('<div class="popover-content"></div>'),
 						resize: {
 							overlay: angular.element('<div class="ta-resizer-handle-overlay"></div>'),
@@ -327,6 +328,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 					};
 
 					// Setup the popover
+					scope.displayElements.popover.append(scope.displayElements.popoverArrow);
 					scope.displayElements.popover.append(scope.displayElements.popoverContainer);
 					scope.displayElements.scrollWindow.append(scope.displayElements.popover);
 
@@ -340,8 +342,8 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 
 					// define the popover show and hide functions
 					scope.showPopover = function(_el){
-						scope.reflowPopover(_el);
 						scope.displayElements.popover.css('display', 'block');
+						scope.reflowPopover(_el);
 						$animate.addClass(scope.displayElements.popover, 'in');
 						oneEvent(element, 'click keyup', function(){scope.hidePopover();});
 					};
@@ -353,12 +355,10 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 							scope.displayElements.popover.css('top', _el[0].offsetTop - 54 + 'px');
 							scope.displayElements.popover.removeClass('bottom').addClass('top');
 						}
-						scope.displayElements.popover.css('left', Math.max(0,
-							Math.min(
-								scope.displayElements.text[0].offsetWidth - 305,
-								_el[0].offsetLeft + (_el[0].offsetWidth / 2.0) - 152.5
-							)
-						) + 'px');
+						var _maxLeft = scope.displayElements.text[0].offsetWidth - scope.displayElements.popover[0].offsetWidth;
+						var _targetLeft = _el[0].offsetLeft + (_el[0].offsetWidth / 2.0) - (scope.displayElements.popover[0].offsetWidth / 2.0);
+						scope.displayElements.popover.css('left', Math.max(0, Math.min(_maxLeft, _targetLeft)) + 'px');
+						scope.displayElements.popoverArrow.css('margin-left', (Math.min(_targetLeft, (Math.max(0, _targetLeft - _maxLeft))) - 11) + 'px');
 					};
 					scope.hidePopover = function(){
 						$animate.removeClass(scope.displayElements.popover, 'in', /* istanbul ignore next: dosen't test with mocked animate */ function(){

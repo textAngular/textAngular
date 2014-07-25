@@ -453,6 +453,35 @@ describe('taTools test tool actions', function(){
 				$rootScope.$digest();
 				expect(editorScope.displayElements.text.find('p').find('a').attr('href')).toBe('testval');
 			});
+			
+			describe('has functioning target button', function(){
+				it('adds target', function(){
+					editorScope.displayElements.text.find('p').find('a').triggerHandler('click');
+					editorScope.displayElements.popoverContainer.find('button').eq(2).triggerHandler('click');
+					$rootScope.$digest();
+					expect(editorScope.displayElements.text.find('p').find('a').attr('target')).toBe('_blank');
+				});
+				it('removes target', function(){
+					editorScope.displayElements.text.find('p').find('a').triggerHandler('click');
+					editorScope.displayElements.popoverContainer.find('button').eq(2).triggerHandler('click');
+					$rootScope.$digest();
+					editorScope.displayElements.text.find('p').find('a').triggerHandler('click');
+					editorScope.displayElements.popoverContainer.find('button').eq(2).triggerHandler('click');
+					$rootScope.$digest();
+					expect(editorScope.displayElements.text.find('p').find('a').attr('target')).not.toBe('_blank');
+				});
+				it('deactivates button with target!="_blank"', function(){
+					editorScope.displayElements.text.find('p').find('a').triggerHandler('click');
+					expect(editorScope.displayElements.popoverContainer.find('button').eq(2).hasClass('active')).not.toBe(true);
+				});
+				it('activates button with target="_blank"', function(){
+					editorScope.displayElements.text.find('p').find('a').triggerHandler('click');
+					editorScope.displayElements.popoverContainer.find('button').eq(2).triggerHandler('click');
+					$rootScope.$digest();
+					editorScope.displayElements.text.find('p').find('a').triggerHandler('click');
+					expect(editorScope.displayElements.popoverContainer.find('button').eq(2).hasClass('active')).toBe(true);
+				});
+			});
 		});
 	});
 	

@@ -517,7 +517,7 @@ angular.module('textAngularSetup', [])
 				// setup the editor toolbar
 				// Credit to the work at http://hackerwins.github.io/summernote/ for this editbar logic
 				event.preventDefault();
-				editorScope.displayElements.popover.css('width', '305px');
+				editorScope.displayElements.popover.css('width', '435px');
 				var container = editorScope.displayElements.popoverContainer;
 				container.empty();
 				container.css('line-height', '28px');
@@ -544,7 +544,7 @@ angular.module('textAngularSetup', [])
 				});
 				buttonGroup.append(reLinkButton);
 				var unLinkButton = angular.element('<button type="button" class="btn btn-default btn-sm btn-small" tabindex="-1" unselectable="on"><i class="fa fa-unlink icon-unlink"></i></button>');
-				// directly before ths click event is fired a digest is fired off whereby the reference to $element is orphaned off
+				// directly before this click event is fired a digest is fired off whereby the reference to $element is orphaned off
 				unLinkButton.on('click', function(event){
 					event.preventDefault();
 					$element.replaceWith($element.contents());
@@ -552,6 +552,17 @@ angular.module('textAngularSetup', [])
 					editorScope.hidePopover();
 				});
 				buttonGroup.append(unLinkButton);
+				var targetToggle = angular.element('<button type="button" class="btn btn-default btn-sm btn-small" tabindex="-1" unselectable="on">Open in New Window</button>');
+				if($element.attr('target') === '_blank'){
+					targetToggle.addClass('active');
+				}
+				targetToggle.on('click', function(event){
+					event.preventDefault();
+					$element.attr('target', ($element.attr('target') === '_blank') ? '' : '_blank');
+					targetToggle.toggleClass('active');
+					editorScope.updateTaBindtaTextElement();
+				});
+				buttonGroup.append(targetToggle);
 				container.append(buttonGroup);
 				editorScope.showPopover($element);
 			}
