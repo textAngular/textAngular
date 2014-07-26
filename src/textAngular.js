@@ -961,13 +961,14 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 				
 				// defaults to the paragraph element, but we need the line-break or it doesn't allow you to type into the empty element
 				// non IE is '<p><br/></p>', ie is '<p></p>' as for once IE gets it correct...
-				var _defaultVal, _defaultTest;
+				var _defaultVal, _defaultTest, _trimTest;
 				// set the default to be a paragraph value
 				if(attrs.taDefaultWrap === undefined) attrs.taDefaultWrap = 'p';
 				/* istanbul ignore next: ie specific test */
 				if(attrs.taDefaultWrap === ''){
 					_defaultVal = '';
 					_defaultTest = (ie === undefined)? '<div><br></div>' : (ie >= 11)? '<p><br></p>' : (ie <= 8)? '<P>&nbsp;</P>' : '<p>&nbsp;</p>';
+					_trimTest = (ie === undefined)? /^<div>(\s|&nbsp;)*<\/div>$/ig : /^<p>(\s|&nbsp;)*<\/p>$/ig;
 				}else{
 					_defaultVal = (ie === undefined || ie >= 11)?
 						'<' + attrs.taDefaultWrap + '><br></' + attrs.taDefaultWrap + '>' :
@@ -979,8 +980,9 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 						(ie <= 8)?
 							'<' + attrs.taDefaultWrap.toUpperCase() + '>&nbsp;</' + attrs.taDefaultWrap.toUpperCase() + '>' :
 							'<' + attrs.taDefaultWrap + '>&nbsp;</' + attrs.taDefaultWrap + '>';
+					_trimTest = new RegExp('^<' + attrs.taDefaultWrap + '>(\\s|&nbsp;)*<\\/' + attrs.taDefaultWrap + '>$', 'ig');
 				}
-
+				
 				element.addClass('ta-bind');
 
 				// in here we are undoing the converts used elsewhere to prevent the < > and & being displayed when they shouldn't in the code.
@@ -992,7 +994,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 				
 				var _setViewValue = function(val){
 					if(!val) val = _compileHtml();
-					if(val === _defaultTest){
+					if(val === _defaultTest || val.match(_trimTest)){
 						// this avoids us from tripping the ng-pristine flag if we click in and out with out typing
 						if(ngModel.$viewValue !== '') ngModel.$setViewValue('');
 					}else{
@@ -1125,7 +1127,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 				
 				// trigger the validation calls
 				var _validity = function(value){
-					if(attrs.required) ngModel.$setValidity('required', !(!value || value.trim() === _defaultTest || value.trim() === ''));
+					if(attrs.required) ngModel.$setValidity('required', !(!value || value.trim() === _defaultTest || value.trim().match(_trimTest) || value.trim() === ''));
 					return value;
 				};
 				// parsers trigger from the above keyup function or any other time that the viewValue is updated and parses it for storage in the ngModel

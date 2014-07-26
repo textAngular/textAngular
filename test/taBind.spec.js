@@ -245,6 +245,45 @@ describe('taBind', function () {
 			jQuery(element.find('a')[0]).trigger('click');
 		});
 		
+		describe('should trim empty content', function(){
+			it('returns undefined when <p></p>', function(){
+				element.html('<p></p>');
+				$rootScope.updateTaBind();
+				$rootScope.$digest();
+				expect($rootScope.html).toBe('');
+			});
+			it('returns undefined when <p><br/></p>', function(){
+				element.html('<p><br/></p>');
+				$rootScope.updateTaBind();
+				$rootScope.$digest();
+				expect($rootScope.html).toBe('');
+			});
+			it('returns undefined when single whitespace', function(){
+				element.html('<p> </p>');
+				$rootScope.updateTaBind();
+				$rootScope.$digest();
+				expect($rootScope.html).toBe('');
+			});
+			it('returns undefined when single &nbsp;', function(){
+				element.html('<p>&nbsp;</p>');
+				$rootScope.updateTaBind();
+				$rootScope.$digest();
+				expect($rootScope.html).toBe('');
+			});
+			it('returns undefined when multiple &nbsp;', function(){
+				element.html('<p>&nbsp;&nbsp;&nbsp;</p>');
+				$rootScope.updateTaBind();
+				$rootScope.$digest();
+				expect($rootScope.html).toBe('');
+			});
+			it('returns undefined whith mixed &nbsp; and whitespace', function(){
+				element.html('<p>&nbsp; &nbsp; &nbsp;</p>');
+				$rootScope.updateTaBind();
+				$rootScope.$digest();
+				expect($rootScope.html).toBe('');
+			});
+		});
+		
 		describe('should respect the ta-default-wrap value', function(){
 			describe('on focus', function(){
 				it('default to p element', inject(function($rootScope, $compile){
