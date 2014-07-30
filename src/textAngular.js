@@ -32,7 +32,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 			globalContentEditableBlur = false;
 		}, false); // add global click handler
 		angular.element(document).ready(function () {
-			angular.element(document.body).append(angular.element('<input id="textAngular-editableFix-010203040506070809" style="width:1px;height:1px;border:none;margin:0;padding:0;position:absolute; top: -10000; left: -10000;" unselectable="on" tabIndex="-1">'));
+			angular.element(document.body).append(angular.element('<input id="textAngular-editableFix-010203040506070809" style="width:1px;height:1px;border:none;margin:0;padding:0;position:absolute; top: -10000px; left: -10000px;" unselectable="on" tabIndex="-1">'));
 		});
 	}
 	// IE version detection - http://stackoverflow.com/questions/4169160/javascript-ie-detection-why-not-use-simple-conditional-comments
@@ -68,11 +68,11 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 		return ((rv > -1) ? rv : undef);
 	}());
 
-	// Thanks to answer in http://stackoverflow.com/questions/2308134/trim-in-javascript-not-working-in-ie
+	// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/Trim#Compatibility
 	/* istanbul ignore next: trim shim for older browsers */
-	if(typeof String.prototype.trim !== 'function') {
-		String.prototype.trim = function() {
-			return this.replace(/^\s\s*/, '').replace(/\s\s*$/, '');
+	if (!String.prototype.trim) {
+		String.prototype.trim = function () {
+			return this.replace(/^\s+|\s+$/g, '');
 		};
 	}
 
@@ -784,7 +784,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 		return function(taDefaultWrap){
 			taDefaultWrap = taBrowserTag(taDefaultWrap);
 			return function(command, showUI, options){
-				var i, $target, html, _nodes, next;
+				var i, $target, html, _nodes, next, optionsTagName;
 				var defaultWrapper = angular.element('<' + taDefaultWrap + '>');
 				var selectedElement = taSelection.getSelectionElement();
 				var $selected = angular.element(selectedElement);
@@ -849,7 +849,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 							return;
 						}
 					}else if(command.toLowerCase() === 'formatblock'){
-						var optionsTagName = options.toLowerCase().replace(/[<>]/ig, '');
+						optionsTagName = options.toLowerCase().replace(/[<>]/ig, '');
 						if(tagName === 'li') $target = $selected.parent();
 						else $target = $selected;
 						// find the first blockElement
@@ -1936,22 +1936,13 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 			return rangeNodes;
 		};
 		return {
-			getOnlySelectedElements: function(){
-				if (window.getSelection) {
-					var sel = $window.getSelection();
-					if (!sel.isCollapsed) {
-						return getRangeSelectedNodes(sel.getRangeAt(0));
-					}
-				}
-				return [];
-			},
-			// Some basic selection functions
-			getSelectionElement: function () {
+			getSelection: function(){
 				var range, sel, container;
 				if (_document.selection && _document.selection.createRange) {
 					// IE case
 					range = _document.selection.createRange();
-					return range.parentElement();
+					container = range.parentElement();
+					sel = {isCollapsed: range.text.length === 0};
 				} else if ($window.getSelection) {
 					sel = $window.getSelection();
 					if (sel.getRangeAt) {
@@ -1964,7 +1955,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 						range = _document.createRange();
 						range.setStart(sel.anchorNode, sel.anchorOffset);
 						range.setEnd(sel.focusNode, sel.focusOffset);
-
+						
 						// Handle the case when the selection was selected backwards (from the end to the start in the document)
 						if (range.collapsed !== sel.isCollapsed) {
 							range.setStart(sel.focusNode, sel.focusOffset);
@@ -1976,9 +1967,45 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 						container = range.commonAncestorContainer;
 
 						// Check if the container is a text node and return its parent if so
-						return container.nodeType === 3 ? container.parentNode : container;
+						container = container.nodeType === 3 ? container.parentNode : container;
 					}
 				}
+				if (range) return {
+					start: {
+						element: range.startContainer,
+						offset: range.startOffset
+					},
+					end: {
+						element: range.endContainer,
+						offset: range.endOffset
+					},
+					container: container,
+					collapsed: sel.isCollapsed
+					
+				};
+				else return {
+					start: {
+						offset: 0
+					},
+					end: {
+						offset: 0
+					},
+					container: undefined,
+					collapsed: true
+				};
+			},
+			getOnlySelectedElements: function(){
+				if (window.getSelection) {
+					var sel = $window.getSelection();
+					if (!sel.isCollapsed) {
+						return getRangeSelectedNodes(sel.getRangeAt(0));
+					}
+				}
+				return [];
+			},
+			// Some basic selection functions
+			getSelectionElement: function () {
+				return this.getSelection().container;
 			},
 			setSelectionToElementStart: function (el){
 				if (_document.createRange && $window.getSelection) {
