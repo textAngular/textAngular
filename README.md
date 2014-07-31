@@ -4,7 +4,7 @@ textAngular v1.2.2
 [![Build Status](https://travis-ci.org/fraywing/textAngular.png?branch=master)](https://travis-ci.org/fraywing/textAngular) [![Coverage Status](https://coveralls.io/repos/fraywing/textAngular/badge.png)](https://coveralls.io/r/fraywing/textAngular)
 
 
-Demo is available at: http://www.textangular.com
+Demo is available at: <strike>http://www.textangular.com</strike> (Outdated: See [Plunkr Demo](http://plnkr.co/edit/tpl:iwVyu2?p=preview))
 
 #### This readme is for the v1.2.x release, if you are looking for the v1.2.0 readme go here: https://github.com/fraywing/textAngular/tree/v1.2.0
 
