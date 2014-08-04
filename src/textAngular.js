@@ -653,6 +653,14 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 						element.prepend(_toolbar);
 						$compile(_toolbar)(scope.$parent);
 						_toolbars = textAngularManager.registerEditor(_name, scope, ['textAngularToolbar' + _serial]);
+
+						scope.$watch('html', function(newValue, oldValue) {
+							var html = '<button type="button" class="btn btn-default ng-scope" name="wordCount" unselectable="on" ng-disabled="isDisabled()" tabindex="-1" ng-click="executeAction()" ng-class="displayActiveToolClass(active)" disabled="disabled">';
+							var regex = /\s+/gi;
+							// console.log('word count: ' + newValue.trim().replace(regex, ' ').split(' ').length);
+							element[0].childNodes[0].childNodes[4].childNodes[0].innerHTML = 'word count: ' + newValue.trim().replace(regex, ' ').split(' ').length;
+
+						});
 					}
 
 					scope.$on('$destroy', function(){
