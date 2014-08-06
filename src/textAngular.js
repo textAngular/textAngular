@@ -15,8 +15,8 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 	var globalContentEditableBlur = false;
 	/* istanbul ignore next: Browser Un-Focus fix for webkit */
 	if(/AppleWebKit\/([\d.]+)/.exec(navigator.userAgent)) { // detect webkit
-		document.addEventListener("click", function(){
-			var curelement = window.event.target;
+		document.addEventListener("click", function(e){
+			var curelement = e.target;
 			if(globalContentEditableBlur && curelement !== null){
 				var isEditable = false;
 				var tempEl = curelement;
@@ -28,7 +28,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 					document.getElementById('textAngular-editableFix-010203040506070809').setSelectionRange(0, 0); // set caret focus to an element that handles caret focus correctly.
 					curelement.focus(); // focus the wanted element.
 				}
-			}
+			}	
 			globalContentEditableBlur = false;
 		}, false); // add global click handler
 		angular.element(document).ready(function () {
