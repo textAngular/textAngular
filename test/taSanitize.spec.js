@@ -24,19 +24,19 @@ describe('taSanitize', function(){
 			expect(safe.css('text-align')).toBe('justify');
 		}));
 	});
-	
+
 	describe('if invalid HTML', function(){
 		it('should return the oldsafe passed in', inject(function(taSanitize){
 			var result = taSanitize('<broken><test', 'safe');
 			expect(result).toBe('safe');
 		}));
-		
+
 		it('should return an empty string if no oldsafe', inject(function(taSanitize){
 			var result = taSanitize('<broken><test');
 			expect(result).toBe('');
 		}));
 	});
-	
+
 	describe('only certain style attributes are allowed', function(){
 		describe('validated color attribute', function(){
 			it('name', inject(function(taSanitize){
@@ -68,7 +68,38 @@ describe('taSanitize', function(){
 				expect(result).toBe('<div></div>');
 			}));
 		});
-		
+
+		describe('validated background-color attribute', function(){
+			it('name', inject(function(taSanitize){
+				var result = angular.element(taSanitize('<div style="background-color: blue;"></div>'));
+				expect(result.attr('style')).toBe('background-color: blue;');
+			}));
+			it('hex value', inject(function(taSanitize){
+				var result = angular.element(taSanitize('<div style="background-color: #000000;"></div>'));
+				expect(result.attr('style')).toBe('background-color: #000000;');
+			}));
+			it('rgba', inject(function(taSanitize){
+				var result = angular.element(taSanitize('<div style="background-color: rgba(20, 20, 20, 0.5);"></div>'));
+				expect(result.attr('style')).toBe('background-color: rgba(20, 20, 20, 0.5);');
+			}));
+			it('rgb', inject(function(taSanitize){
+				var result = angular.element(taSanitize('<div style="background-color: rgb(20, 20, 20);"></div>'));
+				expect(result.attr('style')).toBe('background-color: rgb(20, 20, 20);');
+			}));
+			it('hsl', inject(function(taSanitize){
+				var result = angular.element(taSanitize('<div style="background-color: hsl(20, 20%, 20%);"></div>'));
+				expect(result.attr('style')).toBe('background-color: hsl(20, 20%, 20%);');
+			}));
+			it('hlsa', inject(function(taSanitize){
+				var result = angular.element(taSanitize('<div style="background-color: hsla(20, 20%, 20%, 0.5);"></div>'));
+				expect(result.attr('style')).toBe('background-color: hsla(20, 20%, 20%, 0.5);');
+			}));
+			it('bad value not accepted', inject(function(taSanitize){
+				var result = taSanitize('<div style="background-color: execute(alert(\'test\'));"></div>');
+				expect(result).toBe('<div></div>');
+			}));
+		});
+
 		describe('validated text-align attribute', function(){
 			it('left', inject(function(taSanitize){
 				var result = angular.element(taSanitize('<div style="text-align: left;"></div>'));
@@ -91,7 +122,7 @@ describe('taSanitize', function(){
 				expect(result).toBe('<div></div>');
 			}));
 		});
-		
+
 		describe('validated float attribute', function(){
 			it('left', inject(function(taSanitize){
 				var result = angular.element(taSanitize('<div style="float: left;"></div>'));
@@ -106,7 +137,7 @@ describe('taSanitize', function(){
 				expect(result).toBe('<div></div>');
 			}));
 		});
-		
+
 		describe('validated height attribute', function(){
 			it('px', inject(function(taSanitize){
 				var result = angular.element(taSanitize('<div style="height: 100px;"></div>'));
@@ -129,7 +160,7 @@ describe('taSanitize', function(){
 				expect(result).toBe('<div></div>');
 			}));
 		});
-		
+
 		describe('validated width attribute', function(){
 			it('px', inject(function(taSanitize){
 				var result = angular.element(taSanitize('<div style="width: 100px;"></div>'));
@@ -152,7 +183,7 @@ describe('taSanitize', function(){
 				expect(result).toBe('<div></div>');
 			}));
 		});
-		
+
 		describe('un-validated are removed', function(){
 			it('removes non whitelisted values', inject(function(taSanitize){
 				var result = taSanitize('<div style="max-height: 12px;"></div>');
@@ -164,13 +195,13 @@ describe('taSanitize', function(){
 			}));
 		});
 	});
-	
+
 	describe('allow disabling of sanitizer', function(){
 		it('should return the oldsafe passed in if bad html', inject(function(taSanitize, $sce){
 			var result = taSanitize('<broken><test', 'safe', true);
 			expect(result).toBe('safe');
 		}));
-		
+
 		it('should allow html not allowed by sanitizer', inject(function(taSanitize, $sce){
 			var result = taSanitize('<bad-tag></bad-tag>', '', true);
 			expect(result).toBe('<bad-tag></bad-tag>');
