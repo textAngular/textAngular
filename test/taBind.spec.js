@@ -337,6 +337,34 @@ describe('taBind', function () {
 					expect(element.html()).toBe('');
 				}));
 			});
+			describe('on ignoring keys press', function() {
+				it('should ignore blocked keys events', inject(function($rootScope, $compile, $window, $document, taSelection) {
+					var BLOCKED_KEYS = [19,20,27,33,34,35,36,37,38,39,40,45,46,112,113,114,115,116,117,118,119,120,121,122,123,144,145],
+						eventSpy = spyOn(taSelection, 'setSelectionToElementStart').andCallThrough(),
+						event;
+					$rootScope.html = '<p><br></p>';
+					element = $compile('<div ta-bind ta-default-wrap="b" contenteditable="contenteditable" ng-model="html"></div>')($rootScope);
+					$document.find('body').append(element);
+					$rootScope.$digest();
+					var range = $window.rangy.createRangyRange();
+					range.selectNodeContents(element.children()[0]);
+					$window.rangy.getSelection().setSingleRange(range);
+
+					BLOCKED_KEYS.forEach(function(key) {
+						if(angular.element === jQuery) {
+							event = jQuery.Event('keyup');
+							event.keyCode = key;
+							element.triggerHandler(event);
+						}else{
+							event = {keyCode: key};
+							element.triggerHandler('keyup', event);
+						}
+						$rootScope.$digest();
+						expect(eventSpy).not.toHaveBeenCalled();
+					});
+					element.remove();
+				}));
+			});
 			describe('on enter press', function(){
 				it('replace inserted with default wrap', inject(function($rootScope, $compile, $window, $document){
 					$rootScope.html = '<p><br></p>';
