@@ -12,7 +12,7 @@ angular.module('textAngularSetup', [])
 .value('taOptions',  {
 	toolbar: [
 		['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'pre', 'quote'],
-		['bold', 'italics', 'underline', 'ul', 'ol', 'redo', 'undo', 'clear'],
+		['bold', 'italics', 'underline', 'strikeThrough', 'ul', 'ol', 'redo', 'undo', 'clear'],
 		['justifyLeft','justifyCenter','justifyRight','indent','outdent'],
 		['html', 'insertImage', 'insertLink', 'insertVideo']
 	],
@@ -121,6 +121,9 @@ angular.module('textAngularSetup', [])
 	underline: {
 		tooltip: 'Underline'
 	},
+	strikeThrough:{
+    		tooltip: 'Strikethrough'
+  	},
 	justifyLeft: {
 		tooltip: 'Align text left'
 	},
@@ -327,6 +330,15 @@ angular.module('textAngularSetup', [])
 			return this.$editor().queryCommandState('underline');
 		},
 		commandKeyCode: 117
+	});
+	taRegisterTool('strikeThrough', {
+		iconclass: 'fa fa-strikethrough',
+		action: function(){
+			return this.$editor().wrapSelection("strikeThrough", null);
+		},
+		activeState: function(){
+			return document.queryCommandState('strikeThrough');
+		}
 	});
 	taRegisterTool('clear', {
 		iconclass: 'fa fa-ban',
