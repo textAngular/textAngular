@@ -122,7 +122,7 @@ angular.module('textAngularSetup', [])
 		tooltip: 'Underline'
 	},
 	strikeThrough:{
-    		tooltip: 'Strikethrough'
+		tooltip: 'Strikethrough'
   	},
 	justifyLeft: {
 		tooltip: 'Align text left'
