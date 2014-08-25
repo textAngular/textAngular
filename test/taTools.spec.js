@@ -163,6 +163,11 @@ describe('taTools test tool actions', function(){
 			expect(button.hasClass('active'));
 		});
 		
+		it('strikethrough button should function correctly', function(){
+			button = findAndTriggerButton('strikethrough');
+			expect(button.hasClass('active'));
+		});
+		
 		it('ul button should function correctly', function(){
 			button = findAndTriggerButton('ul');
 			expect(button.hasClass('active'));
