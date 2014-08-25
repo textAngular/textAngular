@@ -123,7 +123,7 @@ angular.module('textAngularSetup', [])
 	},
 	strikeThrough:{
 		tooltip: 'Strikethrough'
-  	},
+	},
 	justifyLeft: {
 		tooltip: 'Align text left'
 	},
