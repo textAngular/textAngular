@@ -1283,12 +1283,12 @@ describe('textAngular', function(){
 		it('should re-focus on toolbar when swapping directly from editor to editor', inject(function($timeout, textAngularManager){
 			textAngularManager.retrieveEditor('test1').scope.displayElements.text.triggerHandler('focus');
 			$rootScope.$digest();
-			expect(jQuery(toolbar[0]).find('button:not(:disabled)').length).toBe(27);
+			expect(jQuery(toolbar[0]).find('button:not(:disabled)').length).toBe(28);
 			textAngularManager.retrieveEditor('test2').scope.displayElements.text.triggerHandler('focus');
 			$rootScope.$digest();
 			$timeout.flush();
 			// expect none to be disabled
-			expect(jQuery(toolbar[0]).find('button:not(:disabled)').length).toBe(27);
+			expect(jQuery(toolbar[0]).find('button:not(:disabled)').length).toBe(28);
 		}));
 	});
 });
