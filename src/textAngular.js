@@ -165,7 +165,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 			_addCSSRule(topsheet, '.ta-root .ta-resizer-handle-overlay > .ta-resizer-handle-corner-tr', 'top: 0; right: 0; border-right: 1px solid black; border-top: 1px solid black;');
 			_addCSSRule(topsheet, '.ta-root .ta-resizer-handle-overlay > .ta-resizer-handle-corner-bl', 'bottom: 0; left: 0; border-left: 1px solid black; border-bottom: 1px solid black;');
 			_addCSSRule(topsheet, '.ta-root .ta-resizer-handle-overlay > .ta-resizer-handle-corner-br', 'bottom: 0; right: 0; border: 1px solid black; cursor: se-resize; background-color: white;');
-		}
+		};
 	}
 
 	// recursive function that returns an array of angular.elements that have the passed attribute set on them
@@ -289,7 +289,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 						},
 						showHtml: false
 					});
-					// add the standard styling unless the taDisableStandardStyles attribute is set
+                    /* istanbul ignore else : add standard styles if this flag is nott set */
 					if(!attrs.taDisableStandardStyles) {
 						addStandardStyles();
 					}
