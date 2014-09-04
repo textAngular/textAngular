@@ -1,7 +1,7 @@
 {
   "name": "textAngular",
   "version": "1.2.2",
-  "main": "./dist/textAngular.min.js",
+  "main": "./src/textAngular.js",
   "description": "A radically powerful Text-Editor/Wysiwyg editor for Angular.js",
   "keywords": [
     "editor",
