@@ -1053,6 +1053,9 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 									var range = $document[0].selection.createRange();
 									range.pasteHTML(text);
 								}
+								else if($window.clipboardData){
+									$document[0].execCommand('ms-pasteTextOnly');
+								}
 								else{
 									$document[0].execCommand('insertText', false, text);
 								}
