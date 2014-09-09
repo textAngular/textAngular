@@ -14,14 +14,14 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 	// this is set true when a blur occurs as the blur of the ta-bind triggers before the click
 	var globalContentEditableBlur = false;
 
-    /**
-     * Detect webkit
-     * @type {Boolean}
-     */
-    var isWebkit = /AppleWebKit\/([\d.]+)/.exec(navigator.userAgent);
-
-    /* istanbul ignore next: Browser Un-Focus fix for webkit */
-    if(isWebkit) {
+	/**
+	* Detect webkit
+	* @type {Boolean}
+	*/
+	var isWebkit = /AppleWebKit\/([\d.]+)/.exec(navigator.userAgent);
+	
+	/* istanbul ignore next: Browser Un-Focus fix for webkit */
+	if(isWebkit) {
 		document.addEventListener("click", function(){
 			var curelement = window.event.target;
 			if(globalContentEditableBlur && curelement !== null){
@@ -393,35 +393,35 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 						});
 						scope.displayElements.resize.info.text(_el.offsetWidth + ' x ' + _el.offsetHeight);
 					};
-
-                    /**
-                     * Apply safely CSS properties
-                     *
-                     * Reset previously defined properties and define
-                     * in CSS the requested value
-                     *
-                     * @param element Element to safe css
-                     * @param properties Object of properties to set safely in element
-                     */
-                    var applyImageSafeCSS = function(element, properties){
-                        $element = angular.element(element);
-
-                        if ($element[0].tagName.toLowerCase() === 'img') {
-                            if (properties.height) {
-                                $element
-                                    .css('height', properties.height)
-                                    .removeAttr('height');
-                            }
-
-                            if (properties.width) {
-                                $element
-                                    .css('width', properties.width)
-                                    .removeAttr('width');
-                            }
-
-                            $element.css(properties);
-                        }
-                    };
+						
+					/**
+					* Apply safely CSS properties
+					*
+					* Reset previously defined properties and define
+					* in CSS the requested value
+					*
+					* @param element Element to safe css
+					* @param properties Object of properties to set safely in element
+					*/
+					var applyImageSafeCSS = function(element, properties){
+						$element = angular.element(element);
+						
+						if ($element[0].tagName.toLowerCase() === 'img') {
+						    if (properties.height) {
+						        $element
+						            .css('height', properties.height)
+						            .removeAttr('height');
+						    }
+						
+						    if (properties.width) {
+						        $element
+						            .css('width', properties.width)
+						            .removeAttr('width');
+						    }
+						
+						    $element.css(properties);
+						}
+					};
 
 					/* istanbul ignore next: pretty sure phantomjs won't test this */
 					scope.showResizeOverlay = function(_el){
@@ -445,12 +445,12 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 									y: Math.max(0, startPosition.height + (event.clientY - startPosition.y))
 								};
 
-                                // keep ratio
-                                if (event.shiftKey) {
-                                    var newRatio = pos.y / pos.x;
-                                    pos.x = ratio > newRatio ? pos.x : pos.y / ratio;
-                                    pos.y = ratio > newRatio ? pos.x * ratio : pos.y;
-                                }
+				                                // keep ratio
+				                                if (event.shiftKey) {
+				                                    var newRatio = pos.y / pos.x;
+				                                    pos.x = ratio > newRatio ? pos.x : pos.y / ratio;
+				                                    pos.y = ratio > newRatio ? pos.x * ratio : pos.y;
+				                                }
 
 								applyImageSafeCSS(_el, {
 									width: pos.x,
@@ -460,20 +460,20 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 								// reflow the popover tooltip
 								scope.reflowResizeOverlay(_el);
 							};
-                            $document.find('body').on('mousemove', mousemove);
-                            $document.on('mouseup', function(){
-                                $document.find('body').off('mousemove', mousemove);
-                                scope.showPopover(_el);
-                            });
+							$document.find('body').on('mousemove', mousemove);
+								$document.on('mouseup', function(){
+								$document.find('body').off('mousemove', mousemove);
+								scope.showPopover(_el);
+							});
 							event.stopPropagation();
 							event.preventDefault();
 						};
 
-                        // show resize helpers only in webkit browsers
-                        if (isWebkit) {
-                            scope.displayElements.resize.anchors[3].on('mousedown', resizeMouseDown);
-                            scope.reflowResizeOverlay(_el);
-                        }
+						// show resize helpers only in webkit browsers
+						if (isWebkit) {
+							scope.displayElements.resize.anchors[3].on('mousedown', resizeMouseDown);
+							scope.reflowResizeOverlay(_el);
+						}
 
 						oneEvent(element, 'click', function(){scope.hideResizeOverlay();});
 					};
