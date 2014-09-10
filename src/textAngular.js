@@ -407,10 +407,10 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 						$element = angular.element(element);
 						
 						if ($element[0].tagName.toLowerCase() === 'img') {
-						    if (properties.height) {
-							$element
-								.css('height', properties.height)
-								.removeAttr('height');
+							if (properties.height) {
+								$element
+									.css('height', properties.height)
+									.removeAttr('height');
 							}
 							
 							if (properties.width) {
