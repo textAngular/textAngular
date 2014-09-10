@@ -408,18 +408,18 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 						
 						if ($element[0].tagName.toLowerCase() === 'img') {
 						    if (properties.height) {
-						        $element
-						            .css('height', properties.height)
-						            .removeAttr('height');
-						    }
-						
-						    if (properties.width) {
-						        $element
-						            .css('width', properties.width)
-						            .removeAttr('width');
-						    }
-						
-						    $element.css(properties);
+							$element
+								.css('height', properties.height)
+								.removeAttr('height');
+							}
+							
+							if (properties.width) {
+								$element
+									.css('width', properties.width)
+									.removeAttr('width');
+							}
+								
+							$element.css(properties);
 						}
 					};
 
@@ -445,13 +445,13 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 									y: Math.max(0, startPosition.height + (event.clientY - startPosition.y))
 								};
 
-				                                // keep ratio
-				                                if (event.shiftKey) {
-				                                    var newRatio = pos.y / pos.x;
-				                                    pos.x = ratio > newRatio ? pos.x : pos.y / ratio;
-				                                    pos.y = ratio > newRatio ? pos.x * ratio : pos.y;
-				                                }
-
+								// keep ratio
+								if (event.shiftKey) {
+									var newRatio = pos.y / pos.x;
+									pos.x = ratio > newRatio ? pos.x : pos.y / ratio;
+									pos.y = ratio > newRatio ? pos.x * ratio : pos.y;
+								}
+								
 								applyImageSafeCSS(_el, {
 									width: pos.x,
 									height: pos.y
