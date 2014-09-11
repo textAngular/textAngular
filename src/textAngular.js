@@ -480,6 +480,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 
 					/* istanbul ignore next: pretty sure phantomjs won't test this */
 					scope.hideResizeOverlay = function(){
+						scope.displayElements.resize.anchors[3].off('mousedown');
 						scope.displayElements.resize.overlay.css('display', '');
 					};
 
