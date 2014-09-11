@@ -13,8 +13,15 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 	// fix a webkit bug, see: https://gist.github.com/shimondoodkin/1081133
 	// this is set true when a blur occurs as the blur of the ta-bind triggers before the click
 	var globalContentEditableBlur = false;
+
+	/**
+	* Detect webkit
+	* @type {Boolean}
+	*/
+	var isWebkit = /AppleWebKit\/([\d.]+)/.exec(navigator.userAgent);
+	
 	/* istanbul ignore next: Browser Un-Focus fix for webkit */
-	if(/AppleWebKit\/([\d.]+)/.exec(navigator.userAgent)) { // detect webkit
+	if(isWebkit) {
 		document.addEventListener("click", function(){
 			var curelement = window.event.target;
 			if(globalContentEditableBlur && curelement !== null){
@@ -386,6 +393,36 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 						});
 						scope.displayElements.resize.info.text(_el.offsetWidth + ' x ' + _el.offsetHeight);
 					};
+						
+					/**
+					* Apply safely CSS properties
+					*
+					* Reset previously defined properties and define
+					* in CSS the requested value
+					*
+					* @param element Element to safe css
+					* @param properties Object of properties to set safely in element
+					*/
+					var applyImageSafeCSS = function(element, properties){
+						$element = angular.element(element);
+						
+						if ($element[0].tagName.toLowerCase() === 'img') {
+							if (properties.height) {
+								$element
+									.css('height', properties.height)
+									.removeAttr('height');
+							}
+							
+							if (properties.width) {
+								$element
+									.css('width', properties.width)
+									.removeAttr('width');
+							}
+								
+							$element.css(properties);
+						}
+					};
+
 					/* istanbul ignore next: pretty sure phantomjs won't test this */
 					scope.showResizeOverlay = function(_el){
 						var resizeMouseDown = function(event){
@@ -395,48 +432,36 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 								x: event.clientX,
 								y: event.clientY
 							};
-							if(startPosition.width === undefined) startPosition.width = _el[0].offsetWidth;
-							if(startPosition.height === undefined) startPosition.height = _el[0].offsetHeight;
+							if(!startPosition.width) startPosition.width = _el[0].offsetWidth;
+							if(!startPosition.height) startPosition.height = _el[0].offsetHeight;
+
 							scope.hidePopover();
 							var ratio = startPosition.height / startPosition.width;
+
 							var mousemove = function(event){
 								// calculate new size
 								var pos = {
 									x: Math.max(0, startPosition.width + (event.clientX - startPosition.x)),
 									y: Math.max(0, startPosition.height + (event.clientY - startPosition.y))
 								};
-								var applyImageSafeCSS = function(_el, css){
-									_el = angular.element(_el);
-									if(_el[0].tagName.toLowerCase() === 'img'){
-										if(css.height){
-											_el.attr('height', css.height);
-											delete css.height;
-										}
-										if(css.width){
-											_el.attr('width', css.width);
-											delete css.width;
-										}
-									}
-									_el.css(css);
-								};
-								if(event.shiftKey){
-									// keep ratio
+
+								// keep ratio
+								if (event.shiftKey) {
 									var newRatio = pos.y / pos.x;
-									applyImageSafeCSS(_el, {
-										width: ratio > newRatio ? pos.x : pos.y / ratio,
-										height: ratio > newRatio ? pos.x * ratio : pos.y
-									});
-								}else{
-									applyImageSafeCSS(_el, {
-										width: pos.x,
-										height: pos.y
-									});
+									pos.x = ratio > newRatio ? pos.x : pos.y / ratio;
+									pos.y = ratio > newRatio ? pos.x * ratio : pos.y;
 								}
+								
+								applyImageSafeCSS(_el, {
+									width: pos.x,
+									height: pos.y
+								});
+
 								// reflow the popover tooltip
 								scope.reflowResizeOverlay(_el);
 							};
 							$document.find('body').on('mousemove', mousemove);
-							oneEvent(scope.displayElements.resize.overlay, 'mouseup', function(){
+								$document.on('mouseup', function(){
 								$document.find('body').off('mousemove', mousemove);
 								scope.showPopover(_el);
 							});
@@ -444,13 +469,18 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 							event.preventDefault();
 						};
 
-						scope.displayElements.resize.anchors[3].on('mousedown', resizeMouseDown);
+						// show resize helpers only in webkit browsers
+						if (isWebkit) {
+							scope.displayElements.resize.anchors[3].on('mousedown', resizeMouseDown);
+							scope.reflowResizeOverlay(_el);
+						}
 
-						scope.reflowResizeOverlay(_el);
 						oneEvent(element, 'click', function(){scope.hideResizeOverlay();});
 					};
+
 					/* istanbul ignore next: pretty sure phantomjs won't test this */
 					scope.hideResizeOverlay = function(){
+						scope.displayElements.resize.anchors[3].off('mousedown');
 						scope.displayElements.resize.overlay.css('display', '');
 					};
 
@@ -471,12 +501,12 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 					});
 					scope.displayElements.scrollWindow.attr({'ng-hide': 'showHtml'});
 					if(attrs.taDefaultWrap) scope.displayElements.text.attr('ta-default-wrap', attrs.taDefaultWrap);
-					
+
 					if(attrs.taUnsafeSanitizer){
 						scope.displayElements.text.attr('ta-unsafe-sanitizer', attrs.taUnsafeSanitizer);
 						scope.displayElements.html.attr('ta-unsafe-sanitizer', attrs.taUnsafeSanitizer);
 					}
-					
+
 					// add the main elements to the origional element
 					scope.displayElements.scrollWindow.append(scope.displayElements.text);
 					element.append(scope.displayElements.scrollWindow);
@@ -959,7 +989,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 				var _focussed = false;
 				var _disableSanitizer = attrs.taUnsafeSanitizer || taOptions.disableSanitizer;
 				var BLOCKED_KEYS = /^(9|19|20|27|33|34|35|36|37|38|39|40|45|46|112|113|114|115|116|117|118|119|120|121|122|123|144|145)$/;
-				
+
 				// defaults to the paragraph element, but we need the line-break or it doesn't allow you to type into the empty element
 				// non IE is '<p><br/></p>', ie is '<p></p>' as for once IE gets it correct...
 				var _defaultVal, _defaultTest, _trimTest;
@@ -983,7 +1013,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 							'<' + attrs.taDefaultWrap + '>&nbsp;</' + attrs.taDefaultWrap + '>';
 					_trimTest = new RegExp('^<' + attrs.taDefaultWrap + '>(\\s|&nbsp;)*<\\/' + attrs.taDefaultWrap + '>$', 'ig');
 				}
-				
+
 				element.addClass('ta-bind');
 
 				// in here we are undoing the converts used elsewhere to prevent the < > and & being displayed when they shouldn't in the code.
@@ -992,7 +1022,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 					if(_isInputFriendly) return element.val();
 					throw ('textAngular Error: attempting to update non-editable taBind');
 				};
-				
+
 				var _setViewValue = function(val){
 					if(!val) val = _compileHtml();
 					if(val === _defaultTest || val.match(_trimTest)){
@@ -1002,12 +1032,12 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 						if(ngModel.$viewValue !== val) ngModel.$setViewValue(val);
 					}
 				};
-				
+
 				//used for updating when inserting wrapped elements
 				scope.$parent['updateTaBind' + (attrs.id || '')] = function(){
 					if(!_isReadonly) _setViewValue();
 				};
-				
+
 				//this code is used to update the models when data is entered/deleted
 				if(_isInputFriendly){
 					if(!_isContentEditable){
@@ -1110,22 +1140,22 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 							_focussed = true;
 							ngModel.$render();
 						});
-						
+
 						// prevent propagation on mousedown in editor, see #206
 						element.on('mousedown', function(event, eventData){
 							/* istanbul ignore else: this is for catching the jqLite testing*/
 							if(eventData) angular.extend(event, eventData);
-							event.stopPropagation(); 
+							event.stopPropagation();
 						});
 					}
 				}
-				
+
 				// catch DOM XSS via taSanitize
 				// Sanitizing both ways is identical
 				var _sanitize = function(unsafe){
 					return (ngModel.$oldViewValue = taSanitize(taFixChrome(unsafe), ngModel.$oldViewValue, _disableSanitizer));
 				};
-				
+
 				// trigger the validation calls
 				var _validity = function(value){
 					if(attrs.required) ngModel.$setValidity('required', !(!value || value.trim() === _defaultTest || value.trim().match(_trimTest) || value.trim() === ''));
@@ -1168,11 +1198,11 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 								.on('click', selectorClickHandler);
 						});
 				};
-				
+
 				var _setInnerHTML = function(newval){
 					element[0].innerHTML = newval;
 				};
-				
+
 				// changes to the model variable from outside the html/text inputs
 				ngModel.$render = function(){
 					// catch model being null or undefined
@@ -1220,7 +1250,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 						}
 					}
 				};
-				
+
 				if(attrs.taReadonly){
 					//set initial value
 					_isReadonly = scope.$parent.$eval(attrs.taReadonly);
@@ -1770,7 +1800,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 											break;
 										}
 									}
-									if(result) break; 
+									if(result) break;
 								}
 							}
 							return result;
@@ -1956,7 +1986,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 						range = _document.createRange();
 						range.setStart(sel.anchorNode, sel.anchorOffset);
 						range.setEnd(sel.focusNode, sel.focusOffset);
-						
+
 						// Handle the case when the selection was selected backwards (from the end to the start in the document)
 						if (range.collapsed !== sel.isCollapsed) {
 							range.setStart(sel.focusNode, sel.focusOffset);
@@ -1982,7 +2012,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 					},
 					container: container,
 					collapsed: sel.isCollapsed
-					
+
 				};
 				else return {
 					start: {
