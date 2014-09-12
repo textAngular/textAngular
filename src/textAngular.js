@@ -928,6 +928,14 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 						}
 						taSelection.setSelectionToElementEnd($target[0]);
 						return;
+					}else if(command.toLowerCase() === 'createlink'){
+						var _selection = taSelection.getSelection();
+						if(_selection.collapsed){
+							// insert text at selection, then select then just let normal exec-command run
+							_html = _selection.start.element.innerHTML;
+							_selection.start.element.innerHTML = _html.substring(0, _selection.start.offset) + '<a href="' + options + '">' + options + '</a>' + _html.substring(_selection.start.offset);
+							return;
+						}
 					}
 				}
 				try{
@@ -1997,6 +2005,24 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 			// Some basic selection functions
 			getSelectionElement: function () {
 				return this.getSelection().container;
+			},
+			setSelection: function(el, start, end){
+				if (_document.createRange && $window.getSelection) {
+					var range = _document.createRange();
+					range.selectNodeContents(el);
+					range.setStart(el, start);
+					range.setEnd(el, end);
+
+					var sel = $window.getSelection();
+					sel.removeAllRanges();
+					sel.addRange(range);
+				} else if (_document.selection && _document.body.createTextRange) {
+					var textRange = _document.body.createTextRange();
+					textRange.moveToElementText(el);
+					textRange.moveEnd("character", start);
+					textRange.moveStart("character", end);
+					textRange.select();
+				}
 			},
 			setSelectionToElementStart: function (el){
 				if (_document.createRange && $window.getSelection) {

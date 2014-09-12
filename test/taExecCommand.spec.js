@@ -34,6 +34,39 @@ describe('taExecCommand', function(){
 		});
 	});
 	
+	describe('catches collapsed link creation and fills them in', function(){
+		beforeEach(function(){
+			module(function($provide){
+				$provide.value('taSelection', {
+					element: undefined,
+					getSelection: function(){return {
+						start: {
+							element: this.element,
+							offset: 0
+						},
+						end: {
+							element: this.element,
+							offset: 0
+						},
+						container: this.element,
+						collapsed: true
+					};},
+					getSelectionElement: function (){ return this.element; },
+					getOnlySelectedElements: function(){ return [].slice.call(this.element.childNodes); },
+					setSelectionToElementStart: function (){ return; },
+					setSelectionToElementEnd: function (){ return; }
+				});
+			});
+		});
+		
+		it('correctly', inject(function(taExecCommand, taSelection){
+			$element = angular.element('<div class="ta-bind"></div>');
+			taSelection.element = $element[0];
+			taExecCommand()('createLink', false, 'http://test.com');
+			expect($element.html()).toBe('<a href="http://test.com">http://test.com</a>');
+		}));
+	});
+	
 	describe('handles formatBlock BLOCKQUOTE correctly', function(){
 		beforeEach(function(){
 			module(function($provide){
