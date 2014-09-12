@@ -951,7 +951,6 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 		// OR any non-form element with contenteditable="contenteditable" ta-bind="html|text" ng-model
 		return {
 			require: 'ngModel',
-			scope: {},
 			link: function(scope, element, attrs, ngModel){
 				// the option to use taBind on an input or textarea is required as it will sanitize all input into it correctly.
 				var _isContentEditable = element.attr('contenteditable') !== undefined && element.attr('contenteditable');
@@ -1005,7 +1004,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 				};
 				
 				//used for updating when inserting wrapped elements
-				scope.$parent['updateTaBind' + (attrs.id || '')] = function(){
+				scope['updateTaBind' + (attrs.id || '')] = function(){
 					if(!_isReadonly) _setViewValue();
 				};
 				
@@ -1160,7 +1159,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 				};
 
 				//used for updating when inserting wrapped elements
-				scope.$parent['reApplyOnSelectorHandlers' + (attrs.id || '')] = function(){
+				scope['reApplyOnSelectorHandlers' + (attrs.id || '')] = function(){
 					/* istanbul ignore else */
 					if(!_isReadonly) angular.forEach(taSelectableElements, function(selector){
 							// check we don't apply the handler twice
@@ -1224,7 +1223,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 				
 				if(attrs.taReadonly){
 					//set initial value
-					_isReadonly = scope.$parent.$eval(attrs.taReadonly);
+					_isReadonly = scope.$eval(attrs.taReadonly);
 					if(_isReadonly){
 						element.addClass('ta-readonly');
 						// we changed to readOnly mode (taReadonly='true')
@@ -1245,7 +1244,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 					}
 					// taReadonly only has an effect if the taBind element is an input or textarea or has contenteditable='true' on it.
 					// Otherwise it is readonly by default
-					scope.$parent.$watch(attrs.taReadonly, function(newVal, oldVal){
+					scope.$watch(attrs.taReadonly, function(newVal, oldVal){
 						if(oldVal === newVal) return;
 						if(newVal){
 							element.addClass('ta-readonly');
