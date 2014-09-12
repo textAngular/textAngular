@@ -51,6 +51,7 @@ describe('taExecCommand', function(){
 						container: this.element,
 						collapsed: true
 					};},
+					insertHtml: function(html){ angular.element(this.element).html(html); },
 					getSelectionElement: function (){ return this.element; },
 					getOnlySelectedElements: function(){ return [].slice.call(this.element.childNodes); },
 					setSelectionToElementStart: function (){ return; },
