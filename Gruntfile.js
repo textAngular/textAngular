@@ -22,7 +22,7 @@ module.exports = function (grunt) {
 	
 	// Project configuration.
 	grunt.initConfig({
-		clean: ["coverage/*"],
+		clean: ["coverage"],
 		coverage: {
 		  options: {
 		  	thresholds: {

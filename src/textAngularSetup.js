@@ -344,6 +344,7 @@ angular.module('textAngularSetup', [])
 		iconclass: 'fa fa-ban',
 		tooltiptext: taTranslations.clear.tooltip,
 		action: function(deferred, restoreSelection){
+			var i;
 			this.$editor().wrapSelection("removeFormat", null);
 			var possibleNodes = angular.element(taSelection.getSelectionElement());
 			// remove lists
@@ -360,6 +361,36 @@ angular.module('textAngularSetup', [])
 			};
 			angular.forEach(possibleNodes.find("ul"), removeListElements);
 			angular.forEach(possibleNodes.find("ol"), removeListElements);
+			if(possibleNodes[0].tagName.toLowerCase() === 'li'){
+				var _list = possibleNodes[0].parentNode.childNodes;
+				var _preLis = [], _postLis = [], _found = false;
+				for(i = 0; i < _list.length; i++){
+					if(_list[i] === possibleNodes[0]){
+						_found = true;
+					}else if(!_found) _preLis.push(_list[i]);
+					else _postLis.push(_list[i]);
+				}
+				var _parent = angular.element(possibleNodes[0].parentNode);
+				var newElem = angular.element('<p></p>');
+				newElem.html(angular.element(possibleNodes[0]).html());
+				if(_preLis.length === 0 || _postLis.length === 0){
+					if(_postLis.length === 0) _parent.after(newElem);
+					else _parent[0].parentNode.insertBefore(newElem[0], _parent[0]);
+					
+					if(_preLis.length === 0 && _postLis.length === 0) _parent.remove();
+					else angular.element(possibleNodes[0]).remove();
+				}else{
+					var _firstList = angular.element('<'+_parent[0].tagName+'></'+_parent[0].tagName+'>');
+					var _secondList = angular.element('<'+_parent[0].tagName+'></'+_parent[0].tagName+'>');
+					for(i = 0; i < _preLis.length; i++) _firstList.append(angular.element(_preLis[i]));
+					for(i = 0; i < _postLis.length; i++) _secondList.append(angular.element(_postLis[i]));
+					_parent.after(_secondList);
+					_parent.after(newElem);
+					_parent.after(_firstList);
+					_parent.remove();
+				}
+				taSelection.setSelectionToElementEnd(newElem[0]);
+			}
 			// clear out all class attributes. These do not seem to be cleared via removeFormat
 			var $editor = this.$editor();
 			var recursiveRemoveClass = function(node){
