@@ -93,30 +93,35 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 	var sheet, addCSSRule, removeCSSRule, _addCSSRule, _removeCSSRule;
 	/* istanbul ignore else: IE <8 test*/
 	if(ie > 8 || ie === undefined){
-		var topsheet = (function() {
-			// Create the <style> tag
-			var style = document.createElement("style");
-			/* istanbul ignore else : WebKit hack :( */
-			if(/AppleWebKit\/([\d.]+)/.exec(navigator.userAgent)) style.appendChild(document.createTextNode(""));
-
-			// Add the <style> element to the page, add as first so the styles can be overridden by custom stylesheets
-			document.head.insertBefore(style,document.head.firstChild);
-
-			return style.sheet;
-		})();
-
-		// this sheet is used for the placeholders later on.
-		sheet = (function() {
-			// Create the <style> tag
-			var style = document.createElement("style");
-			/* istanbul ignore else : WebKit hack :( */
-			if(/AppleWebKit\/([\d.]+)/.exec(navigator.userAgent)) style.appendChild(document.createTextNode(""));
-
-			// Add the <style> element to the page, add as first so the styles can be overridden by custom stylesheets
-			document.head.appendChild(style);
-
-			return style.sheet;
-		})();
+		var _sheets = document.styleSheets, _lastValidSheet;
+		/* istanbul ignore next: preference for stylesheet loaded externally */
+		for(var i = 0; i < _sheets.length; i++){
+			if(_sheets[i].media.length === 0 || _sheets[i].media.mediaText.match(/(all|screen)/ig)){
+				if(_sheets[i].href){
+					if(_sheets[i].href.match(/textangular\.(min\.|)css/ig)){
+						sheet = _sheets[i];
+						break;
+					} else _lastValidSheet = _sheets[i];
+				}
+			}
+		}
+		/* istanbul ignore next: preference for stylesheet loaded externally */
+		if(!sheet && _lastValidSheet){
+			sheet = _lastValidSheet;
+		}else if(!sheet){
+			// this sheet is used for the placeholders later on.
+			sheet = (function() {
+				// Create the <style> tag
+				var style = document.createElement("style");
+				/* istanbul ignore else : WebKit hack :( */
+				if(/AppleWebKit\/([\d.]+)/.exec(navigator.userAgent)) style.appendChild(document.createTextNode(""));
+	
+				// Add the <style> element to the page, add as first so the styles can be overridden by custom stylesheets
+				document.head.appendChild(style);
+	
+				return style.sheet;
+			})();
+		}
 
 		// use as: addCSSRule("header", "float: left");
 		addCSSRule = function(selector, rules) {
@@ -149,22 +154,6 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 				sheet.deleteRule(index);
 			}
 		};
-
-		// add generic styling for the editor
-		_addCSSRule(topsheet, '.ta-scroll-window.form-control', "height: auto; min-height: 300px; overflow: auto; font-family: inherit; font-size: 100%; position: relative; padding: 0;");
-		_addCSSRule(topsheet, '.ta-root.focussed .ta-scroll-window.form-control', 'border-color: #66afe9; outline: 0; -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 8px rgba(102, 175, 233, 0.6);');
-		_addCSSRule(topsheet, '.ta-editor.ta-html', "min-height: 300px; height: auto; overflow: auto; font-family: inherit; font-size: 100%;");
-		_addCSSRule(topsheet, '.ta-scroll-window > .ta-bind', "height: auto; min-height: 300px; padding: 6px 12px;");
-
-		// add the styling for the awesomness of the resizer
-		_addCSSRule(topsheet, '.ta-root .ta-resizer-handle-overlay', 'z-index: 100; position: absolute; display: none;');
-		_addCSSRule(topsheet, '.ta-root .ta-resizer-handle-overlay > .ta-resizer-handle-info', 'position: absolute; bottom: 16px; right: 16px; border: 1px solid black; background-color: #FFF; padding: 0 4px; opacity: 0.7;');
-		_addCSSRule(topsheet, '.ta-root .ta-resizer-handle-overlay > .ta-resizer-handle-background', 'position: absolute; bottom: 5px; right: 5px; left: 5px; top: 5px; border: 1px solid black; background-color: rgba(0, 0, 0, 0.2);');
-		_addCSSRule(topsheet, '.ta-root .ta-resizer-handle-overlay > .ta-resizer-handle-corner', 'width: 10px; height: 10px; position: absolute;');
-		_addCSSRule(topsheet, '.ta-root .ta-resizer-handle-overlay > .ta-resizer-handle-corner-tl', 'top: 0; left: 0; border-left: 1px solid black; border-top: 1px solid black;');
-		_addCSSRule(topsheet, '.ta-root .ta-resizer-handle-overlay > .ta-resizer-handle-corner-tr', 'top: 0; right: 0; border-right: 1px solid black; border-top: 1px solid black;');
-		_addCSSRule(topsheet, '.ta-root .ta-resizer-handle-overlay > .ta-resizer-handle-corner-bl', 'bottom: 0; left: 0; border-left: 1px solid black; border-bottom: 1px solid black;');
-		_addCSSRule(topsheet, '.ta-root .ta-resizer-handle-overlay > .ta-resizer-handle-corner-br', 'bottom: 0; right: 0; border: 1px solid black; cursor: se-resize; background-color: white;');
 	}
 
 	// recursive function that returns an array of angular.elements that have the passed attribute set on them
@@ -349,6 +338,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 						oneEvent(element, 'click keyup', function(){scope.hidePopover();});
 					};
 					scope.reflowPopover = function(_el){
+						/* istanbul ignore if: catches only if near bottom of editor */
 						if(scope.displayElements.text[0].offsetHeight - 51 > _el[0].offsetTop){
 							scope.displayElements.popover.css('top', _el[0].offsetTop + _el[0].offsetHeight + 'px');
 							scope.displayElements.popover.removeClass('top').addClass('bottom');

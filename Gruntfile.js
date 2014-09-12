@@ -3,13 +3,14 @@ module.exports = function (grunt) {
 	// load all grunt tasks
 	grunt.loadNpmTasks('grunt-contrib-jshint');
 	grunt.loadNpmTasks('grunt-contrib-uglify');
+	grunt.loadNpmTasks('grunt-contrib-cssmin');
 	grunt.loadNpmTasks('grunt-contrib-clean');
 	grunt.loadNpmTasks('grunt-istanbul-coverage');
 	grunt.loadNpmTasks('grunt-karma');
 	grunt.loadNpmTasks('grunt-karma-coveralls');
 	
 	// Default task.
-	grunt.registerTask('default', ['uglify', 'clean', 'test']);
+	grunt.registerTask('default', ['uglify', 'cssmin', 'clean', 'test']);
 	grunt.registerTask('test', ['jshint', 'karma', 'coverage']);
 	grunt.registerTask('travis-test', ['jshint', 'karma', 'coverage', 'coveralls']);
 	
@@ -30,7 +31,7 @@ module.exports = function (grunt) {
 			  'lines': 100,
 			  'functions': 100
 			},
-			dir: ''
+			dir: 'coverage'
 		  }
 		},
 		coveralls: {
@@ -72,6 +73,13 @@ module.exports = function (grunt) {
 				files: {
 					'dist/textAngular.min.js': ['src/textAngularSetup.js','src/textAngular.js'],
 					'dist/textAngular-sanitize.min.js': ['src/textAngular-sanitize.js']
+				}
+			}
+		},
+		cssmin: {
+			compress_css: {
+				files: {
+					'dist/textAngular.min.css': ['src/textAngular.css']
 				}
 			}
 		}

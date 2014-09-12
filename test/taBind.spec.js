@@ -51,10 +51,10 @@ describe('taBind', function () {
 				$rootScope.html = '';
 				var element = $compile('<div ta-bind id="test" contenteditable="true" ng-model="html" placeholder="Add Comment"></div>')($rootScope);
 				$rootScope.$digest();
-				expect(document.styleSheets[2].rules.length).toBe(1);
+				expect(document.styleSheets[1].rules.length).toBe(1);
 				element.scope().$destroy();
 				$rootScope.$digest();
-				expect(document.styleSheets[2].rules.length).toBe(0);
+				expect(document.styleSheets[1].rules.length).toBe(0);
 			}));
 		});
 		

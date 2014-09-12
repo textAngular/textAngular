@@ -27,6 +27,7 @@ Demo is available at: http://www.textangular.com (Or editable [Plunkr Demo](http
 Run `bower install textAngular` from the command line.
 Include script tags similar to the following:
 ```html
+<link rel='stylesheet' href='/bower_components/textAngular/dist/textAngular.min.css'>
 <script src='/bower_components/textAngular/dist/textAngular-sanitize.min.js'></script>
 <script src='/bower_components/textAngular/dist/textAngular.min.js'></script>
 ```
@@ -35,21 +36,24 @@ Include script tags similar to the following:
 
 Include script tags similar to the following:
 ```html
-	<script src='http://cdnjs.cloudflare.com/ajax/libs/textAngular/1.2.2/textAngular-sanitize.min.js'></script>
-<script src='http://cdnjs.cloudflare.com/ajax/libs/textAngular/1.2.2/textAngular.min.js'></script>
+<link rel='stylesheet' href='http://cdnjs.cloudflare.com/ajax/libs/textAngular/1.2.3/textAngular.min.css'>
+<script src='http://cdnjs.cloudflare.com/ajax/libs/textAngular/1.2.3/textAngular-sanitize.min.js'></script>
+<script src='http://cdnjs.cloudflare.com/ajax/libs/textAngular/1.2.3/textAngular.min.js'></script>
 ```
 
 **Via jsDelivr:**
 
 Include script tag similar to the following: (For details on how this works see: [https://github.com/jsdelivr/jsdelivr#load-multiple-files-with-single-http-request](https://github.com/jsdelivr/jsdelivr#load-multiple-files-with-single-http-request))
 ```html
-<script src='http://cdn.jsdelivr.net/g/angular.textangular@1.2.2(textAngular-sanitize.min.js+textAngular.min.js)'></script>
+<link rel='stylesheet' href='http://cdn.jsdelivr.net/angular.textangular/1.2.3/textAngular.min.css'>
+<script src='http://cdn.jsdelivr.net/g/angular.textangular@1.2.3(textAngular-sanitize.min.js+textAngular.min.js)'></script>
 ```
 
 **Via Github**
 
 Download the code from [https://github.com/fraywing/textAngular/releases/latest](https://github.com/fraywing/textAngular/releases/latest), unzip the files then add script tags similar to the following:
 ```html
+<link rel='stylesheet' href='/path/to/unzipped/files/textAngular.min.css'>
 <script src='/path/to/unzipped/files/textAngular-sanitize.min.js'></script>
 <script src='/path/to/unzipped/files/textAngular.min.js'></script>
 ```
