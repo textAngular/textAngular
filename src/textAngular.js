@@ -15,7 +15,8 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 	var globalContentEditableBlur = false;
 	/* istanbul ignore next: Browser Un-Focus fix for webkit */
 	if(/AppleWebKit\/([\d.]+)/.exec(navigator.userAgent)) { // detect webkit
-		document.addEventListener("click", function(e){
+		document.addEventListener("click", function(_event){
+			var e = _event || window.event;
 			var curelement = e.target;
 			if(globalContentEditableBlur && curelement !== null){
 				var isEditable = false;
