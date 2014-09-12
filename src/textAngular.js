@@ -569,10 +569,14 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 					};
 					scope.switchView = function(){
 						scope.showHtml = !scope.showHtml;
+						$animate.enabled(false, scope.displayElements.html);
+						$animate.enabled(false, scope.displayElements.text);
 						//Show the HTML view
 						if(scope.showHtml){
 							//defer until the element is visible
 							$timeout(function(){
+								$animate.enabled(true, scope.displayElements.html);
+								$animate.enabled(true, scope.displayElements.text);
 								// [0] dereferences the DOM object from the angular.element
 								return scope.displayElements.html[0].focus();
 							}, 100);
@@ -580,6 +584,8 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 							//Show the WYSIWYG view
 							//defer until the element is visible
 							$timeout(function(){
+								$animate.enabled(true, scope.displayElements.html);
+								$animate.enabled(true, scope.displayElements.text);
 								// [0] dereferences the DOM object from the angular.element
 								return scope.displayElements.text[0].focus();
 							}, 100);
