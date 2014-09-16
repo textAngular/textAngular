@@ -1013,56 +1013,46 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 				
 				//this code is used to update the models when data is entered/deleted
 				if(_isInputFriendly){
+					element.on('paste', function(e, eventData){
+						/* istanbul ignore else: this is for catching the jqLite testing*/
+						if(eventData) angular.extend(e, eventData);
+						var text;
+						// for non-ie
+						if(e.clipboardData || (e.originalEvent && e.originalEvent.clipboardData)){
+							text = (e.originalEvent || e).clipboardData.getData('text/html');
+							/* istanbul ignore next: special catch case */
+							if(!text) text = (e.originalEvent || e).clipboardData.getData('text/plain');
+						// for ie
+						}else if($window.clipboardData)
+							text = $window.clipboardData.getData('Text');
+						// if theres non text data and we aren't in read-only do default
+						if(!text && !_isReadonly) return true;
+						// prevent the default paste command
+						e.preventDefault();
+						if(!_isReadonly){
+							text = taSanitize(text);
+							if ($document[0].selection){
+								var range = $document[0].selection.createRange();
+								range.pasteHTML(text);
+							}
+							else{
+								$document[0].execCommand('insertHtml', false, text);
+							}
+						}
+					});
+					element.on('paste cut', function(e){
+						// timeout to next is needed as otherwise the paste/cut event has not finished actually changing the display
+						if(!_isReadonly) $timeout(function(){
+							ngModel.$setViewValue(_compileHtml());
+						}, 0);
+						else e.preventDefault();
+					});
 					if(!_isContentEditable){
-						element.on('paste cut', function(){
-							// timeout to next is needed as otherwise the paste/cut event has not finished actually changing the display
-							if(!_isReadonly) $timeout(function(){
-								ngModel.$setViewValue(_compileHtml());
-							}, 0);
-						});
 						// if a textarea or input just add in change and blur handlers, everything else is done by angulars input directive
 						element.on('change blur', function(){
 							if(!_isReadonly) ngModel.$setViewValue(_compileHtml());
 						});
 					}else{
-						element.on('cut', function(e){
-							// timeout to next is needed as otherwise the paste/cut event has not finished actually changing the display
-							if(!_isReadonly)
-								$timeout(function(){
-									_setViewValue();
-								}, 0);
-							else e.preventDefault();
-						});
-						element.on('paste', function(e, eventData){
-							/* istanbul ignore else: this is for catching the jqLite testing*/
-							if(eventData) angular.extend(e, eventData);
-							var text;
-							// for non-ie
-							if(e.clipboardData || (e.originalEvent && e.originalEvent.clipboardData))
-								text = (e.originalEvent || e).clipboardData.getData('text/plain');
-							// for ie
-							else if($window.clipboardData)
-								text = $window.clipboardData.getData('Text');
-							// if theres non text data and we aren't in read-only do default
-							if(!text && !_isReadonly) return true;
-							// prevent the default paste command
-							e.preventDefault();
-							if(!_isReadonly){
-								var _working = angular.element('<div></div>');
-								_working[0].innerHTML = text;
-								// this strips out all HTML tags
-								text = _working.text();
-								if ($document[0].selection){
-									var range = $document[0].selection.createRange();
-									range.pasteHTML(text);
-								}
-								else{
-									$document[0].execCommand('insertText', false, text);
-								}
-								_setViewValue();
-							}
-						});
-
 						// all the code specific to contenteditable divs
 						element.on('keyup', function(event, eventData){
 							/* istanbul ignore else: this is for catching the jqLite testing*/
@@ -1436,6 +1426,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 			} catch (e){
 				safe = oldsafe || '';
 			}
+			safe = safe.replace(/(&#9;)|(&#10;)/ig, ''); // remove odd unicode chars
 			return safe;
 		};
 	}]).directive('textAngularToolbar', [

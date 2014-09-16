@@ -582,6 +582,8 @@ describe('taBind', function () {
 					};
 					element.triggerHandler('paste');
 					$rootScope.$digest();
+					$timeout.flush();
+					$rootScope.$digest();
 					expect(ok).toBe(true);
 					$window.clipboardData = undefined;
 					document.selection = undefined;
@@ -590,17 +592,23 @@ describe('taBind', function () {
 				it('non-ie based w/o jquery', inject(function($window){
 					element.triggerHandler('paste', {clipboardData: {getData: function(){ return 'Test 3 Content'; }}});
 					$rootScope.$digest();
+					$timeout.flush();
+					$rootScope.$digest();
 					expect($rootScope.html).toBe('<p>Test 3 Content</p>');
 				}));
 				
 				it('non-ie based w/ jquery', inject(function($window){
 					element.triggerHandler('paste', {originalEvent: {clipboardData: {getData: function(){ return 'Test 3 Content'; } }}});
 					$rootScope.$digest();
+					$timeout.flush();
+					$rootScope.$digest();
 					expect($rootScope.html).toBe('<p>Test 3 Content</p>');
 				}));
 				
 				it('non-ie based w/o paste content', inject(function($window){
 					element.triggerHandler('paste');
+					$rootScope.$digest();
+					$timeout.flush();
 					$rootScope.$digest();
 					expect($rootScope.html).toBe('<p>Test Contents</p>');
 				}));
