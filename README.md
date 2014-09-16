@@ -1,4 +1,4 @@
-textAngular v1.2.2
+textAngular v1.3.0-pre1
 ===========
 
 [![Build Status](https://travis-ci.org/fraywing/textAngular.png?branch=master)](https://travis-ci.org/fraywing/textAngular) [![Coverage Status](https://coveralls.io/repos/fraywing/textAngular/badge.png)](https://coveralls.io/r/fraywing/textAngular)
