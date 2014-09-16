@@ -1426,7 +1426,6 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 			} catch (e){
 				safe = oldsafe || '';
 			}
-			safe = safe.replace(/(&#9;)|(&#10;)/ig, ''); // remove odd unicode chars
 			return safe;
 		};
 	}]).directive('textAngularToolbar', [

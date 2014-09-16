@@ -25,11 +25,6 @@ describe('taSanitize', function(){
 		}));
 	});
 	
-	it('clean up wierd unicode removes &#10; and &#9;', inject(function(taSanitize){
-		var result = taSanitize('<p>test&#10;&#9;&#9;&#9;&#10;&#9;&#9;&#9;</p>', '');
-		expect(result).toBe('<p>test</p>');
-	}));
-	
 	describe('if invalid HTML', function(){
 		it('should return the oldsafe passed in', inject(function(taSanitize){
 			var result = taSanitize('<broken><test', 'safe');
