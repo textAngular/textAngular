@@ -270,7 +270,8 @@ describe('textAngularToolbar', function(){
 			taRegisterTool('buttontext', {buttontext: 'Only Text'});
 			taRegisterTool('iconclass', {iconclass: 'onlyiconclass'});
 			taRegisterTool('iconandtext', {iconclass: 'iconclass', buttontext: 'good text'});
-			taOptions.toolbar = [['display','buttontext','iconclass','iconandtext']];
+			taRegisterTool('customclass', {'class': 'buttonclass', buttontext: 'custom class'});
+			taOptions.toolbar = [['display','buttontext','iconclass','iconandtext','customclass']];
 			$rootScope = _$rootScope_;
 			element = $compile('<text-angular-toolbar name="test"></text-angular-toolbar>')($rootScope);
 			toolbarScope = textAngularManager.retrieveToolbar('test');
@@ -294,6 +295,14 @@ describe('textAngularToolbar', function(){
 			
 			it('should display both icon and buttontext in the button', function(){
 				expect($('button[name=iconandtext]', element[0]).html()).toBe('<i class="iconclass"></i>&nbsp;good text');
+			});
+			
+			it('should use the default class', function(){
+				expect($('div[name=display]', element[0]).hasClass('btn')).toBe(true);
+			});
+			
+			it('should override the default class', function(){
+				expect($('button[name=customclass]', element[0]).hasClass('buttonclass')).toBe(true);
 			});
 		});
 		

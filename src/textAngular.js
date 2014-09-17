@@ -189,6 +189,8 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 			display: [string]?
 					Optional, an HTML element to be displayed as the button. The `scope` of the button is the tool definition object with some additional functions
 					If set this will cause buttontext and iconclass to be ignored
+			class: [string]?
+					Optional, if set will override the taOptions.classes.toolbarButton class.
 			buttontext: [string]?
 					if this is defined it will replace the contents of the element contained in the `display` element
 			iconclass: [string]?
@@ -1458,13 +1460,15 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 					});
 
 					var setupToolElement = function(toolDefinition, toolScope){
-						var toolElement;
+						var toolElement, _class;
 						if(toolDefinition && toolDefinition.display){
 							toolElement = angular.element(toolDefinition.display);
 						}
 						else toolElement = angular.element("<button type='button'>");
-
-						toolElement.addClass(scope.classes.toolbarButton);
+						
+						if(toolDefinition && toolDefinition["class"]) toolElement.addClass(toolDefinition["class"]);
+						else toolElement.addClass(scope.classes.toolbarButton);
+						
 						toolElement.attr('name', toolScope.name);
 						// important to not take focus from the main text/html entry
 						toolElement.attr('unselectable', 'on');
