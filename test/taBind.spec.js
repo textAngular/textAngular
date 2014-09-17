@@ -568,6 +568,8 @@ describe('taBind', function () {
 				it('ie based', inject(function($window){
 					var content = 'Test 2 Content';
 					var ok = false;
+					var _temp = window.getSelection;
+					window.getSelection = null;
 					$window.clipboardData = {
 						getData: function(){ return content; }
 					};
@@ -587,6 +589,7 @@ describe('taBind', function () {
 					expect(ok).toBe(true);
 					$window.clipboardData = undefined;
 					document.selection = undefined;
+					window.getSelection = _temp;
 				}));
 				
 				it('non-ie based w/o jquery', inject(function($window){

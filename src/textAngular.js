@@ -238,8 +238,8 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 	}]);
 
 	textAngular.directive("textAngular", [
-		'$compile', '$timeout', 'taOptions', 'taSelection', 'taExecCommand', 'textAngularManager', '$window', '$document', '$animate', '$log',
-		function($compile, $timeout, taOptions, taSelection, taExecCommand, textAngularManager, $window, $document, $animate, $log){
+		'$compile', '$timeout', 'taOptions', 'taSelection', 'taExecCommand', 'textAngularManager', '$window', '$document', '$animate', '$log', '$interpolate'
+		function($compile, $timeout, taOptions, taSelection, taExecCommand, textAngularManager, $window, $document, $animate, $log, $interpolate){
 			return {
 				require: '?ngModel',
 				scope: {},
@@ -606,7 +606,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 								var _initialValue = scope.$parent.$eval(attrs.ngModel);
 								if((_initialValue === undefined || _initialValue === null) && (_originalContents && _originalContents !== '')){
 									// on passing through to taBind it will be sanitised
-									ngModel.$setViewValue(_originalContents);
+									ngModel.$setViewValue($interpolate(_originalContents)(scope.$parent));
 								}
 							}
 							scope.displayElements.forminput.val(ngModel.$viewValue);
@@ -626,8 +626,8 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 						ngModel.$formatters.push(_validity);
 					}else{
 						// if no ngModel then update from the contents of the origional html.
-						scope.displayElements.forminput.val(_originalContents);
-						scope.html = _originalContents;
+						scope.displayElements.forminput.val($interpolate(_originalContents)(scope.$parent));
+						scope.html = $interpolate(_originalContents)(scope.$parent);
 					}
 
 					// changes from taBind back up to here
@@ -1032,14 +1032,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 						// prevent the default paste command
 						e.preventDefault();
 						if(!_isReadonly){
-							text = taSanitize(text);
-							if ($document[0].selection){
-								var range = $document[0].selection.createRange();
-								range.pasteHTML(text);
-							}
-							else{
-								$document[0].execCommand('insertHtml', false, text);
-							}
+							taSelection.insertHtml(taSanitize(text));
 						}
 					});
 					element.on('paste cut', function(e){
