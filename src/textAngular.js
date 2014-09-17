@@ -707,9 +707,26 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 					scope.displayElements.html.on('keydown', _keydown);
 					scope.displayElements.text.on('keydown', _keydown);
 					// stop updating on key up and update the display/model
-					_keyup = function(){
+					_keyup = function() {
 						scope._bUpdateSelectedStyles = false;
+                        updateToolbarsWordCount() ;
 					};
+
+                    var updateToolbarsWordCount = function() {
+                        var toolbars = textAngularManager.getToolbar() ;
+                        for(var t in toolbars) {
+                            toolbars[t]._updateWordCount(_countWords()) ;
+                        }
+                    };
+
+                    var _countWords = function() {
+                        var divWithText = scope.displayElements.text ;
+                        var text = divWithText[0].innerText ;
+                        return text.split(/\b\w+\b/).length - 1 ;
+                    };
+
+                    scope._countWords = _countWords ;
+
 					scope.displayElements.html.on('keyup', _keyup);
 					scope.displayElements.text.on('keyup', _keyup);
 					// stop updating on key up and update the display/model
@@ -739,6 +756,8 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 					};
 					scope.displayElements.html.on('mouseup', _mouseup);
 					scope.displayElements.text.on('mouseup', _mouseup);
+
+                    updateToolbarsWordCount() ;
 				}
 			};
 		}
@@ -1612,6 +1631,13 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 					scope.$on('$destroy', function(){
 						textAngularManager.unregisterToolbar(scope.name);
 					});
+
+                    var wcElement = angular.element("<div id=\"toolbarWC\" style=\"display:block; width:100px;\"></div>");
+                    element.append(wcElement) ;
+
+                    scope._updateWordCount = function(number) {
+                        wcElement[0].innerText = "Words : " + number ;
+                    } ;
 				}
 			};
 		}
@@ -1883,6 +1909,11 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 				taRegisterTool(toolKey, toolDefinition);
 				toolbars[toolbarKey].addTool(toolKey, toolDefinition, group, index);
 			},
+
+            getToolbar: function(toolbarKey) {
+                return toolbars ;
+            },
+
 			// this is used when externally the html of an editor has been changed and textAngular needs to be notified to update the model.
 			// this will call a $digest if not already happening
 			refreshEditor: function(name){
@@ -1891,7 +1922,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 					/* istanbul ignore else: phase catch */
 					if(!editors[name].scope.$$phase) editors[name].scope.$digest();
 				}else throw('textAngular Error: No Editor with name "' + name + '" exists');
-			}
+            }
 		};
 	}]).service('taSelection', ['$window', '$document',
 	/* istanbul ignore next: all browser specifics and PhantomJS dosen't seem to support half of it */
