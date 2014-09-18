@@ -14,7 +14,7 @@ angular.module('textAngularSetup', [])
 		['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'pre', 'quote'],
 		['bold', 'italics', 'underline', 'strikeThrough', 'ul', 'ol', 'redo', 'undo', 'clear'],
 		['justifyLeft','justifyCenter','justifyRight','indent','outdent'],
-		['html', 'insertImage', 'insertLink', 'insertVideo']
+		['html', 'insertImage', 'insertLink', 'insertVideo', 'wordcount', 'charcount']
 	],
 	classes: {
 		focussed: "focussed",
@@ -154,6 +154,12 @@ angular.module('textAngularSetup', [])
 	insertLink: {
 		tooltip: 'Insert / edit link',
 		dialogPrompt: "Please enter a URL to insert"
+	},
+	wordcount: {
+		tooltip: 'Display words Count'
+	},
+        charcount: {
+		tooltip: 'Display characters Count'
 	}
 })
 .run(['taRegisterTool', '$window', 'taTranslations', 'taSelection', function(taRegisterTool, $window, taTranslations, taSelection){
@@ -610,5 +616,49 @@ angular.module('textAngularSetup', [])
 				editorScope.showPopover($element);
 			}
 		}
+	});
+	taRegisterTool('wordcount', {
+		display: '<div id="toolbarWC" style="display:block; width:100px;">Words:{{wordcount}}</div>',
+		activeState: function(){ // this fires on keyup
+		    if( this.$editor().displayElements)
+		    {
+		        var textElement = this.$editor().displayElements.text;
+		        var sourceText = textElement[0].innerText || textElement[0].textContent; // to cover the non-jquery use case.
+		
+		        // Caculate number of words
+		        var sourceTextArray = sourceText.replace(/\s+/g,' ').split(' ');
+		        var noOfWords = 0;
+		        for (var i = 0; i < sourceTextArray.length; i++) {
+		            if (sourceTextArray[i] !== '') {
+		                noOfWords++;
+		            }
+		        }
+		
+		        //Set current scope
+		        this.wordcount = noOfWords;
+		        //Set editor scope
+		        this.$editor().wordcount = noOfWords;
+		    }
+		    return false;
+		}
+	});
+	taRegisterTool('charcount', {
+	        display: '<div id="toolbarCC" style="display:block; width:120px;">Characters:{{charcount}}</div>',
+	        activeState: function(){ // this fires on keyup
+	            if( this.$editor().displayElements)
+	            {
+	                var textElement = this.$editor().displayElements.text;
+	                var sourceText = textElement[0].innerText || textElement[0].textContent; // to cover the non-jquery use case.
+	
+	                // Caculate number of chars
+	                var noOfChars = sourceText.replace(/^\s+/g,' ').replace(/\s+$/g, ' ').length;
+	
+	                //Set current scope
+	                this.charcount = noOfChars;
+	                //Set editor scope
+	                this.$editor().charcount = noOfChars;
+	            }
+	            return false;
+	        }
 	});
 }]);
