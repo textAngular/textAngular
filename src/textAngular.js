@@ -1629,7 +1629,9 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 			var result;
 			try{
 				result = this.action(deferred, _editor.startAction());
-			}catch(any){}
+			}catch(exc){
+				console.error(exc);
+			}
 			if(result || result === undefined){
 				// if true or undefined is returned then the action has finished. Otherwise the deferred action will be resolved manually.
 				deferred.resolve();
