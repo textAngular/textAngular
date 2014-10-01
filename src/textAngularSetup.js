@@ -7,7 +7,7 @@ Version 1.2.2
 See README.md or https://github.com/fraywing/textAngular/wiki for requirements and use.
 */
 angular.module('textAngularSetup', [])
-	
+
 // Here we set up the global display defaults, to set your own use a angular $provider#decorator.
 .value('taOptions',  {
 	toolbar: [
@@ -296,7 +296,7 @@ angular.module('textAngularSetup', [])
 			return this.$editor().wrapSelection("indent", null);
 		},
 		activeState: function(){
-			return this.$editor().queryFormatBlockState('blockquote'); 
+			return this.$editor().queryFormatBlockState('blockquote');
 		}
 	});
 	taRegisterTool('outdent', {
@@ -376,7 +376,7 @@ angular.module('textAngularSetup', [])
 				if(_preLis.length === 0 || _postLis.length === 0){
 					if(_postLis.length === 0) _parent.after(newElem);
 					else _parent[0].parentNode.insertBefore(newElem[0], _parent[0]);
-					
+
 					if(_preLis.length === 0 && _postLis.length === 0) _parent.remove();
 					else angular.element(possibleNodes[0]).remove();
 				}else{
@@ -406,7 +406,7 @@ angular.module('textAngularSetup', [])
 			restoreSelection();
 		}
 	});
-	
+
 	var imgOnSelectAction = function(event, $element, editorScope){
 		// setup the editor toolbar
 		// Credit to the work at http://hackerwins.github.io/summernote/ for this editbar logic/display
@@ -460,7 +460,7 @@ angular.module('textAngularSetup', [])
 		buttonGroup.append(quartButton);
 		buttonGroup.append(resetButton);
 		container.append(buttonGroup);
-		
+
 		buttonGroup = angular.element('<div class="btn-group" style="padding-right: 6px;">');
 		var floatLeft = angular.element('<button type="button" class="btn btn-default btn-sm btn-small" unselectable="on" tabindex="-1"><i class="fa fa-align-left"></i></button>');
 		floatLeft.on('click', function(event){
@@ -484,7 +484,7 @@ angular.module('textAngularSetup', [])
 		buttonGroup.append(floatNone);
 		buttonGroup.append(floatRight);
 		container.append(buttonGroup);
-		
+
 		buttonGroup = angular.element('<div class="btn-group">');
 		var remove = angular.element('<button type="button" class="btn btn-default btn-sm btn-small" unselectable="on" tabindex="-1"><i class="fa fa-trash-o"></i></button>');
 		remove.on('click', function(event){
@@ -494,11 +494,11 @@ angular.module('textAngularSetup', [])
 		});
 		buttonGroup.append(remove);
 		container.append(buttonGroup);
-		
+
 		editorScope.showPopover($element);
 		editorScope.showResizeOverlay($element);
 	};
-	
+
 	taRegisterTool('insertImage', {
 		iconclass: 'fa fa-picture-o',
 		tooltiptext: taTranslations.insertImage.tooltip,
@@ -528,7 +528,7 @@ angular.module('textAngularSetup', [])
 					// create the embed link
 					var urlLink = "http://www.youtube.com/embed/" + ids[0].substring(3);
 					// create the HTML
-					var embed = '<img class="ta-insert-video" ta-insert-video="' + urlLink + '" contenteditable="false" src="" allowfullscreen="true" width="300" frameborder="0" height="250"/>';
+					var embed = '<img class="ta-insert-video" src="http://img.youtube.com/vi/' + ids[0].substring(3) + '/maxresdefault.jpg" ta-insert-video="' + urlLink + '" contenteditable="false" src="" allowfullscreen="true" frameborder="0" />';
 					// insert
 					return this.$editor().wrapSelection('insertHTML', embed, true);
 				}
@@ -539,7 +539,7 @@ angular.module('textAngularSetup', [])
 			onlyWithAttrs: ['ta-insert-video'],
 			action: imgOnSelectAction
 		}
-	});	
+	});
 	taRegisterTool('insertLink', {
 		tooltiptext: taTranslations.insertLink.tooltip,
 		iconclass: 'fa fa-link',
