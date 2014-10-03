@@ -628,21 +628,21 @@ angular.module('textAngularSetup', [])
 	});
 	taRegisterTool('wordcount', {
 		display: '<div id="toolbarWC" style="display:block; width:100px;">Words:{{wordcount}}</div>',
+		disabled: true,
 		activeState: function(){ // this fires on keyup
-			if( this.$editor().displayElements)
-			{
+			if(this.$editor().displayElements){
 				var textElement = this.$editor().displayElements.text;
 				var sourceText = textElement[0].innerText || textElement[0].textContent; // to cover the non-jquery use case.
-
+				
 				// Caculate number of words
 				var sourceTextArray = sourceText.replace(/\s+/g,' ').split(' ');
 				var noOfWords = 0;
-				for (var i = 0; i < sourceTextArray.length; i++) {
-					if (sourceTextArray[i] !== '') {
+				for(var i = 0; i < sourceTextArray.length; i++){
+					if(sourceTextArray[i] !== ''){
 						noOfWords++;
 					}
 				}
-
+				
 				//Set current scope
 				this.wordcount = noOfWords;
 				//Set editor scope
@@ -652,16 +652,15 @@ angular.module('textAngularSetup', [])
 		}
 	});
 	taRegisterTool('charcount', {
-			display: '<div id="toolbarCC" style="display:block; width:120px;">Characters:{{charcount}}</div>',
-			activeState: function(){ // this fires on keyup
-			if( this.$editor().displayElements)
-			{
+		display: '<div id="toolbarCC" style="display:block; width:120px;">Characters:{{charcount}}</div>',
+		disabled: true,
+		activeState: function(){ // this fires on keyup
+			if(this.$editor().displayElements){
 				var textElement = this.$editor().displayElements.text;
 				var sourceText = textElement[0].innerText || textElement[0].textContent; // to cover the non-jquery use case.
-
+				
 				// Caculate number of chars
-				var noOfChars = sourceText.replace(/^\s+/g,' ').replace(/\s+$/g, ' ').length;
-
+				var noOfChars = sourceText.replace(/(\r\n|\n|\r)/gm,"").replace(/^\s+/g,' ').replace(/\s+$/g, ' ').length;
 				//Set current scope
 				this.charcount = noOfChars;
 				//Set editor scope
