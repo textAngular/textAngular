@@ -1,5 +1,7 @@
+'use strict';
+
+
 describe('ngBindHtml', function() {
-  'use strict';
   beforeEach(module('ngSanitize'));
 
   it('should set html', inject(function($rootScope, $compile) {

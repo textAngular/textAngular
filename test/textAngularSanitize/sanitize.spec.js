@@ -1,4 +1,7 @@
+'use strict';
+
 describe('HTML', function() {
+
   var expectHTML;
 
   beforeEach(module('ngSanitize'));
@@ -13,32 +16,34 @@ describe('HTML', function() {
   });
 
   describe('htmlParser', function() {
+    /* global htmlParser */
     if (angular.isUndefined(window.htmlParser)) return;
 
     var handler, start, text, comment;
     beforeEach(function() {
+      text = "";
       handler = {
-          start: function(tag, attrs, unary){
-            start = {
-                tag: tag,
-                attrs: attrs,
-                unary: unary
-            };
-            // Since different browsers handle newlines differently we trim
-            // so that it is easier to write tests.
-            angular.forEach(attrs, function(value, key) {
-              attrs[key] = value.replace(/^\s*/, '').replace(/\s*$/, '');
-            });
-          },
-          chars: function(text_){
-            text = text_;
-          },
-          end:function(tag) {
-            expect(tag).toEqual(start.tag);
-          },
-          comment:function(comment_) {
-            comment = comment_;
-          }
+        start: function(tag, attrs, unary){
+          start = {
+            tag: tag,
+            attrs: attrs,
+            unary: unary
+          };
+          // Since different browsers handle newlines differently we trim
+          // so that it is easier to write tests.
+          angular.forEach(attrs, function(value, key) {
+            attrs[key] = value.replace(/^\s*/, '').replace(/\s*$/, '');
+          });
+        },
+        chars: function(text_){
+          text += text_;
+        },
+        end:function(tag) {
+          expect(tag).toEqual(start.tag);
+        },
+        comment:function(comment_) {
+          comment = comment_;
+        }
       };
     });
 
@@ -77,8 +82,31 @@ describe('HTML', function() {
       expect(text).toEqual('text');
     });
 
+    it('should not treat "<" followed by a non-/ or non-letter as a tag', function() {
+      expectHTML('<- text1 text2 <1 text1 text2 <{', handler).
+        toBe('&lt;- text1 text2 &lt;1 text1 text2 &lt;{');
+    });
+
+    it('should throw badparse if text content contains "<" followed by "/" without matching ">"', function() {
+      expect(function() {
+        htmlParser('foo </ bar', handler);
+      }).toThrowMinErr('$sanitize', 'badparse', 'The sanitizer was unable to parse the following block of html: </ bar');
+    });
+
+    it('should throw badparse if text content contains "<" followed by an ASCII letter without matching ">"', function() {
+      expect(function() {
+        htmlParser('foo <a bar', handler);
+      }).toThrowMinErr('$sanitize', 'badparse', 'The sanitizer was unable to parse the following block of html: <a bar');
+    });
+
+    it('should accept tag delimiters such as "<" inside real tags', function() {
+      // Assert that the < is part of the text node content, and not part of a tag name.
+      htmlParser('<p> 10 < 100 </p>', handler);
+      expect(text).toEqual(' 10 < 100 ');
+    });
+
     it('should parse newlines in tags', function() {
-      htmlParser('<\ntag\n attr="value"\n>text<\n/\ntag\n>', handler);
+      htmlParser('<tag\n attr="value"\n>text</\ntag\n>', handler);
       expect(start).toEqual({tag:'tag', attrs:{attr:'value'}, unary:false});
       expect(text).toEqual('text');
     });
@@ -119,8 +147,9 @@ describe('HTML', function() {
     expectHTML('a<!DocTyPe html>c.').toEqual('ac.');
   });
 
-  it('should remove nested script', function() {
-    expectHTML('a< SCRIPT >A< SCRIPT >evil< / scrIpt >B< / scrIpt >c.').toEqual('ac.');
+  it('should escape non-start tags', function() {
+    expectHTML('a< SCRIPT >A< SCRIPT >evil< / scrIpt >B< / scrIpt >c.').
+      toBe('a&lt; SCRIPT &gt;A&lt; SCRIPT &gt;evil&lt; / scrIpt &gt;B&lt; / scrIpt &gt;c.');
   });
 
   it('should remove attrs', function() {
@@ -156,19 +185,21 @@ describe('HTML', function() {
   });
 
   it('should handle entities', function() {
-    var everything = '<div rel="!@#$%^&amp;*()_+-={}[]:&#34;;\'&lt;&gt;?,./`~ ">' +
-    '!@#$%^&amp;*()_+-={}[]:&#34;;\'&lt;&gt;?,./`~ </div>';
+    var everything = '<div rel="!@#$%^&amp;*()_+-={}[]:&#34;;\'&lt;&gt;?,./`~ ħ">' +
+    '!@#$%^&amp;*()_+-={}[]:&#34;;\'&lt;&gt;?,./`~ ħ</div>';
     expectHTML(everything).toEqual(everything);
   });
 
-  it('should handle improper html', function() {
+  it('should mangle improper html', function() {
+    // This text is encoded more than a real HTML parser would, but it should render the same.
     expectHTML('< div rel="</div>" alt=abc dir=\'"\' >text< /div>').
-      toEqual('<div rel="&lt;/div&gt;" alt="abc" dir="&#34;">text</div>');
+      toBe('&lt; div rel=&#34;&#34; alt=abc dir=\'&#34;\' &gt;text&lt; /div&gt;');
   });
 
-  it('should handle improper html2', function() {
+  it('should mangle improper html2', function() {
+    // A proper HTML parser would clobber this more in most cases, but it looks reasonable.
     expectHTML('< div rel="</div>" / >').
-      toEqual('<div rel="&lt;/div&gt;"/>');
+      toBe('&lt; div rel=&#34;&#34; / &gt;');
   });
 
   it('should ignore back slash as escape', function() {
@@ -191,7 +222,24 @@ describe('HTML', function() {
     expectHTML('\na\n').toEqual('&#10;a&#10;');
   });
 
+  it('should accept tag delimiters such as "<" inside real tags (with nesting)', function() {
+    //this is an integrated version of the 'should accept tag delimiters such as "<" inside real tags' test
+    expectHTML('<p> 10 < <span>100</span> </p>')
+    .toEqual('<p> 10 &lt; <span>100</span> </p>');
+  });
+
+  it('should accept non-string arguments', function() {
+    expectHTML(null).toBe('');
+    expectHTML(undefined).toBe('');
+    expectHTML(42).toBe('42');
+    expectHTML({}).toBe('[object Object]');
+    expectHTML([1, 2, 3]).toBe('1,2,3');
+    expectHTML(true).toBe('true');
+    expectHTML(false).toBe('false');
+  });
+
   describe('htmlSanitizerWriter', function() {
+    /* global htmlSanitizeWriter: false */
     if (angular.isUndefined(window.htmlSanitizeWriter)) return;
 
     var writer, html, uriValidator;
@@ -234,6 +282,11 @@ describe('HTML', function() {
     it('should ignore unknown attributes', function() {
       writer.start('div', {unknown:""});
       expect(html).toEqual('<div>');
+    });
+
+    it('should handle surrogate pair', function() {
+      writer.chars(String.fromCharCode(55357, 56374));
+      expect(html).toEqual('&#128054;');
     });
 
     describe('explicitly disallow', function() {
@@ -363,11 +416,13 @@ describe('HTML', function() {
     });
 
     it('should not be URI', function() {
+      /* jshint scripturl: true */
       expect('javascript:alert').not.toBeValidUrl();
     });
 
     describe('javascript URLs', function() {
       it('should ignore javascript:', function() {
+        /* jshint scripturl: true */
         expect('JavaScript:abc').not.toBeValidUrl();
         expect(' \n Java\n Script:abc').not.toBeValidUrl();
         expect('http://JavaScript/my.js').toBeValidUrl();
