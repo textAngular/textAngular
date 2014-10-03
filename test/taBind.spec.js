@@ -430,6 +430,27 @@ describe('taBind', function () {
 					expect(element.html()).toBe('<li><br></li>');
 					element.remove();
 				}));
+				it('NOT replace inserted with default wrap when nested in a li', inject(function($rootScope, $compile, $window, $document){
+					$rootScope.html = '<li><i><br></i></li>';
+					element = $compile('<div ta-bind ta-default-wrap="b" contenteditable="contenteditable" ng-model="html"></div>')($rootScope);
+					$document.find('body').append(element);
+					$rootScope.$digest();
+					var range = $window.rangy.createRangyRange();
+					range.selectNodeContents(element.children()[0].childNodes[0]);
+					$window.rangy.getSelection().setSingleRange(range);
+					var event;
+					if(angular.element === jQuery){
+						event = jQuery.Event('keyup');
+						event.keyCode = 13;
+						element.triggerHandler(event);
+					}else{
+						event = {keyCode: 13};
+						element.triggerHandler('keyup', event);
+					}
+					$rootScope.$digest();
+					expect(element.html()).toBe('<li><i><br></i></li>');
+					element.remove();
+				}));
 				it('should replace inserted with default wrap when empty', inject(function($rootScope, $compile, $window, $document){
 					$rootScope.html = '<p><br></p>';
 					element = $compile('<div ta-bind ta-default-wrap="b" contenteditable="contenteditable" ng-model="html"></div>')($rootScope);
