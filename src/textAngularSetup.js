@@ -534,7 +534,7 @@ angular.module('textAngularSetup', [])
 					// create the embed link
 					var urlLink = "http://www.youtube.com/embed/" + ids[0].substring(3);
 					// create the HTML
-					var embed = '<img class="ta-insert-video" ta-insert-video="' + urlLink + '" contenteditable="false" src="" allowfullscreen="true" width="300" frameborder="0" height="250"/>';
+					var embed = '<img class="ta-insert-video" src="http://img.youtube.com/vi/' + ids[0].substring(3) + '/maxresdefault.jpg" ta-insert-video="' + urlLink + '" contenteditable="false" src="" allowfullscreen="true" frameborder="0" />';
 					// insert
 					return this.$editor().wrapSelection('insertHTML', embed, true);
 				}
