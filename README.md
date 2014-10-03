@@ -1,4 +1,4 @@
-textAngular v1.3.0-pre1
+textAngular v1.3.0-pre2
 ===========
 
 [![Build Status](https://travis-ci.org/fraywing/textAngular.png?branch=master)](https://travis-ci.org/fraywing/textAngular) [![Coverage Status](https://coveralls.io/repos/fraywing/textAngular/badge.png)](https://coveralls.io/r/fraywing/textAngular)
@@ -36,17 +36,15 @@ Include script tags similar to the following:
 
 Include script tags similar to the following:
 ```html
-<link rel='stylesheet' href='http://cdnjs.cloudflare.com/ajax/libs/textAngular/1.2.3/textAngular.min.css'>
-<script src='http://cdnjs.cloudflare.com/ajax/libs/textAngular/1.2.3/textAngular-sanitize.min.js'></script>
-<script src='http://cdnjs.cloudflare.com/ajax/libs/textAngular/1.2.3/textAngular.min.js'></script>
+<script src='http://cdnjs.cloudflare.com/ajax/libs/textAngular/1.2.2/textAngular-sanitize.min.js'></script>
+<script src='http://cdnjs.cloudflare.com/ajax/libs/textAngular/1.2.2/textAngular.min.js'></script>
 ```
 
 **Via jsDelivr:**
 
 Include script tag similar to the following: (For details on how this works see: [https://github.com/jsdelivr/jsdelivr#load-multiple-files-with-single-http-request](https://github.com/jsdelivr/jsdelivr#load-multiple-files-with-single-http-request))
 ```html
-<link rel='stylesheet' href='http://cdn.jsdelivr.net/angular.textangular/1.2.3/textAngular.min.css'>
-<script src='http://cdn.jsdelivr.net/g/angular.textangular@1.2.3(textAngular-sanitize.min.js+textAngular.min.js)'></script>
+<script src='http://cdn.jsdelivr.net/g/angular.textangular@1.2.2(textAngular-sanitize.min.js+textAngular.min.js)'></script>
 ```
 
 **Via Github**
