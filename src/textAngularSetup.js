@@ -42,6 +42,7 @@ angular.module('textAngularSetup', [])
 				};
 
 				reader.readAsDataURL(file);
+				// NOTE: For async procedures return a promise and resolve it when the editor should update the model.
 				return true;
 			}
 			return false;

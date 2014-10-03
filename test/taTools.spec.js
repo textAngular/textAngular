@@ -1,5 +1,4 @@
 var val;
-console.error = function(){};
 describe('taToolsExecuteFunction', function(){
 	var scope, startActionResult, editor, $rootScope;
 	beforeEach(module('textAngular'));

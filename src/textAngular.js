@@ -238,8 +238,8 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 	}]);
 
 	textAngular.directive("textAngular", [
-		'$compile', '$timeout', 'taOptions', 'taSelection', 'taExecCommand', 'textAngularManager', '$window', '$document', '$animate', '$log',
-		function($compile, $timeout, taOptions, taSelection, taExecCommand, textAngularManager, $window, $document, $animate, $log){
+		'$compile', '$timeout', 'taOptions', 'taSelection', 'taExecCommand', 'textAngularManager', '$window', '$document', '$animate', '$log', '$q',
+		function($compile, $timeout, taOptions, taSelection, taExecCommand, textAngularManager, $window, $document, $animate, $log, $q){
 			return {
 				require: '?ngModel',
 				scope: {},
@@ -669,10 +669,13 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 							angular.forEach(dataTransfer.files, function(file){
 								// taking advantage of boolean execution, if the fileDropHandler returns true, nothing else after it is executed
 								// If it is false then execute the defaultFileDropHandler if the fileDropHandler is NOT the default one
+								// Once one of these has been executed wrap the result as a promise, if undefined or variable update the taBind, else we should wait for the promise
 								try{
-									return scope.fileDropHandler(file, scope.wrapSelection) ||
+									$q.when(scope.fileDropHandler(file, scope.wrapSelection) ||
 										(scope.fileDropHandler !== scope.defaultFileDropHandler &&
-										scope.defaultFileDropHandler(file, scope.wrapSelection));
+										scope.defaultFileDropHandler(file, scope.wrapSelection))).finally(function(){
+											scope['updateTaBindtaTextElement' + _serial]();
+										});
 								}catch(error){
 									$log.error(error);
 								}
@@ -1151,7 +1154,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 				};
 
 				//used for updating when inserting wrapped elements
-				scope['reApplyOnSelectorHandlers' + (attrs.id || '')] = function(){
+				var _reApplyOnSelectorHandlers = scope['reApplyOnSelectorHandlers' + (attrs.id || '')] = function(){
 					/* istanbul ignore else */
 					if(!_isReadonly) angular.forEach(taSelectableElements, function(selector){
 							// check we don't apply the handler twice
@@ -1190,9 +1193,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 							}
 							// if in WYSIWYG and readOnly we kill the use of links by clicking
 							if(!_isReadonly){
-								angular.forEach(taSelectableElements, function(selector){
-									element.find(selector).on('click', selectorClickHandler);
-								});
+								_reApplyOnSelectorHandlers();
 								element.on('drop', fileDropHandler);
 							}else{
 								element.off('drop', fileDropHandler);
@@ -1612,7 +1613,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 				}
 			};
 		}
-	]).service('taToolExecuteAction', ['$q', function($q){
+	]).service('taToolExecuteAction', ['$q', '$log', function($q, $log){
 		// this must be called on a toolScope or instance
 		return function(editor){
 			if(editor !== undefined) this.$editor = function(){ return editor; };
@@ -1627,7 +1628,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 			try{
 				result = this.action(deferred, _editor.startAction());
 			}catch(exc){
-				console.error(exc);
+				$log.error(exc);
 			}
 			if(result || result === undefined){
 				// if true or undefined is returned then the action has finished. Otherwise the deferred action will be resolved manually.
