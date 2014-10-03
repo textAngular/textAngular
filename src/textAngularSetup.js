@@ -264,8 +264,16 @@ angular.module('textAngularSetup', [])
 		},
 		activeState: function(commonElement){
 			var result = false;
-			if(commonElement) result = commonElement.css('text-align') === 'left' || commonElement.attr('align') === 'left' ||
-				(commonElement.css('text-align') !== 'right' && commonElement.css('text-align') !== 'center' && !this.$editor().queryCommandState('justifyRight') && !this.$editor().queryCommandState('justifyCenter'));
+			if(commonElement) result =
+				commonElement.css('text-align') === 'left' ||
+				commonElement.attr('align') === 'left' ||
+				(
+					commonElement.css('text-align') !== 'right' &&
+					commonElement.css('text-align') !== 'center' &&
+					commonElement.css('text-align') !== 'justify' &&
+					!this.$editor().queryCommandState('justifyRight') &&
+					!this.$editor().queryCommandState('justifyCenter')
+				) && !this.$editor().queryCommandState('justifyFull');
 			result = result || this.$editor().queryCommandState('justifyLeft');
 			return result;
 		}
