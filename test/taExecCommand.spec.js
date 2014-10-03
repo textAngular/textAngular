@@ -34,6 +34,41 @@ describe('taExecCommand', function(){
 		});
 	});
 	
+	describe('insertHTML shim works', function(){
+		var _selection = {
+			start: {
+				element: this.element,
+				offset: 0
+			},
+			end: {
+				element: this.element,
+				offset: 0
+			},
+			container: this.element,
+			collapsed: true
+		};
+		beforeEach(function(){
+			module(function($provide){
+				$provide.value('taSelection', {
+					element: undefined,
+					getSelection: function(){return _selection;},
+					insertHtml: function(html){ angular.element(this.element).html(html); },
+					getSelectionElement: function (){ return this.element; },
+					getOnlySelectedElements: function(){ return [].slice.call(this.element.childNodes); },
+					setSelectionToElementStart: function (){ return; },
+					setSelectionToElementEnd: function (){ return; }
+				});
+			});
+		});
+		
+		it('inserts collapsed', inject(function(taExecCommand, taSelection){
+			$element = angular.element('<div class="ta-bind"></div>');
+			taSelection.element = $element[0];
+			taExecCommand()('insertHTML', false, 'bananna');
+			expect($element.html()).toBe('bananna');
+		}));
+	});
+	
 	describe('catches collapsed link creation and fills them in', function(){
 		beforeEach(function(){
 			module(function($provide){

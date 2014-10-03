@@ -943,6 +943,9 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 							taSelection.insertHtml('<a href="' + options + '">' + options + '</a>');
 							return;
 						}
+					}else if(command.toLowerCase() === 'inserthtml'){
+						taSelection.insertHtml(options);
+						return;
 					}
 				}
 				try{
