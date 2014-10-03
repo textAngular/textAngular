@@ -1036,13 +1036,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 						e.preventDefault();
 						if(!_isReadonly){
 							text = taSanitize(text);
-							if ($document[0].selection){
-								var range = $document[0].selection.createRange();
-								range.pasteHTML(text);
-							}
-							else{
-								$document[0].execCommand('insertHtml', false, text);
-							}
+							taSelection.insertHtml(text);
 						}
 					});
 					element.on('paste cut', function(e){
