@@ -1531,7 +1531,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 							// to set your own disabled logic set a function or boolean on the tool called 'disabled'
 							return ( // this bracket is important as without it it just returns the first bracket and ignores the rest
 								// when the button's disabled function/value evaluates to true
-								this.$eval('disabled') || this.$eval('disabled()') ||
+								(typeof this.$eval('disabled') !== 'function' && this.$eval('disabled')) || this.$eval('disabled()') ||
 								// all buttons except the HTML Switch button should be disabled in the showHtml (RAW html) mode
 								(this.name !== 'html' && this.$editor().showHtml) ||
 								// if the toolbar is disabled
