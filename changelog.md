@@ -1,4 +1,25 @@
-###Changelog
+<a name="1.3.0-pre4"></a>
+### 1.3.0-pre4 (2014-10-06)
+
+
+#### Bug Fixes
+
+* **taTools:** Fixes the wordcount to count correctly. ([fb208874](http://github.com/fraywing/textAngular/commit/fb208874a53abd2bea7c4f7fedd260dcee489141))
+
+
+<a name="1.3.0-pre3"></a>
+### 1.3.0-pre3 (2014-10-06)
+
+
+<a name="1.3.0-pre2"></a>
+### 1.3.0-pre2 (2014-10-06)
+
+
+<a name="1.3.0-pre1"></a>
+### 1.3.0-pre1 (2014-10-06)
+
+
+###OLD Changelog - PRE v1.3.0-pre1
 
 2014-07-26 v1.2.2
 

@@ -8,10 +8,11 @@ module.exports = function (grunt) {
 	grunt.loadNpmTasks('grunt-istanbul-coverage');
 	grunt.loadNpmTasks('grunt-karma');
 	grunt.loadNpmTasks('grunt-karma-coveralls');
+	grunt.loadNpmTasks('grunt-conventional-changelog');
 	
 	// Default task.
-	grunt.registerTask('default', ['uglify', 'cssmin', 'clean', 'test']);
-	grunt.registerTask('test', ['jshint', 'karma', 'coverage']);
+	grunt.registerTask('default', ['uglify', 'cssmin', 'test']);
+	grunt.registerTask('test', ['clean', 'jshint', 'karma', 'coverage']);
 	grunt.registerTask('travis-test', ['jshint', 'karma', 'coverage', 'coveralls']);
 	
 	var testConfig = function (configFile, customOptions) {
@@ -22,6 +23,7 @@ module.exports = function (grunt) {
 	
 	// Project configuration.
 	grunt.initConfig({
+		changelog: {optios: {dest: 'changelog.md'}},
 		clean: ["coverage"],
 		coverage: {
 		  options: {
@@ -82,6 +84,7 @@ module.exports = function (grunt) {
 					'dist/textAngular.min.css': ['src/textAngular.css']
 				}
 			}
-		}
+		},
+		
 	});
 };
