@@ -246,7 +246,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 				restrict: "EA",
 				link: function(scope, element, attrs, ngModel){
 					// all these vars should not be accessable outside this directive
-					var _keydown, _keyup, _keypress, _mouseup, _mousedown, _focusin, _focusout,
+					var _keydown, _keyup, _keypress, _mouseup, _focusin, _focusout,
 						_originalContents, _toolbars,
 						_serial = (attrs.serial) ? attrs.serial : Math.floor(Math.random() * 10000000000000000),
 						_name = (attrs.name) ? attrs.name : 'textAngularEditor' + _serial,
@@ -1065,7 +1065,6 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 									if(!event.shiftKey){
 										// new paragraph, br should be caught correctly
 										var selection = taSelection.getSelectionElement();
-										var closestValidElement = selection;
 										var VALIDELEMENTS = /^(address|article|aside|audio|blockquote|canvas|dd|div|dl|fieldset|figcaption|figure|footer|form|h1|h2|h3|h4|h5|h6|header|hgroup|hr|noscript|ol|output|p|pre|section|table|tfoot|ul|video|li)$/ig;
 										while(!selection.tagName.match(VALIDELEMENTS) && selection !== element[0]){
 											selection = selection.parentNode;
@@ -1463,7 +1462,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 					});
 
 					var setupToolElement = function(toolDefinition, toolScope){
-						var toolElement, _class;
+						var toolElement;
 						if(toolDefinition && toolDefinition.display){
 							toolElement = angular.element(toolDefinition.display);
 						}
@@ -1697,6 +1696,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 							angular.forEach(_toolbars, function(toolbarScope){
 								angular.forEach(toolbarScope.tools, function(toolScope){
 									if(toolScope.activeState){
+										toolbarScope._parent = scope;
 										toolScope.active = toolScope.activeState(selectedElement);
 									}
 								});
