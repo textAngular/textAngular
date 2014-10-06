@@ -309,6 +309,32 @@ describe('taTools test tool actions', function(){
 		testAllButtons();
 	});
 	
+	describe('test count buttons', function(){
+		beforeEach(module('textAngular'));
+		var buttons;
+		beforeEach(inject(function (_$compile_, _$rootScope_, $document, textAngularManager, _$window_) {
+			$window = _$window_;
+			$rootScope = _$rootScope_;
+			$rootScope.htmlcontent = '<p>Test Content <b>that</b> <u>should</u> be cleared</p><h1>Test Other Tags</h1><ul><li>Test <b>1</b></li><li>Test 2</li></ul>';
+			element = _$compile_('<text-angular name="test" ng-model="htmlcontent" ta-toolbar="[[\'wordcount\',\'charcount\']]"></text-angular>')($rootScope);
+			$rootScope.$digest();
+			editorScope = textAngularManager.retrieveEditor('test').scope;
+			buttons = element.children()[0].childNodes[0];
+			textAngularManager.retrieveEditor('test').editorFunctions.updateSelectedStyles();
+			$rootScope.$digest();
+		}));
+		
+		it('word count should be 13', function(){
+			expect(buttons.childNodes[0].innerHTML).toBe('Words:13');
+			expect(editorScope.wordcount).toBe(13);
+		});
+		
+		it('char count should be 62', function(){
+			expect(buttons.childNodes[1].innerHTML).toBe('Characters:62');
+			expect(editorScope.charcount).toBe(62);
+		});
+	});
+	
 	describe('test clear button', function(){
 		beforeEach(module('textAngular'));
 		beforeEach(inject(function (_$compile_, _$rootScope_, $document, textAngularManager, _$window_) {
