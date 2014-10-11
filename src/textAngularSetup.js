@@ -542,10 +542,10 @@ angular.module('textAngularSetup', [])
 				if(ids.length > 0){
 					// create the embed link
 					var protocol = 'http:';
-                    if (location.protocol === 'https:') protocol = 'https';
-                    var urlLink = protocol + "http://www.youtube.com/embed/" + ids[0].substring(3);
+					if ($window.location.protocol === 'https:') protocol = 'https:';
+					var urlLink = protocol + "//www.youtube.com/embed/" + ids[0].substring(3);
 					// create the HTML
-					var embed = '<img class="ta-insert-video" src="http://img.youtube.com/vi/' + ids[0].substring(3) + '/maxresdefault.jpg" ta-insert-video="' + urlLink + '" contenteditable="false" src="" allowfullscreen="true" frameborder="0" />';
+					var embed = '<img class="ta-insert-video" src="' + protocol + '//img.youtube.com/vi/' + ids[0].substring(3) + '/maxresdefault.jpg" ta-insert-video="' + urlLink + '" contenteditable="false" src="" allowfullscreen="true" frameborder="0" />';
 					// insert
 					return this.$editor().wrapSelection('insertHTML', embed, true);
 				}
