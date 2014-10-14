@@ -28,8 +28,11 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 				if(!isEditable){
 					document.getElementById('textAngular-editableFix-010203040506070809').setSelectionRange(0, 0); // set caret focus to an element that handles caret focus correctly.
 					curelement.focus(); // focus the wanted element.
+					if (curelement.select) {
+						curelement.select(); // use select to place cursor for input elements.
+					}
 				}
-			}	
+			}
 			globalContentEditableBlur = false;
 		}, false); // add global click handler
 		angular.element(document).ready(function () {
