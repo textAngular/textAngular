@@ -315,7 +315,7 @@ describe('taTools test tool actions', function(){
 		beforeEach(inject(function (_$compile_, _$rootScope_, $document, textAngularManager, _$window_) {
 			$window = _$window_;
 			$rootScope = _$rootScope_;
-			$rootScope.htmlcontent = '<p>Test Content <b>that</b> <u>should</u> be cleared</p><h1>Test Other Tags</h1><ul><li>Test <b>1</b></li><li>Test 2</li></ul>';
+			$rootScope.htmlcontent = '<p>Test Content <b>that</b> <u>should</u> be cleared</p><h1>Test Other Tags</h1>\n<ul><li>Test <b>1</b></li><li>Test 2</li></ul>';
 			element = _$compile_('<text-angular name="test" ng-model="htmlcontent" ta-toolbar="[[\'wordcount\',\'charcount\']]"></text-angular>')($rootScope);
 			$rootScope.$digest();
 			editorScope = textAngularManager.retrieveEditor('test').scope;

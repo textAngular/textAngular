@@ -633,9 +633,7 @@ angular.module('textAngularSetup', [])
 		activeState: function(){ // this fires on keyup
 			var textElement = this.$editor().displayElements.text;
 			var workingHTML = textElement[0].innerHTML;
-			var workingDiv = angular.element('<div>');
-			workingDiv.html(workingHTML.replace(/(<\s*\/\s*\w\s*.*?>|<\s*br\s*>)/g,'$1\n'));
-			var sourceText = workingDiv[0].innerText || workingDiv[0].textContent; // to cover the non-jquery use case.
+			var sourceText = workingHTML.replace(/(<[^>]*?>)/ig, ' '); // replace all html tags with spaces
 			
 			// Caculate number of words
 			var sourceTextMatches = sourceText.match(/\S+/g);
