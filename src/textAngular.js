@@ -1033,16 +1033,73 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 						// for ie
 						}else if($window.clipboardData)
 							text = $window.clipboardData.getData('Text');
-						// if theres non text data and we aren't in read-only do default
-						if(!text && !_isReadonly) return true;
 						// prevent the default paste command
 						e.preventDefault();
-						if(!_isReadonly){
+						if(text && !_isReadonly){
+							if(text.match(/class=["']*Mso(Normal|List)/i)){
+								var textFragment = text.match(/<!--StartFragment-->([\s\S]*?)<!--EndFragment-->/i);
+								if(!textFragment) textFragment = text;
+								else textFragment = textFragment[1];
+								textFragment = textFragment.replace(/<o:p>[\s\S]*?<\/o:p>/ig, '').replace(/class=(["']|)MsoNormal(["']|)/ig, '');
+								var dom = angular.element("<div>" + textFragment + "</div>");
+								var _list = {
+									element: null,
+									lastIndent: null,
+									lastLi: null,
+									isUl: false
+								};
+								for(var i = 0; i <= dom[0].childNodes.length; i++){
+									if(!dom[0].childNodes[i] || dom[0].childNodes[i].nodeName === "#text" || dom[0].childNodes[i].tagName.toLowerCase() !== "p") continue;
+									var el = angular.element(dom[0].childNodes[i]);
+									var _listMatch = (el.attr('class') || '').match(/MsoList(Bullet|Number|Paragraph)CxSp(First|Middle|Last)/i);
+									
+									if(_listMatch){
+										if(el[0].childNodes.length < 2 || el[0].childNodes[1].childNodes.length < 1){
+											el.remove();
+											continue;
+										}
+										var isUl = _listMatch[1].toLowerCase() === "bullet" || (_listMatch[1].toLowerCase() !== "bullet" && !(el[0].childNodes[1].innerHTML.match(/^[0-9a-z]/ig) || el[0].childNodes[1].childNodes[0].innerHTML.match(/^[0-9a-z]/ig)));
+										var _indentMatch = (el.attr('style') || '').match(/margin-left:([\-\.0-9]*)pt/i);
+										var indent = parseFloat((_indentMatch)?_indentMatch[1]:0);
+										
+										if (_listMatch[2].toLowerCase() === "first" || (_list.isUl !== isUl && _list.lastIndent === indent)) {
+											_list.isUl = isUl;
+											_list.element = angular.element(isUl ? "<ul>" : "<ol>");
+											el.after(_list.element);
+										} else if ((_list.lastIndent != null) && _list.lastIndent < indent) {
+											_list.element = angular.element(isUl ? "<ul>" : "<ol>");
+											_list.lastLi.append(_list.element);
+										}
+										/* istanbul ignore next: phantom js cannot test this for some reason */
+										else if ((_list.lastIndent != null) && _list.lastIndent > indent) {
+											_list.element = _list.element.parent();
+											_list.isUl = _list.element[0].tagName.toLowerCase() === "ul";
+											if (isUl !== _list.isUl) {
+												_list.isUl = isUl;
+												_list.element = angular.element(isUl ? "<ul>" : "<ol>");
+												el.after(_list.element);
+											}
+										}
+										
+										_list.lastIndent = indent;
+										_list.lastLi = angular.element("<li>");
+										_list.element.append(_list.lastLi);
+										_list.lastLi.html(el.html().replace(/<!(--|)\[if !supportLists\](--|)>[\s\S]*?<!(--|)\[endif\](--|)>/ig, ''));
+										el.remove();
+									}
+								}
+								text = dom.html();
+							}	
 							text = taSanitize(text);
 							taSelection.insertHtml(text);
 						}
+						if(!_isReadonly){
+							$timeout(function(){
+								ngModel.$setViewValue(_compileHtml());
+							}, 0);
+						}
 					});
-					element.on('paste cut', function(e){
+					element.on('cut', function(e){
 						// timeout to next is needed as otherwise the paste/cut event has not finished actually changing the display
 						if(!_isReadonly) $timeout(function(){
 							ngModel.$setViewValue(_compileHtml());
