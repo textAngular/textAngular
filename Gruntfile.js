@@ -23,7 +23,7 @@ module.exports = function (grunt) {
 	
 	// Project configuration.
 	grunt.initConfig({
-		changelog: {optios: {dest: 'changelog.md'}},
+		changelog: {options: {dest: 'changelog.md'}},
 		clean: ["coverage"],
 		coverage: {
 		  options: {
