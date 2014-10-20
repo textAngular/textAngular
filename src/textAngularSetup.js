@@ -78,7 +78,7 @@ angular.module('textAngularSetup', [])
 	}
 ])
 
-.constant('taTranslations', {
+.value('taTranslations', {
 	// moved to sub-elements
 	//toggleHTML: "Toggle HTML",
 	//insertImage: "Please enter a image URL to insert",
