@@ -534,16 +534,16 @@ angular.module('textAngularSetup', [])
 		tooltiptext: taTranslations.insertVideo.tooltip,
 		action: function(){
 			var urlPrompt;
-			urlPrompt = $window.prompt(taTranslations.insertVideo.dialogPrompt, 'http://');
-			if (urlPrompt && urlPrompt !== '' && urlPrompt !== 'http://') {
+			urlPrompt = $window.prompt(taTranslations.insertVideo.dialogPrompt, 'https://');
+			if (urlPrompt && urlPrompt !== '' && urlPrompt !== 'https://') {
 				// get the video ID
 				var ids = urlPrompt.match(/(\?|&)v=[^&]*/);
 				/* istanbul ignore else: if it's invalid don't worry - though probably should show some kind of error message */
 				if(ids.length > 0){
 					// create the embed link
-					var urlLink = "http://www.youtube.com/embed/" + ids[0].substring(3);
+					var urlLink = "https://www.youtube.com/embed/" + ids[0].substring(3);
 					// create the HTML
-					var embed = '<img class="ta-insert-video" src="http://img.youtube.com/vi/' + ids[0].substring(3) + '/maxresdefault.jpg" ta-insert-video="' + urlLink + '" contenteditable="false" src="" allowfullscreen="true" frameborder="0" />';
+					var embed = '<img class="ta-insert-video" src="https://img.youtube.com/vi/' + ids[0].substring(3) + '/maxresdefault.jpg" ta-insert-video="' + urlLink + '" contenteditable="false" src="" allowfullscreen="true" frameborder="0" />';
 					// insert
 					return this.$editor().wrapSelection('insertHTML', embed, true);
 				}
