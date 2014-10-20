@@ -9,6 +9,7 @@ describe('taExecCommand', function(){
 			$document = _$document_;
 			contents = angular.element('<div>');
 			contents.append('<p>Test Text</p>');
+			$document.find('body').append(contents);
 			// Fake it till you make it
 			_tempExec = $document[0].execCommand;
 			$document[0].execCommand = function(){
@@ -27,7 +28,11 @@ describe('taExecCommand', function(){
 		}));
 		
 		describe('document execCommand fallback', function(){
-			it('should execute for elements', inject(function(taExecCommand){
+			it('should execute for elements', inject(function(taExecCommand, $window){
+				var sel = $window.rangy.getSelection();
+				var range = $window.rangy.createRangyRange();
+				range.selectNodeContents(contents.find('p')[0]);
+				sel.setSingleRange(range);
 				taExecCommand()('bold', false, null);
 				expect(contents.html()).toBe('<p><b>Test Text</b></p>');
 			}));

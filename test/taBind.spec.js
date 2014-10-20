@@ -225,7 +225,7 @@ describe('taBind', function () {
 		}));
 		// in fragment
 		it('in fragment', inject(function($timeout, taSelection){
-			element.triggerHandler('paste', {clipboardData: {getData: function(){
+			element.triggerHandler('paste', {clipboardData: {types: 'text/html', getData: function(){
 				return '<div><!--StartFragment--><p class=MsoNormal>Test Content Stripping<o:p></o:p></p><!--EndFragment--></div>';// jshint ignore:line
 			}}});
 			$timeout.flush();
@@ -234,7 +234,7 @@ describe('taBind', function () {
 		}));
 		// out fragment
 		it('outside fragment', inject(function($timeout, taSelection){
-			element.triggerHandler('paste', {clipboardData: {getData: function(){
+			element.triggerHandler('paste', {clipboardData: {types: 'text/html', getData: function(){
 				return '<p class="MsoNormal"><span lang="EN-US">Body</span><o:p></o:p></p>';// jshint ignore:line
 			}}});
 			$timeout.flush();
@@ -243,7 +243,7 @@ describe('taBind', function () {
 		}));
 		
 		it('remove blank list tag', inject(function($timeout, taSelection){
-			element.triggerHandler('paste', {clipboardData: {getData: function(){
+			element.triggerHandler('paste', {clipboardData: {types: 'text/html', getData: function(){
 				return '<p class="MsoListBulletCxSpLast"><span lang="EN-US">&nbsp;</span></p>';// jshint ignore:line
 			}}});
 			$timeout.flush();
@@ -253,7 +253,7 @@ describe('taBind', function () {
 		
 		// header
 		it('Header Element', inject(function($timeout, taSelection){
-			element.triggerHandler('paste', {clipboardData: {getData: function(){
+			element.triggerHandler('paste', {clipboardData: {types: 'text/html', getData: function(){
 				return '<h1>Header 1<o:p></o:p></h1>';// jshint ignore:line
 			}}});
 			$timeout.flush();
@@ -262,7 +262,7 @@ describe('taBind', function () {
 		}));
 		// bold/italics
 		it('handle bold/italics/underline', inject(function($timeout, taSelection){
-			element.triggerHandler('paste', {clipboardData: {getData: function(){
+			element.triggerHandler('paste', {clipboardData: {types: 'text/html', getData: function(){
 				return '<p><b>Header</b> <u>1</u> <i>Test</i><o:p></o:p></p>';// jshint ignore:line
 			}}});
 			$timeout.flush();
@@ -271,7 +271,7 @@ describe('taBind', function () {
 		}));
 		// lists, ul/ol
 		it('ol list, format 1', inject(function($timeout, taSelection){
-			element.triggerHandler('paste', {clipboardData: {getData: function(){
+			element.triggerHandler('paste', {clipboardData: {types: 'text/html', getData: function(){
 				return '<p class=MsoListParagraphCxSpFirst style="text-indent:-18.0pt;mso-list:l0 level1 lfo1"><![if !supportLists]><span style="mso-fareast-font-family:Cambria;mso-fareast-theme-font:minor-latin;mso-bidi-font-family:Cambria;mso-bidi-theme-font:minor-latin"><span style="mso-list:Ignore">1.<span style="font:7.0pt \'Times New Roman\'">&nbsp;&nbsp;&nbsp;&nbsp;</span></span></span><![endif]>Test1<o:p></o:p></p>';// jshint ignore:line
 			}}});
 			$timeout.flush();
@@ -279,7 +279,7 @@ describe('taBind', function () {
 			expect(pasted).toBe('<ol><li>Test1</li></ol>');
 		}));
 		it('ol list, format 2', inject(function($timeout, taSelection){
-			element.triggerHandler('paste', {clipboardData: {getData: function(){
+			element.triggerHandler('paste', {clipboardData: {types: 'text/html', getData: function(){
 				return '<p class="MsoListNumberCxSpFirst"><!--[if !supportLists]--><span lang="EN-US" style="font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:Symbol;mso-ansi-language:EN-US">1.<span style="font-stretch: normal; font-size: 7pt; font-family: \'Times New Roman\';">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></span><!--[endif]-->Test1<o:p></o:p></p>';// jshint ignore:line
 			}}});
 			$timeout.flush();
@@ -287,7 +287,7 @@ describe('taBind', function () {
 			expect(pasted).toBe('<ol><li>Test1</li></ol>');
 		}));
 		it('ul list, format 1', inject(function($timeout, taSelection){
-			element.triggerHandler('paste', {clipboardData: {getData: function(){
+			element.triggerHandler('paste', {clipboardData: {types: 'text/html', getData: function(){
 				return '<p class=MsoListParagraphCxSpFirst style="text-indent:-18.0pt;mso-list:l0 level1 lfo1"><![if !supportLists]><span style="mso-fareast-font-family:Cambria;mso-fareast-theme-font:minor-latin;mso-bidi-font-family:Cambria;mso-bidi-theme-font:minor-latin"><span style="mso-list:Ignore">.<span style="font:7.0pt \'Times New Roman\'">&nbsp;&nbsp;&nbsp;&nbsp;</span></span></span><![endif]>Test1<o:p></o:p></p><p class=MsoListParagraphCxSpLast style="text-indent:-18.0pt;mso-list:l0 level1 lfo1"><![if !supportLists]><span style="mso-fareast-font-family:Cambria;mso-fareast-theme-font:minor-latin;mso-bidi-font-family:Cambria;mso-bidi-theme-font:minor-latin"><span style="mso-list:Ignore">.<span style="font:7.0pt \'Times New Roman\'">&nbsp;&nbsp;&nbsp;&nbsp;</span></span></span><![endif]>Test1<o:p></o:p></p>';// jshint ignore:line
 			}}});
 			$timeout.flush();
@@ -295,7 +295,7 @@ describe('taBind', function () {
 			expect(pasted).toBe('<ul><li>Test1</li><li>Test1</li></ul>');
 		}));
 		it('ul list, format 2', inject(function($timeout, taSelection){
-			element.triggerHandler('paste', {clipboardData: {getData: function(){
+			element.triggerHandler('paste', {clipboardData: {types: 'text/html', getData: function(){
 				return '<p class="MsoListBulletCxSpFirst"><!--[if !supportLists]--><span lang="EN-US" style="font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:Symbol;mso-ansi-language:EN-US">·<span style="font-stretch: normal; font-size: 7pt; font-family: \'Times New Roman\';">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></span><!--[endif]-->Test1<o:p></o:p></p><p class="MsoListBulletCxSpLast"><!--[if !supportLists]--><span lang="EN-US" style="font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:Symbol;mso-ansi-language:EN-US">·<span style="font-stretch: normal; font-size: 7pt; font-family: \'Times New Roman\';">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></span><!--[endif]-->Test1<o:p></o:p></p>';// jshint ignore:line
 			}}});
 			$timeout.flush();
@@ -305,7 +305,7 @@ describe('taBind', function () {
 		// indents - ul > ul, ul > ol, ol > ol, ol > ul
 		
 		it('ul > ul nested list', inject(function($timeout, taSelection){
-			element.triggerHandler('paste', {clipboardData: {getData: function(){
+			element.triggerHandler('paste', {clipboardData: {types: 'text/html', getData: function(){
 				return '<p class="MsoListBulletCxSpFirst"><!--[if !supportLists]--><span lang="EN-US" style="font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:Symbol;mso-ansi-language:EN-US">·<span style="font-stretch: normal; font-size: 7pt; font-family: \'Times New Roman\';">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></span><!--[endif]-->Test1<o:p></o:p></p>' + // jshint ignore:line
 					'<p class="MsoListBulletCxSpLast" style="margin-left:39.6pt"><!--[if !supportLists]--><span lang="EN-US" style="font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:Symbol;mso-ansi-language:EN-US">·<span style="font-stretch: normal; font-size: 7pt; font-family: \'Times New Roman\';">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></span><!--[endif]-->Test1<o:p></o:p></p>';// jshint ignore:line
 			}}});
@@ -314,7 +314,7 @@ describe('taBind', function () {
 			expect(pasted).toBe('<ul><li>Test1<ul><li>Test1</li></ul></li></ul>');
 		}));
 		it('ul > ol nested list', inject(function($timeout, taSelection){
-			element.triggerHandler('paste', {clipboardData: {getData: function(){
+			element.triggerHandler('paste', {clipboardData: {types: 'text/html', getData: function(){
 				return '<p class="MsoListBulletCxSpFirst"><!--[if !supportLists]--><span lang="EN-US" style="font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:Symbol;mso-ansi-language:EN-US">·<span style="font-stretch: normal; font-size: 7pt; font-family: \'Times New Roman\';">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></span><!--[endif]-->Test1<o:p></o:p></p>' + // jshint ignore:line
 					'<p class="MsoListNumberCxSpLast" style="margin-left:39.6pt"><!--[if !supportLists]--><span lang="EN-US" style="font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:Symbol;mso-ansi-language:EN-US">1.<span style="font-stretch: normal; font-size: 7pt; font-family: \'Times New Roman\';">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></span><!--[endif]-->Test1<o:p></o:p></p>';// jshint ignore:line
 			}}});
@@ -323,7 +323,7 @@ describe('taBind', function () {
 			expect(pasted).toBe('<ul><li>Test1<ol><li>Test1</li></ol></li></ul>');
 		}));
 		it('ol > ol nested list', inject(function($timeout, taSelection){
-			element.triggerHandler('paste', {clipboardData: {getData: function(){
+			element.triggerHandler('paste', {clipboardData: {types: 'text/html', getData: function(){
 				return '<p class="MsoListNumberCxSpFirst"><!--[if !supportLists]--><span lang="EN-US" style="font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:Symbol;mso-ansi-language:EN-US">1.<span style="font-stretch: normal; font-size: 7pt; font-family: \'Times New Roman\';">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></span><!--[endif]-->Test1<o:p></o:p></p>' + // jshint ignore:line
 					'<p class="MsoListNumberCxSpLast" style="margin-left:39.6pt"><!--[if !supportLists]--><span lang="EN-US" style="font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:Symbol;mso-ansi-language:EN-US">2.<span style="font-stretch: normal; font-size: 7pt; font-family: \'Times New Roman\';">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></span><!--[endif]-->Test1<o:p></o:p></p>';// jshint ignore:line
 			}}});
@@ -332,7 +332,7 @@ describe('taBind', function () {
 			expect(pasted).toBe('<ol><li>Test1<ol><li>Test1</li></ol></li></ol>');
 		}));
 		it('ol > ul nested list', inject(function($timeout, taSelection){
-			element.triggerHandler('paste', {clipboardData: {getData: function(){
+			element.triggerHandler('paste', {clipboardData: {types: 'text/html', getData: function(){
 				return '<p class="MsoListNumberCxSpFirst"><!--[if !supportLists]--><span lang="EN-US" style="font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:Symbol;mso-ansi-language:EN-US">1.<span style="font-stretch: normal; font-size: 7pt; font-family: \'Times New Roman\';">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></span><!--[endif]-->Test1<o:p></o:p></p>' + // jshint ignore:line
 					'<p class="MsoListBulletCxSpLast" style="margin-left:39.6pt"><!--[if !supportLists]--><span lang="EN-US" style="font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:Symbol;mso-ansi-language:EN-US">·<span style="font-stretch: normal; font-size: 7pt; font-family: \'Times New Roman\';">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></span><!--[endif]-->Test1<o:p></o:p></p>';// jshint ignore:line
 			}}});
@@ -344,62 +344,68 @@ describe('taBind', function () {
 		// outdents - ul < ul, ul < ol, ol < ol, ol < ul
 		/* These Break on Phantom JS for some reason. */
 		it('ul > ul < ul nested list', inject(function($timeout, taSelection){
-			element.triggerHandler('paste', {clipboardData: {getData: function(){
+			element.triggerHandler('paste', {clipboardData: {types: 'text/html', getData: function(){
 				return '<p class="MsoListBulletCxSpFirst"><!--[if !supportLists]--><span lang="EN-US" style="font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:Symbol;mso-ansi-language:EN-US">·<span style="font-stretch: normal; font-size: 7pt; font-family: \'Times New Roman\';">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></span><!--[endif]-->Test1<o:p></o:p></p>' + // jshint ignore:line
 					'<p class="MsoListBulletCxSpMiddle" style="margin-left:39.6pt"><!--[if !supportLists]--><span lang="EN-US" style="font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:Symbol;mso-ansi-language:EN-US">·<span style="font-stretch: normal; font-size: 7pt; font-family: \'Times New Roman\';">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></span><!--[endif]-->Test1<o:p></o:p></p>' + // jshint ignore:line
 					'<p class="MsoListBulletCxSpLast"><!--[if !supportLists]--><span lang="EN-US" style="font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:Symbol;mso-ansi-language:EN-US">·<span style="font-stretch: normal; font-size: 7pt; font-family: \'Times New Roman\';">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></span><!--[endif]-->Test1<o:p></o:p></p>';// jshint ignore:line
 			}}});
-			/*$timeout.flush();
+			/*
+			$timeout.flush();
 			$rootScope.$digest();
 			expect(pasted).toBe('<ul><li>Test1<ul><li>Test1</li></ul></li><li>Test1</li></ul>');*/
 		}));
 		it('ul > ul < ol nested list', inject(function($timeout, taSelection){
-			element.triggerHandler('paste', {clipboardData: {getData: function(){
+			element.triggerHandler('paste', {clipboardData: {types: 'text/html', getData: function(){
 				return '<p class="MsoListBulletCxSpFirst"><!--[if !supportLists]--><span lang="EN-US" style="font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:Symbol;mso-ansi-language:EN-US">·<span style="font-stretch: normal; font-size: 7pt; font-family: \'Times New Roman\';">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></span><!--[endif]-->Test1<o:p></o:p></p>' + // jshint ignore:line
 					'<p class="MsoListBulletCxSpMiddle" style="margin-left:39.6pt"><!--[if !supportLists]--><span lang="EN-US" style="font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:Symbol;mso-ansi-language:EN-US">·<span style="font-stretch: normal; font-size: 7pt; font-family: \'Times New Roman\';">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></span><!--[endif]-->Test1<o:p></o:p></p>' + // jshint ignore:line
 					'<p class="MsoListNumberCxSpLast"><!--[if !supportLists]--><span lang="EN-US" style="font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:Symbol;mso-ansi-language:EN-US">1.<span style="font-stretch: normal; font-size: 7pt; font-family: \'Times New Roman\';">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></span><!--[endif]-->Test1<o:p></o:p></p>';// jshint ignore:line
 			}}});
-			/*$timeout.flush();
+			/*
+			$timeout.flush();
 			$rootScope.$digest();
 			expect(pasted).toBe('<ul><li>Test1<ul><li>Test1</li></ul></li></ul><ol><li>Test1</li></ol>');*/
 		}));
 		it('ol > ul < ol nested list', inject(function($timeout, taSelection){
-			element.triggerHandler('paste', {clipboardData: {getData: function(){
+			element.triggerHandler('paste', {clipboardData: {types: 'text/html', getData: function(){
 				return '<p class="MsoListNumberCxSpFirst"><!--[if !supportLists]--><span lang="EN-US" style="font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:Symbol;mso-ansi-language:EN-US">1.<span style="font-stretch: normal; font-size: 7pt; font-family: \'Times New Roman\';">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></span><!--[endif]-->Test1<o:p></o:p></p>' + // jshint ignore:line
 					'<p class="MsoListBulletCxSpMiddle" style="margin-left:39.6pt"><!--[if !supportLists]--><span lang="EN-US" style="font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:Symbol;mso-ansi-language:EN-US">·<span style="font-stretch: normal; font-size: 7pt; font-family: \'Times New Roman\';">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></span><!--[endif]-->Test1<o:p></o:p></p>' + // jshint ignore:line
 					'<p class="MsoListNumberCxSpLast"><!--[if !supportLists]--><span lang="EN-US" style="font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:Symbol;mso-ansi-language:EN-US">1.<span style="font-stretch: normal; font-size: 7pt; font-family: \'Times New Roman\';">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></span><!--[endif]-->Test1<o:p></o:p></p>';// jshint ignore:line
 			}}});
-			/*$timeout.flush();
+			/*
+			$timeout.flush();
 			$rootScope.$digest();
 			expect(pasted).toBe('<ol><li>Test1<ul><li>Test1</li></ul></li><li>Test1</li></ol>');*/
 		}));
 		it('ol > ol < ol nested list', inject(function($timeout, taSelection){
-			element.triggerHandler('paste', {clipboardData: {getData: function(){
+			element.triggerHandler('paste', {clipboardData: {types: 'text/html', getData: function(){
 				return '<p class="MsoListNumberCxSpFirst"><!--[if !supportLists]--><span lang="EN-US" style="font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:Symbol;mso-ansi-language:EN-US">1.<span style="font-stretch: normal; font-size: 7pt; font-family: \'Times New Roman\';">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></span><!--[endif]-->Test1<o:p></o:p></p>' + // jshint ignore:line
 					'<p class="MsoListNumberCxSpMiddle" style="margin-left:39.6pt"><!--[if !supportLists]--><span lang="EN-US" style="font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:Symbol;mso-ansi-language:EN-US">1.<span style="font-stretch: normal; font-size: 7pt; font-family: \'Times New Roman\';">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></span><!--[endif]-->Test1<o:p></o:p></p>' + // jshint ignore:line
 					'<p class="MsoListNumberCxSpLast"><!--[if !supportLists]--><span lang="EN-US" style="font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:Symbol;mso-ansi-language:EN-US">1.<span style="font-stretch: normal; font-size: 7pt; font-family: \'Times New Roman\';">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></span><!--[endif]-->Test1<o:p></o:p></p>';// jshint ignore:line
 			}}});
-			/*$timeout.flush();
+			/*
+			$timeout.flush();
 			$rootScope.$digest();
 			expect(pasted).toBe('<ol><li>Test1<ol><li>Test1</li></ol></li><li>Test1</li></ol>');*/
 		}));
 		it('ol > ol < ul nested list', inject(function($timeout, taSelection){
-			element.triggerHandler('paste', {clipboardData: {getData: function(){
+			element.triggerHandler('paste', {clipboardData: {types: 'text/html', getData: function(){
 				return '<p class="MsoListNumberCxSpFirst"><!--[if !supportLists]--><span lang="EN-US" style="font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:Symbol;mso-ansi-language:EN-US">1.<span style="font-stretch: normal; font-size: 7pt; font-family: \'Times New Roman\';">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></span><!--[endif]-->Test1<o:p></o:p></p>' + // jshint ignore:line
 					'<p class="MsoListNumberCxSpMiddle" style="margin-left:39.6pt"><!--[if !supportLists]--><span lang="EN-US" style="font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:Symbol;mso-ansi-language:EN-US">1.<span style="font-stretch: normal; font-size: 7pt; font-family: \'Times New Roman\';">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></span><!--[endif]-->Test1<o:p></o:p></p>' + // jshint ignore:line
 					'<p class="MsoListBulletCxSpLast"><!--[if !supportLists]--><span lang="EN-US" style="font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:Symbol;mso-ansi-language:EN-US">·<span style="font-stretch: normal; font-size: 7pt; font-family: \'Times New Roman\';">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></span><!--[endif]-->Test1<o:p></o:p></p>';// jshint ignore:line
 			}}});
-			/*$timeout.flush();
+			/*
+			$timeout.flush();
 			$rootScope.$digest();
 			expect(pasted).toBe('<ol><li>Test1<ol><li>Test1</li></ol></li></ol><ul><li>Test1</li></ul>');*/
 		}));
 		it('ul > ol < ul nested list', inject(function($timeout, taSelection){
-			element.triggerHandler('paste', {clipboardData: {getData: function(){
+			element.triggerHandler('paste', {clipboardData: {types: 'text/html', getData: function(){
 				return '<p class="MsoListBulletCxSpFirst"><!--[if !supportLists]--><span lang="EN-US" style="font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:Symbol;mso-ansi-language:EN-US">1.<span style="font-stretch: normal; font-size: 7pt; font-family: \'Times New Roman\';">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></span><!--[endif]-->Test1<o:p></o:p></p>' + // jshint ignore:line
 					'<p class="MsoListNumberCxSpMiddle" style="margin-left:39.6pt"><!--[if !supportLists]--><span lang="EN-US" style="font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:Symbol;mso-ansi-language:EN-US">1.<span style="font-stretch: normal; font-size: 7pt; font-family: \'Times New Roman\';">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></span><!--[endif]-->Test1<o:p></o:p></p>' + // jshint ignore:line
 					'<p class="MsoListBulletCxSpLast"><!--[if !supportLists]--><span lang="EN-US" style="font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:Symbol;mso-ansi-language:EN-US">·<span style="font-stretch: normal; font-size: 7pt; font-family: \'Times New Roman\';">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></span><!--[endif]-->Test1<o:p></o:p></p>';// jshint ignore:line
 			}}});
-			/*$timeout.flush();
+			/*
+			$timeout.flush();
 			$rootScope.$digest();
 			expect(pasted).toBe('<ul><li>Test1<ol><li>Test1</li></ol></li><li>Test1</li></ul>');*/
 		}));
@@ -729,42 +735,7 @@ describe('taBind', function () {
 	});
 
 	describe('should update from cut and paste events', function () {
-		describe('on non-contenteditable', function(){
-			var $rootScope, element, $timeout;
-			beforeEach(inject(function (_$compile_, _$rootScope_, _$timeout_) {
-				$rootScope = _$rootScope_;
-				$timeout = _$timeout_;
-				$rootScope.html = '<p>Test Contents</p>';
-				element = _$compile_('<textarea ta-bind ng-model="html"></textarea>')($rootScope);
-				$rootScope.$digest();
-			}));
-	
-			it('should update model from paste', function () {
-				element.val('<div>Test 2 Content</div>');
-				element.triggerHandler('paste');
-				$rootScope.$digest();
-				$timeout.flush();
-				$rootScope.$digest();
-				expect($rootScope.html).toBe('<div>Test 2 Content</div>');				
-			});
-
-			it('should update model from paste with ie code', function () {
-				element.val('<div>Test 2 Content</div>');
-				element.triggerHandler('paste');
-				$rootScope.$digest();
-				$timeout.flush();
-				$rootScope.$digest();
-				expect($rootScope.html).toBe('<div>Test 2 Content</div>');
-			});
-	
-			it('should update model from cut', function () {
-				element.val('<div>Test 2 Content</div>');
-				element.triggerHandler('cut');
-				$timeout.flush();
-				$rootScope.$digest();
-				expect($rootScope.html).toBe('<div>Test 2 Content</div>');
-			});
-		});
+		// non-contenteditable is handled by the change event now
 		
 		describe('on content-editable', function () {
 			var $rootScope, element, $timeout;
@@ -787,16 +758,14 @@ describe('taBind', function () {
 			// var text = (e.originalEvent || e).clipboardData.getData('text/plain') || $window.clipboardData.getData('Text');
 			describe('should update model from paste', function () {
 				it('non-ie based w/o jquery', inject(function($window){
-					element.triggerHandler('paste', {clipboardData: {getData: function(){ return 'Test 3 Content'; }}});
-					$rootScope.$digest();
+					element.triggerHandler('paste', {clipboardData: {types: 'text/plain', getData: function(){ return 'Test 3 Content'; }}});
 					$timeout.flush();
 					$rootScope.$digest();
 					expect($rootScope.html).toBe('<p>Test 3 Content</p>');
 				}));
 				
 				it('non-ie based w/ jquery', inject(function($window){
-					element.triggerHandler('paste', {originalEvent: {clipboardData: {getData: function(){ return 'Test 3 Content'; } }}});
-					$rootScope.$digest();
+					element.triggerHandler('paste', {originalEvent: {clipboardData: {types: 'text/plain', getData: function(){ return 'Test 3 Content'; } }}});
 					$timeout.flush();
 					$rootScope.$digest();
 					expect($rootScope.html).toBe('<p>Test 3 Content</p>');
@@ -804,8 +773,9 @@ describe('taBind', function () {
 				
 				it('non-ie based w/o paste content', inject(function($window){
 					element.triggerHandler('paste');
-					$rootScope.$digest();
-					$timeout.flush();
+					expect(function(){
+						$timeout.flush();
+					}).toThrow();
 					$rootScope.$digest();
 					expect($rootScope.html).toBe('<p>Test Contents</p>');
 				}));
@@ -845,13 +815,19 @@ describe('taBind', function () {
 						getData: function(){ return 'Test 2 Content'; }
 					};
 					element.triggerHandler('paste');
+					expect(function(){
+						$timeout.flush();
+					}).toThrow();
 					$rootScope.$digest();
 					expect($rootScope.html).toBe('<p>Test Contents</p>');
 					$window.clipboardData = undefined;
 				}));
 				
 				it('non-ie based', inject(function($window){
-					element.triggerHandler('paste', {clipboardData: {getData: function(){ return 'Test 3 Content'; }}});
+					element.triggerHandler('paste', {clipboardData: {types: 'text/plain', getData: function(){ return 'Test 3 Content'; }}});
+					expect(function(){
+						$timeout.flush();
+					}).toThrow();
 					$rootScope.$digest();
 					expect($rootScope.html).toBe('<p>Test Contents</p>');
 				}));
@@ -1253,14 +1229,17 @@ describe('taBind', function () {
 						$rootScope.$digest();
 					}));
 
-					it('should update model from paste', function () {
+					it('should not update model from paste', inject(function($timeout) {
 						element.val('<div>Test 2 Content</div>');
 						element.triggerHandler('paste');
+						expect(function(){
+							$timeout.flush();
+						}).toThrow();
 						$rootScope.$digest();
 						expect($rootScope.html).toBe('<p>Test Contents</p>');
-					});
+					}));
 
-					it('should update model from cut', function () {
+					it('should not update model from cut', function () {
 						element.val('<div>Test 2 Content</div>');
 						element.triggerHandler('cut');
 						$rootScope.$digest();
@@ -1278,14 +1257,17 @@ describe('taBind', function () {
 						$rootScope.$digest();
 					}));
 
-					it('should update model from paste', function () {
+					it('should not update model from paste', inject(function ($timeout) {
 						element.val('<div>Test 2 Content</div>');
 						element.triggerHandler('paste');
+						expect(function(){
+							$timeout.flush();
+						}).toThrow();
 						$rootScope.$digest();
 						expect($rootScope.html).toBe('<p>Test Contents</p>');
-					});
+					}));
 
-					it('should update model from cut', function () {
+					it('should not update model from cut', function () {
 						element.val('<div>Test 2 Content</div>');
 						element.triggerHandler('cut');
 						$rootScope.$digest();
@@ -1303,14 +1285,17 @@ describe('taBind', function () {
 						$rootScope.$digest();
 					}));
 
-					it('should update model from paste', function () {
+					it('should not update model from paste', inject(function ($timeout) {
 						element.html('<div>Test 2 Content</div>');
 						element.triggerHandler('paste');
+						expect(function(){
+							$timeout.flush();
+						}).toThrow();
 						$rootScope.$digest();
 						expect($rootScope.html).toBe('<p>Test Contents</p>');
-					});
+					}));
 
-					it('should update model from cut', function () {
+					it('should not update model from cut', function () {
 						element.html('<div>Test 2 Content</div>');
 						element.triggerHandler('cut');
 						$rootScope.$digest();
@@ -1330,7 +1315,7 @@ describe('taBind', function () {
 						$rootScope.$digest();
 					}));
 
-					it('should update model', function () {
+					it('should not update model', function () {
 						element.val('<div>Test 2 Content</div>');
 						$rootScope.updateTaBind();
 						$rootScope.$digest();
@@ -1348,7 +1333,7 @@ describe('taBind', function () {
 						$rootScope.$digest();
 					}));
 
-					it('should update model', function () {
+					it('should not update model', function () {
 						element.val('<div>Test 2 Content</div>');
 						$rootScope.updateTaBind();
 						$rootScope.$digest();
@@ -1366,7 +1351,7 @@ describe('taBind', function () {
 						$rootScope.$digest();
 					}));
 
-					it('should update model', function () {
+					it('should not update model', function () {
 						element.html('<div>Test 2 Content</div>');
 						$rootScope.updateTaBind();
 						$rootScope.$digest();
@@ -1386,7 +1371,7 @@ describe('taBind', function () {
 						$rootScope.$digest();
 					}));
 
-					it('should update model', function () {
+					it('should not update model', function () {
 						element.val('<div>Test 2 Content</div>');
 						element.triggerHandler('blur');
 						$rootScope.$digest();
@@ -1404,7 +1389,7 @@ describe('taBind', function () {
 						$rootScope.$digest();
 					}));
 
-					it('should update model', function () {
+					it('should not update model', function () {
 						element.val('<div>Test 2 Content</div>');
 						element.triggerHandler('blur');
 						$rootScope.$digest();
@@ -1424,7 +1409,7 @@ describe('taBind', function () {
 						$rootScope.$digest();
 					}));
 
-					it('should update model', function () {
+					it('should not update model', function () {
 						element.html('<div>Test 2 Content</div>');
 						element.triggerHandler('keyup');
 						$rootScope.$digest();

@@ -813,118 +813,73 @@ describe('textAngular', function(){
 	
 	describe('should have correct startAction and endAction functions', function(){
 		'use strict';
-		describe('should work with rangy loaded', function(){
-			beforeEach(module('textAngular'));
-			
-			it('should have rangy loaded with save-restore module', function(){
-				expect(window.rangy).toBeDefined();
-				expect(window.rangy.saveSelection).toBeDefined();
+		beforeEach(module('textAngular'));
+		
+		it('should have rangy loaded with save-restore module', function(){
+			expect(window.rangy).toBeDefined();
+			expect(window.rangy.saveSelection).toBeDefined();
+		});
+		var editorScope, element, sel, range;
+		beforeEach(inject(function($compile, $rootScope, textAngularManager, $document){
+			$rootScope.html = '<p>Lorem ipsum dolor sit amet, <i>consectetur adipisicing</i> elit, <strong>sed do eiusmod tempor incididunt</strong> ut labore et dolore magna aliqua.</p>';
+			element = $compile('<text-angular name="test" ng-model="html">Test Contents2</text-angular>')($rootScope);
+			$document.find('body').append(element);
+			$rootScope.$digest();
+			editorScope = textAngularManager.retrieveEditor('test').scope;
+			// setup selection
+			sel = window.rangy.getSelection();
+			range = window.rangy.createRangyRange();
+			range.selectNodeContents(editorScope.displayElements.text.find('p').find('strong')[0]);
+			sel.setSingleRange(range);
+		}));
+		afterEach(function(){
+			element.remove();
+		});
+		describe('startAction should return a function that will restore a selection', function(){
+			it('should start with the correct selection', function(){
+				expect(sel.getRangeAt(0).toHtml()).toBe('sed do eiusmod tempor incididunt');
 			});
-			var editorScope, element, sel, range;
-			beforeEach(inject(function($compile, $rootScope, textAngularManager, $document){
-				$rootScope.html = '<p>Lorem ipsum dolor sit amet, <i>consectetur adipisicing</i> elit, <strong>sed do eiusmod tempor incididunt</strong> ut labore et dolore magna aliqua.</p>';
-				element = $compile('<text-angular name="test" ng-model="html">Test Contents2</text-angular>')($rootScope);
-				$document.find('body').append(element);
-				$rootScope.$digest();
-				editorScope = textAngularManager.retrieveEditor('test').scope;
-				// setup selection
-				sel = window.rangy.getSelection();
-				range = window.rangy.createRangyRange();
-				range.selectNodeContents(editorScope.displayElements.text.find('p').find('strong')[0]);
+			
+			it('should set _actionRunning to true', function(){
+				editorScope.startAction();
+				expect(editorScope._actionRunning);
+			});
+			
+			it('should return a function that resets the selection', function(){
+				var resetFunc = editorScope.startAction();
+				expect(sel.toHtml()).toBe('sed do eiusmod tempor incididunt');
+				// change selection
+				var range = window.rangy.createRangyRange();
+				range.selectNodeContents(editorScope.displayElements.text.find('p').find('i')[0]);
 				sel.setSingleRange(range);
-			}));
-			afterEach(function(){
-				element.remove();
-			});
-			describe('startAction should return a function that will restore a selection', function(){
-				it('should start with the correct selection', function(){
-					expect(sel.getRangeAt(0).toHtml()).toBe('sed do eiusmod tempor incididunt');
-				});
-				
-				it('should set _actionRunning to true', function(){
-					editorScope.startAction();
-					expect(editorScope._actionRunning);
-				});
-				
-				it('should return a function that resets the selection', function(){
-					var resetFunc = editorScope.startAction();
-					expect(sel.toHtml()).toBe('sed do eiusmod tempor incididunt');
-					// change selection
-					var range = window.rangy.createRangyRange();
-					range.selectNodeContents(editorScope.displayElements.text.find('p').find('i')[0]);
-					sel.setSingleRange(range);
-					sel.refresh();
-					expect(sel.toHtml()).toBe('consectetur adipisicing');
-					// reset selection
-					resetFunc();
-					sel.refresh();
-					expect(sel.toHtml()).toBe('sed do eiusmod tempor incididunt');
-				});
-			});
-			
-			describe('endAction should remove the ability to restore selection', function(){
-				it('shouldn\'t affect the selection', function(){
-					editorScope.startAction();
-					editorScope.endAction();
-					expect(sel.toHtml()).toBe('sed do eiusmod tempor incididunt');
-				});
-				
-				it('shouldn\'t restore the selection', function(){
-					var resetFunc = editorScope.startAction();
-					editorScope.endAction();
-					var range = window.rangy.createRangyRange();
-					range.selectNodeContents(editorScope.displayElements.text.find('p').find('i')[0]);
-					sel.setSingleRange(range);
-					sel.refresh();
-					expect(sel.toHtml()).toBe('consectetur adipisicing');
-					// reset selection - should do nothing now
-					resetFunc();
-					sel.refresh();
-					expect(sel.toHtml()).toBe('consectetur adipisicing');
-				});
+				sel.refresh();
+				expect(sel.toHtml()).toBe('consectetur adipisicing');
+				// reset selection
+				resetFunc();
+				sel.refresh();
+				expect(sel.toHtml()).toBe('sed do eiusmod tempor incididunt');
 			});
 		});
 		
-		describe('should work without rangy save-selection loaded', function(){
-			var _rangy;
-			beforeEach(function(){
-				// used for testing
-				_rangy = window.rangy.saveSelection;
-				window.rangy.saveSelection = undefined;
-			});
-			afterEach(function(){
-				window.rangy.saveSelection = _rangy;
-			});
-			beforeEach(module('textAngular'));
-			
-			it('should NOT have rangy loaded with save-restore module', function(){
-				expect(window.rangy.saveSelection).not.toBeDefined();
+		describe('endAction should remove the ability to restore selection', function(){
+			it('shouldn\'t affect the selection', function(){
+				editorScope.startAction();
+				editorScope.endAction();
+				expect(sel.toHtml()).toBe('sed do eiusmod tempor incididunt');
 			});
 			
-			var editorScope, element;
-			beforeEach(inject(function($compile, $rootScope, textAngularManager, $document){
-				$rootScope.html = '<p>Lorem ipsum dolor sit amet, <i>consectetur adipisicing</i> elit, <strong>sed do eiusmod tempor incididunt</strong> ut labore et dolore magna aliqua.</p>';
-				element = $compile('<text-angular name="test" ng-model="html">Test Contents2</text-angular>')($rootScope);
-				$document.find('body').append(element);
-				$rootScope.$digest();
-				editorScope = textAngularManager.retrieveEditor('test').scope;
-				// setup selection
-				var sel = window.rangy.getSelection();
+			it('shouldn\'t restore the selection', function(){
+				var resetFunc = editorScope.startAction();
+				editorScope.endAction();
 				var range = window.rangy.createRangyRange();
-				range.selectNodeContents(editorScope.displayElements.text.find('p').find('strong')[0]);
+				range.selectNodeContents(editorScope.displayElements.text.find('p').find('i')[0]);
 				sel.setSingleRange(range);
-			}));
-			
-			it('should set the variables correctly and NOT error', function(){
-				var resultFunc;
-				expect(function(){
-					resultFunc = editorScope.startAction();
-				}).not.toThrow();
-				expect(resultFunc).not.toBeDefined();
-				expect(editorScope._actionRunning);
-				expect(function(){
-					editorScope.endAction();
-				}).not.toThrow();
+				sel.refresh();
+				expect(sel.toHtml()).toBe('consectetur adipisicing');
+				// reset selection - should do nothing now
+				resetFunc();
+				sel.refresh();
+				expect(sel.toHtml()).toBe('consectetur adipisicing');
 			});
 		});
 	});

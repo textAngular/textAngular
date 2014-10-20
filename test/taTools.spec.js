@@ -348,8 +348,9 @@ describe('taTools test tool actions', function(){
 			editorScope = textAngularManager.retrieveEditor('testclearbutton').scope;
 			var sel = $window.rangy.getSelection();
 			var range = $window.rangy.createRangyRange();
-			range.selectNodeContents(jQuery('.ta-text > .ta-bind')[0]);
+			range.selectNodeContents(jQuery('.ta-text > .ta-bind', element)[0]);
 			sel.setSingleRange(range);
+			sel.refresh();
 		}));
 		afterEach(function(){
 			element.remove();
