@@ -480,19 +480,34 @@ angular.module('textAngularSetup', [])
 		var floatLeft = angular.element('<button type="button" class="btn btn-default btn-sm btn-small" unselectable="on" tabindex="-1"><i class="fa fa-align-left"></i></button>');
 		floatLeft.on('click', function(event){
 			event.preventDefault();
+			// webkit
 			$element.css('float', 'left');
+			// firefox
+			$element.css('cssFloat', 'left');
+			// IE < 8
+			$element.css('styleFloat', 'left');
 			finishEdit();
 		});
 		var floatRight = angular.element('<button type="button" class="btn btn-default btn-sm btn-small" unselectable="on" tabindex="-1"><i class="fa fa-align-right"></i></button>');
 		floatRight.on('click', function(event){
 			event.preventDefault();
+			// webkit
 			$element.css('float', 'right');
+			// firefox
+			$element.css('cssFloat', 'right');
+			// IE < 8
+			$element.css('styleFloat', 'right');
 			finishEdit();
 		});
 		var floatNone = angular.element('<button type="button" class="btn btn-default btn-sm btn-small" unselectable="on" tabindex="-1"><i class="fa fa-align-justify"></i></button>');
 		floatNone.on('click', function(event){
 			event.preventDefault();
+			// webkit
 			$element.css('float', '');
+			// firefox
+			$element.css('cssFloat', '');
+			// IE < 8
+			$element.css('styleFloat', '');
 			finishEdit();
 		});
 		buttonGroup.append(floatLeft);
