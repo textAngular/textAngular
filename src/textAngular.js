@@ -779,11 +779,15 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 			listElement.remove();
 			taSelection.setSelectionToElementEnd($target[0]);
 		};
+		var selectLi = function(liElement){
+			if(/(<br(|\/)>)$/.test(liElement.innerHTML.trim())) taSelection.setSelectionBeforeElement(angular.element(liElement).find("br")[0]);
+			else taSelection.setSelectionToElementEnd(liElement);
+		};
 		var listToList = function(listElement, newListTag){
 			var $target = angular.element('<' + newListTag + '>' + listElement[0].innerHTML + '</' + newListTag + '>');
 			listElement.after($target);
 			listElement.remove();
-			taSelection.setSelectionToElementEnd($target.find('li')[0]);
+			selectLi($target.find('li')[0]);
 		};
 		var childElementsToList = function(elements, listElement, newListTag){
 			var html = '';
@@ -793,7 +797,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 			var $target = angular.element('<' + newListTag + '>' + html + '</' + newListTag + '>');
 			listElement.after($target);
 			listElement.remove();
-			taSelection.setSelectionToElementEnd($target.find('li')[0]);
+			selectLi($target.find('li')[0]);
 		};
 		return function(taDefaultWrap){
 			taDefaultWrap = taBrowserTag(taDefaultWrap);
@@ -858,8 +862,13 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 									}
 								}
 								$target = angular.element('<' + selfTag + '>' + html + '</' + selfTag + '>');
-								$nodes.pop().replaceWith($target);
-								angular.forEach($nodes, function($node){ $node.remove(); });
+								if($nodes.length){
+									$nodes.pop().replaceWith($target);
+									angular.forEach($nodes, function($node){ $node.remove(); });
+								}else{
+									// selection was empty, insert html (cursor moved automatically)
+									return taSelection.insertHtml('<' + selfTag + '>' + html + '</' + selfTag + '>');
+								}
 							}
 							taSelection.setSelectionToElementEnd($target[0]);
 							return;
@@ -2052,6 +2061,22 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 				
 				range.setStart(el, start);
 				range.setEnd(el, end);
+				
+				rangy.getSelection().setSingleRange(range);
+			},
+			setSelectionBeforeElement: function (el){
+				var range = rangy.createRange();
+				
+				range.selectNode(el);
+				range.collapse(true);
+				
+				rangy.getSelection().setSingleRange(range);
+			},
+			setSelectionAfterElement: function (el){
+				var range = rangy.createRange();
+				
+				range.selectNode(el);
+				range.collapse(false);
 				
 				rangy.getSelection().setSingleRange(range);
 			},

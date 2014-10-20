@@ -306,14 +306,18 @@ describe('taExecCommand', function(){
 	});
 	
 	describe('handles lists correctly', function(){
-		var taSelectionMock, $document, contents;
+		var taSelectionMock, $document, contents, insertedHtml;
 		beforeEach(function(){
+			insertedHtml = '';
 			taSelectionMock = {
 				element: undefined,
 				getSelectionElement: function (){ return this.element; },
 				getOnlySelectedElements: function(){ return this.element.childNodes; },
 				setSelectionToElementStart: function (){ return; },
-				setSelectionToElementEnd: function (){ return; }
+				setSelectionToElementEnd: function (){ return; },
+				setSelectionAfterElement: function (){ return; },
+				setSelectionBeforeElement: function (){ return; },
+				insertHtml: function(html){ insertedHtml = html; }
 			};
 			
 			module(function($provide){
@@ -333,6 +337,51 @@ describe('taExecCommand', function(){
 					taExecCommand()('insertorderedlist', false, null);
 					expect(element.html()).toBe('<b>Test Text</b>');
 					$document[0].execCommand = _temp;
+				}));
+			});
+			describe('nothing selected', function(){
+				beforeEach(inject(function(taSelection){
+					element = angular.element('<div><p></p></div>');
+					taSelection.element = element.children()[0];
+				}));
+				it('to ol', inject(function(taSelection, taExecCommand){
+					taExecCommand()('insertorderedlist', false, null);
+					expect(element.html()).toBe('<ol><li></li></ol>');
+				}));
+				
+				it('to ul', inject(function(taSelection, taExecCommand){
+					taExecCommand()('insertunorderedlist', false, null);
+					expect(element.html()).toBe('<ul><li></li></ul>');
+				}));
+			});
+			describe('br on line selected', function(){
+				beforeEach(inject(function(taSelection){
+					element = angular.element('<div><p><br></p></div>');
+					taSelection.element = element.children()[0];
+				}));
+				it('to ol', inject(function(taSelection, taExecCommand){
+					taExecCommand()('insertorderedlist', false, null);
+					expect(element.html()).toBe('<ol><li><br></li></ol>');
+				}));
+				
+				it('to ul', inject(function(taSelection, taExecCommand){
+					taExecCommand()('insertunorderedlist', false, null);
+					expect(element.html()).toBe('<ul><li><br></li></ul>');
+				}));
+			});
+			describe('empty ta-bind', function(){
+				beforeEach(inject(function(taSelection){
+					element = angular.element('<div class="ta-bind"></div>');
+					taSelection.element = element[0];
+				}));
+				it('to ol', inject(function(taSelection, taExecCommand){
+					taExecCommand()('insertorderedlist', false, null);
+					expect(insertedHtml).toBe('<ol></ol>');
+				}));
+				
+				it('to ul', inject(function(taSelection, taExecCommand){
+					taExecCommand()('insertunorderedlist', false, null);
+					expect(insertedHtml).toBe('<ul></ul>');
 				}));
 			});
 			describe('single element selected', function(){
