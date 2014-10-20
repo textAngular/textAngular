@@ -541,9 +541,11 @@ angular.module('textAngularSetup', [])
 				/* istanbul ignore else: if it's invalid don't worry - though probably should show some kind of error message */
 				if(ids.length > 0){
 					// create the embed link
-					var urlLink = "http://www.youtube.com/embed/" + ids[0].substring(3);
+					var protocol = 'http:';
+					if ($window.location.protocol === 'https:') protocol = 'https:';
+					var urlLink = protocol + "//www.youtube.com/embed/" + ids[0].substring(3);
 					// create the HTML
-					var embed = '<img class="ta-insert-video" src="http://img.youtube.com/vi/' + ids[0].substring(3) + '/maxresdefault.jpg" ta-insert-video="' + urlLink + '" contenteditable="false" src="" allowfullscreen="true" frameborder="0" />';
+					var embed = '<img class="ta-insert-video" src="' + protocol + '//img.youtube.com/vi/' + ids[0].substring(3) + '/maxresdefault.jpg" ta-insert-video="' + urlLink + '" contenteditable="false" src="" allowfullscreen="true" frameborder="0" />';
 					// insert
 					return this.$editor().wrapSelection('insertHTML', embed, true);
 				}
