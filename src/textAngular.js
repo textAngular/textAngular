@@ -674,7 +674,9 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 
 					// catch element select event and pass to toolbar tools
 					scope.$on('ta-element-select', function(event, element){
-						_toolbars.triggerElementSelect(event, element);
+						if(_toolbars.triggerElementSelect(event, element)){
+							scope['reApplyOnSelectorHandlerstaTextElement' + _serial]();
+						}
 					});
 
 					scope.$on('ta-drop-event', function(event, element, dropEvent, dataTransfer){
@@ -687,7 +689,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 								try{
 									$q.when(scope.fileDropHandler(file, scope.wrapSelection) ||
 										(scope.fileDropHandler !== scope.defaultFileDropHandler &&
-										scope.defaultFileDropHandler(file, scope.wrapSelection))).finally(function(){
+										$q.when(scope.defaultFileDropHandler(file, scope.wrapSelection)))).then(function(){
 											scope['updateTaBindtaTextElement' + _serial]();
 										});
 								}catch(error){
@@ -696,6 +698,11 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 							});
 							dropEvent.preventDefault();
 							dropEvent.stopPropagation();
+						/* istanbul ignore else, the updates if moved text */
+						}else{
+							$timeout(function(){
+								scope['updateTaBindtaTextElement' + _serial]();
+							}, 0);
 						}
 					});
 
@@ -1274,7 +1281,11 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 						if(event.originalEvent) dataTransfer = event.originalEvent.dataTransfer;
 						else dataTransfer = event.dataTransfer;
 						scope.$emit('ta-drop-event', this, event, dataTransfer);
-						$timeout(function(){dropFired = false;}, 100);
+						$timeout(function(){
+							dropFired = false;
+							_setViewValue();
+							_reApplyOnSelectorHandlers();
+						}, 100);
 					}
 				};
 
