@@ -3,7 +3,6 @@ module.exports = function (grunt) {
 	// load all grunt tasks
 	grunt.loadNpmTasks('grunt-contrib-jshint');
 	grunt.loadNpmTasks('grunt-contrib-uglify');
-	grunt.loadNpmTasks('grunt-contrib-cssmin');
 	grunt.loadNpmTasks('grunt-contrib-clean');
 	grunt.loadNpmTasks('grunt-istanbul-coverage');
 	grunt.loadNpmTasks('grunt-karma');
@@ -11,7 +10,7 @@ module.exports = function (grunt) {
 	grunt.loadNpmTasks('grunt-conventional-changelog');
 	
 	// Default task.
-	grunt.registerTask('default', ['uglify', 'cssmin', 'test']);
+	grunt.registerTask('default', ['uglify', 'test']);
 	grunt.registerTask('test', ['clean', 'jshint', 'karma', 'coverage']);
 	grunt.registerTask('travis-test', ['jshint', 'karma', 'coverage', 'coveralls']);
 	
@@ -73,18 +72,11 @@ module.exports = function (grunt) {
 			},
 			my_target: {
 				files: {
+					'dist/textAngular-rangy.min.js': ['bower_components/rangy/rangy-core.js', 'bower_components/rangy/rangy-selectionsaverestore.js'],
 					'dist/textAngular.min.js': ['src/textAngularSetup.js','src/textAngular.js'],
 					'dist/textAngular-sanitize.min.js': ['src/textAngular-sanitize.js']
 				}
 			}
-		},
-		cssmin: {
-			compress_css: {
-				files: {
-					'dist/textAngular.min.css': ['src/textAngular.css']
-				}
-			}
-		},
-		
+		}
 	});
 };

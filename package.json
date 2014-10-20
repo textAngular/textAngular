@@ -1,7 +1,7 @@
 {
   "name": "textAngular",
   "filename": "textAngular.min.js",
-  "version": "1.3.0-pre4",
+  "version": "1.3.0-pre5",
   "description": "A radically powerful Text-Editor/Wysiwyg editor for Angular.js",
   "maintainers": [
     {
@@ -26,7 +26,6 @@
     "grunt": "~0.4.2",
     "grunt-cli": "~0.1.11",
     "grunt-contrib-clean": "~0.5.0",
-    "grunt-contrib-cssmin": "^0.10.0",
     "grunt-contrib-jshint": "^0.8.0",
     "grunt-contrib-uglify": "^0.2.7",
     "grunt-conventional-changelog": "^1.1.0",

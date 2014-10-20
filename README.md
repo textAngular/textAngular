@@ -1,4 +1,4 @@
-textAngular v1.3.0-pre3
+textAngular v1.3.0-pre5
 ===========
 
 [![Build Status](https://travis-ci.org/fraywing/textAngular.png?branch=master)](https://travis-ci.org/fraywing/textAngular) [![Coverage Status](https://coveralls.io/repos/fraywing/textAngular/badge.png)](https://coveralls.io/r/fraywing/textAngular)
@@ -6,17 +6,17 @@ textAngular v1.3.0-pre3
 
 Demo is available at: http://www.textangular.com (Or editable [Plunkr Demo](http://plnkr.co/edit/tpl:iwVyu2?p=preview))
 
-#### This readme is for the v1.2.x release, if you are looking for the v1.2.0 readme go here: https://github.com/fraywing/textAngular/tree/v1.2.0
+#### This readme is for the v1.3.x release, if you are looking for the v1.2.2 readme go here: https://github.com/fraywing/textAngular/tree/v1.2.2
 
 ## Requirements
 
 1. `AngularJS` ≥ `1.2.x`
+2. `Rangy` ≥ `1.2.x`, Both rangy-core and rangy-saveselection are required. (There is a minified combination of these two included in the dist folder)
 
 ### Optional requirements
 
 1. [Bootstrap 3.x](http://getbootstrap.com/) for the default styles
 2. [Font-Awesome 4.x](http://fortawesome.github.io/Font-Awesome/) for the default icons on the toolbar
-3. [Rangy 1.x](https://code.google.com/p/rangy/) for better activeState detection and more dynamic plugins, also the selectionsaverestore module.
 
 ### Where to get it
 
@@ -27,7 +27,8 @@ Demo is available at: http://www.textangular.com (Or editable [Plunkr Demo](http
 Run `bower install textAngular` from the command line.
 Include script tags similar to the following:
 ```html
-<link rel='stylesheet' href='/bower_components/textAngular/dist/textAngular.min.css'>
+<link rel='stylesheet' href='/bower_components/textAngular/src/textAngular.css'>
+<script src='/bower_components/textAngular/dist/textAngular-rangy.min.js'></script>
 <script src='/bower_components/textAngular/dist/textAngular-sanitize.min.js'></script>
 <script src='/bower_components/textAngular/dist/textAngular.min.js'></script>
 ```
@@ -51,17 +52,19 @@ Include script tag similar to the following: (For details on how this works see:
 
 Download the code from [https://github.com/fraywing/textAngular/releases/latest](https://github.com/fraywing/textAngular/releases/latest), unzip the files then add script tags similar to the following:
 ```html
-<link rel='stylesheet' href='/path/to/unzipped/files/textAngular.min.css'>
-<script src='/path/to/unzipped/files/textAngular-sanitize.min.js'></script>
-<script src='/path/to/unzipped/files/textAngular.min.js'></script>
+<link rel='stylesheet' href='/path/to/unzipped/files/src/textAngular.min.css'>
+<script src='/path/to/unzipped/files/dist/textAngular-rangy.min.js'></script>
+<script src='/path/to/unzipped/files/dist/textAngular-sanitize.min.js'></script>
+<script src='/path/to/unzipped/files/dist/textAngular.min.js'></script>
 ```
 
 ### Usage
 
-1. Include `textAngular-sanitize.js` or `textAngular-sanitize.min.js` in your project using script tags
-2. Include `textAngularSetup.js` and `textAngular.js` or `textAngular.min.js` (textAngularSetup.js is included inside textAngular.min.js)
-3. Add a dependency to `textAngular` in your app module, for example: ```angular.module('myModule', ['textAngular'])```.
-4. Create an element to hold the editor and add an `ng-model="htmlVariable"` attribute where `htmlVariable` is the scope variable that will hold the HTML entered into the editor:
+1. Include (`rangy-core.js` and `rangy-saveselection.js`) or `textAngular-rangy.min.js` in your project using script tags
+2. Include `textAngular-sanitize.js` or `textAngular-sanitize.min.js` in your project using script tags
+3. Include (`textAngularSetup.js` and `textAngular.js`) or `textAngular.min.js` (textAngularSetup.js is included inside textAngular.min.js)
+4. Add a dependency to `textAngular` in your app module, for example: ```angular.module('myModule', ['textAngular'])```.
+5. Create an element to hold the editor and add an `ng-model="htmlVariable"` attribute where `htmlVariable` is the scope variable that will hold the HTML entered into the editor:
 ```html
 <div text-angular ng-model="htmlVariable"></div>
 ```

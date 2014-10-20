@@ -1,3 +1,17 @@
+<a name="1.3.0-pre5"></a>
+### 1.3.0-pre5 (2014-10-20)
+
+
+#### Bug Fixes
+
+* **bower:** Fixes angular bower dependancy to support 1.3.0 ([491c8daf](http://github.com/fraywing/textAngular/commit/491c8daf31078ccb38e02f2058bf2e5acbe7c4c9), closes [#358](http://github.com/fraywing/textAngular/issues/358))
+
+
+#### Features
+
+* **taBind:** Add paste from word converting. ([e9edbdfe](http://github.com/fraywing/textAngular/commit/e9edbdfe7376f28bc27a376ce15a61a6e14b2b81))
+
+
 <a name="1.3.0-pre4"></a>
 ### 1.3.0-pre4 (2014-10-06)
 
