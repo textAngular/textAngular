@@ -21,37 +21,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 		}
 	}
 	
-	// fix a webkit bug, see: https://gist.github.com/shimondoodkin/1081133
-	// this is set true when a blur occurs as the blur of the ta-bind triggers before the click
-	var globalContentEditableBlur = false;
-	/* istanbul ignore next: Browser Un-Focus fix for webkit */
-	if(/AppleWebKit\/([\d.]+)/.exec(navigator.userAgent)) { // detect webkit
-		document.addEventListener("click", function(_event){
-			var e = _event || window.event;
-			var curelement = e.target;
-			if(globalContentEditableBlur && curelement !== null){
-				var isEditable = false;
-				var tempEl = curelement;
-				while(tempEl !== null && tempEl.tagName.toLowerCase() !== 'html' && !isEditable){
-					isEditable = tempEl.contentEditable === 'true';
-					tempEl = tempEl.parentNode;
-				}
-				if(!isEditable){
-					document.getElementById('textAngular-editableFix-010203040506070809').setSelectionRange(0, 0); // set caret focus to an element that handles caret focus correctly.
-					curelement.focus(); // focus the wanted element.
-				}
-			}	
-			globalContentEditableBlur = false;
-		}, false); // add global click handler
-		angular.element(document).ready(function () {
-			angular.element(document.body).append(angular.element('<input id="textAngular-editableFix-010203040506070809" style="width:1px;height:1px;border:none;margin:0;padding:0;position:absolute; top: -10000px; left: -10000px;" unselectable="on" tabIndex="-1">'));
-		});
-	}
-	
-	// Gloabl to textAngular REGEXP vars for block and list elements.
-	
-	var BLOCKELEMENTS = /^(address|article|aside|audio|blockquote|canvas|dd|div|dl|fieldset|figcaption|figure|footer|form|h1|h2|h3|h4|h5|h6|header|hgroup|hr|noscript|ol|output|p|pre|section|table|tfoot|ul|video)$/ig;
-	var LISTELEMENTS = /^(ul|li|ol)$/ig;
+										
 	// IE version detection - http://stackoverflow.com/questions/4169160/javascript-ie-detection-why-not-use-simple-conditional-comments
 	// We need this as IE sometimes plays funny tricks with the contenteditable.
 	// ----------------------------------------------------------
@@ -84,7 +54,42 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 
 		return ((rv > -1) ? rv : undef);
 	}());
-
+	// detect webkit
+	var webkit = /AppleWebKit\/([\d.]+)/.test(navigator.userAgent);
+	
+	// fix a webkit bug, see: https://gist.github.com/shimondoodkin/1081133
+	// this is set true when a blur occurs as the blur of the ta-bind triggers before the click
+	var globalContentEditableBlur = false;
+	/* istanbul ignore next: Browser Un-Focus fix for webkit */
+	if(webkit) {
+		document.addEventListener("click", function(_event){
+			var e = _event || window.event;
+			var curelement = e.target;
+			if(globalContentEditableBlur && curelement !== null){
+				var isEditable = false;
+				var tempEl = curelement;
+				while(tempEl !== null && tempEl.tagName.toLowerCase() !== 'html' && !isEditable){
+					isEditable = tempEl.contentEditable === 'true';
+					tempEl = tempEl.parentNode;
+				}
+				if(!isEditable){
+					document.getElementById('textAngular-editableFix-010203040506070809').setSelectionRange(0, 0); // set caret focus to an element that handles caret focus correctly.
+					curelement.focus(); // focus the wanted element.
+				}
+			}	
+			globalContentEditableBlur = false;
+		}, false); // add global click handler
+		angular.element(document).ready(function () {
+			angular.element(document.body).append(angular.element('<input id="textAngular-editableFix-010203040506070809" style="width:1px;height:1px;border:none;margin:0;padding:0;position:absolute; top: -10000px; left: -10000px;" unselectable="on" tabIndex="-1">'));
+		});
+	}
+	
+	// Gloabl to textAngular REGEXP vars for block and list elements.
+	
+	var BLOCKELEMENTS = /^(address|article|aside|audio|blockquote|canvas|dd|div|dl|fieldset|figcaption|figure|footer|form|h1|h2|h3|h4|h5|h6|header|hgroup|hr|noscript|ol|output|p|pre|section|table|tfoot|ul|video)$/ig;
+	var LISTELEMENTS = /^(ul|li|ol)$/ig;
+	var VALIDELEMENTS = /^(address|article|aside|audio|blockquote|canvas|dd|div|dl|fieldset|figcaption|figure|footer|form|h1|h2|h3|h4|h5|h6|header|hgroup|hr|noscript|ol|output|p|pre|section|table|tfoot|ul|video|li)$/ig;
+	
 	// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/Trim#Compatibility
 	/* istanbul ignore next: trim shim for older browsers */
 	if (!String.prototype.trim) {
@@ -283,15 +288,21 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 					angular.extend(scope, angular.copy(taOptions), {
 						// wraps the selection in the provided tag / execCommand function. Should only be called in WYSIWYG mode.
 						wrapSelection: function(command, opt, isSelectableElementTool){
-							// catch errors like FF erroring when you try to force an undo with nothing done
-							_taExecCommand(command, false, opt);
-							if(isSelectableElementTool){
-								// re-apply the selectable tool events
-								scope['reApplyOnSelectorHandlerstaTextElement' + _serial]();
+							if(command.toLowerCase() === "undo"){
+								scope['$undoTaBindtaTextElement' + _serial]();
+							}else if(command.toLowerCase() === "redo"){
+								scope['$redoTaBindtaTextElement' + _serial]();
+							}else{
+								// catch errors like FF erroring when you try to force an undo with nothing done
+								_taExecCommand(command, false, opt);
+								if(isSelectableElementTool){
+									// re-apply the selectable tool events
+									scope['reApplyOnSelectorHandlerstaTextElement' + _serial]();
+								}
+								// refocus on the shown display element, this fixes a display bug when using :focus styles to outline the box.
+								// You still have focus on the text/html input it just doesn't show up
+								scope.displayElements.text[0].focus();
 							}
-							// refocus on the shown display element, this fixes a display bug when using :focus styles to outline the box.
-							// You still have focus on the text/html input it just doesn't show up
-							scope.displayElements.text[0].focus();
 						},
 						showHtml: false
 					});
@@ -999,7 +1010,9 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 				var _isReadonly = false;
 				var _focussed = false;
 				var _disableSanitizer = attrs.taUnsafeSanitizer || taOptions.disableSanitizer;
-				var BLOCKED_KEYS = /^(9|19|20|27|33|34|35|36|37|38|39|40|45|46|112|113|114|115|116|117|118|119|120|121|122|123|144|145)$/;
+				var _lastKey;
+				var BLOCKED_KEYS = /^(9|19|20|27|33|34|35|36|37|38|39|40|45|112|113|114|115|116|117|118|119|120|121|122|123|144|145)$/;
+				var UNDO_TRIGGER_KEYS = /^(8|13|32|46|59|61|107|109|186|187|188|189|190|191|192|219|220|221|222)$/; // spaces, enter, delete, backspace, all punctuation
 				
 				// defaults to the paragraph element, but we need the line-break or it doesn't allow you to type into the empty element
 				// non IE is '<p><br/></p>', ie is '<p></p>' as for once IE gets it correct...
@@ -1026,7 +1039,71 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 				}
 				
 				element.addClass('ta-bind');
-
+				
+				var _undoKeyupTimeout;
+				
+				scope['$undoManager' + (attrs.id || '')] = ngModel.$undoManager = {
+					_stack: [],
+					_index: 0,
+					_max: 1000,
+					push: function(value){
+						if((typeof value === "undefined" || value === null) ||
+							((typeof this.current() !== "undefined" && this.current() !== null) && value === this.current())) return value;
+						if(this._index < this._stack.length - 1){
+							this._stack = this._stack.slice(0,this._index+1);
+						}
+						this._stack.push(value);
+						if(_undoKeyupTimeout) $timeout.cancel(_undoKeyupTimeout);
+						if(this._stack.length > this._max) this._stack.shift();
+						this._index = this._stack.length - 1;
+						return value;
+					},
+					undo: function(){
+						return this.setToIndex(this._index-1);
+					},
+					redo: function(){
+						return this.setToIndex(this._index+1);
+					},
+					setToIndex: function(index){
+						if(index < 0 || index > this._stack.length - 1){
+							return undefined;
+						}
+						this._index = index;
+						return this.current();
+					},
+					current: function(){
+						return this._stack[this._index];
+					}
+				};
+				
+				var _undo = scope['$undoTaBind' + (attrs.id || '')] = function(){
+					/* istanbul ignore else: can't really test it due to all changes being ignored as well in readonly */
+					if(!_isReadonly && _isContentEditable){
+						var content = ngModel.$undoManager.undo();
+						if(typeof content !== "undefined" && content !== null){
+							element[0].innerHTML = content;
+							_setViewValue(content, false);
+							/* istanbul ignore else: browser catch */
+							if(element[0].childNodes.length) taSelection.setSelectionToElementEnd(element[0].childNodes[element[0].childNodes.length-1]);
+							else taSelection.setSelectionToElementEnd(element[0]);
+						}
+					}
+				};
+				
+				var _redo = scope['$redoTaBind' + (attrs.id || '')] = function(){
+					/* istanbul ignore else: can't really test it due to all changes being ignored as well in readonly */
+					if(!_isReadonly && _isContentEditable){
+						var content = ngModel.$undoManager.redo();
+						if(typeof content !== "undefined" && content !== null){
+							element[0].innerHTML = content;
+							_setViewValue(content, false);
+							/* istanbul ignore else: browser catch */
+							if(element[0].childNodes.length) taSelection.setSelectionToElementEnd(element[0].childNodes[element[0].childNodes.length-1]);
+							else taSelection.setSelectionToElementEnd(element[0]);
+						}
+					}
+				};
+				
 				// in here we are undoing the converts used elsewhere to prevent the < > and & being displayed when they shouldn't in the code.
 				var _compileHtml = function(){
 					if(_isContentEditable) return element[0].innerHTML;
@@ -1034,13 +1111,18 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 					throw ('textAngular Error: attempting to update non-editable taBind');
 				};
 				
-				var _setViewValue = function(val){
+				var _setViewValue = function(val, triggerUndo){
+					if(typeof triggerUndo === "undefined" || triggerUndo === null) triggerUndo = true && _isContentEditable; // if not contentEditable then the native undo/redo is fine
 					if(!val) val = _compileHtml();
-					if(val === _defaultTest || val.match(_trimTest)){
+					if(val === _defaultTest || _trimTest.test(val)){
 						// this avoids us from tripping the ng-pristine flag if we click in and out with out typing
 						if(ngModel.$viewValue !== '') ngModel.$setViewValue('');
+						if(triggerUndo && ngModel.$undoManager.current() !== '') ngModel.$undoManager.push('');
 					}else{
-						if(ngModel.$viewValue !== val) ngModel.$setViewValue(val);
+						if(ngModel.$viewValue !== val){
+							ngModel.$setViewValue(val);
+							if(triggerUndo) ngModel.$undoManager.push(val);
+						}
 					}
 				};
 				
@@ -1184,16 +1266,35 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 							else e.preventDefault();
 						});
 						
+						element.on('keydown', function(event, eventData){
+							/* istanbul ignore else: this is for catching the jqLite testing*/
+							if(eventData) angular.extend(event, eventData);
+							/* istanbul ignore else: readonly check */
+							if(!_isReadonly){
+								if(event.metaKey || event.ctrlKey){
+									// covers ctrl/command + z
+									if((event.keyCode === 90 && !event.shiftKey)){
+										_undo();
+										event.preventDefault();
+									// covers ctrl + y, command + shift + z
+									}else if((event.keyCode === 90 && event.shiftKey) || (event.keyCode === 89 && !event.shiftKey)){
+										_redo();
+										event.preventDefault();
+									}
+								}
+							}
+						});
+						
 						element.on('keyup', function(event, eventData){
 							/* istanbul ignore else: this is for catching the jqLite testing*/
 							if(eventData) angular.extend(event, eventData);
+							if(_undoKeyupTimeout) $timeout.cancel(_undoKeyupTimeout);
 							if(!_isReadonly && !BLOCKED_KEYS.test(event.keyCode)){
 								// if enter - insert new taDefaultWrap, if shift+enter insert <br/>
 								if(_defaultVal !== '' && event.keyCode === 13){
 									if(!event.shiftKey){
 										// new paragraph, br should be caught correctly
 										var selection = taSelection.getSelectionElement();
-										var VALIDELEMENTS = /^(address|article|aside|audio|blockquote|canvas|dd|div|dl|fieldset|figcaption|figure|footer|form|h1|h2|h3|h4|h5|h6|header|hgroup|hr|noscript|ol|output|p|pre|section|table|tfoot|ul|video|li)$/ig;
 										while(!selection.tagName.match(VALIDELEMENTS) && selection !== element[0]){
 											selection = selection.parentNode;
 										}
@@ -1209,7 +1310,10 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 									element[0].innerHTML = _defaultVal;
 									taSelection.setSelectionToElementStart(element.children()[0]);
 								}
-								_setViewValue(val);
+								var triggerUndo = _lastKey !== event.keyCode && UNDO_TRIGGER_KEYS.test(event.keyCode);
+								_setViewValue(val, triggerUndo);
+								if(!triggerUndo) _undoKeyupTimeout = $timeout(function(){ ngModel.$undoManager.push(val); }, 250);
+								_lastKey = event.keyCode;
 							}
 						});
 
@@ -1264,6 +1368,9 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 				// because textAngular is bi-directional (which is awesome) we need to also sanitize values going in from the server
 				ngModel.$formatters.push(_sanitize);
 				ngModel.$formatters.push(_validity);
+				ngModel.$formatters.push(function(value){
+					return ngModel.$undoManager.push(value || '');
+				});
 
 				var selectorClickHandler = function(event){
 					// emit the element-select event, pass the element
