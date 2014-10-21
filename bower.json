@@ -1,6 +1,6 @@
 {
   "name": "textAngular",
-  "version": "1.3.0-pre5",
+  "version": "1.3.0-pre6",
   "main": ["./src/textAngular.js", "./src/textAngularSetup.js", "./src/textAngular.css"],
   "description": "A radically powerful Text-Editor/Wysiwyg editor for Angular.js",
   "keywords": [

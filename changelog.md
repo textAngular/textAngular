@@ -1,3 +1,20 @@
+<a name="1.3.0-pre6"></a>
+### 1.3.0-pre6 (2014-10-21)
+
+
+#### Bug Fixes
+
+* **taBind:** Fix the drop handler not re-applying on select handler ([af233b9f](http://github.com/fraywing/textAngular/commit/af233b9f2443c386afe9f83c5b1b2cd69d62e39d))
+* **taExecCommand:** Fix lists for FF specifically. ([0924a8ca](http://github.com/fraywing/textAngular/commit/0924a8ca22493f018b679cc6a0805f8f1152f832), closes [#290](http://github.com/fraywing/textAngular/issues/290))
+* **taSanitize:** Allow id attribute. ([7afc96c0](http://github.com/fraywing/textAngular/commit/7afc96c0896a60cec4d95099d172f7bfa37ed7a1), closes [#355](http://github.com/fraywing/textAngular/issues/355))
+* **taTranslations:** Change Constant to Value ([58781ee9](http://github.com/fraywing/textAngular/commit/58781ee907a690c3f1e980c76ac71d67fb2187a6))
+
+
+#### Features
+
+* **taBind.undoManager:** Add undoManager to taBind. ([bd2bb0ae](http://github.com/fraywing/textAngular/commit/bd2bb0aee69953f5caa043571b854219a28145d0))
+
+
 <a name="1.3.0-pre5"></a>
 ### 1.3.0-pre5 (2014-10-20)
 
