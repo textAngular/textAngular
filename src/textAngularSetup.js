@@ -2,7 +2,7 @@
 textAngular
 Author : Austin Anderson
 License : 2013 MIT
-Version 1.2.2
+Version 1.3.0-pre7
 
 See README.md or https://github.com/fraywing/textAngular/wiki for requirements and use.
 */

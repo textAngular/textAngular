@@ -1,3 +1,12 @@
+<a name="1.3.0-pre7"></a>
+### 1.3.0-pre7 (2014-10-22)
+
+
+#### Bug Fixes
+
+* **Setup:** Make the rangy loaded check more forgiving. ([ec778431](http://github.com/fraywing/textAngular/commit/ec7784311bc7256b0d216cd2b8a0321c897dd43b))
+
+
 <a name="1.3.0-pre6"></a>
 ### 1.3.0-pre6 (2014-10-21)
 
