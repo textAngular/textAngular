@@ -1220,8 +1220,17 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 											el.remove();
 										}
 									}
+									var _unwrapElement = function(node){
+										node = angular.element(node);
+										for(var _n = node[0].childNodes.length - 1; _n >= 0; _n--) node.after(node[0].childNodes[_n]);
+										node.remove();
+									};
+									
+									angular.forEach(dom.find('span'), _unwrapElement);
+									angular.forEach(dom.find('font'), _unwrapElement);
 									text = dom.html();
-								}	
+								}
+								
 								text = taSanitize(text);
 								taSelection.insertHtml(text);
 								$timeout(function(){
@@ -1244,10 +1253,14 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 							var savedcontent = element[0].innerHTML;
 							var clipboardData = (e.originalEvent || e).clipboardData;
 							if (clipboardData && clipboardData.getData) {// Webkit - get data from clipboard, put into editdiv, cleanup, then cancel event
+								var _types = "";
+								for(var _t = 0; _t < clipboardData.types.length; _t++){
+									_types += " " + clipboardData.types[_t];
+								}
 								/* istanbul ignore next: browser tests */
-								if (/text\/html/.test(clipboardData.types)) {
+								if (/text\/html/.test(_types)) {
 									element[0].innerHTML = clipboardData.getData('text/html');
-								} else if (/text\/plain/.test(clipboardData.types)) {
+								} else if (/text\/plain/.test(_types)) {
 									element[0].innerHTML = clipboardData.getData('text/plain');
 								} else {
 									element[0].innerHTML = "";

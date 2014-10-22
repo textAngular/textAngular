@@ -47,14 +47,14 @@ describe('taBind.events', function () {
 			// var text = (e.originalEvent || e).clipboardData.getData('text/plain') || $window.clipboardData.getData('Text');
 			describe('should update model from paste', function () {
 				it('non-ie based w/o jquery', inject(function($window){
-					element.triggerHandler('paste', {clipboardData: {types: 'text/plain', getData: function(){ return 'Test 3 Content'; }}});
+					element.triggerHandler('paste', {clipboardData: {types: ['text/plain'], getData: function(){ return 'Test 3 Content'; }}});
 					$timeout.flush();
 					$rootScope.$digest();
 					expect($rootScope.html).toBe('<p>Test 3 Content</p>');
 				}));
 				
 				it('non-ie based w/ jquery', inject(function($window){
-					element.triggerHandler('paste', {originalEvent: {clipboardData: {types: 'text/plain', getData: function(){ return 'Test 3 Content'; } }}});
+					element.triggerHandler('paste', {originalEvent: {clipboardData: {types: ['text/plain'], getData: function(){ return 'Test 3 Content'; } }}});
 					$timeout.flush();
 					$rootScope.$digest();
 					expect($rootScope.html).toBe('<p>Test 3 Content</p>');
@@ -113,7 +113,7 @@ describe('taBind.events', function () {
 				}));
 				
 				it('non-ie based', inject(function($window){
-					element.triggerHandler('paste', {clipboardData: {types: 'text/plain', getData: function(){ return 'Test 3 Content'; }}});
+					element.triggerHandler('paste', {clipboardData: {types: ['text/plain'], getData: function(){ return 'Test 3 Content'; }}});
 					expect(function(){
 						$timeout.flush();
 					}).toThrow();

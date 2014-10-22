@@ -26,7 +26,7 @@ describe('taBind.wordPaste', function () {
 		}));
 		// in fragment
 		it('in fragment', inject(function($timeout, taSelection){
-			element.triggerHandler('paste', {clipboardData: {types: 'text/html', getData: function(){
+			element.triggerHandler('paste', {clipboardData: {types: ['text/html'], getData: function(){
 				return '<div><!--StartFragment--><p class=MsoNormal>Test Content Stripping<o:p></o:p></p><!--EndFragment--></div>';// jshint ignore:line
 			}}});
 			$timeout.flush();
@@ -35,16 +35,16 @@ describe('taBind.wordPaste', function () {
 		}));
 		// out fragment
 		it('outside fragment', inject(function($timeout, taSelection){
-			element.triggerHandler('paste', {clipboardData: {types: 'text/html', getData: function(){
+			element.triggerHandler('paste', {clipboardData: {types: ['text/html'], getData: function(){
 				return '<p class="MsoNormal"><span lang="EN-US">Body</span><o:p></o:p></p>';// jshint ignore:line
 			}}});
 			$timeout.flush();
 			$rootScope.$digest();
-			expect(pasted).toBe('<p><span lang="EN-US">Body</span></p>');
+			expect(pasted).toBe('<p>Body</p>');
 		}));
 		
 		it('remove blank list tag', inject(function($timeout, taSelection){
-			element.triggerHandler('paste', {clipboardData: {types: 'text/html', getData: function(){
+			element.triggerHandler('paste', {clipboardData: {types: ['text/html'], getData: function(){
 				return '<p class="MsoListBulletCxSpLast"><span lang="EN-US">&nbsp;</span></p>';// jshint ignore:line
 			}}});
 			$timeout.flush();
@@ -54,7 +54,7 @@ describe('taBind.wordPaste', function () {
 		
 		// header
 		it('Header Element', inject(function($timeout, taSelection){
-			element.triggerHandler('paste', {clipboardData: {types: 'text/html', getData: function(){
+			element.triggerHandler('paste', {clipboardData: {types: ['text/html'], getData: function(){
 				return '<h1>Header 1<o:p></o:p></h1>';// jshint ignore:line
 			}}});
 			$timeout.flush();
@@ -63,7 +63,7 @@ describe('taBind.wordPaste', function () {
 		}));
 		// bold/italics
 		it('handle bold/italics/underline', inject(function($timeout, taSelection){
-			element.triggerHandler('paste', {clipboardData: {types: 'text/html', getData: function(){
+			element.triggerHandler('paste', {clipboardData: {types: ['text/html'], getData: function(){
 				return '<p><b>Header</b> <u>1</u> <i>Test</i><o:p></o:p></p>';// jshint ignore:line
 			}}});
 			$timeout.flush();
@@ -72,7 +72,7 @@ describe('taBind.wordPaste', function () {
 		}));
 		// lists, ul/ol
 		it('ol list, format 1', inject(function($timeout, taSelection){
-			element.triggerHandler('paste', {clipboardData: {types: 'text/html', getData: function(){
+			element.triggerHandler('paste', {clipboardData: {types: ['text/html'], getData: function(){
 				return '<p class=MsoListParagraphCxSpFirst style="text-indent:-18.0pt;mso-list:l0 level1 lfo1"><![if !supportLists]><span style="mso-fareast-font-family:Cambria;mso-fareast-theme-font:minor-latin;mso-bidi-font-family:Cambria;mso-bidi-theme-font:minor-latin"><span style="mso-list:Ignore">1.<span style="font:7.0pt \'Times New Roman\'">&nbsp;&nbsp;&nbsp;&nbsp;</span></span></span><![endif]>Test1<o:p></o:p></p>';// jshint ignore:line
 			}}});
 			$timeout.flush();
@@ -80,7 +80,7 @@ describe('taBind.wordPaste', function () {
 			expect(pasted).toBe('<ol><li>Test1</li></ol>');
 		}));
 		it('ol list, format 2', inject(function($timeout, taSelection){
-			element.triggerHandler('paste', {clipboardData: {types: 'text/html', getData: function(){
+			element.triggerHandler('paste', {clipboardData: {types: ['text/html'], getData: function(){
 				return '<p class="MsoListNumberCxSpFirst"><!--[if !supportLists]--><span lang="EN-US" style="font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:Symbol;mso-ansi-language:EN-US">1.<span style="font-stretch: normal; font-size: 7pt; font-family: \'Times New Roman\';">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></span><!--[endif]-->Test1<o:p></o:p></p>';// jshint ignore:line
 			}}});
 			$timeout.flush();
@@ -88,7 +88,7 @@ describe('taBind.wordPaste', function () {
 			expect(pasted).toBe('<ol><li>Test1</li></ol>');
 		}));
 		it('ul list, format 1', inject(function($timeout, taSelection){
-			element.triggerHandler('paste', {clipboardData: {types: 'text/html', getData: function(){
+			element.triggerHandler('paste', {clipboardData: {types: ['text/html'], getData: function(){
 				return '<p class=MsoListParagraphCxSpFirst style="text-indent:-18.0pt;mso-list:l0 level1 lfo1"><![if !supportLists]><span style="mso-fareast-font-family:Cambria;mso-fareast-theme-font:minor-latin;mso-bidi-font-family:Cambria;mso-bidi-theme-font:minor-latin"><span style="mso-list:Ignore">.<span style="font:7.0pt \'Times New Roman\'">&nbsp;&nbsp;&nbsp;&nbsp;</span></span></span><![endif]>Test1<o:p></o:p></p><p class=MsoListParagraphCxSpLast style="text-indent:-18.0pt;mso-list:l0 level1 lfo1"><![if !supportLists]><span style="mso-fareast-font-family:Cambria;mso-fareast-theme-font:minor-latin;mso-bidi-font-family:Cambria;mso-bidi-theme-font:minor-latin"><span style="mso-list:Ignore">.<span style="font:7.0pt \'Times New Roman\'">&nbsp;&nbsp;&nbsp;&nbsp;</span></span></span><![endif]>Test1<o:p></o:p></p>';// jshint ignore:line
 			}}});
 			$timeout.flush();
@@ -96,7 +96,7 @@ describe('taBind.wordPaste', function () {
 			expect(pasted).toBe('<ul><li>Test1</li><li>Test1</li></ul>');
 		}));
 		it('ul list, format 2', inject(function($timeout, taSelection){
-			element.triggerHandler('paste', {clipboardData: {types: 'text/html', getData: function(){
+			element.triggerHandler('paste', {clipboardData: {types: ['text/html'], getData: function(){
 				return '<p class="MsoListBulletCxSpFirst"><!--[if !supportLists]--><span lang="EN-US" style="font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:Symbol;mso-ansi-language:EN-US">·<span style="font-stretch: normal; font-size: 7pt; font-family: \'Times New Roman\';">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></span><!--[endif]-->Test1<o:p></o:p></p><p class="MsoListBulletCxSpLast"><!--[if !supportLists]--><span lang="EN-US" style="font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:Symbol;mso-ansi-language:EN-US">·<span style="font-stretch: normal; font-size: 7pt; font-family: \'Times New Roman\';">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></span><!--[endif]-->Test1<o:p></o:p></p>';// jshint ignore:line
 			}}});
 			$timeout.flush();
@@ -106,7 +106,7 @@ describe('taBind.wordPaste', function () {
 		// indents - ul > ul, ul > ol, ol > ol, ol > ul
 		
 		it('ul > ul nested list', inject(function($timeout, taSelection){
-			element.triggerHandler('paste', {clipboardData: {types: 'text/html', getData: function(){
+			element.triggerHandler('paste', {clipboardData: {types: ['text/html'], getData: function(){
 				return '<p class="MsoListBulletCxSpFirst"><!--[if !supportLists]--><span lang="EN-US" style="font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:Symbol;mso-ansi-language:EN-US">·<span style="font-stretch: normal; font-size: 7pt; font-family: \'Times New Roman\';">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></span><!--[endif]-->Test1<o:p></o:p></p>' + // jshint ignore:line
 					'<p class="MsoListBulletCxSpLast" style="margin-left:39.6pt"><!--[if !supportLists]--><span lang="EN-US" style="font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:Symbol;mso-ansi-language:EN-US">·<span style="font-stretch: normal; font-size: 7pt; font-family: \'Times New Roman\';">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></span><!--[endif]-->Test1<o:p></o:p></p>';// jshint ignore:line
 			}}});
@@ -115,7 +115,7 @@ describe('taBind.wordPaste', function () {
 			expect(pasted).toBe('<ul><li>Test1<ul><li>Test1</li></ul></li></ul>');
 		}));
 		it('ul > ol nested list', inject(function($timeout, taSelection){
-			element.triggerHandler('paste', {clipboardData: {types: 'text/html', getData: function(){
+			element.triggerHandler('paste', {clipboardData: {types: ['text/html'], getData: function(){
 				return '<p class="MsoListBulletCxSpFirst"><!--[if !supportLists]--><span lang="EN-US" style="font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:Symbol;mso-ansi-language:EN-US">·<span style="font-stretch: normal; font-size: 7pt; font-family: \'Times New Roman\';">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></span><!--[endif]-->Test1<o:p></o:p></p>' + // jshint ignore:line
 					'<p class="MsoListNumberCxSpLast" style="margin-left:39.6pt"><!--[if !supportLists]--><span lang="EN-US" style="font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:Symbol;mso-ansi-language:EN-US">1.<span style="font-stretch: normal; font-size: 7pt; font-family: \'Times New Roman\';">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></span><!--[endif]-->Test1<o:p></o:p></p>';// jshint ignore:line
 			}}});
@@ -124,7 +124,7 @@ describe('taBind.wordPaste', function () {
 			expect(pasted).toBe('<ul><li>Test1<ol><li>Test1</li></ol></li></ul>');
 		}));
 		it('ol > ol nested list', inject(function($timeout, taSelection){
-			element.triggerHandler('paste', {clipboardData: {types: 'text/html', getData: function(){
+			element.triggerHandler('paste', {clipboardData: {types: ['text/html'], getData: function(){
 				return '<p class="MsoListNumberCxSpFirst"><!--[if !supportLists]--><span lang="EN-US" style="font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:Symbol;mso-ansi-language:EN-US">1.<span style="font-stretch: normal; font-size: 7pt; font-family: \'Times New Roman\';">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></span><!--[endif]-->Test1<o:p></o:p></p>' + // jshint ignore:line
 					'<p class="MsoListNumberCxSpLast" style="margin-left:39.6pt"><!--[if !supportLists]--><span lang="EN-US" style="font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:Symbol;mso-ansi-language:EN-US">2.<span style="font-stretch: normal; font-size: 7pt; font-family: \'Times New Roman\';">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></span><!--[endif]-->Test1<o:p></o:p></p>';// jshint ignore:line
 			}}});
@@ -133,7 +133,7 @@ describe('taBind.wordPaste', function () {
 			expect(pasted).toBe('<ol><li>Test1<ol><li>Test1</li></ol></li></ol>');
 		}));
 		it('ol > ul nested list', inject(function($timeout, taSelection){
-			element.triggerHandler('paste', {clipboardData: {types: 'text/html', getData: function(){
+			element.triggerHandler('paste', {clipboardData: {types: ['text/html'], getData: function(){
 				return '<p class="MsoListNumberCxSpFirst"><!--[if !supportLists]--><span lang="EN-US" style="font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:Symbol;mso-ansi-language:EN-US">1.<span style="font-stretch: normal; font-size: 7pt; font-family: \'Times New Roman\';">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></span><!--[endif]-->Test1<o:p></o:p></p>' + // jshint ignore:line
 					'<p class="MsoListBulletCxSpLast" style="margin-left:39.6pt"><!--[if !supportLists]--><span lang="EN-US" style="font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:Symbol;mso-ansi-language:EN-US">·<span style="font-stretch: normal; font-size: 7pt; font-family: \'Times New Roman\';">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></span><!--[endif]-->Test1<o:p></o:p></p>';// jshint ignore:line
 			}}});
@@ -145,7 +145,7 @@ describe('taBind.wordPaste', function () {
 		// outdents - ul < ul, ul < ol, ol < ol, ol < ul
 		/* These Break on Phantom JS for some reason. */
 		it('ul > ul < ul nested list', inject(function($timeout, taSelection){
-			element.triggerHandler('paste', {clipboardData: {types: 'text/html', getData: function(){
+			element.triggerHandler('paste', {clipboardData: {types: ['text/html'], getData: function(){
 				return '<p class="MsoListBulletCxSpFirst"><!--[if !supportLists]--><span lang="EN-US" style="font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:Symbol;mso-ansi-language:EN-US">·<span style="font-stretch: normal; font-size: 7pt; font-family: \'Times New Roman\';">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></span><!--[endif]-->Test1<o:p></o:p></p>' + // jshint ignore:line
 					'<p class="MsoListBulletCxSpMiddle" style="margin-left:39.6pt"><!--[if !supportLists]--><span lang="EN-US" style="font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:Symbol;mso-ansi-language:EN-US">·<span style="font-stretch: normal; font-size: 7pt; font-family: \'Times New Roman\';">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></span><!--[endif]-->Test1<o:p></o:p></p>' + // jshint ignore:line
 					'<p class="MsoListBulletCxSpLast"><!--[if !supportLists]--><span lang="EN-US" style="font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:Symbol;mso-ansi-language:EN-US">·<span style="font-stretch: normal; font-size: 7pt; font-family: \'Times New Roman\';">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></span><!--[endif]-->Test1<o:p></o:p></p>';// jshint ignore:line
@@ -156,7 +156,7 @@ describe('taBind.wordPaste', function () {
 			expect(pasted).toBe('<ul><li>Test1<ul><li>Test1</li></ul></li><li>Test1</li></ul>');*/
 		}));
 		it('ul > ul < ol nested list', inject(function($timeout, taSelection){
-			element.triggerHandler('paste', {clipboardData: {types: 'text/html', getData: function(){
+			element.triggerHandler('paste', {clipboardData: {types: ['text/html'], getData: function(){
 				return '<p class="MsoListBulletCxSpFirst"><!--[if !supportLists]--><span lang="EN-US" style="font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:Symbol;mso-ansi-language:EN-US">·<span style="font-stretch: normal; font-size: 7pt; font-family: \'Times New Roman\';">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></span><!--[endif]-->Test1<o:p></o:p></p>' + // jshint ignore:line
 					'<p class="MsoListBulletCxSpMiddle" style="margin-left:39.6pt"><!--[if !supportLists]--><span lang="EN-US" style="font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:Symbol;mso-ansi-language:EN-US">·<span style="font-stretch: normal; font-size: 7pt; font-family: \'Times New Roman\';">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></span><!--[endif]-->Test1<o:p></o:p></p>' + // jshint ignore:line
 					'<p class="MsoListNumberCxSpLast"><!--[if !supportLists]--><span lang="EN-US" style="font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:Symbol;mso-ansi-language:EN-US">1.<span style="font-stretch: normal; font-size: 7pt; font-family: \'Times New Roman\';">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></span><!--[endif]-->Test1<o:p></o:p></p>';// jshint ignore:line
@@ -167,7 +167,7 @@ describe('taBind.wordPaste', function () {
 			expect(pasted).toBe('<ul><li>Test1<ul><li>Test1</li></ul></li></ul><ol><li>Test1</li></ol>');*/
 		}));
 		it('ol > ul < ol nested list', inject(function($timeout, taSelection){
-			element.triggerHandler('paste', {clipboardData: {types: 'text/html', getData: function(){
+			element.triggerHandler('paste', {clipboardData: {types: ['text/html'], getData: function(){
 				return '<p class="MsoListNumberCxSpFirst"><!--[if !supportLists]--><span lang="EN-US" style="font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:Symbol;mso-ansi-language:EN-US">1.<span style="font-stretch: normal; font-size: 7pt; font-family: \'Times New Roman\';">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></span><!--[endif]-->Test1<o:p></o:p></p>' + // jshint ignore:line
 					'<p class="MsoListBulletCxSpMiddle" style="margin-left:39.6pt"><!--[if !supportLists]--><span lang="EN-US" style="font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:Symbol;mso-ansi-language:EN-US">·<span style="font-stretch: normal; font-size: 7pt; font-family: \'Times New Roman\';">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></span><!--[endif]-->Test1<o:p></o:p></p>' + // jshint ignore:line
 					'<p class="MsoListNumberCxSpLast"><!--[if !supportLists]--><span lang="EN-US" style="font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:Symbol;mso-ansi-language:EN-US">1.<span style="font-stretch: normal; font-size: 7pt; font-family: \'Times New Roman\';">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></span><!--[endif]-->Test1<o:p></o:p></p>';// jshint ignore:line
@@ -178,7 +178,7 @@ describe('taBind.wordPaste', function () {
 			expect(pasted).toBe('<ol><li>Test1<ul><li>Test1</li></ul></li><li>Test1</li></ol>');*/
 		}));
 		it('ol > ol < ol nested list', inject(function($timeout, taSelection){
-			element.triggerHandler('paste', {clipboardData: {types: 'text/html', getData: function(){
+			element.triggerHandler('paste', {clipboardData: {types: ['text/html'], getData: function(){
 				return '<p class="MsoListNumberCxSpFirst"><!--[if !supportLists]--><span lang="EN-US" style="font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:Symbol;mso-ansi-language:EN-US">1.<span style="font-stretch: normal; font-size: 7pt; font-family: \'Times New Roman\';">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></span><!--[endif]-->Test1<o:p></o:p></p>' + // jshint ignore:line
 					'<p class="MsoListNumberCxSpMiddle" style="margin-left:39.6pt"><!--[if !supportLists]--><span lang="EN-US" style="font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:Symbol;mso-ansi-language:EN-US">1.<span style="font-stretch: normal; font-size: 7pt; font-family: \'Times New Roman\';">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></span><!--[endif]-->Test1<o:p></o:p></p>' + // jshint ignore:line
 					'<p class="MsoListNumberCxSpLast"><!--[if !supportLists]--><span lang="EN-US" style="font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:Symbol;mso-ansi-language:EN-US">1.<span style="font-stretch: normal; font-size: 7pt; font-family: \'Times New Roman\';">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></span><!--[endif]-->Test1<o:p></o:p></p>';// jshint ignore:line
@@ -189,7 +189,7 @@ describe('taBind.wordPaste', function () {
 			expect(pasted).toBe('<ol><li>Test1<ol><li>Test1</li></ol></li><li>Test1</li></ol>');*/
 		}));
 		it('ol > ol < ul nested list', inject(function($timeout, taSelection){
-			element.triggerHandler('paste', {clipboardData: {types: 'text/html', getData: function(){
+			element.triggerHandler('paste', {clipboardData: {types: ['text/html'], getData: function(){
 				return '<p class="MsoListNumberCxSpFirst"><!--[if !supportLists]--><span lang="EN-US" style="font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:Symbol;mso-ansi-language:EN-US">1.<span style="font-stretch: normal; font-size: 7pt; font-family: \'Times New Roman\';">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></span><!--[endif]-->Test1<o:p></o:p></p>' + // jshint ignore:line
 					'<p class="MsoListNumberCxSpMiddle" style="margin-left:39.6pt"><!--[if !supportLists]--><span lang="EN-US" style="font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:Symbol;mso-ansi-language:EN-US">1.<span style="font-stretch: normal; font-size: 7pt; font-family: \'Times New Roman\';">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></span><!--[endif]-->Test1<o:p></o:p></p>' + // jshint ignore:line
 					'<p class="MsoListBulletCxSpLast"><!--[if !supportLists]--><span lang="EN-US" style="font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:Symbol;mso-ansi-language:EN-US">·<span style="font-stretch: normal; font-size: 7pt; font-family: \'Times New Roman\';">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></span><!--[endif]-->Test1<o:p></o:p></p>';// jshint ignore:line
@@ -200,7 +200,7 @@ describe('taBind.wordPaste', function () {
 			expect(pasted).toBe('<ol><li>Test1<ol><li>Test1</li></ol></li></ol><ul><li>Test1</li></ul>');*/
 		}));
 		it('ul > ol < ul nested list', inject(function($timeout, taSelection){
-			element.triggerHandler('paste', {clipboardData: {types: 'text/html', getData: function(){
+			element.triggerHandler('paste', {clipboardData: {types: ['text/html'], getData: function(){
 				return '<p class="MsoListBulletCxSpFirst"><!--[if !supportLists]--><span lang="EN-US" style="font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:Symbol;mso-ansi-language:EN-US">1.<span style="font-stretch: normal; font-size: 7pt; font-family: \'Times New Roman\';">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></span><!--[endif]-->Test1<o:p></o:p></p>' + // jshint ignore:line
 					'<p class="MsoListNumberCxSpMiddle" style="margin-left:39.6pt"><!--[if !supportLists]--><span lang="EN-US" style="font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:Symbol;mso-ansi-language:EN-US">1.<span style="font-stretch: normal; font-size: 7pt; font-family: \'Times New Roman\';">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></span><!--[endif]-->Test1<o:p></o:p></p>' + // jshint ignore:line
 					'<p class="MsoListBulletCxSpLast"><!--[if !supportLists]--><span lang="EN-US" style="font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:Symbol;mso-ansi-language:EN-US">·<span style="font-stretch: normal; font-size: 7pt; font-family: \'Times New Roman\';">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></span><!--[endif]-->Test1<o:p></o:p></p>';// jshint ignore:line
