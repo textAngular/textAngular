@@ -9,18 +9,6 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 
 (function(){ // encapsulate all variables so they don't become global vars
 	"Use Strict";
-	
-	/* istanbul ignore next: not sure how to test this */
-	// Require Rangy and rangy savedSelection module.
-	if(!window.rangy){
-		throw("rangy-core.js and rangy-selectionsaverestore.js are required for textAngular to work correctly, rangy-core is not yet loaded.");
-	}else{
-		window.rangy.init();
-		if(!window.rangy.saveSelection){
-			throw("rangy-selectionsaverestore.js are required for textAngular to work correctly.");
-		}
-	}
-	
 										
 	// IE version detection - http://stackoverflow.com/questions/4169160/javascript-ie-detection-why-not-use-simple-conditional-comments
 	// We need this as IE sometimes plays funny tricks with the contenteditable.
@@ -260,7 +248,20 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 		// clear taTools variable. Just catches testing and any other time that this config may run multiple times...
 		angular.forEach(taTools, function(value, key){ delete taTools[key];	});
 	}]);
-
+	
+	textAngular.run([function(){
+		/* istanbul ignore next: not sure how to test this */
+		// Require Rangy and rangy savedSelection module.
+		if(!window.rangy){
+			throw("rangy-core.js and rangy-selectionsaverestore.js are required for textAngular to work correctly, rangy-core is not yet loaded.");
+		}else{
+			window.rangy.init();
+			if(!window.rangy.saveSelection){
+				throw("rangy-selectionsaverestore.js are required for textAngular to work correctly.");
+			}
+		}
+	}]);
+	
 	textAngular.directive("textAngular", [
 		'$compile', '$timeout', 'taOptions', 'taSelection', 'taExecCommand', 'textAngularManager', '$window', '$document', '$animate', '$log', '$q',
 		function($compile, $timeout, taOptions, taSelection, taExecCommand, textAngularManager, $window, $document, $animate, $log, $q){
