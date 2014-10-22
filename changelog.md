@@ -1,3 +1,12 @@
+<a name="1.3.0-pre8"></a>
+### 1.3.0-pre8 (2014-10-23)
+
+
+#### Bug Fixes
+
+* **taBind:** Fix some paste from word issues. ([ca8af8b1](http://github.com/fraywing/textAngular/commit/ca8af8b17a363a9b70d63b1ebf5115ecb53b55c1))
+
+
 <a name="1.3.0-pre7"></a>
 ### 1.3.0-pre7 (2014-10-22)
 

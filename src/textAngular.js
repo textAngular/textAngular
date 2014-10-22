@@ -1,8 +1,8 @@
-/*
+/*!
 textAngular
 Author : Austin Anderson
 License : 2013 MIT
-Version 1.3.0-pre7
+Version 1.3.0-pre8
 
 See README.md or https://github.com/fraywing/textAngular/wiki for requirements and use.
 */
@@ -2244,7 +2244,6 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 					// check for blockelements - if they exist then we have to split the current element in half (and all others up to the closest block element) and insert all children in-between.
 					// If there are no block elements, or there is a mixture we need to create textNodes for the non wrapped text (we don't want them spans messing up the picture).
 					nodes = [];
-					var matchBlockEls = false;
 					for(_childI = 0; _childI < children.length; _childI++){
 						if(!(
 							(children[_childI].nodeName.toLowerCase() === 'p' && children[_childI].innerHTML.trim() === '') || // empty p element
