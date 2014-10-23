@@ -68,7 +68,8 @@ module.exports = function (grunt) {
 			options: {
 				mangle: true,
 				compress: true,
-				wrap: true
+				wrap: true,
+				preserveComments: 'some'
 			},
 			my_target: {
 				files: {
