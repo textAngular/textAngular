@@ -644,7 +644,7 @@ angular.module('textAngularSetup', [])
 		}
 	});
 	taRegisterTool('wordcount', {
-		display: '<div id="toolbarWC" style="display:block; width:100px;">Words:{{wordcount}}</div>',
+		display: '<div id="toolbarWC" style="display:block; min-width:100px;">Words:{{wordcount}}</div>',
 		disabled: true,
 		wordcount: 0,
 		activeState: function(){ // this fires on keyup
@@ -664,7 +664,7 @@ angular.module('textAngularSetup', [])
 		}
 	});
 	taRegisterTool('charcount', {
-		display: '<div id="toolbarCC" style="display:block; width:120px;">Characters:{{charcount}}</div>',
+		display: '<div id="toolbarCC" style="display:block; min-width:120px;">Characters:{{charcount}}</div>',
 		disabled: true,
 		charcount: 0,
 		activeState: function(){ // this fires on keyup
