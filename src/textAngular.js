@@ -1,5 +1,5 @@
-/*!
-textAngular
+/*
+@license textAngular
 Author : Austin Anderson
 License : 2013 MIT
 Version 1.3.0-pre8
@@ -1183,7 +1183,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 									for(var i = 0; i <= dom[0].childNodes.length; i++){
 										if(!dom[0].childNodes[i] || dom[0].childNodes[i].nodeName === "#text" || dom[0].childNodes[i].tagName.toLowerCase() !== "p") continue;
 										var el = angular.element(dom[0].childNodes[i]);
-										var _listMatch = (el.attr('class') || '').match(/MsoList(Bullet|Number|Paragraph)(|CxSp(First|Middle|Last))/i);
+										var _listMatch = (el.attr('class') || '').match(/MsoList(Bullet|Number|Paragraph)(CxSp(First|Middle|Last)|)/i);
 										
 										if(_listMatch){
 											if(el[0].childNodes.length < 2 || el[0].childNodes[1].childNodes.length < 1){
@@ -1194,7 +1194,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 											var _indentMatch = (el.attr('style') || '').match(/margin-left:([\-\.0-9]*)pt/i);
 											var indent = parseFloat((_indentMatch)?_indentMatch[1]:0);
 											
-											if (!_listMatch[2] || _listMatch[2].toLowerCase() === "first" || (_list.lastIndent === null && _list.element === null) || (_list.isUl !== isUl && _list.lastIndent === indent)) {
+											if (!_listMatch[3] || _listMatch[3].toLowerCase() === "first" || (_list.lastIndent === null) || (_list.isUl !== isUl && _list.lastIndent === indent)) {
 												_list.isUl = isUl;
 												_list.element = angular.element(isUl ? "<ul>" : "<ol>");
 												el.after(_list.element);
@@ -1226,7 +1226,10 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 										node.remove();
 									};
 									
-									angular.forEach(dom.find('span'), _unwrapElement);
+									angular.forEach(dom.find('span'), function(node){
+										node.removeAttribute('lang');
+										if(node.attributes.length <= 0) _unwrapElement(node);
+									});
 									angular.forEach(dom.find('font'), _unwrapElement);
 									text = dom.html();
 								}

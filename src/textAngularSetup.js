@@ -1,5 +1,5 @@
 /*!
-textAngular
+@license textAngular
 Author : Austin Anderson
 License : 2013 MIT
 Version 1.3.0-pre8

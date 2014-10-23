@@ -103,6 +103,17 @@ describe('taBind.wordPaste', function () {
 			$rootScope.$digest();
 			expect(pasted).toBe('<ul><li>Test1</li><li>Test1</li></ul>');
 		}));
+		
+		it('subsequent list', inject(function($timeout, taSelection){
+			element.triggerHandler('paste', {clipboardData: {types: ['text/html'], getData: function(){
+				return '<p class="MsoListParagraphCxSpFirst" style="text-indent:-18.0pt;mso-list:l1 level1 lfo1"><!--[if !supportLists]--><span lang="EN-US" style="font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:Symbol"><span style="mso-list:Ignore">·<span style="font:7.0pt &quot;Times New Roman&quot;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></span></span><!--[endif]--><span lang="EN-US">no vidisse partiendocomplectitur has. </span></p><p class="MsoListParagraphCxSpLast" style="text-indent:-18.0pt;mso-list:l1 level1 lfo1"><!--[if !supportLists]--><span lang="EN-US" style="font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:Symbol"><span style="mso-list:Ignore">·<span style="font:7.0pt &quot;Times New Roman&quot;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></span></span><!--[endif]--><span lang="EN-US">Te sit iusto viris tibique, nevoluptaria philosophia cum, cum ad vivendum mediocritatem. </span></p><p  style="text-indent:18.0pt"><span lang="EN-US"></span></p><p  style="text-indent:18.0pt"><span lang="EN-US">Alii mazimsoleat ne sed, dicta putant ad qui. </span></p><p class="MsoListParagraphCxSpFirst" style="margin-left:18.0pt;mso-add-space:auto;text-indent:-18.0pt;mso-list:l0 level1 lfo2"><!--[if !supportLists]--><span lang="EN-US" style="mso-fareast-font-family:Cambria;mso-fareast-theme-font:minor-latin;mso-bidi-font-family:Cambria;mso-bidi-theme-font:minor-latin"><span style="mso-list:Ignore">1.<span style="font:7.0pt &quot;Times New Roman&quot;">&nbsp;&nbsp;&nbsp;&nbsp;</span></span></span><!--[endif]--><span lang="EN-US">Has accusam scriptorem cu, </span></p><p class="MsoListParagraphCxSpLast" style="margin-left:39.6pt;mso-add-space:auto;text-indent:-21.6pt;mso-list:l0 level2 lfo2"><!--[if !supportLists]--><span lang="EN-US" style="mso-fareast-font-family:Cambria;mso-fareast-theme-font:minor-latin;mso-bidi-font-family:Cambria;mso-bidi-theme-font:minor-latin"><span style="mso-list:Ignore">1.1.<span style="font:7.0pt &quot;Times New Roman&quot;">&nbsp; </span></span></span><!--[endif]--><span lang="EN-US">aliquam complectitur vim ne.</span></p>';// jshint ignore:line
+			}}});
+			$timeout.flush();
+			$rootScope.$digest();
+			expect(pasted).toBe('<ul><li>no vidisse partiendocomplectitur has. </li><li>Te sit iusto viris tibique, nevoluptaria philosophia cum, cum ad vivendum mediocritatem. </li></ul><p></p><p>Alii mazimsoleat ne sed, dicta putant ad qui. </p><ol><li>Has accusam scriptorem cu, <ol><li>aliquam complectitur vim ne.</li></ol></li></ol>');
+		}));
+		
+		
 		// indents - ul > ul, ul > ol, ol > ol, ol > ul
 		
 		it('ul > ul nested list', inject(function($timeout, taSelection){
