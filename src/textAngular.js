@@ -1231,7 +1231,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 									text = dom.html();
 								}
 								
-								text = taSanitize(text);
+								text = taSanitize(text, '', _disableSanitizer);
 								taSelection.insertHtml(text);
 								$timeout(function(){
 									ngModel.$setViewValue(_compileHtml());

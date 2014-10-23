@@ -122,6 +122,45 @@ describe('taBind.events', function () {
 				}));
 			});
 		});
+
+		describe('on content-editable with ta-unsafe-sanitizer=true attribute', function () {
+			var $rootScope, element, $timeout;
+			beforeEach(inject(function (_$compile_, _$rootScope_, _$timeout_, $document, $window) {
+				$rootScope = _$rootScope_;
+				$timeout = _$timeout_;
+				$rootScope.html = '<p>Test Contents</p>';
+				element = _$compile_('<div contenteditable="true" ta-unsafe-sanitizer="true" ta-bind ng-model="html"></div>')($rootScope);
+				$document.find('body').append(element);
+				$rootScope.$digest();
+				var sel = $window.rangy.getSelection();
+				var range = $window.rangy.createRangyRange();
+				range.selectNodeContents(element.find('p')[0]);
+				sel.setSingleRange(range);
+			}));
+			afterEach(function(){
+				element.remove();
+			});
+
+			// var text = (e.originalEvent || e).clipboardData.getData('text/plain') || $window.clipboardData.getData('Text');
+			describe('should update model from paste keeping all styles', function () {
+				it('non-ie based w/o jquery', inject(function($window){
+					element.triggerHandler('paste', {clipboardData: {types: ['text/html'], getData: function(){ return '<span style="font-size:10px">Test 4 Content</span>'; }}});
+					$timeout.flush();
+					$rootScope.$digest();
+					expect($rootScope.html).toBe('<p><span style="font-size:10px">Test 4 Content</span></p>');
+				}));
+
+				it('non-ie based w/ jquery', inject(function($window){
+					element.triggerHandler('paste', {originalEvent: {clipboardData: {types: ['text/html'], getData: function(){ return '<span style="font-size:10px">Test 4 Content</span>';} }}});
+					$timeout.flush();
+					$rootScope.$digest();
+					expect($rootScope.html).toBe('<p><span style="font-size:10px">Test 4 Content</span></p>');
+				}));
+
+			});
+
+		});
+
 	});
 	
 	describe('emits the ta-drop-event event correctly', function(){
