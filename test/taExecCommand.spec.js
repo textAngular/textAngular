@@ -376,12 +376,28 @@ describe('taExecCommand', function(){
 				}));
 				it('to ol', inject(function(taSelection, taExecCommand){
 					taExecCommand()('insertorderedlist', false, null);
-					expect(insertedHtml).toBe('<ol></ol>');
+					expect(insertedHtml).toBe('');
 				}));
 				
 				it('to ul', inject(function(taSelection, taExecCommand){
 					taExecCommand()('insertunorderedlist', false, null);
-					expect(insertedHtml).toBe('<ul></ul>');
+					expect(insertedHtml).toBe('');
+				}));
+			});
+			describe('text-only ta-bind', function(){
+				beforeEach(inject(function(taSelection){
+					element = angular.element('<div class="ta-bind">testsomecontent</div>');
+					taSelection.element = element[0];
+					taSelection.getOnlySelectedElements = function(){ return []; };
+				}));
+				it('to ol', inject(function(taSelection, taExecCommand){
+					taExecCommand()('insertorderedlist', false, null);
+					expect(element.html()).toBe('<ol><li>testsomecontent</li></ol>');
+				}));
+				
+				it('to ul', inject(function(taSelection, taExecCommand){
+					taExecCommand()('insertunorderedlist', false, null);
+					expect(element.html()).toBe('<ul><li>testsomecontent</li></ul>');
 				}));
 			});
 			describe('single element selected', function(){

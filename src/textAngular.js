@@ -865,7 +865,12 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 						}else if(tagName.match(BLOCKELEMENTS)){
 							// if we get here then all the contents of the ta-bind are selected
 							_nodes = taSelection.getOnlySelectedElements();
-							if(_nodes.length === 1 && (_nodes[0].tagName.toLowerCase() === 'ol' || _nodes[0].tagName.toLowerCase() === 'ul')){
+							if(_nodes.length === 0){
+								// here is if there is only text in ta-bind ie <div ta-bind>test content</div>
+								$target = angular.element('<' + selfTag + '><li>' + selectedElement.innerHTML + '</li></' + selfTag + '>');
+								$selected.html('');
+								$selected.append($target);
+							}else if(_nodes.length === 1 && (_nodes[0].tagName.toLowerCase() === 'ol' || _nodes[0].tagName.toLowerCase() === 'ul')){
 								if(_nodes[0].tagName.toLowerCase() === selfTag){
 									// remove
 									return listToDefault(angular.element(_nodes[0]), taDefaultWrap);
@@ -884,13 +889,8 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 									}
 								}
 								$target = angular.element('<' + selfTag + '>' + html + '</' + selfTag + '>');
-								if($nodes.length){
-									$nodes.pop().replaceWith($target);
-									angular.forEach($nodes, function($node){ $node.remove(); });
-								}else{
-									// selection was empty, insert html (cursor moved automatically)
-									return taSelection.insertHtml('<' + selfTag + '>' + html + '</' + selfTag + '>');
-								}
+								$nodes.pop().replaceWith($target);
+								angular.forEach($nodes, function($node){ $node.remove(); });
 							}
 							taSelection.setSelectionToElementEnd($target[0]);
 							return;
