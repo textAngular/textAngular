@@ -50,7 +50,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 	var globalContentEditableBlur = false;
 	/* istanbul ignore next: Browser Un-Focus fix for webkit */
 	if(webkit) {
-		document.addEventListener("click", function(_event){
+		document.addEventListener("mousedown", function(_event){
 			var e = _event || window.event;
 			var curelement = e.target;
 			if(globalContentEditableBlur && curelement !== null){
