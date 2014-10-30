@@ -944,15 +944,11 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 							_nodes = taSelection.getOnlySelectedElements();
 							if(_nodes.length === 0) _nodes = [$target[0]];
 							// find the parent block element if any of the nodes are inline or text
-							var inlineNodePresent = false;
-							angular.forEach(_nodes, function(node){
-								if(node.nodeType === 3 || !node.tagName.match(BLOCKELEMENTS)){
-									inlineNodePresent = true;
-								}
-							});
-							if(inlineNodePresent){
-								while(_nodes[0].nodeType === 3 || !_nodes[0].tagName.match(BLOCKELEMENTS)){
-									_nodes = [_nodes[0].parentNode];
+							for(i = 0; i < _nodes.length; i++){
+								if(_nodes[i].nodeType === 3 || !_nodes[i].tagName.match(BLOCKELEMENTS)){
+									while(_nodes[i].nodeType === 3 || !_nodes[i].tagName || !_nodes[i].tagName.match(BLOCKELEMENTS)){
+										_nodes[i] = _nodes[i].parentNode;
+									}
 								}
 							}
 							if(angular.element(_nodes[0]).hasClass('ta-bind')){
@@ -2199,10 +2195,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 			},
 			getOnlySelectedElements: function(){
 				var sel = rangy.getSelection();
-				if (!sel.collapsed) {
-					return sel.getRangeAt(0).getNodes();
-				}
-				return [];
+				return sel.getRangeAt(0).getNodes([1]);
 			},
 			// Some basic selection functions
 			getSelectionElement: function () {
