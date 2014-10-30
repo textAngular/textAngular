@@ -762,14 +762,14 @@ describe('textAngular', function(){
 			$rootScope.html = undefined;
 			var element = $compile('<text-angular name="test" ng-model="html">Test Contents</text-angular>')($rootScope);
 			$rootScope.$digest();
-			expect(textAngularManager.retrieveEditor('test').scope.displayElements.text.html()).toBe('Test Contents');
+			expect(textAngularManager.retrieveEditor('test').scope.displayElements.text.html()).toBe('<p>Test Contents</p>');
 		}));
 		
 		it('should handle initial null to originalContents', inject(function ($compile, $rootScope, textAngularManager) {
 			$rootScope.html = null;
 			var element = $compile('<text-angular name="test" ng-model="html">Test Contents</text-angular>')($rootScope);
 			$rootScope.$digest();
-			expect(textAngularManager.retrieveEditor('test').scope.displayElements.text.html()).toBe('Test Contents');
+			expect(textAngularManager.retrieveEditor('test').scope.displayElements.text.html()).toBe('<p>Test Contents</p>');
 		}));
 		
 		describe('should reset', function(){

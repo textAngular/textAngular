@@ -151,6 +151,22 @@ describe('taBind.validation', function () {
 			});
 		});
 		
+		describe('should handle blank test', function () {
+			beforeEach(function(){
+				$rootScope.html = '<pre><br></pre>';
+				$rootScope.$digest();
+			});
+			it('ng-required', function(){
+				expect($rootScope.form.test.$error.required).toBe(true);
+			});
+			it('valid', function(){
+				expect($rootScope.form.$valid).toBe(false);
+			});
+			it('field valid', function(){
+				expect($rootScope.form.test.$valid).toBe(false);
+			});
+		});
+		
 		describe('should change on input update', function () {
 			beforeEach(inject(function(textAngularManager){
 				element.html('<div>Test Change Content</div>');

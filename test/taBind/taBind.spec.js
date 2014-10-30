@@ -49,6 +49,11 @@ describe('taBind', function () {
 			$rootScope.$digest();
 			expect(element.html()).toBe('<div>Test 2 Content</div>');
 		});
+		it('should wrap content from model change', function () {
+			$rootScope.html = 'Test 2 Content';
+			$rootScope.$digest();
+			expect(element.html()).toBe('<p>Test 2 Content</p>');
+		});
 		
 		it('should prevent links default event', function () {
 			$rootScope.html = '<div><a href="test">Test</a> 2 Content</div>';

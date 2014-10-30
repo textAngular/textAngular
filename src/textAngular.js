@@ -821,7 +821,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 			listElement.remove();
 			selectLi($target.find('li')[0]);
 		};
-		return function(taDefaultWrap){
+		return function(taDefaultWrap, topNode){
 			taDefaultWrap = taBrowserTag(taDefaultWrap);
 			return function(command, showUI, options){
 				var i, $target, html, _nodes, next, optionsTagName, selectedElement;
@@ -988,11 +988,11 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 						var _selection = taSelection.getSelection();
 						if(_selection.collapsed){
 							// insert text at selection, then select then just let normal exec-command run
-							taSelection.insertHtml('<a href="' + options + '">' + options + '</a>');
+							taSelection.insertHtml('<a href="' + options + '">' + options + '</a>', topNode);
 							return;
 						}
 					}else if(command.toLowerCase() === 'inserthtml'){
-						taSelection.insertHtml(options);
+						taSelection.insertHtml(options, topNode);
 						return;
 					}
 				}
@@ -1020,14 +1020,14 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 				
 				// defaults to the paragraph element, but we need the line-break or it doesn't allow you to type into the empty element
 				// non IE is '<p><br/></p>', ie is '<p></p>' as for once IE gets it correct...
-				var _defaultVal, _defaultTest, _trimTest;
+				var _defaultVal, _defaultTest;
+				var _trimTest = /^<[^>]+>(\s|&nbsp;)*<\/[^>]+>$/ig;
 				// set the default to be a paragraph value
 				if(attrs.taDefaultWrap === undefined) attrs.taDefaultWrap = 'p';
 				/* istanbul ignore next: ie specific test */
 				if(attrs.taDefaultWrap === ''){
 					_defaultVal = '';
 					_defaultTest = (ie === undefined)? '<div><br></div>' : (ie >= 11)? '<p><br></p>' : (ie <= 8)? '<P>&nbsp;</P>' : '<p>&nbsp;</p>';
-					_trimTest = (ie === undefined)? /^<div>(\s|&nbsp;)*<\/div>$/ig : /^<p>(\s|&nbsp;)*<\/p>$/ig;
 				}else{
 					_defaultVal = (ie === undefined || ie >= 11)?
 						'<' + attrs.taDefaultWrap + '><br></' + attrs.taDefaultWrap + '>' :
@@ -1039,8 +1039,14 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 						(ie <= 8)?
 							'<' + attrs.taDefaultWrap.toUpperCase() + '>&nbsp;</' + attrs.taDefaultWrap.toUpperCase() + '>' :
 							'<' + attrs.taDefaultWrap + '>&nbsp;</' + attrs.taDefaultWrap + '>';
-					_trimTest = new RegExp('^<' + attrs.taDefaultWrap + '>(\\s|&nbsp;)*<\\/' + attrs.taDefaultWrap + '>$', 'ig');
 				}
+				
+				var _blankTest = function(val){
+					val = val.trim();
+					if(val.length === 0 || val === _defaultTest || _trimTest.test(val)) return true;
+					if(/>\s*(([^\s<]+)\s*)+</.test(val) || /^([^\s<>]+\s*)+$/.test(val)) return false;// this regex tests if there is some content that isn't white space between tags, or there is just some text passed in
+					return true;
+				};
 				
 				element.addClass('ta-bind');
 				
@@ -1118,7 +1124,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 				var _setViewValue = function(val, triggerUndo){
 					if(typeof triggerUndo === "undefined" || triggerUndo === null) triggerUndo = true && _isContentEditable; // if not contentEditable then the native undo/redo is fine
 					if(!val) val = _compileHtml();
-					if(val === _defaultTest || _trimTest.test(val)){
+					if(_blankTest(val)){
 						// this avoids us from tripping the ng-pristine flag if we click in and out with out typing
 						if(ngModel.$viewValue !== '') ngModel.$setViewValue('');
 						if(triggerUndo && ngModel.$undoManager.current() !== '') ngModel.$undoManager.push('');
@@ -1235,7 +1241,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 								}
 								
 								text = taSanitize(text, '', _disableSanitizer);
-								taSelection.insertHtml(text);
+								taSelection.insertHtml(text, element[0]);
 								$timeout(function(){
 									ngModel.$setViewValue(_compileHtml());
 								}, 0);
@@ -1379,7 +1385,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 				
 				// trigger the validation calls
 				var _validity = function(value){
-					if(attrs.required) ngModel.$setValidity('required', !(!value || value.trim() === _defaultTest || value.trim().match(_trimTest) || value.trim() === ''));
+					if(attrs.required) ngModel.$setValidity('required', !_blankTest(value));
 					return value;
 				};
 				// parsers trigger from the above keyup function or any other time that the viewValue is updated and parses it for storage in the ngModel
@@ -1387,6 +1393,14 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 				ngModel.$parsers.push(_validity);
 				// because textAngular is bi-directional (which is awesome) we need to also sanitize values going in from the server
 				ngModel.$formatters.push(_sanitize);
+				ngModel.$formatters.push(function(value){
+					if(_blankTest(value)) return value;
+					var domTest = angular.element("<div>" + value + "</div>");
+					if(domTest.children().length === 0){
+						value = "<" + attrs.taDefaultWrap + ">" + value + "</" + attrs.taDefaultWrap + ">";
+					}
+					return value;
+				});
 				ngModel.$formatters.push(_validity);
 				ngModel.$formatters.push(function(value){
 					return ngModel.$undoManager.push(value || '');
@@ -2235,7 +2249,8 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 				rangy.getSelection().setSingleRange(range);
 			},
 			// from http://stackoverflow.com/questions/6690752/insert-html-at-caret-in-a-contenteditable-div
-			insertHtml: function(html){
+			// topNode is the contenteditable normally, all manipulation MUST be inside this.
+			insertHtml: function(html, topNode){
 				var parent, secondParent, _childI, nodes, startIndex, startNodes, endNodes, i, lastNode;
 				var element = angular.element("<div>" + html + "</div>");
 				var range = rangy.getSelection().getRangeAt(0);
@@ -2266,7 +2281,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 				if(isInline){
 					range.deleteContents();
 				}else{ // not inline insert
-					if(range.collapsed){
+					if(range.collapsed && range.startContainer !== topNode && range.startContainer.parentNode !== topNode){
 						// split element into 2 and insert block element in middle
 						if(range.startContainer.nodeType === 3){ // if text node
 							parent = range.startContainer.parentNode;
