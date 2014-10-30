@@ -1197,7 +1197,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 												continue;
 											}
 											var isUl = _listMatch[1].toLowerCase() === "bullet" || (_listMatch[1].toLowerCase() !== "bullet" && !(el[0].childNodes[1].innerHTML.match(/^[0-9a-z]/ig) || el[0].childNodes[1].childNodes[0].innerHTML.match(/^[0-9a-z]/ig)));
-											var _indentMatch = (el.attr('style') || '').match(/margin-left:([\-\.0-9]*)pt/i);
+											var _indentMatch = (el.attr('style') || '').match(/margin-left:([\-\.0-9]*)/i);
 											var indent = parseFloat((_indentMatch)?_indentMatch[1]:0);
 											
 											if (!_listMatch[3] || _listMatch[3].toLowerCase() === "first" || (_list.lastIndent === null) || (_list.isUl !== isUl && _list.lastIndent === indent)) {
