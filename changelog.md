@@ -1,3 +1,15 @@
+<a name="1.3.0-pre10"></a>
+### 1.3.0-pre10 (2014-10-30)
+
+
+#### Bug Fixes
+
+* **taBind:**
+  * Fix paste from word issue with nested lists and different margin measurements. ([20c4ea2e](http://github.com/fraywing/textAngular/commit/20c4ea2efcce918e35c9229f3f15bfce85889ba1))
+  * Issue with unwrapped/empty content. ([be883684](http://github.com/fraywing/textAngular/commit/be8836840c2bb964537f329428e056a528eff8d2))
+* **textAngularSetup:** Fix wordcount and charcount display with large numbers. ([42f1e349](http://github.com/fraywing/textAngular/commit/42f1e349374cef7d67cc60e257e2e9eec70defeb))
+
+
 <a name="1.3.0-pre9"></a>
 ### 1.3.0-pre9 (2014-10-24)
 
