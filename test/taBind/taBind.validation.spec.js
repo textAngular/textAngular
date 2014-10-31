@@ -167,6 +167,22 @@ describe('taBind.validation', function () {
 			});
 		});
 		
+		describe('should handle inline elements like img', function () {
+			beforeEach(function(){
+				$rootScope.html = '<pre><img src="test.jpg"/></pre>';
+				$rootScope.$digest();
+			});
+			it('ng-required', function(){
+				expect($rootScope.form.test.$error.required).toBe(false);
+			});
+			it('valid', function(){
+				expect($rootScope.form.$valid).toBe(true);
+			});
+			it('field valid', function(){
+				expect($rootScope.form.test.$valid).toBe(true);
+			});
+		});
+		
 		describe('should change on input update', function () {
 			beforeEach(inject(function(textAngularManager){
 				element.html('<div>Test Change Content</div>');

@@ -43,7 +43,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 		return ((rv > -1) ? rv : undef);
 	}());
 	// detect webkit
-	var webkit = /AppleWebKit\/([\d.]+)/.test(navigator.userAgent);
+	var webkit = /AppleWebKit\/([\d.]+)/i.test(navigator.userAgent);
 	
 	// fix a webkit bug, see: https://gist.github.com/shimondoodkin/1081133
 	// this is set true when a blur occurs as the blur of the ta-bind triggers before the click
@@ -802,7 +802,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 			taSelection.setSelectionToElementEnd($target[0]);
 		};
 		var selectLi = function(liElement){
-			if(/(<br(|\/)>)$/.test(liElement.innerHTML.trim())) taSelection.setSelectionBeforeElement(angular.element(liElement).find("br")[0]);
+			if(/(<br(|\/)>)$/i.test(liElement.innerHTML.trim())) taSelection.setSelectionBeforeElement(angular.element(liElement).find("br")[0]);
 			else taSelection.setSelectionToElementEnd(liElement);
 		};
 		var listToList = function(listElement, newListTag){
@@ -1011,8 +1011,9 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 				var _focussed = false;
 				var _disableSanitizer = attrs.taUnsafeSanitizer || taOptions.disableSanitizer;
 				var _lastKey;
-				var BLOCKED_KEYS = /^(9|19|20|27|33|34|35|36|37|38|39|40|45|112|113|114|115|116|117|118|119|120|121|122|123|144|145)$/;
-				var UNDO_TRIGGER_KEYS = /^(8|13|32|46|59|61|107|109|186|187|188|189|190|191|192|219|220|221|222)$/; // spaces, enter, delete, backspace, all punctuation
+				var BLOCKED_KEYS = /^(9|19|20|27|33|34|35|36|37|38|39|40|45|112|113|114|115|116|117|118|119|120|121|122|123|144|145)$/i;
+				var UNDO_TRIGGER_KEYS = /^(8|13|32|46|59|61|107|109|186|187|188|189|190|191|192|219|220|221|222)$/i; // spaces, enter, delete, backspace, all punctuation
+				var INLINETAGS_NONBLANK = /<(a|abbr|acronym|bdi|bdo|big|cite|code|del|dfn|img|ins|kbd|label|map|mark|q|ruby|rp|rt|s|samp|time|tt|var)[^>]*>/i;
 				
 				// defaults to the paragraph element, but we need the line-break or it doesn't allow you to type into the empty element
 				// non IE is '<p><br/></p>', ie is '<p></p>' as for once IE gets it correct...
@@ -1037,11 +1038,10 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 							'<' + attrs.taDefaultWrap + '>&nbsp;</' + attrs.taDefaultWrap + '>';
 				}
 				
-				var _blankTest = function(val){
-					val = val.trim();
-					if(val.length === 0 || val === _defaultTest || _trimTest.test(val)) return true;
-					if(/>\s*(([^\s<]+)\s*)+</.test(val) || /^([^\s<>]+\s*)+$/.test(val)) return false;// this regex tests if there is some content that isn't white space between tags, or there is just some text passed in
-					return true;
+				var _blankTest = function(_blankVal){
+					_blankVal = _blankVal.trim();
+					return (_blankVal.length === 0 || _blankVal === _defaultTest || _trimTest.test(_blankVal) ||
+						!(/>\s*(([^\s<]+)\s*)+</i.test(_blankVal) || /^([^\s<>]+\s*)+$/i.test(_blankVal) || INLINETAGS_NONBLANK.test(_blankVal)));// this regex tests if there is some content that isn't white space between tags, or there is just some text passed in
 				};
 				
 				element.addClass('ta-bind');
@@ -1117,17 +1117,17 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 					throw ('textAngular Error: attempting to update non-editable taBind');
 				};
 				
-				var _setViewValue = function(val, triggerUndo){
+				var _setViewValue = function(_val, triggerUndo){
 					if(typeof triggerUndo === "undefined" || triggerUndo === null) triggerUndo = true && _isContentEditable; // if not contentEditable then the native undo/redo is fine
-					if(!val) val = _compileHtml();
-					if(_blankTest(val)){
+					if(typeof _val === "undefined" || _val === null) _val = _compileHtml();
+					if(_blankTest(_val)){
 						// this avoids us from tripping the ng-pristine flag if we click in and out with out typing
 						if(ngModel.$viewValue !== '') ngModel.$setViewValue('');
 						if(triggerUndo && ngModel.$undoManager.current() !== '') ngModel.$undoManager.push('');
 					}else{
-						if(ngModel.$viewValue !== val){
-							ngModel.$setViewValue(val);
-							if(triggerUndo) ngModel.$undoManager.push(val);
+						if(ngModel.$viewValue !== _val){
+							ngModel.$setViewValue(_val);
+							if(triggerUndo) ngModel.$undoManager.push(_val);
 						}
 					}
 				};
@@ -1263,9 +1263,9 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 									_types += " " + clipboardData.types[_t];
 								}
 								/* istanbul ignore next: browser tests */
-								if (/text\/html/.test(_types)) {
+								if (/text\/html/i.test(_types)) {
 									element[0].innerHTML = clipboardData.getData('text/html');
-								} else if (/text\/plain/.test(_types)) {
+								} else if (/text\/plain/i.test(_types)) {
 									element[0].innerHTML = clipboardData.getData('text/plain');
 								} else {
 									element[0].innerHTML = "";
@@ -2303,12 +2303,12 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 						// put cursor to end of inserted content
 						range.setStartAfter(parent);
 						range.setEndAfter(parent);
-						if(/^(|<br(|\/)>)$/.test(parent.innerHTML.trim())){
+						if(/^(|<br(|\/)>)$/i.test(parent.innerHTML.trim())){
 							range.setStartBefore(parent);
 							range.setEndBefore(parent);
 							angular.element(parent).remove();
 						}
-						if(/^(|<br(|\/)>)$/.test(secondParent.innerHTML.trim())) angular.element(secondParent).remove();
+						if(/^(|<br(|\/)>)$/i.test(secondParent.innerHTML.trim())) angular.element(secondParent).remove();
 					}else{
 						range.deleteContents();
 					}
