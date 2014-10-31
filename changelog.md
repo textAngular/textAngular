@@ -1,3 +1,13 @@
+<a name="1.3.0-pre11"></a>
+### 1.3.0-pre11 (2014-10-31)
+
+
+#### Bug Fixes
+
+* **taBind:** Fix for only inline elements like `img` ([7123785f](http://github.com/fraywing/textAngular/commit/7123785fe400130f3a9f4e7469aadca4c94534df))
+* **taExecCommand:** Fixes bug with blockquotes. ([5edb37cf](http://github.com/fraywing/textAngular/commit/5edb37cf3d8a2f537139401365bd06e22db97b16))
+
+
 <a name="1.3.0-pre10"></a>
 ### 1.3.0-pre10 (2014-10-30)
 
