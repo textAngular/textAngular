@@ -821,6 +821,17 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 			listElement.remove();
 			selectLi($target.find('li')[0]);
 		};
+        function findListContainer($selected) {
+            if ($selected[0].tagName && $selected[0].tagName.match(/li/gi)) {
+                return $selected;
+            }else if($selected[0].tagName && $selected[0].tagName.match(BLOCKELEMENTS)){
+                return $selected;
+            }else if($selected.parent().hasClass('ta-bind')){
+                return $selected;
+            } else{
+                return findListContainer($selected.parent());
+            }
+        }
 		return function(taDefaultWrap, topNode){
 			taDefaultWrap = taBrowserTag(taDefaultWrap);
 			return function(command, showUI, options){
@@ -895,7 +906,79 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 							taSelection.setSelectionToElementEnd($target[0]);
 							return;
 						}
-					}else if(command.toLowerCase() === 'formatblock'){
+					}else if(command.toLowerCase() === 'indent'){
+                        var _selected = $selected;
+                        $selected = findListContainer($selected);
+                        tagName = $selected[0].tagName;
+                        var prev = $selected[0].previousSibling;
+                        var parent = $selected.parent();
+                        if (!tagName || !tagName.match(/li/gi) || !parent[0].tagName || !parent[0].tagName.match(/[ou]l/gi)) {
+                            console.log('indent of non-list elements. use default (blockquote)');
+                        }else if(!prev) {
+                            /* if there is no previous sibling in the OL container, then do nothing. */
+                            return;
+                        }else if(prev && prev.lastChild && prev.lastChild.tagName && prev.lastChild.tagName.match(/[ou]l/gi)) {
+                            prev.lastChild.appendChild($selected[0]);
+                            taSelection.setSelectionToElementEnd($selected[0]);
+                            return;
+                        }else{
+                            var listContainer = document.createElement(parent[0].tagName.toLowerCase());
+                            prev.appendChild(listContainer);
+                            listContainer.appendChild($selected[0]);
+                            taSelection.setSelectionToElementEnd($selected[0]);
+                            return;
+                        }
+                    }else if(command.toLowerCase() === 'outdent'){
+                        var _selected = $selected;
+                        $selected = findListContainer($selected);
+                        tagName = $selected[0].tagName;
+                        var prev = $selected[0].previousSibling;
+                        var parent = $selected.parent();
+                        if (!tagName || !tagName.match(/li/gi) || !parent[0].tagName || !parent[0].tagName.match(/[ou]l/gi)) {
+                            console.log('indent of non-list elements. use default (blockquote)');
+                        }else if(parent.parent()[0].tagName.match(/li/i)) {
+                            if (parent[0].lastChild !== $selected[0]) {
+                                var listContainer = angular.element("<" + parent[0].tagName + ">");
+                                while ($selected[0].nextSibling) {
+                                    listContainer.append($selected[0].nextSibling);
+                                }
+                                $selected.append(listContainer[0]);
+                            }
+                            parent.parent().after($selected[0]);
+                            if (parent.children().length === 0) parent.remove();
+                            taSelection.setSelectionToElementEnd($selected.children()[0]);
+                            return;
+                        }else{
+                            function wrap ($selected) {
+                                var elem = angular.element('<' + taDefaultWrap + '>');
+                                if ($selected[0].childNodes && $selected[0].childNodes.length > 0) {
+                                    while ($selected[0].childNodes.length > 0) {
+                                        elem[0].appendChild($selected[0].childNodes[0]);
+                                    }
+                                } else {
+                                    elem[0].innerHTML = $selected[0].innerHTML;
+                                }
+                                return elem;
+                            }
+                            if (parent[0].lastChild !== $selected[0]) {
+                                var listContainer = angular.element("<" + parent[0].tagName + ">");
+                                while ($selected[0].nextSibling) {
+                                    console.log($selected[0].nextSibling);
+                                    listContainer.append($selected[0].nextSibling);
+                                }
+                                var wrapElem = wrap($selected);
+                                parent.after(wrapElem[0]);
+                                wrapElem.after(listContainer[0]);
+                            } else {
+                                var wrapElem = wrap($selected);
+                                parent.after(wrapElem[0]);
+                            }
+                            $selected.remove();
+                            if (parent.children().length === 0) parent.remove();
+                            taSelection.setSelectionToElementEnd(wrapElem[0]);
+                            return;
+                        }
+                    }else if(command.toLowerCase() === 'formatblock'){
 						optionsTagName = options.toLowerCase().replace(/[<>]/ig, '');
 						if(tagName === 'li') $target = $selected.parent();
 						else $target = $selected;
@@ -1195,7 +1278,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 											var isUl = _listMatch[1].toLowerCase() === "bullet" || (_listMatch[1].toLowerCase() !== "bullet" && !(el[0].childNodes[1].innerHTML.match(/^[0-9a-z]/ig) || el[0].childNodes[1].childNodes[0].innerHTML.match(/^[0-9a-z]/ig)));
 											var _indentMatch = (el.attr('style') || '').match(/margin-left:([\-\.0-9]*)/i);
 											var indent = parseFloat((_indentMatch)?_indentMatch[1]:0);
-											
+
 											if (!_listMatch[3] || _listMatch[3].toLowerCase() === "first" || (_list.lastIndent === null) || (_list.isUl !== isUl && _list.lastIndent === indent)) {
 												_list.isUl = isUl;
 												_list.element = angular.element(isUl ? "<ul>" : "<ol>");
