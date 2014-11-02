@@ -832,20 +832,20 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
                 return findListContainer($selected.parent());
             }
         }
-        function wrap ($selected) {
-            var elem = angular.element('<' + taDefaultWrap + '>');
-            if ($selected[0].childNodes && $selected[0].childNodes.length > 0) {
-                while ($selected[0].childNodes.length > 0) {
-                    elem[0].appendChild($selected[0].childNodes[0]);
-                }
-            } else {
-                elem[0].innerHTML = $selected[0].innerHTML;
-            }
-            return elem;
-        }
 		return function(taDefaultWrap, topNode){
-			taDefaultWrap = taBrowserTag(taDefaultWrap);
+            taDefaultWrap = taBrowserTag(taDefaultWrap);
 			return function(command, showUI, options){
+                function wrap ($selected) {
+                    var elem = angular.element('<' + taDefaultWrap + '>');
+                    if ($selected[0].childNodes && $selected[0].childNodes.length > 0) {
+                        while ($selected[0].childNodes.length > 0) {
+                            elem[0].appendChild($selected[0].childNodes[0]);
+                        }
+                    } else {
+                        elem[0].innerHTML = $selected[0].innerHTML;
+                    }
+                    return elem;
+                }
 				var i, $target, html, _nodes, next, optionsTagName, selectedElement;
 				var defaultWrapper = angular.element('<' + taDefaultWrap + '>');
 				try{
