@@ -1162,6 +1162,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 							}
 						};
 						
+						/* istanbul ignore next: phantom js cannot test this for some reason */
 						var processpaste = function(savedcontent, _savedSelection) {
 							text = element[0].innerHTML;
 							element[0].innerHTML = savedcontent;
@@ -1176,11 +1177,26 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 									else textFragment = textFragment[1];
 									textFragment = textFragment.replace(/<o:p>[\s\S]*?<\/o:p>/ig, '').replace(/class=(["']|)MsoNormal(["']|)/ig, '');
 									var dom = angular.element("<div>" + textFragment + "</div>");
+									var targetDom = angular.element("<div></div>");
 									var _list = {
 										element: null,
-										lastIndent: null,
+										lastIndent: [],
 										lastLi: null,
 										isUl: false
+									};
+									_list.lastIndent.peek = function(){
+										var n = this.length;
+										if (n>0) return this[n-1];
+									};
+									var _resetList = function(isUl){
+										_list.isUl = isUl;
+										_list.element = angular.element(isUl ? "<ul>" : "<ol>");
+										_list.lastIndent = [];
+										_list.lastIndent.peek = function(){
+											var n = this.length;
+											if (n>0) return this[n-1];
+										};
+										_list.lastLevelMatch = null;
 									};
 									for(var i = 0; i <= dom[0].childNodes.length; i++){
 										if(!dom[0].childNodes[i] || dom[0].childNodes[i].nodeName === "#text" || dom[0].childNodes[i].tagName.toLowerCase() !== "p") continue;
@@ -1189,37 +1205,50 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 										
 										if(_listMatch){
 											if(el[0].childNodes.length < 2 || el[0].childNodes[1].childNodes.length < 1){
-												el.remove();
 												continue;
 											}
-											var isUl = _listMatch[1].toLowerCase() === "bullet" || (_listMatch[1].toLowerCase() !== "bullet" && !(el[0].childNodes[1].innerHTML.match(/^[0-9a-z]/ig) || el[0].childNodes[1].childNodes[0].innerHTML.match(/^[0-9a-z]/ig)));
+											var isUl = _listMatch[1].toLowerCase() === "bullet" || (_listMatch[1].toLowerCase() !== "number" && !(/^[^0-9a-z<]*[0-9a-z]+[^0-9a-z<>]</i.test(el[0].childNodes[1].innerHTML) || /^[^0-9a-z<]*[0-9a-z]+[^0-9a-z<>]</i.test(el[0].childNodes[1].childNodes[0].innerHTML)));
 											var _indentMatch = (el.attr('style') || '').match(/margin-left:([\-\.0-9]*)/i);
 											var indent = parseFloat((_indentMatch)?_indentMatch[1]:0);
+											var _levelMatch = (el.attr('style') || '').match(/mso-list:l([0-9]+) level([0-9]+) lfo[0-9+]($|;)/i);
+											// prefers the mso-list syntax
 											
-											if (!_listMatch[3] || _listMatch[3].toLowerCase() === "first" || (_list.lastIndent === null) || (_list.isUl !== isUl && _list.lastIndent === indent)) {
-												_list.isUl = isUl;
-												_list.element = angular.element(isUl ? "<ul>" : "<ol>");
-												el.after(_list.element);
-											} else if ((_list.lastIndent != null) && _list.lastIndent < indent) {
+											if(_levelMatch && _levelMatch[2]) indent = parseInt(_levelMatch[2]);
+											
+											if ((_levelMatch && (!_list.lastLevelMatch || _levelMatch[1] !== _list.lastLevelMatch[1])) || !_listMatch[3] || _listMatch[3].toLowerCase() === "first" || (_list.lastIndent.peek() === null) || (_list.isUl !== isUl && _list.lastIndent.peek() === indent)) {
+												_resetList(isUl);
+												targetDom.append(_list.element);
+											} else if (_list.lastIndent.peek() != null && _list.lastIndent.peek() < indent){
 												_list.element = angular.element(isUl ? "<ul>" : "<ol>");
 												_list.lastLi.append(_list.element);
-											}
-											/* istanbul ignore next: phantom js cannot test this for some reason */
-											else if ((_list.lastIndent != null) && _list.lastIndent > indent) {
-												_list.element = _list.element.parent();
+											} else if (_list.lastIndent.peek() != null && _list.lastIndent.peek() > indent){
+												while(_list.lastIndent.peek() != null && _list.lastIndent.peek() > indent){
+													if(_list.element.parent()[0].tagName.toLowerCase() === 'li'){
+														_list.element = _list.element.parent();
+														continue;
+													}else if(/[uo]l/i.test(_list.element.parent()[0].tagName.toLowerCase())){
+														_list.element = _list.element.parent();
+													}else{ // else it's it should be a sibling
+														break;
+													}
+													_list.lastIndent.pop();
+												}
 												_list.isUl = _list.element[0].tagName.toLowerCase() === "ul";
 												if (isUl !== _list.isUl) {
-													_list.isUl = isUl;
-													_list.element = angular.element(isUl ? "<ul>" : "<ol>");
-													el.after(_list.element);
+													_resetList(isUl);
+													targetDom.append(_list.element);
 												}
 											}
 											
-											_list.lastIndent = indent;
+											_list.lastLevelMatch = _levelMatch;
+											if(indent !== _list.lastIndent.peek()) _list.lastIndent.push(indent);
 											_list.lastLi = angular.element("<li>");
 											_list.element.append(_list.lastLi);
 											_list.lastLi.html(el.html().replace(/<!(--|)\[if !supportLists\](--|)>[\s\S]*?<!(--|)\[endif\](--|)>/ig, ''));
 											el.remove();
+										}else{
+											_resetList(false);
+											targetDom.append(el);
 										}
 									}
 									var _unwrapElement = function(node){
@@ -1228,12 +1257,12 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 										node.remove();
 									};
 									
-									angular.forEach(dom.find('span'), function(node){
+									angular.forEach(targetDom.find('span'), function(node){
 										node.removeAttribute('lang');
 										if(node.attributes.length <= 0) _unwrapElement(node);
 									});
-									angular.forEach(dom.find('font'), _unwrapElement);
-									text = dom.html();
+									angular.forEach(targetDom.find('font'), _unwrapElement);
+									text = targetDom.html();
 								}
 								
 								text = taSanitize(text, '', _disableSanitizer);
