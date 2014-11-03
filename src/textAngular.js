@@ -831,11 +831,11 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
             } else{
                 return findListContainer($selected.parent());
             }
-        }
+        };
 		return function(taDefaultWrap, topNode){
             taDefaultWrap = taBrowserTag(taDefaultWrap);
 			return function(command, showUI, options){
-                function wrap ($selected) {
+                var wrap = function ($selected) {
                     var elem = angular.element('<' + taDefaultWrap + '>');
                     if ($selected[0].childNodes && $selected[0].childNodes.length > 0) {
                         while ($selected[0].childNodes.length > 0) {
@@ -845,7 +845,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
                         elem[0].innerHTML = $selected[0].innerHTML;
                     }
                     return elem;
-                }
+                };
 				var i, $target, html, _nodes, next, optionsTagName, selectedElement, prev, parent, listContainer, wrapElem;
 				var defaultWrapper = angular.element('<' + taDefaultWrap + '>');
 				try{
