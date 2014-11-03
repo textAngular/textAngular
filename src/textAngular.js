@@ -821,7 +821,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 			listElement.remove();
 			selectLi($target.find('li')[0]);
 		};
-        function findListContainer($selected) {
+        var findListContainer = function ($selected) {
             if ($selected[0].tagName && $selected[0].tagName.match(/li/gi)) {
                 return $selected;
             }else if($selected[0].tagName && $selected[0].tagName.match(BLOCKELEMENTS)){
@@ -846,7 +846,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
                     }
                     return elem;
                 }
-				var i, $target, html, _nodes, next, optionsTagName, selectedElement;
+				var i, $target, html, _nodes, next, optionsTagName, selectedElement, prev, parent, listContainer, wrapElem;
 				var defaultWrapper = angular.element('<' + taDefaultWrap + '>');
 				try{
 					selectedElement = taSelection.getSelectionElement();
@@ -918,11 +918,10 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 							return;
 						}
 					}else if(command.toLowerCase() === 'indent'){
-                        var _selected = $selected;
                         $selected = findListContainer($selected);
                         tagName = $selected[0].tagName;
-                        var prev = $selected[0].previousSibling;
-                        var parent = $selected.parent();
+                        prev = $selected[0].previousSibling;
+                        parent = $selected.parent();
                         if (!tagName || !tagName.match(/li/gi) || !parent[0].tagName || !parent[0].tagName.match(/[ou]l/gi)) {
                             console.log('indent of non-list elements. use default (blockquote)');
                         }else if(!prev) {
@@ -933,23 +932,22 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
                             taSelection.setSelectionToElementEnd($selected[0]);
                             return;
                         }else{
-                            var listContainer = document.createElement(parent[0].tagName.toLowerCase());
+                            listContainer = document.createElement(parent[0].tagName.toLowerCase());
                             prev.appendChild(listContainer);
                             listContainer.appendChild($selected[0]);
                             taSelection.setSelectionToElementEnd($selected[0]);
                             return;
                         }
                     }else if(command.toLowerCase() === 'outdent'){
-                        var _selected = $selected;
                         $selected = findListContainer($selected);
                         tagName = $selected[0].tagName;
-                        var prev = $selected[0].previousSibling;
-                        var parent = $selected.parent();
+                        prev = $selected[0].previousSibling;
+                        parent = $selected.parent();
                         if (!tagName || !tagName.match(/li/gi) || !parent[0].tagName || !parent[0].tagName.match(/[ou]l/gi)) {
                             console.log('indent of non-list elements. use default (blockquote)');
                         }else if(parent.parent()[0].tagName.match(/li/i)) {
                             if (parent[0].lastChild !== $selected[0]) {
-                                var listContainer = angular.element("<" + parent[0].tagName + ">");
+                                listContainer = angular.element("<" + parent[0].tagName + ">");
                                 while ($selected[0].nextSibling) {
                                     listContainer.append($selected[0].nextSibling);
                                 }
@@ -961,16 +959,16 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
                             return;
                         }else{
                             if (parent[0].lastChild !== $selected[0]) {
-                                var listContainer = angular.element("<" + parent[0].tagName + ">");
+                                listContainer = angular.element("<" + parent[0].tagName + ">");
                                 while ($selected[0].nextSibling) {
                                     console.log($selected[0].nextSibling);
                                     listContainer.append($selected[0].nextSibling);
                                 }
-                                var wrapElem = wrap($selected);
+                                wrapElem = wrap($selected);
                                 parent.after(wrapElem[0]);
                                 wrapElem.after(listContainer[0]);
                             } else {
-                                var wrapElem = wrap($selected);
+                                wrapElem = wrap($selected);
                                 parent.after(wrapElem[0]);
                             }
                             $selected.remove();

@@ -11,6 +11,7 @@ node_modules/*
 *.pid
 *.gz
 *.iml
+client/*
 
 pids
 logs
