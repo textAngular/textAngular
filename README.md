@@ -13,7 +13,7 @@ Demo is available at: http://www.textangular.com (Or editable [Plunkr Demo](http
 1. `AngularJS` ≥ `1.2.x`
 2. `Rangy` ≥ `1.2.x`, Both rangy-core and rangy-saveselection are required. (There is a minified combination of these two included in the dist folder)
 
-### Optional requirements
+### Optional Recommended requirements
 
 1. [Bootstrap 3.x](http://getbootstrap.com/) for the default styles
 2. [Font-Awesome 4.x](http://fortawesome.github.io/Font-Awesome/) for the default icons on the toolbar

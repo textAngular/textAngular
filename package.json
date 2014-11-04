@@ -38,7 +38,7 @@
     "karma-jasmine": "~0.1.5",
     "karma-phantomjs-launcher": "~0.1.2",
     "karma-script-launcher": "~0.1.0",
-    "phantomjs": "^1.9.7-5"
+    "phantomjs": "^1.9.8"
   },
   "scripts": {
     "test": "grunt travis-test --verbose",
