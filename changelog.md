@@ -1,3 +1,19 @@
+<a name="1.3.0-pre12"></a>
+### 1.3.0-pre12 (2014-11-04)
+
+
+#### Bug Fixes
+
+* **bower:** Fix files in main bower definition. ([00954faf](http://github.com/fraywing/textAngular/commit/00954faf43f583a81e079665f795058a099882eb), closes [#382](http://github.com/fraywing/textAngular/issues/382))
+* **taBind:** Fixes paste nested list from word issues ([43bc8d9d](http://github.com/fraywing/textAngular/commit/43bc8d9d113e2379bea90c192405e4bb278c8ad9))
+* **taExecCommand:** Fixes blockquote issue. ([63480a67](http://github.com/fraywing/textAngular/commit/63480a67d5bca3d91c5e5aae5abcd49e95a5ffe4), closes [#377](http://github.com/fraywing/textAngular/issues/377))
+
+
+#### Features
+
+* **taBind:** Press enter to escape a blockquote ([717c291c](http://github.com/fraywing/textAngular/commit/717c291cd0f23b8311cae5e0201a864b50861120))
+
+
 <a name="1.3.0-pre11"></a>
 ### 1.3.0-pre11 (2014-10-31)
 
