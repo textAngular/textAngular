@@ -257,7 +257,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 		}else{
 			window.rangy.init();
 			if(!window.rangy.saveSelection){
-				throw("rangy-selectionsaverestore.js are required for textAngular to work correctly.");
+				throw("rangy-selectionsaverestore.js is required for textAngular to work correctly.");
 			}
 		}
 	}]);
