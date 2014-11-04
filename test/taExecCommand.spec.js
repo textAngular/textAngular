@@ -175,11 +175,11 @@ describe('taExecCommand', function(){
 					$element.remove();
 				}));
 				it('selection with multiple nodes', inject(function($document, taExecCommand, taSelection){
-					$element = angular.element('<div class="ta-bind"><p>Some <b>test</b> content</p><p>Some <b>test</b> content</p></div>');
+					$element = angular.element('<div class="ta-bind"><p>Some <b>test</b> content</p><p><br/></p><p>Some <b>test</b> content</p></div>');
 					$document.find('body').append($element);
 					taSelection.element = $element[0];
 					taExecCommand()('formatBlock', false, '<BLOCKQUOTE>');
-					expect($element.html()).toBe('<blockquote><p>Some <b>test</b> content</p><p>Some <b>test</b> content</p></blockquote>');
+					expect($element.html()).toBe('<blockquote><p>Some <b>test</b> content</p><p><br></p><p>Some <b>test</b> content</p></blockquote>');
 					$element.remove();
 				}));
 			});

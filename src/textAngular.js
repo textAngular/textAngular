@@ -900,9 +900,10 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 						if(tagName === 'li') $target = $selected.parent();
 						else $target = $selected;
 						// find the first blockElement
-						while(!$target[0].tagName.match(BLOCKELEMENTS)){
+						while(!$target[0].tagName || !$target[0].tagName.match(BLOCKELEMENTS) && !$target.parent().attr('contenteditable')){
 							$target = $target.parent();
-							tagName = $target[0].tagName.toLowerCase();
+							/* istanbul ignore next */
+							tagName = ($target[0].tagName || '').toLowerCase();
 						}
 						if(tagName === optionsTagName){
 							// $target is wrap element
@@ -964,9 +965,10 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 								$target = angular.element(options);
 								$target[0].innerHTML = html;
 								_nodes[0].parentNode.insertBefore($target[0],_nodes[0]);
-								angular.forEach(_nodes, function(node){
-									node.parentNode.removeChild(node);
-								});
+								for(i = _nodes.length - 1; i >= 0; i--){
+									/* istanbul ignore else:  */
+									if(_nodes[i].parentNode) _nodes[i].parentNode.removeChild(_nodes[i]);
+								}
 							}
 							else {
 								// regular block elements replace other block elements
