@@ -1332,6 +1332,27 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 										_redo();
 										event.preventDefault();
 									}
+								/* istanbul ignore next: difficult to test as can't seem to select */
+								}else if(event.keyCode === 13 && !event.shiftKey){
+									var selection = taSelection.getSelectionElement();
+									if(!selection.tagName.match(VALIDELEMENTS)) return;
+									var _new = angular.element(_defaultVal);
+									if (/^<br(|\/)>$/i.test(selection.innerHTML.trim()) && selection.parentNode.tagName.toLowerCase() === 'blockquote' && !selection.nextSibling) {
+										// if last element in blockquote and element is blank, pull element outside of blockquote.
+										$selection = angular.element(selection);
+										var _parent = $selection.parent();
+										_parent.after(_new);
+										$selection.remove();
+										if(_parent.children().length === 0) _parent.remove();
+										taSelection.setSelectionToElementStart(_new[0]);
+										event.preventDefault();
+									}else if (/^<[^>]+><br(|\/)><\/[^>]+>$/i.test(selection.innerHTML.trim()) && selection.tagName.toLowerCase() === 'blockquote'){
+										$selection = angular.element(selection);
+										$selection.after(_new);
+										$selection.remove();
+										taSelection.setSelectionToElementStart(_new[0]);
+										event.preventDefault();
+									}
 								}
 							}
 						});
@@ -1349,6 +1370,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 										while(!selection.tagName.match(VALIDELEMENTS) && selection !== element[0]){
 											selection = selection.parentNode;
 										}
+										
 										if(selection.tagName.toLowerCase() !== attrs.taDefaultWrap && selection.tagName.toLowerCase() !== 'li' && (selection.innerHTML.trim() === '' || selection.innerHTML.trim() === '<br>')){
 											var _new = angular.element(_defaultVal);
 											angular.element(selection).replaceWith(_new);
