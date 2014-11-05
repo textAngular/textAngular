@@ -281,6 +281,27 @@ describe('taBind', function () {
 					expect(element.html()).toBe('<b><br></b>');
 					element.remove();
 				}));
+				it('should escape blockquote when only empty element', inject(function($rootScope, $compile, $window, $document){
+					$rootScope.html = '<blockquote><p><br></p></blockquote>';
+					element = $compile('<div ta-bind contenteditable="contenteditable" ng-model="html"></div>')($rootScope);
+					$document.find('body').append(element);
+					$rootScope.$digest();
+					var range = $window.rangy.createRangyRange();
+					range.selectNodeContents(element.find('p')[0]);
+					$window.rangy.getSelection().setSingleRange(range);
+					var event;
+					if(angular.element === jQuery){
+						event = jQuery.Event('keydown');
+						event.keyCode = 13;
+						element.triggerHandler(event);
+					}else{
+						event = {keyCode: 13};
+						element.triggerHandler('keydown', event);
+					}
+					$rootScope.$digest();
+					expect(element.html()).toBe('<p><br></p>');
+					element.remove();
+				}));
 			});
 		});
 	});
