@@ -25,31 +25,28 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 	// ie < 9 // Anything less than IE9
 	// ----------------------------------------------------------
 	/* istanbul ignore next: untestable browser check */
-	var ie = (function(){
-		var undef,rv = -1; // Return value assumes failure.
-		var ua = window.navigator.userAgent;
-		var msie = ua.indexOf('MSIE ');
-		var trident = ua.indexOf('Trident/');
-
-		if (msie > 0) {
-			// IE 10 or older => return version number
-			rv = parseInt(ua.substring(msie + 5, ua.indexOf('.', msie)), 10);
-		} else if (trident > 0) {
-			// IE 11 (or newer) => return version number
-			var rvNum = ua.indexOf('rv:');
-			rv = parseInt(ua.substring(rvNum + 3, ua.indexOf('.', rvNum)), 10);
-		}
-
-		return ((rv > -1) ? rv : undef);
-	}());
-	// detect webkit
-	var webkit = /AppleWebKit\/([\d.]+)/i.test(navigator.userAgent);
+	var _browserDetect = {
+		ie: (function(){
+			var undef,
+				v = 3,
+				div = document.createElement('div'),
+				all = div.getElementsByTagName('i');
+			
+			while (
+				div.innerHTML = '<!--[if gt IE ' + (++v) + ']><i></i><![endif]-->',
+				all[0]
+			);
+			
+			return v > 4 ? v : undef;
+		}()),
+		webkit: /AppleWebKit\/([\d.]+)/i.test(navigator.userAgent)
+	};
 	
 	// fix a webkit bug, see: https://gist.github.com/shimondoodkin/1081133
 	// this is set true when a blur occurs as the blur of the ta-bind triggers before the click
 	var globalContentEditableBlur = false;
 	/* istanbul ignore next: Browser Un-Focus fix for webkit */
-	if(webkit) {
+	if(_browserDetect.webkit) {
 		document.addEventListener("mousedown", function(_event){
 			var e = _event || window.event;
 			var curelement = e.target;
@@ -104,7 +101,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 	*/
 	var sheet, addCSSRule, removeCSSRule, _addCSSRule, _removeCSSRule;
 	/* istanbul ignore else: IE <8 test*/
-	if(ie > 8 || ie === undefined){
+	if(_browserDetect.ie > 8 || _browserDetect.ie === undefined){
 		var _sheets = document.styleSheets, _lastValidSheet;
 		/* istanbul ignore next: preference for stylesheet loaded externally */
 		for(var i = 0; i < _sheets.length; i++){
@@ -126,7 +123,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 				// Create the <style> tag
 				var style = document.createElement("style");
 				/* istanbul ignore else : WebKit hack :( */
-				if(/AppleWebKit\/([\d.]+)/.exec(navigator.userAgent)) style.appendChild(document.createTextNode(""));
+				if(_browserDetect.webkit) style.appendChild(document.createTextNode(""));
 	
 				// Add the <style> element to the page, add as first so the styles can be overridden by custom stylesheets
 				document.head.appendChild(style);
@@ -139,17 +136,20 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 		addCSSRule = function(selector, rules) {
 			_addCSSRule(sheet, selector, rules);
 		};
-		_addCSSRule = function(sheet, selector, rules){
+		_addCSSRule = function(_sheet, selector, rules){
 			var insertIndex;
+			
+			// This order is important as IE 11 has both cssRules and rules but they have different lengths - cssRules is correct, rules gives an error in IE 11
 			/* istanbul ignore else: firefox catch */
-			if(sheet.rules) insertIndex = Math.max(sheet.rules.length - 1, 0);
-			else if(sheet.cssRules) insertIndex = Math.max(sheet.cssRules.length - 1, 0);
+			if(_sheet.cssRules) insertIndex = Math.max(_sheet.cssRules.length - 1, 0);
+			else if(_sheet.rules) insertIndex = Math.max(_sheet.rules.length - 1, 0);
+			
 			/* istanbul ignore else: untestable IE option */
-			if(sheet.insertRule) {
-				sheet.insertRule(selector + "{" + rules + "}", insertIndex);
+			if(_sheet.insertRule) {
+				_sheet.insertRule(selector + "{" + rules + "}", insertIndex);
 			}
 			else {
-				sheet.addRule(selector, rules, insertIndex);
+				_sheet.addRule(selector, rules, insertIndex);
 			}
 			// return the index of the stylesheet rule
 			return insertIndex;
@@ -784,9 +784,9 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 	]).factory('taBrowserTag', [function(){
 		return function(tag){
 			/* istanbul ignore next: ie specific test */
-			if(!tag) return (ie <= 8)? 'P' : 'p';
-			else if(tag === '') return (ie === undefined)? 'div' : (ie <= 8)? 'P' : 'p';
-			else return (ie <= 8)? tag.toUpperCase() : tag;
+			if(!tag) return (_browserDetect.ie <= 8)? 'P' : 'p';
+			else if(tag === '') return (_browserDetect.ie === undefined)? 'div' : (_browserDetect.ie <= 8)? 'P' : 'p';
+			else return (_browserDetect.ie <= 8)? tag.toUpperCase() : tag;
 		};
 	}]).factory('taExecCommand', ['taSelection', 'taBrowserTag', '$document', function(taSelection, taBrowserTag, $document){
 		var listToDefault = function(listElement, defaultWrap){
@@ -1026,16 +1026,16 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 				/* istanbul ignore next: ie specific test */
 				if(attrs.taDefaultWrap === ''){
 					_defaultVal = '';
-					_defaultTest = (ie === undefined)? '<div><br></div>' : (ie >= 11)? '<p><br></p>' : (ie <= 8)? '<P>&nbsp;</P>' : '<p>&nbsp;</p>';
+					_defaultTest = (_browserDetect.ie === undefined)? '<div><br></div>' : (_browserDetect.ie >= 11)? '<p><br></p>' : (_browserDetect.ie <= 8)? '<P>&nbsp;</P>' : '<p>&nbsp;</p>';
 				}else{
-					_defaultVal = (ie === undefined || ie >= 11)?
+					_defaultVal = (_browserDetect.ie === undefined || _browserDetect.ie >= 11)?
 						'<' + attrs.taDefaultWrap + '><br></' + attrs.taDefaultWrap + '>' :
-						(ie <= 8)?
+						(_browserDetect.ie <= 8)?
 							'<' + attrs.taDefaultWrap.toUpperCase() + '></' + attrs.taDefaultWrap.toUpperCase() + '>' :
 							'<' + attrs.taDefaultWrap + '></' + attrs.taDefaultWrap + '>';
-					_defaultTest = (ie === undefined || ie >= 11)?
+					_defaultTest = (_browserDetect.ie === undefined || _browserDetect.ie >= 11)?
 						'<' + attrs.taDefaultWrap + '><br></' + attrs.taDefaultWrap + '>' :
-						(ie <= 8)?
+						(_browserDetect.ie <= 8)?
 							'<' + attrs.taDefaultWrap.toUpperCase() + '>&nbsp;</' + attrs.taDefaultWrap.toUpperCase() + '>' :
 							'<' + attrs.taDefaultWrap + '>&nbsp;</' + attrs.taDefaultWrap + '>';
 				}
@@ -1402,7 +1402,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 						});
 
 						// Placeholders not supported on ie 8 and below
-						if(attrs.placeholder && (ie > 8 || ie === undefined)){
+						if(attrs.placeholder && (_browserDetect.ie > 8 || _browserDetect.ie === undefined)){
 							var ruleIndex;
 							if(attrs.id) ruleIndex = addCSSRule('#' + attrs.id + '.placeholder-text:before', 'content: "' + attrs.placeholder + '"');
 							else throw('textAngular Error: An unique ID is required for placeholders to work');
@@ -1606,7 +1606,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 					element.on('drop', fileDropHandler);
 					element.on('blur', function(){
 						/* istanbul ignore next: webkit fix */
-						if(/AppleWebKit\/([\d.]+)/.exec(navigator.userAgent)) { // detect webkit
+						if(_browserDetect.webkit) { // detect webkit
 							globalContentEditableBlur = true;
 						}
 					});
