@@ -474,6 +474,13 @@ describe('taExecCommand', function(){
 					taExecCommand()('insertunorderedlist', false, null);
 					expect(element.html()).toBe('<ul><li>To the List!</li><li>To the List 2!</li></ul>');
 				}));
+				
+				it('multi list to ol', inject(function(taSelection, taExecCommand){
+					element = angular.element('<div class="ta-bind"><ul><li>To the List!</li></ul><ul><li>To the List 2!</li></ul></div>');
+					taSelection.element = element[0];
+					taExecCommand()('insertorderedlist', false, null);
+					expect(element.html()).toBe('<ol><li>To the List!</li><li>To the List 2!</li></ol>');
+				}));
 			});
 			describe('multi element selected within block element', function(){
 				beforeEach(inject(function(taSelection){

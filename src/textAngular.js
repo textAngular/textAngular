@@ -886,7 +886,13 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 									/* istanbul ignore else: catch for real-world can't make it occur in testing */
 									if(_nodes[i].nodeType !== 3){
 										var $n = angular.element(_nodes[i]);
-										html += '<' + taBrowserTag('li') + '>' + $n[0].innerHTML + '</' + taBrowserTag('li') + '>';
+										/* istanbul ignore if: browser check only, phantomjs doesn't return children nodes but chrome at least does */
+										if(_nodes[i].tagName.toLowerCase() === 'li') continue;
+										else if(_nodes[i].tagName.toLowerCase() === 'ol' || _nodes[i].tagName.toLowerCase() === 'ul'){
+											html += $n[0].innerHTML; // if it's a list, add all it's children
+										}else{
+											html += '<' + taBrowserTag('li') + '>' + $n[0].innerHTML + '</' + taBrowserTag('li') + '>';
+										}
 										$nodes.unshift($n);
 									}
 								}
