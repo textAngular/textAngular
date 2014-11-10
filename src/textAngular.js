@@ -385,11 +385,13 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 						scope.displayElements.popoverArrow.css('margin-left', (Math.min(_targetLeft, (Math.max(0, _targetLeft - _maxLeft))) - 11) + 'px');
 					};
 					scope.hidePopover = function(){
-						$animate.removeClass(scope.displayElements.popover, 'in', /* istanbul ignore next: dosen't test with mocked animate */ function(){
+						/* istanbul ignore next: dosen't test with mocked animate */
+						var doneCb = function(){
 							scope.displayElements.popover.css('display', '');
 							scope.displayElements.popoverContainer.attr('style', '');
 							scope.displayElements.popoverContainer.attr('class', 'popover-content');
-						});
+						};
+						$q.when($animate.removeClass(scope.displayElements.popover, 'in', doneCb)).then(doneCb);
 					};
 
 					// setup the resize overlay
