@@ -897,6 +897,10 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 						}
 					}else if(command.toLowerCase() === 'formatblock'){
 						optionsTagName = options.toLowerCase().replace(/[<>]/ig, '');
+						if(optionsTagName.trim() === 'default') {
+							optionsTagName = taDefaultWrap;
+							options = '<' + taDefaultWrap + '>';
+						}
 						if(tagName === 'li') $target = $selected.parent();
 						else $target = $selected;
 						// find the first blockElement

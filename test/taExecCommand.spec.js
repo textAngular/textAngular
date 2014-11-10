@@ -274,7 +274,14 @@ describe('taExecCommand', function(){
 		afterEach(function(){
 			$element.remove();
 		});
-
+		
+		it('default string should insert default wrap', function(){
+			setupElement('<div class="ta-bind"><h1><b>Test</b></h1></div>');
+			taSelection.element = $element.find('b')[0];
+			taExecCommand('def')('formatBlock', false, 'default');
+			expect($element.html()).toBe('<def><b>Test</b></def>');
+		});
+		
 		describe('heading tags', function(){
 			it('can be unwrapped', function(){
 				setupElement('<div class="ta-bind"><h1><b>Test</b></h1></div>');
