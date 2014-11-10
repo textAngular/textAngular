@@ -1,3 +1,16 @@
+<a name="1.3.0-pre13"></a>
+### 1.3.0-pre13 (2014-11-11)
+
+
+#### Bug Fixes
+
+* **$animation:** Fix angular 1.3.x compatability. ([b74ddf61](http://github.com/fraywing/textAngular/commit/b74ddf61d8a0864621b37224b9f02f6e5e74b25a), closes [#401](http://github.com/fraywing/textAngular/issues/401))
+* **placeholder:** Fix the IE 11 bug with CSS style insert ([8e9e6625](http://github.com/fraywing/textAngular/commit/8e9e662574ac6302a3c9fb8cb2e572f3863dea89), closes [#390](http://github.com/fraywing/textAngular/issues/390))
+* **taExecCommand:**
+  * Fixes issue with list buttons and multiple lists. ([76815cbf](http://github.com/fraywing/textAngular/commit/76815cbf26bf8d3c20f7d60e1ef64763ac40effc), closes [#399](http://github.com/fraywing/textAngular/issues/399))
+  * Add default wrap option to formatBlock ([c0fad4d9](http://github.com/fraywing/textAngular/commit/c0fad4d9a3c58cdbcb07c17f1c6876ae9305ab6b), closes [#400](http://github.com/fraywing/textAngular/issues/400))
+
+
 <a name="1.3.0-pre12"></a>
 ### 1.3.0-pre12 (2014-11-04)
 
