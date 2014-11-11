@@ -85,7 +85,6 @@ angular.module('textAngularSetup', [])
 	//insertLink: "Please enter a URL to insert",
 	//insertVideo: "Please enter a youtube URL to embed",
 	html: {
-		buttontext: 'Toggle HTML',
 		tooltip: 'Toggle html / Rich Text'
 	},
 	// tooltip for heading - might be worth splitting
@@ -165,7 +164,7 @@ angular.module('textAngularSetup', [])
 })
 .run(['taRegisterTool', '$window', 'taTranslations', 'taSelection', function(taRegisterTool, $window, taTranslations, taSelection){
 	taRegisterTool("html", {
-		buttontext: taTranslations.html.buttontext,
+		iconclass: 'fa fa-code',
 		tooltiptext: taTranslations.html.tooltip,
 		action: function(){
 			this.$editor().switchView();
