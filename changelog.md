@@ -123,12 +123,53 @@
 ### 1.3.0-pre3 (2014-10-06)
 
 
+#### Bug Fixes
+
+* **taTools:**
+	* If disabled is a value, respect it
+	* Fix align active state when Justify / Full
+	* Cleaned Up character count and stopped it from counting \n and \n\r linebreak characters.
+* **taBind:** Fixes a list bug
+* **IE/Paste:** More IE paste fixes.
+* **fileDropHandler:** Fixes non-binding and long running file drop handlers not updating the model
+
 <a name="1.3.0-pre2"></a>
 ### 1.3.0-pre2 (2014-10-06)
 
 
+#### Bug Fixes
+
+* **taExecCommand:** Shim the insertHTML function
+
+#### Features
+
+* **taTools:**
+	* Add option to override default class
+	* New word and character count tools.
+	* Youtube videos now default to poster image from youtube API
+
 <a name="1.3.0-pre1"></a>
 ### 1.3.0-pre1 (2014-10-06)
+
+
+#### Bug Fixes
+
+* **taBind:**
+	* Validation on just whitespace
+	* Ignoring keyup event on unnecessary keys
+	* Remove Isolate Scope
+* **window.event:** Window.event is undefined on FF
+* **taExecCommand:** Collapsed selection creates link with url
+* **taTools:** Fix clear collapsed list selection
+* **animations:** Disable animations while switching views
+* **paste:** Allow pasting of styles and random trash into the editor by sanitizing the paste event
+
+#### Features
+
+* **taSelection:** Add selection function
+* **taSanitize:** Add background-color to accepted style options
+* **taTools:** Add Strikethrough tool
+* **CSP Compliance:** TextAngular is now CSP Compiant
 
 
 ###OLD Changelog - PRE v1.3.0-pre1
