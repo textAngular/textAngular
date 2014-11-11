@@ -274,8 +274,9 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 					var _keydown, _keyup, _keypress, _mouseup, _focusin, _focusout,
 						_originalContents, _toolbars,
 						_serial = (attrs.serial) ? attrs.serial : Math.floor(Math.random() * 10000000000000000),
-						_name = (attrs.name) ? attrs.name : 'textAngularEditor' + _serial,
 						_taExecCommand;
+					
+					scope._name = (attrs.name) ? attrs.name : 'textAngularEditor' + _serial;
 
 					var oneEvent = function(_element, event, action){
 						$timeout(function(){
@@ -508,7 +509,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 					element.append(scope.displayElements.scrollWindow);
 					element.append(scope.displayElements.html);
 
-					scope.displayElements.forminput.attr('name', _name);
+					scope.displayElements.forminput.attr('name', scope._name);
 					element.append(scope.displayElements.forminput);
 
 					if(attrs.tabindex){
@@ -669,7 +670,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 						}
 					});
 
-					if(attrs.taTargetToolbars) _toolbars = textAngularManager.registerEditor(_name, scope, attrs.taTargetToolbars.split(','));
+					if(attrs.taTargetToolbars) _toolbars = textAngularManager.registerEditor(scope._name, scope, attrs.taTargetToolbars.split(','));
 					else{
 						var _toolbar = angular.element('<div text-angular-toolbar name="textAngularToolbar' + _serial + '">');
 						// passthrough init of toolbar options
@@ -682,11 +683,11 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 
 						element.prepend(_toolbar);
 						$compile(_toolbar)(scope.$parent);
-						_toolbars = textAngularManager.registerEditor(_name, scope, ['textAngularToolbar' + _serial]);
+						_toolbars = textAngularManager.registerEditor(scope._name, scope, ['textAngularToolbar' + _serial]);
 					}
 
 					scope.$on('$destroy', function(){
-						textAngularManager.unregisterEditor(_name);
+						textAngularManager.unregisterEditor(scope._name);
 					});
 
 					// catch element select event and pass to toolbar tools
