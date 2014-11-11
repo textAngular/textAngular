@@ -2,11 +2,10 @@ describe('textAngular', function(){
 	/*
 		Display Tests
 	*/
-	
+	'use strict';
+	beforeEach(module('textAngular'));
+	var $window, element, $rootScope, textAngularManager, editorScope;
 	describe('Minimal Initiation', function(){
-		'use strict';
-		var $rootScope, element;
-		beforeEach(module('textAngular'));
 		beforeEach(inject(function (_$compile_, _$rootScope_) {
 			$rootScope = _$rootScope_;
 			element = _$compile_('<text-angular><p>Test Content</p></text-angular>')($rootScope);
@@ -32,9 +31,6 @@ describe('textAngular', function(){
 	});
 	
 	describe('Basic Initiation without ng-model', function(){
-		'use strict';
-		var $rootScope, element;
-		beforeEach(module('textAngular'));
 		beforeEach(inject(function (_$compile_, _$rootScope_) {
 			$rootScope = _$rootScope_;
 			element = _$compile_('<text-angular name="test"><p>Test Content</p></text-angular>')($rootScope);
@@ -60,9 +56,6 @@ describe('textAngular', function(){
 	});
 	
 	describe('Add classes via attributes', function(){
-		'use strict';
-		var $rootScope, element, textAngularManager;
-		beforeEach(module('textAngular'));
 		beforeEach(inject(function (_$compile_, _$rootScope_, _textAngularManager_) {
 			$rootScope = _$rootScope_;
 			textAngularManager = _textAngularManager_;
@@ -92,8 +85,6 @@ describe('textAngular', function(){
 	});
 	
 	describe('Change classes via decorator', function(){
-		'use strict';
-		var $rootScope, element, textAngularManager;
 		beforeEach(module('textAngular', function($provide){
 			// change all the classes at once
 			$provide.decorator('taOptions', ['$delegate', function(taOptions){
@@ -126,9 +117,6 @@ describe('textAngular', function(){
 	});
 	
 	describe('Add tabindex attribute', function(){
-		'use strict';
-		var $rootScope, element, textAngularManager;
-		beforeEach(module('textAngular'));
 		beforeEach(inject(function (_$compile_, _$rootScope_, _textAngularManager_) {
 			$rootScope = _$rootScope_;
 			textAngularManager = _textAngularManager_;
@@ -150,9 +138,6 @@ describe('textAngular', function(){
 	});
 	
 	describe('Use serial attribute', function(){
-		'use strict';
-		var $rootScope, element, textAngularManager;
-		beforeEach(module('textAngular'));
 		beforeEach(inject(function (_$compile_, _$rootScope_, _textAngularManager_) {
 			$rootScope = _$rootScope_;
 			textAngularManager = _textAngularManager_;
@@ -174,9 +159,6 @@ describe('textAngular', function(){
 	});
 	
 	describe('Disable the editor', function(){
-		'use strict';
-		var $rootScope, element;
-		beforeEach(module('textAngular'));
 		beforeEach(inject(function (_$compile_, _$rootScope_) {
 			$rootScope = _$rootScope_;
 			$rootScope.disabled = true;
@@ -203,15 +185,21 @@ describe('textAngular', function(){
 		});
 	});
 	
+	it('respects the taShowHtml attribute',inject(function ($compile, $rootScope, $document) {
+			element = $compile('<text-angular name="test" ta-show-html="true"></text-angular>')($rootScope);
+			$document.find('body').append(element);
+			$rootScope.$digest();
+			expect(jQuery('.ta-text', element[0]).is(':visible')).toBe(false);
+			expect(jQuery('.ta-html', element[0]).is(':visible')).toBe(true);
+			element.remove();
+		}));
+	
 	describe('Check view change', function(){
-		'use strict';
-		var $rootScope, element, editorScope;
-		beforeEach(module('textAngular'));
 		beforeEach(inject(function (_$compile_, _$rootScope_, textAngularManager, $document) {
 			$rootScope = _$rootScope_;
 			element = _$compile_('<text-angular name="test"></text-angular>')($rootScope);
 			$document.find('body').append(element);
-			editorScope = textAngularManager.retrieveEditor('test').scope;$document.find('body').append(element);
+			editorScope = textAngularManager.retrieveEditor('test').scope;
 			$rootScope.$digest();
 		}));
 		afterEach(function(){
@@ -245,9 +233,6 @@ describe('textAngular', function(){
 	});
 	
 	describe('Check focussed class adding', function(){
-		'use strict';
-		var $rootScope, element, editorScope;
-		beforeEach(module('textAngular'));
 		beforeEach(inject(function (_$compile_, _$rootScope_, textAngularManager) {
 			$rootScope = _$rootScope_;
 			element = _$compile_('<text-angular name="test"></text-angular>')($rootScope);
@@ -283,9 +268,6 @@ describe('textAngular', function(){
 	});
 	
 	describe('Check text and html editor setup functions', function(){
-		'use strict';
-		var $rootScope, element;
-		beforeEach(module('textAngular'));
 		beforeEach(inject(function (_$compile_, _$rootScope_) {
 			$rootScope = _$rootScope_;
 			$rootScope.attrSetup = function($element){
@@ -306,9 +288,6 @@ describe('textAngular', function(){
 	});
 	
 	describe('Check placeholder passthrough', function(){
-		'use strict';
-		var $rootScope, element;
-		beforeEach(module('textAngular'));
 		beforeEach(inject(function (_$compile_, _$rootScope_) {
 			$rootScope = _$rootScope_;
 			element = _$compile_('<text-angular name="test" placeholder="Test Placeholder"></text-angular>')($rootScope);
@@ -326,7 +305,6 @@ describe('textAngular', function(){
 	});
 	
 	describe('registration', function(){
-		beforeEach(module('textAngular'));
 		it('should add itself to the textAngularManager', inject(function($rootScope, $compile, textAngularManager){
 			$compile('<text-angular name="test"></text-angular>')($rootScope);
 			expect(textAngularManager.retrieveEditor('test')).not.toBeUndefined();
@@ -345,9 +323,8 @@ describe('textAngular', function(){
 	});
 	
 	describe('unregistration', function(){
-		beforeEach(module('textAngular'));
 		it('should remove itself from the textAngularManager on $destroy', inject(function($rootScope, $compile, textAngularManager){
-			var element = $compile('<text-angular name="test"></text-angular>')($rootScope);
+			element = $compile('<text-angular name="test"></text-angular>')($rootScope);
 			$rootScope.$digest();
 			textAngularManager.retrieveEditor('test').scope.$destroy();
 			expect(textAngularManager.retrieveEditor('test')).toBeUndefined();
@@ -359,9 +336,6 @@ describe('textAngular', function(){
 	*/
 	
 	describe('form validation', function(){
-		'use strict';
-		var $rootScope, element;
-		beforeEach(module('textAngular'));
 		
 		describe('basic', function(){
 			beforeEach(inject(function (_$compile_, _$rootScope_, _$window_, $document, textAngularManager) {
@@ -532,9 +506,7 @@ describe('textAngular', function(){
 	*/
 	
 	describe('Basic Initiation without ng-model', function(){
-		'use strict';
-		var $rootScope, element, displayElements;
-		beforeEach(module('textAngular'));
+		var displayElements;
 		beforeEach(inject(function (_$compile_, _$rootScope_, textAngularManager) {
 			$rootScope = _$rootScope_;
 			element = _$compile_('<text-angular name="test"><p>Test Content</p></text-angular>')($rootScope);
@@ -555,9 +527,7 @@ describe('textAngular', function(){
 	});
 	
 	describe('Basic Initiation with ng-model', function(){
-		'use strict';
-		var $rootScope, element, displayElements;
-		beforeEach(module('textAngular'));
+		var displayElements;
 		beforeEach(inject(function (_$compile_, _$rootScope_, textAngularManager) {
 			$rootScope = _$rootScope_;
 			$rootScope.html = '<p>Test Content</p>';
@@ -579,9 +549,7 @@ describe('textAngular', function(){
 	});
 	
 	describe('Basic Initiation with ng-model and originalContents', function(){
-		'use strict';
-		var $rootScope, element, displayElements;
-		beforeEach(module('textAngular'));
+		var displayElements;
 		beforeEach(inject(function (_$compile_, _$rootScope_, textAngularManager) {
 			$rootScope = _$rootScope_;
 			$rootScope.html = '<p>Test Content</p>';
@@ -603,7 +571,6 @@ describe('textAngular', function(){
 	});
 	
 	describe('should respect the ta-default-wrap value', function(){
-		beforeEach(module('textAngular'));
 		it('with ng-model', inject(function($rootScope, $compile, textAngularManager){
 			$rootScope.html = '';
 			$compile('<text-angular ta-default-wrap="div" name="test" ng-model="html"></text-angular>')($rootScope);
@@ -626,9 +593,7 @@ describe('textAngular', function(){
 	
 	
 	describe('should respect taUnsafeSanitizer attribute', function () {
-		'use strict';
-		var $rootScope, element, element2, editorScope, displayElements;
-		beforeEach(module('textAngular'));
+		var element2, displayElements;
 		
 		describe('without ng-model', function(){
 			beforeEach(inject(function (_$compile_, _$rootScope_, textAngularManager) {
@@ -682,9 +647,7 @@ describe('textAngular', function(){
 	});
 	
 	describe('Updates without ng-model', function(){
-		'use strict';
-		var $rootScope, element, displayElements;
-		beforeEach(module('textAngular'));
+		var displayElements;
 		beforeEach(inject(function (_$compile_, _$rootScope_, textAngularManager) {
 			$rootScope = _$rootScope_;
 			element = _$compile_('<text-angular name="test"><p>Test Content</p></text-angular>')($rootScope);
@@ -715,9 +678,7 @@ describe('textAngular', function(){
 	});
 	
 	describe('Updates with ng-model', function(){
-		'use strict';
-		var $rootScope, element, displayElements;
-		beforeEach(module('textAngular'));
+		var displayElements;
 		beforeEach(inject(function (_$compile_, _$rootScope_, textAngularManager) {
 			$rootScope = _$rootScope_;
 			$rootScope.html = '<p>Test Content</p>';
@@ -742,32 +703,30 @@ describe('textAngular', function(){
 	});
 	
 	describe('ng-model should handle undefined and null', function(){
-		'use strict';
-		beforeEach(module('textAngular'));
 		it('should handle initial undefined to empty-string', inject(function ($compile, $rootScope, textAngularManager) {
 			$rootScope.html = undefined;
-			var element = $compile('<text-angular name="test" ng-model="html"></text-angular>')($rootScope);
+			element = $compile('<text-angular name="test" ng-model="html"></text-angular>')($rootScope);
 			$rootScope.$digest();
 			expect(textAngularManager.retrieveEditor('test').scope.displayElements.text.html()).toBe('<p><br></p>');
 		}));
 		
 		it('should handle initial null to empty-string', inject(function ($compile, $rootScope, textAngularManager) {
 			$rootScope.html = null;
-			var element = $compile('<text-angular name="test" ng-model="html"></text-angular>')($rootScope);
+			element = $compile('<text-angular name="test" ng-model="html"></text-angular>')($rootScope);
 			$rootScope.$digest();
 			expect(textAngularManager.retrieveEditor('test').scope.displayElements.text.html()).toBe('<p><br></p>');
 		}));
 		
 		it('should handle initial undefined to originalContents', inject(function ($compile, $rootScope, textAngularManager) {
 			$rootScope.html = undefined;
-			var element = $compile('<text-angular name="test" ng-model="html">Test Contents</text-angular>')($rootScope);
+			element = $compile('<text-angular name="test" ng-model="html">Test Contents</text-angular>')($rootScope);
 			$rootScope.$digest();
 			expect(textAngularManager.retrieveEditor('test').scope.displayElements.text.html()).toBe('<p>Test Contents</p>');
 		}));
 		
 		it('should handle initial null to originalContents', inject(function ($compile, $rootScope, textAngularManager) {
 			$rootScope.html = null;
-			var element = $compile('<text-angular name="test" ng-model="html">Test Contents</text-angular>')($rootScope);
+			element = $compile('<text-angular name="test" ng-model="html">Test Contents</text-angular>')($rootScope);
 			$rootScope.$digest();
 			expect(textAngularManager.retrieveEditor('test').scope.displayElements.text.html()).toBe('<p>Test Contents</p>');
 		}));
@@ -775,7 +734,7 @@ describe('textAngular', function(){
 		describe('should reset', function(){
 			it('from undefined to empty-string', inject(function ($compile, $rootScope, textAngularManager) {
 				$rootScope.html = 'Test Content';
-				var element = $compile('<text-angular name="test" ng-model="html"></text-angular>')($rootScope);
+				element = $compile('<text-angular name="test" ng-model="html"></text-angular>')($rootScope);
 				$rootScope.$digest();
 				$rootScope.html = undefined;
 				$rootScope.$digest();
@@ -784,7 +743,7 @@ describe('textAngular', function(){
 			
 			it('from null to empty-string', inject(function ($compile, $rootScope, textAngularManager) {
 				$rootScope.html = 'Test Content';
-				var element = $compile('<text-angular name="test" ng-model="html"></text-angular>')($rootScope);
+				element = $compile('<text-angular name="test" ng-model="html"></text-angular>')($rootScope);
 				$rootScope.$digest();
 				$rootScope.html = null;
 				$rootScope.$digest();
@@ -793,7 +752,7 @@ describe('textAngular', function(){
 			
 			it('from undefined to blank/emptystring WITH originalContents', inject(function ($compile, $rootScope, textAngularManager) {
 				$rootScope.html = 'Test Content1';
-				var element = $compile('<text-angular name="test" ng-model="html">Test Contents2</text-angular>')($rootScope);
+				element = $compile('<text-angular name="test" ng-model="html">Test Contents2</text-angular>')($rootScope);
 				$rootScope.$digest();
 				$rootScope.html = undefined;
 				$rootScope.$digest();
@@ -802,7 +761,7 @@ describe('textAngular', function(){
 			
 			it('from null to blank/emptystring WITH originalContents', inject(function ($compile, $rootScope, textAngularManager) {
 				$rootScope.html = 'Test Content1';
-				var element = $compile('<text-angular name="test" ng-model="html">Test Contents2</text-angular>')($rootScope);
+				element = $compile('<text-angular name="test" ng-model="html">Test Contents2</text-angular>')($rootScope);
 				$rootScope.$digest();
 				$rootScope.html = null;
 				$rootScope.$digest();
@@ -812,14 +771,12 @@ describe('textAngular', function(){
 	});
 	
 	describe('should have correct startAction and endAction functions', function(){
-		'use strict';
-		beforeEach(module('textAngular'));
 		
 		it('should have rangy loaded with save-restore module', function(){
 			expect(window.rangy).toBeDefined();
 			expect(window.rangy.saveSelection).toBeDefined();
 		});
-		var editorScope, element, sel, range;
+		var sel, range;
 		beforeEach(inject(function($compile, $rootScope, textAngularManager, $document){
 			$rootScope.html = '<p>Lorem ipsum dolor sit amet, <i>consectetur adipisicing</i> elit, <strong>sed do eiusmod tempor incididunt</strong> ut labore et dolore magna aliqua.</p>';
 			element = $compile('<text-angular name="test" ng-model="html">Test Contents2</text-angular>')($rootScope);
@@ -885,8 +842,7 @@ describe('textAngular', function(){
 	});
 	
 	describe('Toolbar interaction functions work', function(){
-		beforeEach(module('textAngular'));
-		var editorScope, element, sel, range;
+		var sel, range;
 		beforeEach(inject(function(taRegisterTool, taOptions, taSelectableElements){
 			taSelectableElements.push('i');
 			taRegisterTool('testbutton', {
@@ -1093,8 +1049,6 @@ describe('textAngular', function(){
 	});
 	
 	describe('File Drop Event', function(){
-		beforeEach(module('textAngular'));
-		var textAngularManager;
 		beforeEach(inject(function(_textAngularManager_){
 			textAngularManager = _textAngularManager_;
 		}));
@@ -1223,9 +1177,8 @@ describe('textAngular', function(){
 	});
 	
 	describe('Multiple Editors same toolbar', function(){
-		beforeEach(module('textAngular'));
 		// For more info on this see the excellent writeup @ https://github.com/fraywing/textAngular/issues/112
-		var element1, element2, toolbar, $rootScope;
+		var element1, element2, toolbar;
 		beforeEach(inject(function($compile, _$rootScope_){
 			$rootScope = _$rootScope_;
 			$rootScope.html = '<p>Lorem ipsum <u>dolor sit amet<u>, consectetur <i>adipisicing elit, sed do eiusmod tempor incididunt</i> ut labore et dolore magna aliqua.</p>';

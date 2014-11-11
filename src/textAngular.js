@@ -309,7 +309,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 								scope.displayElements.text[0].focus();
 							}
 						},
-						showHtml: false
+						showHtml: scope.$eval(attrs.taShowHtml) || false
 					});
 					// setup the options from the optional attributes
 					if(attrs.taFocussedClass)			scope.classes.focussed = attrs.taFocussedClass;
