@@ -1,3 +1,15 @@
+<a name="1.3.0-pre14"></a>
+### 1.3.0-pre14 (2014-11-11)
+
+
+#### Features
+
+* **taTools:** Toggle HTML now uses code symbol from Font-Awesome ([856b31c3](http://github.com/fraywing/textAngular/commit/856b31c3f77716452a8e5d1d086e12db7934b43f), closes [#381](http://github.com/fraywing/textAngular/issues/381))
+* **textAngular:**
+  * Allow show html/code view by default, attribute ta-show-html. ([abf7bfb2](http://github.com/fraywing/textAngular/commit/abf7bfb28126928d8a5c8094ce90a0536752c97b))
+  * Name is available on editor scope as `_name` ([6f03d559](http://github.com/fraywing/textAngular/commit/6f03d5593deb11f1dda5f485d069e007b91775fb), closes [#394](http://github.com/fraywing/textAngular/issues/394))
+
+
 <a name="1.3.0-pre13"></a>
 ### 1.3.0-pre13 (2014-11-11)
 
