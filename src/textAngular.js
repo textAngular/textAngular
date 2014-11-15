@@ -134,7 +134,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 
 		// use as: addCSSRule("header", "float: left");
 		addCSSRule = function(selector, rules) {
-			_addCSSRule(sheet, selector, rules);
+			return _addCSSRule(sheet, selector, rules);
 		};
 		_addCSSRule = function(_sheet, selector, rules){
 			var insertIndex;
