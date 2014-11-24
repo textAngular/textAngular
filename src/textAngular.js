@@ -824,10 +824,32 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 			listElement.remove();
 			selectLi($target.find('li')[0]);
 		};
+        var findListContainer = function ($selected) {
+            if ($selected[0].tagName && $selected[0].tagName.match(/li/gi)) {
+                return $selected;
+            }else if($selected[0].tagName && $selected[0].tagName.match(BLOCKELEMENTS)){
+                return $selected;
+            }else if($selected.parent().hasClass('ta-bind')){
+                return $selected;
+            } else{
+                return findListContainer($selected.parent());
+            }
+        };
 		return function(taDefaultWrap, topNode){
-			taDefaultWrap = taBrowserTag(taDefaultWrap);
+            taDefaultWrap = taBrowserTag(taDefaultWrap);
 			return function(command, showUI, options){
-				var i, $target, html, _nodes, next, optionsTagName, selectedElement;
+                var wrap = function ($selected) {
+                    var elem = angular.element('<' + taDefaultWrap + '>');
+                    if ($selected[0].childNodes && $selected[0].childNodes.length > 0) {
+                        while ($selected[0].childNodes.length > 0) {
+                            elem[0].appendChild($selected[0].childNodes[0]);
+                        }
+                    } else {
+                        elem[0].innerHTML = $selected[0].innerHTML;
+                    }
+                    return elem;
+                };
+				var i, $target, html, _nodes, next, optionsTagName, selectedElement, prev, parent, listContainer, wrapElem;
 				var defaultWrapper = angular.element('<' + taDefaultWrap + '>');
 				try{
 					selectedElement = taSelection.getSelectionElement();
@@ -904,7 +926,66 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 							taSelection.setSelectionToElementEnd($target[0]);
 							return;
 						}
-					}else if(command.toLowerCase() === 'formatblock'){
+					}else if(command.toLowerCase() === 'indent'){
+                        $selected = findListContainer($selected);
+                        tagName = $selected[0].tagName;
+                        prev = $selected[0].previousSibling;
+                        parent = $selected.parent();
+                        if (!tagName || !tagName.match(/li/gi) || !parent[0].tagName || !parent[0].tagName.match(/[ou]l/gi)) {
+                            console.log('indent of non-list elements. use default (blockquote)');
+                        }else if(!prev) {
+                            /* if there is no previous sibling in the OL container, then do nothing. */
+                            return;
+                        }else if(prev && prev.lastChild && prev.lastChild.tagName && prev.lastChild.tagName.match(/[ou]l/gi)) {
+                            prev.lastChild.appendChild($selected[0]);
+                            taSelection.setSelectionToElementEnd($selected[0]);
+                            return;
+                        }else{
+                            listContainer = document.createElement(parent[0].tagName.toLowerCase());
+                            prev.appendChild(listContainer);
+                            listContainer.appendChild($selected[0]);
+                            taSelection.setSelectionToElementEnd($selected[0]);
+                            return;
+                        }
+                    }else if(command.toLowerCase() === 'outdent'){
+                        $selected = findListContainer($selected);
+                        tagName = $selected[0].tagName;
+                        prev = $selected[0].previousSibling;
+                        parent = $selected.parent();
+                        if (!tagName || !tagName.match(/li/gi) || !parent[0].tagName || !parent[0].tagName.match(/[ou]l/gi)) {
+                            console.log('indent of non-list elements. use default (blockquote)');
+                        }else if(parent.parent()[0].tagName.match(/li/i)) {
+                            if (parent[0].lastChild !== $selected[0]) {
+                                listContainer = angular.element("<" + parent[0].tagName + ">");
+                                while ($selected[0].nextSibling) {
+                                    listContainer.append($selected[0].nextSibling);
+                                }
+                                $selected.append(listContainer[0]);
+                            }
+                            parent.parent().after($selected[0]);
+                            if (parent.children().length === 0) parent.remove();
+                            taSelection.setSelectionToElementEnd($selected.children()[0]);
+                            return;
+                        }else{
+                            if (parent[0].lastChild !== $selected[0]) {
+                                listContainer = angular.element("<" + parent[0].tagName + ">");
+                                while ($selected[0].nextSibling) {
+                                    console.log($selected[0].nextSibling);
+                                    listContainer.append($selected[0].nextSibling);
+                                }
+                                wrapElem = wrap($selected);
+                                parent.after(wrapElem[0]);
+                                wrapElem.after(listContainer[0]);
+                            } else {
+                                wrapElem = wrap($selected);
+                                parent.after(wrapElem[0]);
+                            }
+                            $selected.remove();
+                            if (parent.children().length === 0) parent.remove();
+                            taSelection.setSelectionToElementEnd(wrapElem[0]);
+                            return;
+                        }
+                    }else if(command.toLowerCase() === 'formatblock'){
 						optionsTagName = options.toLowerCase().replace(/[<>]/ig, '');
 						if(optionsTagName.trim() === 'default') {
 							optionsTagName = taDefaultWrap;
