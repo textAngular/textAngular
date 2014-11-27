@@ -4,13 +4,15 @@ module.exports = function (grunt) {
 	grunt.loadNpmTasks('grunt-contrib-jshint');
 	grunt.loadNpmTasks('grunt-contrib-uglify');
 	grunt.loadNpmTasks('grunt-contrib-clean');
+	grunt.loadNpmTasks('grunt-contrib-watch');
+	grunt.loadNpmTasks('grunt-contrib-concat');
 	grunt.loadNpmTasks('grunt-istanbul-coverage');
 	grunt.loadNpmTasks('grunt-karma');
 	grunt.loadNpmTasks('grunt-karma-coveralls');
 	grunt.loadNpmTasks('grunt-conventional-changelog');
 	
-	// Default task.
-	grunt.registerTask('default', ['uglify', 'test']);
+	grunt.registerTask('compile', ['concat', 'uglify']);
+	grunt.registerTask('default', ['compile', 'test']);
 	grunt.registerTask('test', ['clean', 'jshint', 'karma', 'coverage']);
 	grunt.registerTask('travis-test', ['jshint', 'karma', 'coverage', 'coveralls']);
 	
@@ -64,6 +66,16 @@ module.exports = function (grunt) {
 			globals: {}
 		  }
 		},
+		concat: {
+			options: {
+				banner: "/*\n@license textAngular\nAuthor : Austin Anderson\nLicense : 2013 MIT\nVersion 1.3.0-pre14\n\nSee README.md or https://github.com/fraywing/textAngular/wiki for requirements and use.\n*/\n\n(function(){ // encapsulate all variables so they don't become global vars\n\"Use Strict\";",
+				footer: "})();"
+			},
+			dist: {
+				src: ['lib/globals.js','lib/factories.js','lib/DOM.js','lib/validators.js','lib/taBind.js','lib/main.js'],
+				dest: 'src/textAngular.js'
+			}
+		},
 		uglify: {
 			options: {
 				mangle: true,
@@ -78,6 +90,10 @@ module.exports = function (grunt) {
 					'dist/textAngular-sanitize.min.js': ['src/textAngular-sanitize.js']
 				}
 			}
+		},
+		watch: {
+			files: "lib/*.js",
+			tasks: "concat"
 		}
 	});
 };
