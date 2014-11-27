@@ -530,8 +530,13 @@ function($window, $document){
 			};
 		},
 		getOnlySelectedElements: function(){
-			var sel = rangy.getSelection();
-			return sel.getRangeAt(0).getNodes([1]);
+			var range = rangy.getSelection().getRangeAt(0);
+			var container = range.commonAncestorContainer;
+			// Check if the container is a text node and return its parent if so
+			container = container.nodeType === 3 ? container.parentNode : container;
+			return range.getNodes([1], function(node){
+				return node.parentNode === container;
+			});
 		},
 		// Some basic selection functions
 		getSelectionElement: function () {
