@@ -144,17 +144,17 @@ describe('taBind.events', function () {
 			// var text = (e.originalEvent || e).clipboardData.getData('text/plain') || $window.clipboardData.getData('Text');
 			describe('should update model from paste keeping all styles', function () {
 				it('non-ie based w/o jquery', inject(function($window){
-					element.triggerHandler('paste', {clipboardData: {types: ['text/html'], getData: function(){ return '<span style="font-size:10px">Test 4 Content</span>'; }}});
+					element.triggerHandler('paste', {clipboardData: {types: ['text/html'], getData: function(){ return '<font style="font-size:10px">Test 4 Content</font>'; }}});
 					$timeout.flush();
 					$rootScope.$digest();
-					expect($rootScope.html).toBe('<p><span style="font-size:10px">Test 4 Content</span></p>');
+					expect($rootScope.html).toBe('<p><font style="font-size:10px">Test 4 Content</font></p>');
 				}));
 
 				it('non-ie based w/ jquery', inject(function($window){
-					element.triggerHandler('paste', {originalEvent: {clipboardData: {types: ['text/html'], getData: function(){ return '<span style="font-size:10px">Test 4 Content</span>';} }}});
+					element.triggerHandler('paste', {originalEvent: {clipboardData: {types: ['text/html'], getData: function(){ return '<font style="font-size:10px">Test 4 Content</font>';} }}});
 					$timeout.flush();
 					$rootScope.$digest();
-					expect($rootScope.html).toBe('<p><span style="font-size:10px">Test 4 Content</span></p>');
+					expect($rootScope.html).toBe('<p><font style="font-size:10px">Test 4 Content</font></p>');
 				}));
 
 			});
