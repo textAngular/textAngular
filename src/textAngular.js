@@ -382,6 +382,8 @@ angular.module('textAngular.DOM', ['textAngular.factories'])
 									if(_nodes[i].tagName.toLowerCase() === 'li') continue;
 									else if(_nodes[i].tagName.toLowerCase() === 'ol' || _nodes[i].tagName.toLowerCase() === 'ul'){
 										html += $n[0].innerHTML; // if it's a list, add all it's children
+									}else if(_nodes[i].tagName.toLowerCase() === 'span' && (_nodes[i].childNodes[0].tagName.toLowerCase() === 'ol' || _nodes[i].childNodes[0].tagName.toLowerCase() === 'ul')){
+										html += $n[0].childNodes[0].innerHTML; // if it's a list, add all it's children
 									}else{
 										html += '<' + taBrowserTag('li') + '>' + $n[0].innerHTML + '</' + taBrowserTag('li') + '>';
 									}

@@ -181,7 +181,7 @@ describe('taExecCommand', function(){
 				}));
 			});
 		});
-		describe('list to other', function(){
+		describe('list to other/list', function(){
 			var element;
 			describe('li selected', function(){
 				it('from ol', inject(function(taSelection, taExecCommand){
@@ -198,6 +198,34 @@ describe('taExecCommand', function(){
 				}));
 			});
 			describe('list selected', function(){
+				describe('edge mixed case', function(){
+					it('to ol', inject(function(taSelection, taExecCommand){
+						element = angular.element('<div class="ta-bind"><ol><li>To the List!</li></ol><span><ul><li>To the List!</li></ul></span></div>');
+						taSelection.element = element[0];
+						taExecCommand()('insertorderedlist', false, null);
+						expect(element.html()).toBe('<ol><li>To the List!</li><li>To the List!</li></ol>');
+					}));
+					it('to ul', inject(function(taSelection, taExecCommand){
+						element = angular.element('<div class="ta-bind"><ol><li>To the List!</li></ol><span><ul><li>To the List!</li></ul></span></div>');
+						taSelection.element = element[0];
+						taExecCommand()('insertunorderedlist', false, null);
+						expect(element.html()).toBe('<ul><li>To the List!</li><li>To the List!</li></ul>');
+					}));
+				});
+				describe('mixed as child of ta-bind', function(){
+					it('to ol', inject(function(taSelection, taExecCommand){
+						element = angular.element('<div class="ta-bind"><ol><li>To the List!</li></ol><ul><li>To the List!</li></ul></div>');
+						taSelection.element = element[0];
+						taExecCommand()('insertorderedlist', false, null);
+						expect(element.html()).toBe('<ol><li>To the List!</li><li>To the List!</li></ol>');
+					}));
+					it('to ul', inject(function(taSelection, taExecCommand){
+						element = angular.element('<div class="ta-bind"><ol><li>To the List!</li></ol><ul><li>To the List!</li></ul></div>');
+						taSelection.element = element[0];
+						taExecCommand()('insertunorderedlist', false, null);
+						expect(element.html()).toBe('<ul><li>To the List!</li><li>To the List!</li></ul>');
+					}));
+				});
 				describe('from ol', function(){
 					describe('as child of ta-bind', function(){
 						it('to default', inject(function(taSelection, taExecCommand){
