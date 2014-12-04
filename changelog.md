@@ -1,3 +1,15 @@
+<a name="1.3.0-pre15"></a>
+### 1.3.0-pre15 (2014-12-05)
+
+
+#### Bug Fixes
+
+* **DOM:** Fix for convert to lists ([75cc1441](http://github.com/fraywing/textAngular/commit/75cc14418a7c8cde971b37847d2025a3f4c6abee), closes [#377](http://github.com/fraywing/textAngular/issues/377))
+* **placeholder:** add missing return ([799a4ff0](http://github.com/fraywing/textAngular/commit/799a4ff0112c35cb68822eca10ff1a9f4250ab11))
+* **taBind:** Fix paste issues ([f9d7e423](http://github.com/fraywing/textAngular/commit/f9d7e42336483da7376095fc1f741d6d0322a4df), closes [#407](http://github.com/fraywing/textAngular/issues/407))
+* **taExecCommand:** Fix List conversion bug. ([d97842c6](http://github.com/fraywing/textAngular/commit/d97842c6696544e6971fcfda64ad91de908e79be), closes [#399](http://github.com/fraywing/textAngular/issues/399))
+
+
 <a name="1.3.0-pre14"></a>
 ### 1.3.0-pre14 (2014-11-11)
 

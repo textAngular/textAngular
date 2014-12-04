@@ -68,7 +68,7 @@ module.exports = function (grunt) {
 		},
 		concat: {
 			options: {
-				banner: "/*\n@license textAngular\nAuthor : Austin Anderson\nLicense : 2013 MIT\nVersion 1.3.0-pre14\n\nSee README.md or https://github.com/fraywing/textAngular/wiki for requirements and use.\n*/\n\n(function(){ // encapsulate all variables so they don't become global vars\n\"Use Strict\";",
+				banner: "/*\n@license textAngular\nAuthor : Austin Anderson\nLicense : 2013 MIT\nVersion 1.3.0-pre15\n\nSee README.md or https://github.com/fraywing/textAngular/wiki for requirements and use.\n*/\n\n(function(){ // encapsulate all variables so they don't become global vars\n\"Use Strict\";",
 				footer: "})();"
 			},
 			dist: {
