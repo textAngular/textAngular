@@ -234,8 +234,66 @@ angular.module('textAngular.factories', [])
 		return $html[0].innerHTML;
 	};
 	return taFixChrome;
-}).factory('taSanitize', ['$sanitize', function taSanitizeFactory($sanitize){
+}).factory('taPreSanitize', function() {
+
+	var convert_info = {
+		'font-weight': {
+			values: [ 'bold' ],
+			tag: 'b'
+		},
+		'font-style': {
+			values: [ 'italic' ],
+			tag: 'i'
+		}
+	};
+
+	function fixChildren( jq_elm ) {
+		var children = jq_elm.children();
+		if ( !children.length ) {
+			return;
+		}
+		angular.forEach( children, function( child ) {
+			var jq_child = angular.element(child);
+			fixElement( jq_child );
+			fixChildren( jq_child );
+		});
+	}
+
+	function fixElement( jq_elm ) {
+		var styleString = jq_elm.attr('style');
+		if ( !styleString ) {
+			return;
+		}
+		angular.forEach( convert_info, function( css_info, css_key ) {
+			var css_value = jq_elm.css(css_key);
+			if ( css_info.values.indexOf(css_value) >= 0 && styleString.indexOf(css_key) >= 0 ) {
+				jq_elm.css( css_key, '' );
+				var inner_html = jq_elm.html();
+				var tag = css_info.tag;
+				inner_html = '<'+tag+'>' + inner_html + '</'+tag+'>';
+				jq_elm.html( inner_html );
+			}
+		});
+	}
+
+	return function(unsafe){
+
+		try {
+			var jq_container = angular.element('<div>' + unsafe + '</div>');
+			fixChildren( jq_container );
+			unsafe = jq_container.html();
+		} catch (e) {
+		}
+
+		return unsafe;
+	};
+}).factory('taSanitize', ['$sanitize', 'taPreSanitize', function taSanitizeFactory($sanitize, taPreSanitize){
 	return function taSanitize(unsafe, oldsafe, ignore){
+
+		if ( !ignore ) {
+			unsafe = taPreSanitize(unsafe);
+		}
+
 		// unsafe and oldsafe should be valid HTML strings
 		// any exceptions (lets say, color for example) should be made here but with great care
 		// setup unsafe element for modification
