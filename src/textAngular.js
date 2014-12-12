@@ -234,7 +234,7 @@ angular.module('textAngular.factories', [])
 		return $html[0].innerHTML;
 	};
 	return taFixChrome;
-}).factory('taPreSanitize', function() {
+}).factory('taSanitize', ['$sanitize', function taSanitizeFactory($sanitize){
 
 	var convert_info = {
 		'font-weight': {
@@ -276,22 +276,15 @@ angular.module('textAngular.factories', [])
 		});
 	}
 
-	return function(unsafe){
-
-		try {
-			var jq_container = angular.element('<div>' + unsafe + '</div>');
-			fixChildren( jq_container );
-			unsafe = jq_container.html();
-		} catch (e) {
-		}
-
-		return unsafe;
-	};
-}).factory('taSanitize', ['$sanitize', 'taPreSanitize', function taSanitizeFactory($sanitize, taPreSanitize){
 	return function taSanitize(unsafe, oldsafe, ignore){
 
 		if ( !ignore ) {
-			unsafe = taPreSanitize(unsafe);
+			try {
+				var jq_container = angular.element('<div>' + unsafe + '</div>');
+				fixChildren( jq_container );
+				unsafe = jq_container.html();
+			} catch (e) {
+			}
 		}
 
 		// unsafe and oldsafe should be valid HTML strings
