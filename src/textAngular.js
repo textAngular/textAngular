@@ -281,6 +281,7 @@ angular.module('textAngular.factories', [])
 		if ( !ignore ) {
 			try {
 				var jq_container = angular.element('<div>' + unsafe + '</div>');
+				fixElement( jq_container );
 				fixChildren( jq_container );
 				unsafe = jq_container.html();
 			} catch (e) {
