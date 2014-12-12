@@ -24,7 +24,7 @@ describe('taSanitize', function(){
 			expect(safe.css('text-align')).toBe('justify');
 		}));
 	});
-	
+
 	describe('if invalid HTML', function(){
 		it('should return the oldsafe passed in', inject(function(taSanitize){
 			var result = taSanitize('<broken><test', 'safe');
