@@ -10,11 +10,18 @@ module.exports = function (grunt) {
 	grunt.loadNpmTasks('grunt-karma');
 	grunt.loadNpmTasks('grunt-karma-coveralls');
 	grunt.loadNpmTasks('grunt-conventional-changelog');
+	grunt.loadNpmTasks('grunt-bump');
 	
 	grunt.registerTask('compile', ['concat', 'uglify']);
 	grunt.registerTask('default', ['compile', 'test']);
 	grunt.registerTask('test', ['clean', 'jshint', 'karma', 'coverage']);
-	grunt.registerTask('travis-test', ['jshint', 'karma', 'coverage', 'coveralls']);
+	grunt.registerTask('travis-test', ['concat', 'jshint', 'karma', 'coverage', 'coveralls']);
+	
+	grunt.registerTask('release', ['bump-only','compile','changelog','bump-commit']);
+	grunt.registerTask('release:patch', ['bump-only:patch','compile','changelog','bump-commit']);
+	grunt.registerTask('release:minor', ['bump-only:minor','compile','changelog','bump-commit']);
+	grunt.registerTask('release:major', ['bump-only:major','compile','changelog','bump-commit']);
+	grunt.registerTask('release:prerelease', ['bump-only:prerelease','compile','changelog','bump-commit']);
 	
 	var testConfig = function (configFile, customOptions) {
 		var options = { configFile: configFile, keepalive: true };
@@ -24,7 +31,17 @@ module.exports = function (grunt) {
 	
 	// Project configuration.
 	grunt.initConfig({
+		pkg: grunt.file.readJSON('package.json'),
 		changelog: {options: {dest: 'changelog.md'}},
+		
+		bump: {
+			options: {
+				files: ['package.json','bower.json'],
+				commitFiles: ['package.json', 'changelog.md','bower.json'],
+				pushTo: 'origin',
+				updateConfigs: ['pkg','bower']
+			}
+		},
 		clean: ["coverage"],
 		coverage: {
 		  options: {
@@ -68,7 +85,7 @@ module.exports = function (grunt) {
 		},
 		concat: {
 			options: {
-				banner: "/*\n@license textAngular\nAuthor : Austin Anderson\nLicense : 2013 MIT\nVersion 1.3.0-pre15\n\nSee README.md or https://github.com/fraywing/textAngular/wiki for requirements and use.\n*/\n\n(function(){ // encapsulate all variables so they don't become global vars\n\"Use Strict\";",
+				banner: "/*\n@license textAngular\nAuthor : Austin Anderson\nLicense : 2013 MIT\nVersion <%- pkg.version %>\n\nSee README.md or https://github.com/fraywing/textAngular/wiki for requirements and use.\n*/\n\n(function(){ // encapsulate all variables so they don't become global vars\n\"Use Strict\";",
 				footer: "})();"
 			},
 			dist: {
