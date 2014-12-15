@@ -24,7 +24,7 @@ describe('taSanitize', function(){
 			expect(safe.css('text-align')).toBe('justify');
 		}));
 	});
-	
+
 	describe('if invalid HTML', function(){
 		it('should return the oldsafe passed in', inject(function(taSanitize){
 			var result = taSanitize('<broken><test', 'safe');
@@ -205,6 +205,13 @@ describe('taSanitize', function(){
 		it('should allow html not allowed by sanitizer', inject(function(taSanitize, $sce){
 			var result = taSanitize('<bad-tag></bad-tag>', '', true);
 			expect(result).toBe('<bad-tag></bad-tag>');
+		}));
+	});
+
+	describe('check if style is satinized correctly', function(){
+		it('should translate style to tag', inject(function(taSanitize, $sce){
+			var result = taSanitize('Q<b>W</b><i style="font-weight: bold;">E</i><u style="font-weight: bold; font-style: italic;">R</u>T');
+			expect(result).toBe('Q<b>W</b><i><b>E</b></i><u><i><b>R</b></i></u>T');
 		}));
 	});
 });
