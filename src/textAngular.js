@@ -2,7 +2,7 @@
 @license textAngular
 Author : Austin Anderson
 License : 2013 MIT
-Version 1.3.0-pre14
+Version 1.3.0-pre15
 
 See README.md or https://github.com/fraywing/textAngular/wiki for requirements and use.
 */
@@ -758,7 +758,6 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 			// defaults to the paragraph element, but we need the line-break or it doesn't allow you to type into the empty element
 			// non IE is '<p><br/></p>', ie is '<p></p>' as for once IE gets it correct...
 			var _defaultVal, _defaultTest;
-			var _trimTest = /^<[^>]+>(\s|&nbsp;)*<\/[^>]+>$/ig;
 			// set the default to be a paragraph value
 			if(attrs.taDefaultWrap === undefined) attrs.taDefaultWrap = 'p';
 			/* istanbul ignore next: ie specific test */
@@ -779,9 +778,14 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 			}
 			
 			var _blankTest = function(_blankVal){
-				_blankVal = _blankVal.trim();
-				return (_blankVal.length === 0 || _blankVal === _defaultTest || _trimTest.test(_blankVal) ||
-					!(/>\s*(([^\s<]+)\s*)+</i.test(_blankVal) || /^([^\s<>]+\s*)+$/i.test(_blankVal) || INLINETAGS_NONBLANK.test(_blankVal)));// this regex tests if there is some content that isn't white space between tags, or there is just some text passed in
+				var _firstTagIndex = _blankVal.indexOf('>');
+				if(_firstTagIndex === -1) return _blankVal.trim().length === 0;
+				_blankVal = _blankVal.trim().substring(_firstTagIndex, _firstTagIndex + 100);
+				// this regex is to match any number of whitespace only between two tags
+				if (_blankVal.length === 0 || _blankVal === _defaultTest || /^>(\s|&nbsp;)*<\/[^>]+>$/ig.test(_blankVal)) return true;
+				// this regex tests if there is a tag followed by some optional whitespace and some text after that
+				else if (/>\s*[^\s<]/i.test(_blankVal) || INLINETAGS_NONBLANK.test(_blankVal)) return false;
+				else return true;
 			};
 			
 			element.addClass('ta-bind');
