@@ -64,6 +64,30 @@ describe('taBind', function () {
 			jQuery(element.find('a')[0]).trigger('click');
 		});
 		
+		it('should ensure cursor is correctly placed', inject(function($document, taSelection){
+			$document.find('body').append(element);
+			taSelection.getSelection = function(){
+				return {
+					start: {
+						element: element[0],
+						offset: 0
+					},
+					end: {
+						element: element[0],
+						offset: 0
+					},
+					container: element[0]
+				};
+			};
+			var selectedElement;
+			taSelection.setSelectionToElementStart = function(el){
+				selectedElement = el;
+			};
+			element.triggerHandler('mouseup');
+			$rootScope.$digest();
+			expect(selectedElement.innerHTML).toBe(element.children()[0].innerHTML);
+		}));
+		
 		describe('should trim empty content', function(){
 			it('returns undefined when <p></p>', function(){
 				element.html('<p></p>');
