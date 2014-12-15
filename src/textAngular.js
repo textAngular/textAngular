@@ -957,10 +957,10 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 							that.callself = function () {
 								waitforpastedata(that.s, that._, that.cb);
 							};
-							setTimeout(that.callself,20);
+							setTimeout(that.callself, 5);
 						}
 					};
-					
+					var _processingPaste = false;
 					/* istanbul ignore next: phantom js cannot test this for some reason */
 					var processpaste = function(savedcontent, _savedSelection) {
 						text = element[0].innerHTML;
@@ -1092,21 +1092,27 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 							taSelection.insertHtml(text, element[0]);
 							$timeout(function(){
 								ngModel.$setViewValue(_compileHtml());
+								_processingPaste = false;
+								element.removeClass('processing-paste');
 							}, 0);
+						}else{
+							_processingPaste = false;
+							element.removeClass('processing-paste');
 						}
 					};
 					
 					element.on('paste', function(e, eventData){
 						/* istanbul ignore else: this is for catching the jqLite testing*/
 						if(eventData) angular.extend(e, eventData);
-						// Code adapted from http://stackoverflow.com/questions/2176861/javascript-get-clipboard-data-on-paste-event-cross-browser/6804718#6804718
-						var _savedSelection = $window.rangy.saveSelection();
-						if(_isReadonly){
+						if(_isReadonly || _processingPaste){
 							e.stopPropagation();
 							e.preventDefault();
 							return false;
 						}
-						
+						// Code adapted from http://stackoverflow.com/questions/2176861/javascript-get-clipboard-data-on-paste-event-cross-browser/6804718#6804718
+						var _savedSelection = $window.rangy.saveSelection();
+						_processingPaste = true;
+						element.addClass('processing-paste');
 						var savedcontent = element[0].innerHTML;
 						var clipboardData = (e.originalEvent || e).clipboardData;
 						if (clipboardData && clipboardData.getData) {// Webkit - get data from clipboard, put into editdiv, cleanup, then cancel event
