@@ -1,3 +1,24 @@
+<a name="1.3.0-16"></a>
+### 1.3.0-16 (2014-12-16)
+
+
+#### Bug Fixes
+
+* **taBind:**
+  * Ensure onSelectHandlers are allways applied with DOM changes ([01873453](http://github.com/fraywing/textAngular/commit/0187345359cb833a43f76bd6385e67f79193c84c), closes [#446](http://github.com/fraywing/textAngular/issues/446))
+  * Fix cursor selection on focus ([05f15a5e](http://github.com/fraywing/textAngular/commit/05f15a5e4adcd4d21cd3b9085bcd031e5d0e0c65), closes [#444](http://github.com/fraywing/textAngular/issues/444))
+  * _blankTest should be more performant now and stop crashing chrome ([57ff7ba1](http://github.com/fraywing/textAngular/commit/57ff7ba1d6154ef9202fe13aacc4a3efe1da2d87), closes [#451](http://github.com/fraywing/textAngular/issues/451))
+* **taBind.paste:** Fix multi-paste issue ([58f75379](http://github.com/fraywing/textAngular/commit/58f7537926368a1da96c614f0c02790029e1f284), closes [#392](http://github.com/fraywing/textAngular/issues/392))
+* **taSanitize:**
+  * Fix inconsistencies between browsers of bold, italics and underline ([dd479a16](http://github.com/fraywing/textAngular/commit/dd479a166a054fcd4f2defada0b72a0fc84777ea))
+  * fix also container (#424) ([a49600de](http://github.com/fraywing/textAngular/commit/a49600de089281b5562cdad8d7ccefa7e905baf5))
+  * add test (#424) ([2b94c7c1](http://github.com/fraywing/textAngular/commit/2b94c7c1dca4dde0aa3f9bfe534649f2a5070235))
+  * copy code to lib/factories.js (#424) ([e61f69c0](http://github.com/fraywing/textAngular/commit/e61f69c075ec56a7499df9894b881f4ef634ed10))
+  * merge taPreSatitize to taSanitize (#424) ([e3c9cf6e](http://github.com/fraywing/textAngular/commit/e3c9cf6e665b6e92fe5fc5d62ded35407e15743c))
+  * fix for #424 ([91b16c89](http://github.com/fraywing/textAngular/commit/91b16c89fa2176d2bc27ec804f4d08fb5d471ccd))
+* **textAngular:** Prevent updateSelectedStyles loop when out of document focus ([81a37de7](http://github.com/fraywing/textAngular/commit/81a37de7a48b1d17933843c07559398c0c430ad5))
+
+
 <a name="1.3.0-pre15"></a>
 ### 1.3.0-pre15 (2014-12-05)
 
