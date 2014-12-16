@@ -975,11 +975,11 @@ describe('textAngular', function(){
 					editorScope.hidePopover();
 					expect(editorScope.displayElements.popover.hasClass('in')).toBe(false);
 				});
-				it('on click in editor', function(){
-					element.triggerHandler('click');
+				it('on click in editor', inject(function($document){
+					$document.find('body').triggerHandler('click');
 					editorScope.$parent.$digest();
 					expect(editorScope.displayElements.popover.hasClass('in')).toBe(false);
-				});
+				}));
 				it('should prevent mousedown from propagating up from popover', function(){
 					var event;
 					if(angular.element === jQuery){

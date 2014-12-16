@@ -886,7 +886,7 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 				if(!_isReadonly && _isContentEditable){
 					var content = ngModel.$undoManager.undo();
 					if(typeof content !== "undefined" && content !== null){
-						element[0].innerHTML = content;
+						_setInnerHTML(content);
 						_setViewValue(content, false);
 						/* istanbul ignore else: browser catch */
 						if(element[0].childNodes.length) taSelection.setSelectionToElementEnd(element[0].childNodes[element[0].childNodes.length-1]);
@@ -900,7 +900,7 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 				if(!_isReadonly && _isContentEditable){
 					var content = ngModel.$undoManager.redo();
 					if(typeof content !== "undefined" && content !== null){
-						element[0].innerHTML = content;
+						_setInnerHTML(content);
 						_setViewValue(content, false);
 						/* istanbul ignore else: browser catch */
 						if(element[0].childNodes.length) taSelection.setSelectionToElementEnd(element[0].childNodes[element[0].childNodes.length-1]);
@@ -924,6 +924,7 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 					if(ngModel.$viewValue !== '') ngModel.$setViewValue('');
 					if(triggerUndo && ngModel.$undoManager.current() !== '') ngModel.$undoManager.push('');
 				}else{
+					_reApplyOnSelectorHandlers();
 					if(ngModel.$viewValue !== _val){
 						ngModel.$setViewValue(_val);
 						if(triggerUndo) ngModel.$undoManager.push(_val);
@@ -1209,7 +1210,7 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 							}
 							var val = _compileHtml();
 							if(_defaultVal !== '' && val.trim() === ''){
-								element[0].innerHTML = _defaultVal;
+								_setInnerHTML(_defaultVal);
 								taSelection.setSelectionToElementStart(element.children()[0]);
 							}
 							var triggerUndo = _lastKey !== event.keyCode && UNDO_TRIGGER_KEYS.test(event.keyCode);
@@ -1306,7 +1307,6 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 					$timeout(function(){
 						dropFired = false;
 						_setViewValue();
-						_reApplyOnSelectorHandlers();
 					}, 100);
 				}
 			};
@@ -1548,7 +1548,7 @@ textAngular.directive("textAngular", [
 						// shim the .one till fixed
 						var _func = function(){
 							_element.off(event, _func);
-							action();
+							action.apply(this, arguments);
 						};
 						_element.on(event, _func);
 					}, 100);
@@ -1634,7 +1634,7 @@ textAngular.directive("textAngular", [
 					scope.displayElements.popover.css('display', 'block');
 					scope.reflowPopover(_el);
 					$animate.addClass(scope.displayElements.popover, 'in');
-					oneEvent(element, 'click keyup', function(){scope.hidePopover();});
+					oneEvent($document.find('body'), 'click keyup', function(){scope.hidePopover();});
 				};
 				scope.reflowPopover = function(_el){
 					/* istanbul ignore if: catches only if near bottom of editor */
@@ -1697,38 +1697,24 @@ textAngular.directive("textAngular", [
 								x: Math.max(0, startPosition.width + (event.clientX - startPosition.x)),
 								y: Math.max(0, startPosition.height + (event.clientY - startPosition.y))
 							};
-							var applyImageSafeCSS = function(_el, css){
-								_el = angular.element(_el);
-								if(_el[0].tagName.toLowerCase() === 'img'){
-									if(css.height){
-										_el.attr('height', css.height);
-										delete css.height;
-									}
-									if(css.width){
-										_el.attr('width', css.width);
-										delete css.width;
-									}
-								}
-								_el.css(css);
-							};
+							
 							if(event.shiftKey){
 								// keep ratio
 								var newRatio = pos.y / pos.x;
-								applyImageSafeCSS(_el, {
-									width: ratio > newRatio ? pos.x : pos.y / ratio,
-									height: ratio > newRatio ? pos.x * ratio : pos.y
-								});
-							}else{
-								applyImageSafeCSS(_el, {
-									width: pos.x,
-									height: pos.y
-								});
+								pos.x = ratio > newRatio ? pos.x : pos.y / ratio;
+								pos.y = ratio > newRatio ? pos.x * ratio : pos.y;
 							}
+							el = angular.element(_el);
+							el.attr('height', Math.max(0, pos.y));
+							el.attr('width', Math.max(0, pos.x));
+							
 							// reflow the popover tooltip
 							scope.reflowResizeOverlay(_el);
 						};
 						$document.find('body').on('mousemove', mousemove);
-						oneEvent(scope.displayElements.resize.overlay, 'mouseup', function(){
+						oneEvent($document.find('body'), 'mouseup', function(event){
+							event.preventDefault();
+							event.stopPropagation();
 							$document.find('body').off('mousemove', mousemove);
 							scope.showPopover(_el);
 						});
@@ -1739,7 +1725,7 @@ textAngular.directive("textAngular", [
 					scope.displayElements.resize.anchors[3].on('mousedown', resizeMouseDown);
 
 					scope.reflowResizeOverlay(_el);
-					oneEvent(element, 'click', function(){scope.hideResizeOverlay();});
+					oneEvent($document.find('body'), 'click', function(){scope.hideResizeOverlay();});
 				};
 				/* istanbul ignore next: pretty sure phantomjs won't test this */
 				scope.hideResizeOverlay = function(){
