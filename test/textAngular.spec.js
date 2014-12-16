@@ -1016,7 +1016,8 @@ describe('textAngular', function(){
 				expect(!iButton.hasClass('active'));
 			});
 			
-			it('should change on keydown and stop on keyup', inject(function($timeout){
+			it('should change on keydown and stop on keyup', inject(function($timeout, $document){
+				$document.hasFocus = function(){return true;};
 				editorScope.displayElements.text.triggerHandler('keydown');
 				range.selectNodeContents(editorScope.displayElements.text.find('p').find('u')[0]);
 				sel.setSingleRange(range);
