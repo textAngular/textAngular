@@ -11,17 +11,18 @@ module.exports = function (grunt) {
 	grunt.loadNpmTasks('grunt-karma-coveralls');
 	grunt.loadNpmTasks('grunt-conventional-changelog');
 	grunt.loadNpmTasks('grunt-bump');
+	grunt.loadNpmTasks('grunt-git');
 	
 	grunt.registerTask('compile', ['concat', 'uglify']);
 	grunt.registerTask('default', ['compile', 'test']);
 	grunt.registerTask('test', ['clean', 'jshint', 'karma', 'coverage']);
 	grunt.registerTask('travis-test', ['concat', 'jshint', 'karma', 'coverage', 'coveralls']);
 	
-	grunt.registerTask('release', ['bump-only','compile','changelog','bump-commit']);
-	grunt.registerTask('release:patch', ['bump-only:patch','compile','changelog','bump-commit']);
-	grunt.registerTask('release:minor', ['bump-only:minor','compile','changelog','bump-commit']);
-	grunt.registerTask('release:major', ['bump-only:major','compile','changelog','bump-commit']);
-	grunt.registerTask('release:prerelease', ['bump-only:prerelease','compile','changelog','bump-commit']);
+	grunt.registerTask('release', ['bump-only','compile','changelog','gitcommit','bump-commit']);
+	grunt.registerTask('release:patch', ['bump-only:patch','compile','changelog','gitcommit','bump-commit']);
+	grunt.registerTask('release:minor', ['bump-only:minor','compile','changelog','gitcommit','bump-commit']);
+	grunt.registerTask('release:major', ['bump-only:major','compile','changelog','gitcommit','bump-commit']);
+	grunt.registerTask('release:prerelease', ['bump-only:prerelease','compile','changelog','gitcommit','bump-commit']);
 	
 	var testConfig = function (configFile, customOptions) {
 		var options = { configFile: configFile, keepalive: true };
@@ -39,9 +40,20 @@ module.exports = function (grunt) {
 				files: ['package.json','bower.json'],
 				commitFiles: ['package.json', 'changelog.md','bower.json'],
 				pushTo: 'origin',
-				updateConfigs: ['pkg','bower']
+				updateConfigs: ['pkg']
 			}
 		},
+		gitcommit: {
+			release: {
+				options: {
+					message: "chore(release): Build Dist files"
+				},
+				files: {
+					src: ['src/*','dist/*']
+				}
+			}
+		},
+		
 		clean: ["coverage"],
 		coverage: {
 		  options: {
