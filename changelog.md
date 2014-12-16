@@ -1,3 +1,12 @@
+<a name="1.3.0-18"></a>
+### 1.3.0-18 (2014-12-17)
+
+
+#### Bug Fixes
+
+* **textAngular:** Fixes the window blur check for updating styles ([72a5da81](http://github.com/fraywing/textAngular/commit/72a5da815ba8cad96ec70ab920dcf14971bdb05d))
+
+
 <a name="1.3.0-17"></a>
 ### 1.3.0-17 (2014-12-16)
 
