@@ -2,7 +2,7 @@
 @license textAngular
 Author : Austin Anderson
 License : 2013 MIT
-Version 1.3.0-18
+Version 1.3.0-19
 
 See README.md or https://github.com/fraywing/textAngular/wiki for requirements and use.
 */
@@ -1247,7 +1247,7 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 					
 					element.on('mouseup', function(){
 						var _selection = taSelection.getSelection();
-						if(_selection.start.element === element[0]) taSelection.setSelectionToElementStart(element.children()[0]);
+						if(_selection.start.element === element[0] && element.children().length) taSelection.setSelectionToElementStart(element.children()[0]);
 					});
 					
 					// prevent propagation on mousedown in editor, see #206
@@ -1834,7 +1834,10 @@ textAngular.directive("textAngular", [
 						element.removeClass(scope.classes.focussed);
 						_toolbars.unfocus();
 						// to prevent multiple apply error defer to next seems to work.
-						$timeout(function(){ element.triggerHandler('blur'); }, 0);
+						$timeout(function(){
+							scope._bUpdateSelectedStyles = false;
+							element.triggerHandler('blur');
+						}, 0);
 					}
 					e.preventDefault();
 					return false;
