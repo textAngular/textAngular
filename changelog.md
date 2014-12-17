@@ -1,3 +1,13 @@
+<a name="1.3.0-19"></a>
+### 1.3.0-19 (2014-12-18)
+
+
+#### Bug Fixes
+
+* **taBind:** Catch edge case on mouseup handler when no children ([e1140893](http://github.com/fraywing/textAngular/commit/e11408932653cb1e8adfae628fa34c495c7892bf), closes [#446](http://github.com/fraywing/textAngular/issues/446))
+* **textAngular:** Add stop of update selected styles on blur. ([c877991d](http://github.com/fraywing/textAngular/commit/c877991de312b7e78865d4f03390de5a2e4d40c2), closes [#443](http://github.com/fraywing/textAngular/issues/443))
+
+
 <a name="1.3.0-18"></a>
 ### 1.3.0-18 (2014-12-17)
 
