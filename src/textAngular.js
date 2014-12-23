@@ -1802,19 +1802,13 @@ textAngular.directive("textAngular", [
 
 				// used in the toolbar actions
 				scope._actionRunning = false;
-				var _savedSelection = false;
 				scope.startAction = function(){
 					scope._actionRunning = true;
-					// if rangy library is loaded return a function to reload the current selection
-					_savedSelection = $window.rangy.saveSelection();
 					return function(){
-						if(_savedSelection) $window.rangy.restoreSelection(_savedSelection);
 					};
 				};
 				scope.endAction = function(){
 					scope._actionRunning = false;
-					if(_savedSelection) $window.rangy.removeMarkers(_savedSelection);
-					_savedSelection = false;
 					scope.updateSelectedStyles();
 					// only update if in text or WYSIWYG mode
 					if(!scope.showHtml) scope['updateTaBindtaTextElement' + _serial]();
