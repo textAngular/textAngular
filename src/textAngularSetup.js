@@ -553,7 +553,7 @@ angular.module('textAngularSetup', [])
 				// get the video ID
 				var ids = urlPrompt.match(/(\?|&)v=[^&]*/);
 				/* istanbul ignore else: if it's invalid don't worry - though probably should show some kind of error message */
-				if(ids.length > 0){
+				if(ids && ids.length > 0){
 					// create the embed link
 					var urlLink = "https://www.youtube.com/embed/" + ids[0].substring(3);
 					// create the HTML
