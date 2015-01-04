@@ -1,3 +1,13 @@
+<a name="1.3.0-20"></a>
+### 1.3.0-20 (2015-01-05)
+
+
+#### Bug Fixes
+
+* **textAngular.resize-overlay:** Catch when height or width is NaN ([efcb4115](http://github.com/fraywing/textAngular/commit/efcb411523aecab53a1798a7c25057f34f461444), closes [#470](http://github.com/fraywing/textAngular/issues/470))
+* **textangular:** Fix focus issues in IE11 ([a5200e38](http://github.com/fraywing/textAngular/commit/a5200e38780744ad71aa30f83871917a22fd8471), closes [#443](http://github.com/fraywing/textAngular/issues/443))
+
+
 <a name="1.3.0-19"></a>
 ### 1.3.0-19 (2014-12-18)
 
