@@ -169,7 +169,7 @@ describe('taBind.validation', function () {
 		
 		describe('should handle inline elements like img', function () {
 			beforeEach(function(){
-				$rootScope.html = '<pre><img src="test.jpg"/></pre>';
+				$rootScope.html = '<p><img src="test.jpg"/></p>';
 				$rootScope.$digest();
 			});
 			it('ng-required', function(){
