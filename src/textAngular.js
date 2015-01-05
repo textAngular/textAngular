@@ -2,7 +2,7 @@
 @license textAngular
 Author : Austin Anderson
 License : 2013 MIT
-Version 1.3.0-19
+Version 1.3.0-20
 
 See README.md or https://github.com/fraywing/textAngular/wiki for requirements and use.
 */
@@ -1687,8 +1687,8 @@ textAngular.directive("textAngular", [
 							x: event.clientX,
 							y: event.clientY
 						};
-						if(startPosition.width === undefined) startPosition.width = _el[0].offsetWidth;
-						if(startPosition.height === undefined) startPosition.height = _el[0].offsetHeight;
+						if(startPosition.width === undefined || isNaN(startPosition.width)) startPosition.width = _el[0].offsetWidth;
+						if(startPosition.height === undefined || isNaN(startPosition.height)) startPosition.height = _el[0].offsetHeight;
 						scope.hidePopover();
 						var ratio = startPosition.height / startPosition.width;
 						var mousemove = function(event){
@@ -1823,6 +1823,7 @@ textAngular.directive("textAngular", [
 				// note that focusout > focusin is called everytime we click a button - except bad support: http://www.quirksmode.org/dom/events/blurfocus.html
 				// cascades to displayElements.text and displayElements.html automatically.
 				_focusin = function(){
+					scope.focussed = true;
 					element.addClass(scope.classes.focussed);
 					_toolbars.focus();
 				};
@@ -1837,6 +1838,7 @@ textAngular.directive("textAngular", [
 						$timeout(function(){
 							scope._bUpdateSelectedStyles = false;
 							element.triggerHandler('blur');
+							scope.focussed = false;
 						}, 0);
 					}
 					e.preventDefault();
@@ -1981,7 +1983,10 @@ textAngular.directive("textAngular", [
 				// the following is for applying the active states to the tools that support it
 				scope._bUpdateSelectedStyles = false;
 				/* istanbul ignore next: browser window/tab leave check */
-				angular.element(window).on('blur', function(){ scope._bUpdateSelectedStyles = false; });
+				angular.element(window).on('blur', function(){
+					scope._bUpdateSelectedStyles = false;
+					scope.focussed = false;
+				});
 				// loop through all the tools polling their activeState function if it exists
 				scope.updateSelectedStyles = function(){
 					var _selection;
@@ -1995,6 +2000,11 @@ textAngular.directive("textAngular", [
 				};
 				// start updating on keydown
 				_keydown = function(){
+					/* istanbul ignore next: ie catch */
+					if(!scope.focussed){
+						scope._bUpdateSelectedStyles = false;
+						return;
+					}
 					/* istanbul ignore else: don't run if already running */
 					if(!scope._bUpdateSelectedStyles){
 						scope._bUpdateSelectedStyles = true;
@@ -2085,6 +2095,7 @@ textAngular.service('textAngularManager', ['taToolExecuteAction', 'taTools', 'ta
 							toolbarScope._parent = scope;
 							toolbarScope.disabled = false;
 							toolbarScope.focussed = true;
+							scope.focussed = true;
 						});
 					},
 					unfocus: function(){
@@ -2093,6 +2104,7 @@ textAngular.service('textAngularManager', ['taToolExecuteAction', 'taTools', 'ta
 							toolbarScope.disabled = true;
 							toolbarScope.focussed = false;
 						});
+						scope.focussed = false;
 					},
 					updateSelectedStyles: function(selectedElement){
 						// update the active state of all buttons on liked toolbars
