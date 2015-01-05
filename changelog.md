@@ -1,3 +1,13 @@
+<a name="1.3.0-21"></a>
+### 1.3.0-21 (2015-01-06)
+
+
+#### Bug Fixes
+
+* **taBind:** Add blankTest tests and seperate service ([c3900a4a](http://github.com/fraywing/textAngular/commit/c3900a4a64c9b51632bc70c0e305d2752faa0ba3))
+* **textAngular.resize:** Fixes resize overlay with more than one image ([c08ddd75](http://github.com/fraywing/textAngular/commit/c08ddd75282cea89e5c2bfed64bee7fc2f78b1a5), closes [#470](http://github.com/fraywing/textAngular/issues/470))
+
+
 <a name="1.3.0-20"></a>
 ### 1.3.0-20 (2015-01-05)
 
