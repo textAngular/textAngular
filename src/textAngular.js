@@ -2,7 +2,7 @@
 @license textAngular
 Author : Austin Anderson
 License : 2013 MIT
-Version 1.3.0-20
+Version 1.3.0-21
 
 See README.md or https://github.com/fraywing/textAngular/wiki for requirements and use.
 */
@@ -792,8 +792,25 @@ angular.module('textAngular.validators', [])
 	};
 });
 angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'])
-.directive('taBind', ['taSanitize', '$timeout', '$window', '$document', 'taFixChrome', 'taBrowserTag', 'taSelection', 'taSelectableElements', 'taApplyCustomRenderers', 'taOptions',
-				function(taSanitize, $timeout, $window, $document, taFixChrome, taBrowserTag, taSelection, taSelectableElements, taApplyCustomRenderers, taOptions){
+.service('_taBlankTest', [function(){
+	var INLINETAGS_NONBLANK = /<(a|abbr|acronym|bdi|bdo|big|cite|code|del|dfn|img|ins|kbd|label|map|mark|q|ruby|rp|rt|s|samp|time|tt|var)[^>]*(>|$)/i;
+	return function(_defaultTest){
+		return function(_blankVal){
+			if(!_blankVal) return true;
+			_blankVal = _blankVal.toString();
+			var _firstTagIndex = _blankVal.indexOf('>');
+			if(_firstTagIndex === -1) return _blankVal.trim().length === 0;
+			_blankVal = _blankVal.trim().substring(_firstTagIndex, _firstTagIndex + 100);
+			// this regex is to match any number of whitespace only between two tags
+			if (_blankVal.length === 0 || _blankVal === _defaultTest || /^>(\s|&nbsp;)*<\/[^>]+>$/ig.test(_blankVal)) return true;
+			// this regex tests if there is a tag followed by some optional whitespace and some text after that
+			else if (/>\s*[^\s<]/i.test(_blankVal) || INLINETAGS_NONBLANK.test(_blankVal)) return false;
+			else return true;
+		};
+	};
+}])
+.directive('taBind', ['taSanitize', '$timeout', '$window', '$document', 'taFixChrome', 'taBrowserTag', 'taSelection', 'taSelectableElements', 'taApplyCustomRenderers', 'taOptions', '_taBlankTest',
+				function(taSanitize, $timeout, $window, $document, taFixChrome, taBrowserTag, taSelection, taSelectableElements, taApplyCustomRenderers, taOptions, _taBlankTest){
 	// Uses for this are textarea or input with ng-model and ta-bind='text'
 	// OR any non-form element with contenteditable="contenteditable" ta-bind="html|text" ng-model
 	return {
@@ -808,7 +825,6 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 			var _lastKey;
 			var BLOCKED_KEYS = /^(9|19|20|27|33|34|35|36|37|38|39|40|45|112|113|114|115|116|117|118|119|120|121|122|123|144|145)$/i;
 			var UNDO_TRIGGER_KEYS = /^(8|13|32|46|59|61|107|109|186|187|188|189|190|191|192|219|220|221|222)$/i; // spaces, enter, delete, backspace, all punctuation
-			var INLINETAGS_NONBLANK = /<(a|abbr|acronym|bdi|bdo|big|cite|code|del|dfn|img|ins|kbd|label|map|mark|q|ruby|rp|rt|s|samp|time|tt|var)[^>]*>/i;
 			
 			// defaults to the paragraph element, but we need the line-break or it doesn't allow you to type into the empty element
 			// non IE is '<p><br/></p>', ie is '<p></p>' as for once IE gets it correct...
@@ -832,16 +848,7 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 						'<' + attrs.taDefaultWrap + '>&nbsp;</' + attrs.taDefaultWrap + '>';
 			}
 			
-			var _blankTest = function(_blankVal){
-				var _firstTagIndex = _blankVal.indexOf('>');
-				if(_firstTagIndex === -1) return _blankVal.trim().length === 0;
-				_blankVal = _blankVal.trim().substring(_firstTagIndex, _firstTagIndex + 100);
-				// this regex is to match any number of whitespace only between two tags
-				if (_blankVal.length === 0 || _blankVal === _defaultTest || /^>(\s|&nbsp;)*<\/[^>]+>$/ig.test(_blankVal)) return true;
-				// this regex tests if there is a tag followed by some optional whitespace and some text after that
-				else if (/>\s*[^\s<]/i.test(_blankVal) || INLINETAGS_NONBLANK.test(_blankVal)) return false;
-				else return true;
-			};
+			var _blankTest = _taBlankTest(_defaultTest);
 			
 			element.addClass('ta-bind');
 			
@@ -1539,7 +1546,7 @@ textAngular.directive("textAngular", [
 				var _keydown, _keyup, _keypress, _mouseup, _focusin, _focusout,
 					_originalContents, _toolbars,
 					_serial = (attrs.serial) ? attrs.serial : Math.floor(Math.random() * 10000000000000000),
-					_taExecCommand;
+					_taExecCommand, _resizeMouseDown;
 				
 				scope._name = (attrs.name) ? attrs.name : 'textAngularEditor' + _serial;
 
@@ -1680,7 +1687,8 @@ textAngular.directive("textAngular", [
 				};
 				/* istanbul ignore next: pretty sure phantomjs won't test this */
 				scope.showResizeOverlay = function(_el){
-					var resizeMouseDown = function(event){
+					var _body = $document.find('body');
+					_resizeMouseDown = function(event){
 						var startPosition = {
 							width: parseInt(_el.attr('width')),
 							height: parseInt(_el.attr('height')),
@@ -1705,30 +1713,33 @@ textAngular.directive("textAngular", [
 								pos.y = ratio > newRatio ? pos.x * ratio : pos.y;
 							}
 							el = angular.element(_el);
+							console.log('element', pos, _el);
 							el.attr('height', Math.max(0, pos.y));
 							el.attr('width', Math.max(0, pos.x));
 							
 							// reflow the popover tooltip
 							scope.reflowResizeOverlay(_el);
 						};
-						$document.find('body').on('mousemove', mousemove);
-						oneEvent($document.find('body'), 'mouseup', function(event){
+						_body.on('mousemove', mousemove);
+						oneEvent(_body, 'mouseup', function(event){
 							event.preventDefault();
 							event.stopPropagation();
-							$document.find('body').off('mousemove', mousemove);
+							console.log('Trigger Removal');
+							_body.off('mousemove', mousemove);
 							scope.showPopover(_el);
 						});
 						event.stopPropagation();
 						event.preventDefault();
 					};
 
-					scope.displayElements.resize.anchors[3].on('mousedown', resizeMouseDown);
+					scope.displayElements.resize.anchors[3].on('mousedown', _resizeMouseDown);
 
 					scope.reflowResizeOverlay(_el);
-					oneEvent($document.find('body'), 'click', function(){scope.hideResizeOverlay();});
+					oneEvent(_body, 'click', function(){scope.hideResizeOverlay();});
 				};
 				/* istanbul ignore next: pretty sure phantomjs won't test this */
 				scope.hideResizeOverlay = function(){
+					scope.displayElements.resize.anchors[3].off('mousedown', _resizeMouseDown);
 					scope.displayElements.resize.overlay.css('display', '');
 				};
 
