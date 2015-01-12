@@ -5,7 +5,7 @@
 
   <meta charset="UTF-8">
 
-  <title>textAngular 1.3.0-pre15 Demo</title>
+  <title>textAngular 1.3.0-pre22 Demo</title>
 
   <meta name="robots" content="noindex">
 
@@ -13,6 +13,11 @@
   <link rel='stylesheet prefetch' href='../bower_components/font-awesome/css/font-awesome.css'>
   <link rel='stylesheet prefetch' href='../src/textAngular.css' media="screen">
 
+  <script src='../bower_components/angular/angular.js'></script>
+  <script src='../dist/textAngular-rangy.min.js'></script>
+  <script src='../src/textAngular-sanitize.js'></script>
+  <script src='../src/textAngularSetup.js'></script>
+  <script src='../src/textAngular.js'></script>
 
     <style>
 .ta-editor, .ta-editor > .ta-bind {
@@ -58,6 +63,7 @@
   <button type="button">Does Nothing</button>
   <p>Note: although we support classes and styles, angularjs' ng-bind-html directive will strip out all style attributes.</p>
   
+  <div text-angular ng-model="bio"></div>
   
   <form name="validationForm">
     <label for="name">Name:</label> <input type="text" tabindex="1" id="name" ng-model="name">
@@ -69,12 +75,6 @@
   <h1>Option to masquerade as a fancy text-area - complete with form submission and optional ngModel</h1>
   <text-angular name="htmlcontent_nomodel"><p>Any <b>HTML</b> we put in-between the text-angular tags gets <a href="automatic">automatically</a> put into the editor if there <strong style="font-size: 12pt;"><u><em>is not</em></u></strong> a ngModel</p></text-angular>
 </div>
-  <script src='../bower_components/rangy/rangy-core.js'></script>
-  <script src='../bower_components/angular/angular.js'></script>
-  <script src='../bower_components/rangy/rangy-selectionsaverestore.js'></script>
-  <script src='../src/textAngular-sanitize.js'></script>
-  <script src='../src/textAngularSetup.js'></script>
-  <script src='../src/textAngular.js'></script>
 
   <script type="text/javascript">
   	'use strict';
