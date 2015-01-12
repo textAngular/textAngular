@@ -1838,6 +1838,7 @@ textAngular.directive("textAngular", [
 					scope.focussed = true;
 					element.addClass(scope.classes.focussed);
 					_toolbars.focus();
+					element.triggerHandler('focus');
 				};
 				scope.displayElements.html.on('focus', _focusin);
 				scope.displayElements.text.on('focus', _focusin);
