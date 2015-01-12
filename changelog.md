@@ -1,3 +1,13 @@
+<a name="1.3.0-22"></a>
+### 1.3.0-22 (2015-01-13)
+
+
+#### Bug Fixes
+
+* **main.events:** ng-focus wasn't being triggered on focus. ([3928bc50](http://github.com/fraywing/textAngular/commit/3928bc50205fb53de8c7cc08e213fc4f0b6aca24), closes [#482](http://github.com/fraywing/textAngular/issues/482))
+* **taBind._blankTest:** Fix a bug where the first tag had really big attributes and cut off the actual c ([fe800b24](http://github.com/fraywing/textAngular/commit/fe800b24cbcfad53f2e9a0b793b1ead9b7b4d45e), closes [#484](http://github.com/fraywing/textAngular/issues/484))
+
+
 <a name="1.3.0-21"></a>
 ### 1.3.0-21 (2015-01-06)
 
