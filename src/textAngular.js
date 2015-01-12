@@ -797,7 +797,8 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 	return function(_defaultTest){
 		return function(_blankVal){
 			if(!_blankVal) return true;
-			_blankVal = _blankVal.toString();
+			// Don't do a global replace as that would be waaayy too long, just replace the first 4 occurences should be enough
+			_blankVal = _blankVal.toString().replace(/="[^"]*"/i, '').replace(/="[^"]*"/i, '').replace(/="[^"]*"/i, '').replace(/="[^"]*"/i, '');
 			var _firstTagIndex = _blankVal.indexOf('>');
 			if(_firstTagIndex === -1) return _blankVal.trim().length === 0;
 			_blankVal = _blankVal.trim().substring(_firstTagIndex, _firstTagIndex + 100);

@@ -19,7 +19,13 @@ describe('taBind._taBlankTest', function () {
 	
 	describe('should return false for', function () {
 		angular.forEach(
-			['<p>test</p>','<p>Test Some<br></p>','Some Test','<p><img class="ta-insert-video" src="https://img.youtube.com/vi/sbQQKI1Fwo4/hqdefault.jpg" ta-insert-video="https://www.youtube.com/embed/sbQQKI1Fwo4" contenteditable="false" allowfullscreen="true" frameborder="0"><br></p>'],
+			[
+				'<p>test</p>',
+				'<p>Test Some<br></p>',
+				'Some Test',
+				'<p><img class="ta-insert-video" src="https://img.youtube.com/vi/sbQQKI1Fwo4/hqdefault.jpg" ta-insert-video="https://www.youtube.com/embed/sbQQKI1Fwo4" contenteditable="false" allowfullscreen="true" frameborder="0"><br></p>',
+				'<p></p><p style="color: rgb(68, 68, 68);text-align: left;background-color: rgb(255, 255, 255);"><u><b>ATTITUDES:</b></u></p>'
+			],
 			testString(false)
 		);
 	});
