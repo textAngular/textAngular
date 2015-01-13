@@ -553,6 +553,9 @@ angular.module('textAngular.DOM', ['textAngular.factories'])
 				}else if(command.toLowerCase() === 'inserthtml'){
 					taSelection.insertHtml(options, topNode);
 					return;
+				}else if(command.toLowerCase() === 'customtags'){
+					taSelection.surroundSelection(options);
+					return;
 				}
 			}
 			try{
@@ -716,6 +719,18 @@ function($window, $document){
 			range.insertNode(frag);
 			if(lastNode){
 				api.setSelectionToElementEnd(lastNode);
+			}
+		},
+		surroundSelection: function(htmlString) {
+			var range = rangy.getSelection().getRangeAt(0);
+			var node = range.createContextualFragment(htmlString);
+
+			if (range.commonAncestorContainer.outerHTML.replace(range.commonAncestorContainer.innerHTML, '') !== htmlString) {
+				range.surroundContents(node.firstChild);
+			} else {
+				var oldInnerHTML = range.commonAncestorContainer.innerHTML;
+				angular.element(api.getSelection().container).remove();
+				api.insertHtml(oldInnerHTML);
 			}
 		}
 	};
