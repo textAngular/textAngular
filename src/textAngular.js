@@ -1195,7 +1195,13 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 						}
 					});
 					
-					element.on('keyup', function(event, eventData){
+					element.on('keyup', function(event, eventData) {
+						if (event.keyCode == 9) {
+							var _selection = taSelection.getSelection();
+							if(_selection.start.element === element[0] && element.children().length) taSelection.setSelectionToElementStart(element.children()[0]);
+							return;
+						}
+
 						/* istanbul ignore else: this is for catching the jqLite testing*/
 						if(eventData) angular.extend(event, eventData);
 						if(_undoKeyupTimeout) $timeout.cancel(_undoKeyupTimeout);
