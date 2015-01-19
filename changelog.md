@@ -1,3 +1,12 @@
+<a name="1.3.0-23"></a>
+### 1.3.0-23 (2015-01-20)
+
+
+#### Bug Fixes
+
+* **taBind:** Issue when unwrapped text was entered ([51f37284](http://github.com/fraywing/textAngular/commit/51f37284156bd2fca17a2c9aa7e42176393bf115), closes [#484](http://github.com/fraywing/textAngular/issues/484))
+
+
 <a name="1.3.0-22"></a>
 ### 1.3.0-22 (2015-01-13)
 
