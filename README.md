@@ -92,6 +92,8 @@ The problems with iFrames are that they are a security risk so the sanitizer by 
 You'll have to apply the renderers manually, see comment in issue [#469](https://github.com/fraywing/textAngular/issues/469#issuecomment-68650506) for details.
 3. **IE Is automatically converting typed links to `<a href...>` tags**<br/>
 This is a known issue with IE, to prevent this run the following javascript after page load: `document.execCommand("AutoUrlDetect", false, false)`. See [#475](https://github.com/fraywing/textAngular/issues/475) for details.
+4. **Error `"textAngular Error: An editor with the name already exists"` occurs**<br/>
+See Issue [#240](https://github.com/fraywing/textAngular/issues/240) for specific details on why this occurs and how to resolve it.
 
 ## Developer Notes
 
