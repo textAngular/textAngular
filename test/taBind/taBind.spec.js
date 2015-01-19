@@ -1,3 +1,14 @@
+var triggerKeyup = function(element, options){
+	var event;
+	if(angular.element === jQuery){
+		event = jQuery.Event('keyup');
+		angular.extend(event, options);
+		element.triggerHandler(event);
+	}else{
+		element.triggerHandler('keyup', options);
+	}
+};
+
 describe('taBind', function () {
 	'use strict';
 	beforeEach(module('textAngular'));
@@ -34,7 +45,7 @@ describe('taBind', function () {
 		});
 		it('should update model from keyup', function () {
 			element.html('<div>Test 2 Content</div>');
-			element.triggerHandler('keyup');
+			triggerKeyup(element, {});
 			$rootScope.$digest();
 			expect($rootScope.html).toBe('<div>Test 2 Content</div>');
 		});
@@ -159,7 +170,7 @@ describe('taBind', function () {
 					$rootScope.html = '';
 					element = $compile('<div ta-bind contenteditable="contenteditable" ng-model="html"></div>')($rootScope);
 					$rootScope.$digest();
-					element.triggerHandler('keyup');
+					triggerKeyup(element, {});
 					$rootScope.$digest();
 					expect(element.html()).toBe('<p><br></p>');
 				}));
@@ -167,7 +178,7 @@ describe('taBind', function () {
 					$rootScope.html = '';
 					element = $compile('<div ta-bind ta-default-wrap="div" contenteditable="contenteditable" ng-model="html"></div>')($rootScope);
 					$rootScope.$digest();
-					element.triggerHandler('keyup');
+					triggerKeyup(element, {});
 					$rootScope.$digest();
 					expect(element.html()).toBe('<div><br></div>');
 				}));
@@ -175,7 +186,7 @@ describe('taBind', function () {
 					$rootScope.html = '';
 					element = $compile('<div ta-bind ta-default-wrap="" contenteditable="contenteditable" ng-model="html"></div>')($rootScope);
 					$rootScope.$digest();
-					element.triggerHandler('keyup');
+					triggerKeyup(element, {});
 					$rootScope.$digest();
 					expect(element.html()).toBe('');
 				}));
@@ -194,14 +205,7 @@ describe('taBind', function () {
 					$window.rangy.getSelection().setSingleRange(range);
 
 					BLOCKED_KEYS.forEach(function(key) {
-						if(angular.element === jQuery) {
-							event = jQuery.Event('keyup');
-							event.keyCode = key;
-							element.triggerHandler(event);
-						}else{
-							event = {keyCode: key};
-							element.triggerHandler('keyup', event);
-						}
+						triggerKeyup(element, {keyCode: key});
 						$rootScope.$digest();
 						expect(eventSpy).not.toHaveBeenCalled();
 					});
@@ -217,15 +221,7 @@ describe('taBind', function () {
 					var range = $window.rangy.createRangyRange();
 					range.selectNodeContents(element.children()[0]);
 					$window.rangy.getSelection().setSingleRange(range);
-					var event;
-					if(angular.element === jQuery){
-						event = jQuery.Event('keyup');
-						event.keyCode = 13;
-						element.triggerHandler(event);
-					}else{
-						event = {keyCode: 13};
-						element.triggerHandler('keyup', event);
-					}
+					triggerKeyup(element, {keyCode: 13});
 					$rootScope.$digest();
 					expect(element.html()).toBe('<b><br></b>');
 					element.remove();
@@ -238,16 +234,7 @@ describe('taBind', function () {
 					var range = $window.rangy.createRangyRange();
 					range.selectNodeContents(element.children()[0]);
 					$window.rangy.getSelection().setSingleRange(range);
-					var event;
-					if(angular.element === jQuery){
-						event = jQuery.Event('keyup');
-						event.keyCode = 13;
-						event.shiftKey = true;
-						element.triggerHandler(event);
-					}else{
-						event = {keyCode: 13, shiftKey: true};
-						element.triggerHandler('keyup', event);
-					}
+					triggerKeyup(element, {keyCode: 13, shiftKey: true});
 					$rootScope.$digest();
 					expect(element.html()).toBe('<p><br></p>');
 					element.remove();
@@ -260,15 +247,7 @@ describe('taBind', function () {
 					var range = $window.rangy.createRangyRange();
 					range.selectNodeContents(element.children()[0]);
 					$window.rangy.getSelection().setSingleRange(range);
-					var event;
-					if(angular.element === jQuery){
-						event = jQuery.Event('keyup');
-						event.keyCode = 13;
-						element.triggerHandler(event);
-					}else{
-						event = {keyCode: 13};
-						element.triggerHandler('keyup', event);
-					}
+					triggerKeyup(element, {keyCode: 13});
 					$rootScope.$digest();
 					expect(element.html()).toBe('<li><br></li>');
 					element.remove();
@@ -281,15 +260,7 @@ describe('taBind', function () {
 					var range = $window.rangy.createRangyRange();
 					range.selectNodeContents(element.children()[0].childNodes[0]);
 					$window.rangy.getSelection().setSingleRange(range);
-					var event;
-					if(angular.element === jQuery){
-						event = jQuery.Event('keyup');
-						event.keyCode = 13;
-						element.triggerHandler(event);
-					}else{
-						event = {keyCode: 13};
-						element.triggerHandler('keyup', event);
-					}
+					triggerKeyup(element, {keyCode: 13});
 					$rootScope.$digest();
 					expect(element.html()).toBe('<li><i><br></i></li>');
 					element.remove();
@@ -300,7 +271,7 @@ describe('taBind', function () {
 					$document.find('body').append(element);
 					$rootScope.$digest();
 					element[0].innerHTML = '';
-					element.triggerHandler('keyup');
+					triggerKeyup(element, {});
 					$rootScope.$digest();
 					expect(element.html()).toBe('<b><br></b>');
 					element.remove();
@@ -506,4 +477,22 @@ describe('taBind', function () {
 		}));
 	});
 	*/
+	
+	describe('tests for issue as described in 484', function(){
+		var element, taSelection;
+		beforeEach(inject(function ($compile, _$rootScope_, $document, _taSelection_) {
+			$rootScope = _$rootScope_;
+			taSelection = _taSelection_;
+			$rootScope.html = undefined;
+			element = $compile('<div ta-bind contenteditable="true" ng-model="html"></div>')($rootScope);
+			$document.find('body').append(element);
+			$rootScope.$digest();
+		}));
+		it('it should wrap chars into a <p>-tag', function() {
+			element.html('f'); //maybe there is a <p></p>
+			triggerKeyup(element, {keyCode: 70});
+			$rootScope.$digest();
+			expect($rootScope.html).toBe('<p>f</p>'); //but apparently it is just 'f'
+		});
+	});
 });
