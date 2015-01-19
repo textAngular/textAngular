@@ -90,6 +90,8 @@ If you find something, please let me know - throw me a message, or submit a issu
 The problems with iFrames are that they are a security risk so the sanitizer by default strips them out. Instead of changing the sanitizer to allow iFrames we use a placeholder for youtube videos which has the added advantage of allowing you to edit their size and placement in the editor. To display the youtube videos when you aren't in the editor use the following html: ```<div ta-bind ng-model="data.htmlcontent"></div>```. This invokes our custom renderers to convert the ```<img>``` tags back into the youtube video you expect.
 2. **But I want to use Youtube outside of angular**<br/>
 You'll have to apply the renderers manually, see comment in issue [#469](https://github.com/fraywing/textAngular/issues/469#issuecomment-68650506) for details.
+3. **IE Is automatically converting typed links to `<a href...>` tags**<br/>
+This is a known issue with IE, to prevent this run the following javascript after page load: `document.execCommand("AutoUrlDetect", false, false)`. See [#475](https://github.com/fraywing/textAngular/issues/475) for details.
 
 ## Developer Notes
 
