@@ -547,6 +547,46 @@ describe('textAngular', function(){
 			});
 		});
 	});
+
+	describe('484', function(){
+		var displayElements;
+		beforeEach(inject(function (_$compile_, _$rootScope_, textAngularManager) {
+			$rootScope = _$rootScope_;
+			$rootScope.html = undefined;
+			element = _$compile_('<text-angular name="test" ng-model="html"></text-angular>')($rootScope);
+			$rootScope.$digest();
+			displayElements = textAngularManager.retrieveEditor('test').scope.displayElements;
+		}));
+		it('should initialize correctly', function() {
+			expect(displayElements.html.val()).toBe('');
+			expect($rootScope.html).toBe(undefined);
+		});
+		it('it should wrap chars into a <p>-tag', function() {
+			displayElements.text.html('f'); //maybe there is a <p></p>
+			displayElements.text.triggerHandler('keyup', {which: 70});
+			$rootScope.$digest();
+			expect(displayElements.html.val()).toBe('<p>f</p>');
+			expect($rootScope.html).toBe('<p>f</p>'); //but apparently it is just 'f'
+		});
+		it('it should be able to add a <br/> after entering text', function() {
+			displayElements.text.html('f');
+			displayElements.text.triggerHandler('keyup', {which: 70});
+			displayElements.text.html('f<br/>');
+			displayElements.text.triggerHandler('keyup', {which: 13});
+			$rootScope.$digest();
+			expect(displayElements.html.val()).toBe('<p>f</p><br/>');
+			expect($rootScope.html).toBe('<p>f</p><br/>');
+		});
+		it('it correctly adds a <br/> when text is wrapped in <p>', function() {
+			displayElements.text.html('<p>f</p>');
+			displayElements.text.triggerHandler('keyup', {which: 70});
+			displayElements.text.html('<p>f</p><br/>');
+			displayElements.text.triggerHandler('keyup', {which: 13});
+			$rootScope.$digest();
+			expect(displayElements.html.val()).toBe('<p>f</p><br/>');
+			expect($rootScope.html).toBe('<p>f</p><br/>');
+		});
+	});
 	
 	describe('Basic Initiation with ng-model and originalContents', function(){
 		var displayElements;
