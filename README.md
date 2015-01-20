@@ -1,4 +1,4 @@
-textAngular v1.3.0-pre15
+textAngular v1.3.0
 ===========
 
 [![Build Status](https://travis-ci.org/fraywing/textAngular.png?branch=master)](https://travis-ci.org/fraywing/textAngular) [![Coverage Status](https://coveralls.io/repos/fraywing/textAngular/badge.png)](https://coveralls.io/r/fraywing/textAngular)
@@ -6,7 +6,12 @@ textAngular v1.3.0-pre15
 
 Demo is available at: http://www.textangular.com (Or editable [Plunkr Demo](http://plnkr.co/edit/tpl:iwVyu2?p=preview))
 
-#### This readme is for the v1.3.x release, if you are looking for the v1.2.2 readme go here: https://github.com/fraywing/textAngular/tree/v1.2.2
+#### Upgrading From 1.2.2 or earlier
+
+To upgrade from version 1.2.2 or earlier you need to follow these steps:
+
+1. The styling for textAngular is now in the `src/textAngular.css` file, you will need to include this or a copy of it with your own modifications.
+2. The rangy library is now required, you will need both the `rangy-core` and `rangy-saveselection` modules, alternatively you can include the compressed version (`textAngular-rangy.min.js`) in the dist folder
 
 ## Requirements
 
@@ -34,15 +39,15 @@ Include script tags similar to the following:
 
 Include script tags similar to the following:
 ```html
-<script src='http://cdnjs.cloudflare.com/ajax/libs/textAngular/1.2.2/textAngular-sanitize.min.js'></script>
-<script src='http://cdnjs.cloudflare.com/ajax/libs/textAngular/1.2.2/textAngular.min.js'></script>
+<script src='http://cdnjs.cloudflare.com/ajax/libs/textAngular/1.3.0/textAngular-sanitize.min.js'></script>
+<script src='http://cdnjs.cloudflare.com/ajax/libs/textAngular/1.3.0/textAngular.min.js'></script>
 ```
 
 **Via jsDelivr:**
 
 Include script tag similar to the following: (For details on how this works see: [https://github.com/jsdelivr/jsdelivr#load-multiple-files-with-single-http-request](https://github.com/jsdelivr/jsdelivr#load-multiple-files-with-single-http-request))
 ```html
-<script src='http://cdn.jsdelivr.net/g/angular.textangular@1.2.2(textAngular-sanitize.min.js+textAngular.min.js)'></script>
+<script src='http://cdn.jsdelivr.net/g/angular.textangular@1.3.0(textAngular-sanitize.min.js+textAngular.min.js)'></script>
 ```
 
 **Via Github**
