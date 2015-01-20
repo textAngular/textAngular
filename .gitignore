@@ -1,4 +1,5 @@
 .idea
+.DS_Store
 coverage/*
 lib-cov
 bower_components/*
