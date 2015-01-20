@@ -35,6 +35,17 @@ Include script tags similar to the following:
 <script src='/bower_components/textAngular/dist/textAngular.min.js'></script>
 ```
 
+**Via NPM:**
+
+Run `npm install textangular` from the command line.
+Include script tags similar to the following:
+```html
+<link rel='stylesheet' href='/node_modules/textangular/src/textAngular.css'>
+<script src='/node_modules/textangular/dist/textAngular-rangy.min.js'></script>
+<script src='/node_modules/textangular/dist/textAngular-sanitize.min.js'></script>
+<script src='/node_modules/textangular/dist/textAngular.min.js'></script>
+```
+
 **Via CDNJS:**
 
 Include script tags similar to the following:
