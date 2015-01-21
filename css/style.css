@@ -37,3 +37,7 @@ footer {
 	background-color: #FFF;
 	border: 1px solid #EEE;
 }
+
+textarea.ta-bind {
+	width: 100%;
+}
