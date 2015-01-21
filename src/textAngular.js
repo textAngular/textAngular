@@ -947,9 +947,10 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 			
 			//this code is used to update the models when data is entered/deleted
 			if(_isInputFriendly){
+				scope.events = {};
 				if(!_isContentEditable){
 					// if a textarea or input just add in change and blur handlers, everything else is done by angulars input directive
-					element.on('change blur', function(){
+					element.on('change blur', scope.events.change = scope.events.blur = function(){
 						if(!_isReadonly) ngModel.$setViewValue(_compileHtml());
 					});
 				}else{
@@ -1110,7 +1111,7 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 						}
 					};
 					
-					element.on('paste', function(e, eventData){
+					element.on('paste', scope.events.paste = function(e, eventData){
 						/* istanbul ignore else: this is for catching the jqLite testing*/
 						if(eventData) angular.extend(e, eventData);
 						if(_isReadonly || _processingPaste){
@@ -1147,7 +1148,7 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 							return true;
 						}
 					});
-					element.on('cut', function(e){
+					element.on('cut', scope.events.cut = function(e){
 						// timeout to next is needed as otherwise the paste/cut event has not finished actually changing the display
 						if(!_isReadonly) $timeout(function(){
 							ngModel.$setViewValue(_compileHtml());
@@ -1155,7 +1156,7 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 						else e.preventDefault();
 					});
 					
-					element.on('keydown', function(event, eventData){
+					element.on('keydown', scope.events.keydown = function(event, eventData){
 						/* istanbul ignore else: this is for catching the jqLite testing*/
 						if(eventData) angular.extend(event, eventData);
 						/* istanbul ignore else: readonly check */
@@ -1195,7 +1196,7 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 						}
 					});
 					
-					element.on('keyup', function(event, eventData){
+					element.on('keyup', scope.events.keyup = function(event, eventData){
 						/* istanbul ignore else: this is for catching the jqLite testing*/
 						if(eventData) angular.extend(event, eventData);
 						if(_undoKeyupTimeout) $timeout.cancel(_undoKeyupTimeout);
@@ -1234,7 +1235,7 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 						}
 					});
 
-					element.on('blur', function(){
+					element.on('blur', scope.events.blur = function(){
 						_focussed = false;
 						/* istanbul ignore else: if readonly don't update model */
 						if(!_isReadonly){
@@ -1254,18 +1255,18 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 						});
 					}
 
-					element.on('focus', function(){
+					element.on('focus', scope.events.focus = function(){
 						_focussed = true;
 						ngModel.$render();
 					});
 					
-					element.on('mouseup', function(){
+					element.on('mouseup', scope.events.mouseup = function(){
 						var _selection = taSelection.getSelection();
 						if(_selection.start.element === element[0] && element.children().length) taSelection.setSelectionToElementStart(element.children()[0]);
 					});
 					
 					// prevent propagation on mousedown in editor, see #206
-					element.on('mousedown', function(event, eventData){
+					element.on('mousedown', scope.events.mousedown = function(event, eventData){
 						/* istanbul ignore else: this is for catching the jqLite testing*/
 						if(eventData) angular.extend(event, eventData);
 						event.stopPropagation();
