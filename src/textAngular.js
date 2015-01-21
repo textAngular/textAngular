@@ -2,7 +2,7 @@
 @license textAngular
 Author : Austin Anderson
 License : 2013 MIT
-Version 1.3.0-23
+Version 1.4.0
 
 See README.md or https://github.com/fraywing/textAngular/wiki for requirements and use.
 */
@@ -1804,7 +1804,6 @@ textAngular.directive("textAngular", [
 								pos.y = ratio > newRatio ? pos.x * ratio : pos.y;
 							}
 							el = angular.element(_el);
-							console.log('element', pos, _el);
 							el.attr('height', Math.max(0, pos.y));
 							el.attr('width', Math.max(0, pos.x));
 							
@@ -1815,7 +1814,6 @@ textAngular.directive("textAngular", [
 						oneEvent(_body, 'mouseup', function(event){
 							event.preventDefault();
 							event.stopPropagation();
-							console.log('Trigger Removal');
 							_body.off('mousemove', mousemove);
 							scope.showPopover(_el);
 						});
