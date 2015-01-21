@@ -589,6 +589,7 @@
             _toolbars.focus();
           };
           scope.displayElements.html.on('focus', _focusin);
+          scope.displayElements.text.on('mouseup', _focusin);
           scope.displayElements.text.on('focus', _focusin);
           _focusout = function(e) {
             // if we are NOT runnig an action and have NOT focussed again on the text etc then fire the blur events
@@ -1038,7 +1039,7 @@
           // the option to use taBind on an input or textarea is required as it will sanitize all input into it correctly.
           var _isContentEditable = element.attr('contenteditable') !== undefined && element.attr('contenteditable');
           var _isInputFriendly = _isContentEditable || element[0].tagName.toLowerCase() === 'textarea' || element[0].tagName.toLowerCase() === 'input';
-          var _isReadonly = false;
+          var _isReadonly = _isDisabled = false;
           var _focussed = false;
           var _disableSanitizer = attrs.taUnsafeSanitizer || taOptions.disableSanitizer;
           var _lastKey;
@@ -1630,8 +1631,8 @@
 
           if (attrs.taDisabled) {
             //set initial value
-            _isReadonly = scope.$eval(attrs.taDisabled);
-            if (_isReadonly) {
+            _isDisabled = scope.$eval(attrs.taDisabled);
+            if (_isDisabled) {
               element.addClass('ta-disabled');
               // we changed to disabled mode (taDisabled='true')
               if (element[0].tagName.toLowerCase() === 'textarea' || element[0].tagName.toLowerCase() === 'input') {
@@ -1645,7 +1646,7 @@
               // we changed to NOT readOnly mode (taDisabled='false')
               if (element[0].tagName.toLowerCase() === 'textarea' || element[0].tagName.toLowerCase() === 'input') {
                 element.removeAttr('disabled');
-              } else if (_isContentEditable) {
+              } else if (_isContentEditable && !_isReadonly) {
                 element.attr('contenteditable', 'true');
               }
             }
@@ -1672,7 +1673,7 @@
                 // we changed to NOT readOnly mode (taDisabled='false')
                 if (element[0].tagName.toLowerCase() === 'textarea' || element[0].tagName.toLowerCase() === 'input') {
                   element.removeAttr('disabled');
-                } else if (_isContentEditable) {
+                } else if (_isContentEditable && !_isReadonly) {
                   element.attr('contenteditable', 'true');
                 }
                 // remove the selector click handlers
@@ -1681,7 +1682,7 @@
                 });
                 element.on('drop', fileDropHandler);
               }
-              _isReadonly = newVal;
+              _isDisabled = newVal;
             });
           }
 
