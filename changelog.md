@@ -1,3 +1,14 @@
+<a name="1.4.0"></a>
+## 1.4.0 (2015-01-22)
+
+
+#### Features
+
+* **taBind:**
+  * Textarea basic formatting of html with tabs and newlines ([f0d3baf8](http://github.com/fraywing/textAngular/commit/f0d3baf8dd99e11f746e6aa17ccf1e94c2842a87), closes [#307](http://github.com/fraywing/textAngular/issues/307))
+  * Allow the events to be overriden in external directives ([c4b7bdda](http://github.com/fraywing/textAngular/commit/c4b7bdda609deb49d4c51cacd835c4082843c14b), closes [#493](http://github.com/fraywing/textAngular/issues/493))
+
+
 <a name="1.3.0-23"></a>
 ### 1.3.0-23 (2015-01-20)
 
