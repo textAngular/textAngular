@@ -114,7 +114,7 @@ module.exports = function (grunt) {
 			},
 			my_target: {
 				files: {
-					'dist/textAngular-rangy.min.js': ['bower_components/rangy/rangy-core.js', 'bower_components/rangy/rangy-selectionsaverestore.js'],
+					'dist/textAngular-rangy.min.js': ['bower_components/rangy-official/rangy-core.js', 'bower_components/rangy-official/rangy-selectionsaverestore.js'],
 					'dist/textAngular.min.js': ['src/textAngularSetup.js','src/textAngular.js'],
 					'dist/textAngular-sanitize.min.js': ['src/textAngular-sanitize.js']
 				}
