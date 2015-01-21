@@ -311,6 +311,16 @@ angular.module('textAngular.factories', [])
 		} catch (e){
 			safe = oldsafe || '';
 		}
+		var _preTags = safe.match(/(<pre[^>]*>.*?<\/pre[^>]*>)/ig);
+		safe = safe.replace(/(&#(9|10);)*/ig, '');
+		var re = /<pre[^>]*>.*?<\/pre[^>]*>/i;
+		var index = 0;
+		var origTag;
+		while((origTag = re.exec(safe)) !== null && index < _preTags.length){
+			safe = safe.substring(0, origTag.index) + _preTags[index] + safe.substring(origTag.index + origTag[0].length);
+			re.lastIndex = Math.max(0, re.lastIndex + _preTags[index].length - origTag[0].length);
+			index++;
+		}
 		return safe;
 	};
 }]).factory('taToolExecuteAction', ['$q', '$log', function($q, $log){
@@ -952,6 +962,79 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 					// if a textarea or input just add in change and blur handlers, everything else is done by angulars input directive
 					element.on('change blur', scope.events.change = scope.events.blur = function(){
 						if(!_isReadonly) ngModel.$setViewValue(_compileHtml());
+					});
+					
+					element.on('keydown', scope.events.keydown = function(event, eventData){
+						/* istanbul ignore else: this is for catching the jqLite testing*/
+						if(eventData) angular.extend(event, eventData);
+						// Reference to http://stackoverflow.com/questions/6140632/how-to-handle-tab-in-textarea
+						/* istanbul ignore else: otherwise normal functionality */
+						if(event.keyCode === 9){ // tab was pressed
+							// get caret position/selection
+							var start = this.selectionStart;
+							var end = this.selectionEnd;
+							
+							var value = element.val();
+							if(event.shiftKey){
+								// find \t
+								var _linebreak = value.lastIndexOf('\n', start), _tab = value.lastIndexOf('\t', start);
+								if(_tab !== -1 && _tab >= _linebreak){
+									// set textarea value to: text before caret + tab + text after caret
+									element.val(value.substring(0, _tab) + value.substring(_tab + 1));
+									
+									// put caret at right position again (add one for the tab)
+									this.selectionStart = this.selectionEnd = start - 1;
+								}
+							}else{
+								// set textarea value to: text before caret + tab + text after caret
+								element.val(value.substring(0, start) + "\t" + value.substring(end));
+								
+								// put caret at right position again (add one for the tab)
+								this.selectionStart = this.selectionEnd = start + 1;
+							}
+							// prevent the focus lose
+							event.preventDefault();
+						}
+					});
+					
+					var _repeat = function(string, n){
+						var result = '';
+						for(var _n = 0; _n < n; _n++) result += string;
+						return result;
+					};
+					
+					var recursiveListFormat = function(listNode, tablevel){
+						var _html = '', _children = listNode.childNodes;
+						tablevel++;
+						_html += _repeat('\t', tablevel-1) + listNode.outerHTML.substring(0, listNode.outerHTML.indexOf('<li'));
+						for(var _i = 0; _i < _children.length; _i++){
+							/* istanbul ignore next: browser catch */
+							if(!_children[_i].outerHTML) continue;
+							if(_children[_i].nodeName.toLowerCase() === 'ul' || _children[_i].nodeName.toLowerCase() === 'ol')
+								_html += '\n' + recursiveListFormat(_children[_i], tablevel);
+							else
+								_html += '\n' + _repeat('\t', tablevel) + _children[_i].outerHTML;
+						}
+						_html += '\n' + _repeat('\t', tablevel-1) + listNode.outerHTML.substring(listNode.outerHTML.lastIndexOf('<'));
+						return _html;
+					};
+					
+					ngModel.$formatters.push(function(htmlValue){
+						// tabulate the HTML so it looks nicer
+						var _children = angular.element('<div>' + htmlValue + '</div>')[0].childNodes;
+						if(_children.length > 0){
+							htmlValue = '';
+							for(var i = 0; i < _children.length; i++){
+								/* istanbul ignore next: browser catch */
+								if(!_children[i].outerHTML) continue;
+								if(htmlValue.length > 0) htmlValue += '\n';
+								if(_children[i].nodeName.toLowerCase() === 'ul' || _children[i].nodeName.toLowerCase() === 'ol')
+									htmlValue += '' + recursiveListFormat(_children[i], 0);
+								else htmlValue += '' + _children[i].outerHTML;
+							}
+						}
+						
+						return htmlValue;
 					});
 				}else{
 					// all the code specific to contenteditable divs

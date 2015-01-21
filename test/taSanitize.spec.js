@@ -37,6 +37,68 @@ describe('taSanitize', function(){
 		}));
 	});
 
+	describe('clears out unnecessary &#10; &#9;', function(){
+		it('at start both', inject(function(taSanitize){
+			var result = taSanitize('<p>&#10;&#9;Test Test 2</p>', 'safe');
+			expect(result).toBe('<p>Test Test 2</p>');
+		}));
+		
+		it('at start &#10;', inject(function(taSanitize){
+			var result = taSanitize('<p>&#10;Test Test 2</p>', 'safe');
+			expect(result).toBe('<p>Test Test 2</p>');
+		}));
+		
+		it('at start &#9;', inject(function(taSanitize){
+			var result = taSanitize('<p>&#9;Test Test 2</p>', 'safe');
+			expect(result).toBe('<p>Test Test 2</p>');
+		}));
+		
+		it('at middle both', inject(function(taSanitize){
+			var result = taSanitize('<p>Test &#10;&#9;Test 2</p>', 'safe');
+			expect(result).toBe('<p>Test Test 2</p>');
+		}));
+		
+		it('at middle &#10;', inject(function(taSanitize){
+			var result = taSanitize('<p>Test &#10;Test 2</p>', 'safe');
+			expect(result).toBe('<p>Test Test 2</p>');
+		}));
+		
+		it('at middle &#9;', inject(function(taSanitize){
+			var result = taSanitize('<p>Test &#9;Test 2</p>', 'safe');
+			expect(result).toBe('<p>Test Test 2</p>');
+		}));
+		
+		it('at end both', inject(function(taSanitize){
+			var result = taSanitize('<p>Test Test 2&#10;&#9;</p>', 'safe');
+			expect(result).toBe('<p>Test Test 2</p>');
+		}));
+		
+		it('at end &#10;', inject(function(taSanitize){
+			var result = taSanitize('<p>Test Test 2&#10;</p>', 'safe');
+			expect(result).toBe('<p>Test Test 2</p>');
+		}));
+		
+		it('at end &#9;', inject(function(taSanitize){
+			var result = taSanitize('<p>Test Test 2&#9;</p>', 'safe');
+			expect(result).toBe('<p>Test Test 2</p>');
+		}));
+		
+		it('combination', inject(function(taSanitize){
+			var result = taSanitize('<p>&#10;Test &#10; &#9;Test 2&#10;&#9;</p>', 'safe');
+			expect(result).toBe('<p>Test  Test 2</p>');
+		}));
+		
+		it('leaves them inbetween <pre> tags', inject(function(taSanitize){
+			var result = taSanitize('<pre>&#9;Test &#10; &#9;Test 2&#10;&#9;</pre>', 'safe');
+			expect(result).toBe('<pre>&#9;Test &#10; &#9;Test 2&#10;&#9;</pre>');
+		}));
+		
+		it('correctly handles a mixture', inject(function(taSanitize){
+			var result = taSanitize('<p>&#10;Test &#10; &#9;Test 2&#10;&#9;</p><pre>&#9;Test &#10; &#9;Test 2&#10;&#9;</pre>', 'safe');
+			expect(result).toBe('<p>Test  Test 2</p><pre>&#9;Test &#10; &#9;Test 2&#10;&#9;</pre>');
+		}));
+	});
+
 	describe('only certain style attributes are allowed', function(){
 		describe('validated color attribute', function(){
 			it('name', inject(function(taSanitize){

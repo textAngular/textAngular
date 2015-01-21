@@ -608,7 +608,7 @@ describe('textAngular', function(){
 				element.append('<bad-tag>Test 2 Content</bad-tag>');
 				element.triggerHandler('keyup');
 				$rootScope.$digest();
-				expect(element2.val()).toBe('<p>Test Contents</p><bad-tag>Test 2 Content</bad-tag>');
+				expect(element2.val()).toBe('<p>Test Contents</p>\n<bad-tag>Test 2 Content</bad-tag>');
 			});
 			
 			it('not allow malformed html', function () {
