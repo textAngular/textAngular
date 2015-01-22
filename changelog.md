@@ -1,3 +1,12 @@
+<a name="1.4.0"></a>
+## 1.4.0 (2015-01-23)
+
+
+#### Bug Fixes
+
+* **Bower:** Rangy-official renamed to rangy. ([652204c9](http://github.com/fraywing/textAngular/commit/652204c9e2b271eee51159c27f90d1a429c0acb1))
+
+
 <a name="1.3.0"></a>
 ## 1.3.0 (2015-01-22)
 
