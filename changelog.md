@@ -1,3 +1,13 @@
+<a name="1.3.2"></a>
+### 1.3.2 (2015-01-27)
+
+
+#### Bug Fixes
+
+* **dependancies:** Revert back to stable rangy version ([498176d2](http://github.com/fraywing/textAngular/commit/498176d21ee056ac5fd0348b9a6c8309ab27312e))
+* **taSanitize:** Fix issue with last pre-tag overwriting all previous. ([230e779e](http://github.com/fraywing/textAngular/commit/230e779e9b9ae6f2de59a3e53e1def55420b8dd2), closes [#508](http://github.com/fraywing/textAngular/issues/508))
+
+
 <a name="1.3.1"></a>
 ### 1.3.1 (2015-01-23)
 
