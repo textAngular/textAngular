@@ -155,6 +155,11 @@ angular.module('textAngularSetup', [])
 		tooltip: 'Insert / edit link',
 		dialogPrompt: "Please enter a URL to insert"
 	},
+	editLink: {
+		targetToggle: {
+			buttontext: "Open in New Window"
+		}
+	},
 	wordcount: {
 		tooltip: 'Display words Count'
 	},
@@ -626,7 +631,7 @@ angular.module('textAngularSetup', [])
 					editorScope.hidePopover();
 				});
 				buttonGroup.append(unLinkButton);
-				var targetToggle = angular.element('<button type="button" class="btn btn-default btn-sm btn-small" tabindex="-1" unselectable="on">Open in New Window</button>');
+				var targetToggle = angular.element('<button type="button" class="btn btn-default btn-sm btn-small" tabindex="-1" unselectable="on">' + taTranslations.editLink.targetToggle.buttontext + '</button>');
 				if($element.attr('target') === '_blank'){
 					targetToggle.addClass('active');
 				}
