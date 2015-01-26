@@ -97,6 +97,11 @@ describe('taSanitize', function(){
 			var result = taSanitize('<p>&#10;Test &#10; &#9;Test 2&#10;&#9;</p><pre>&#9;Test &#10; &#9;Test 2&#10;&#9;</pre>', 'safe');
 			expect(result).toBe('<p>Test  Test 2</p><pre>&#9;Test &#10; &#9;Test 2&#10;&#9;</pre>');
 		}));
+		
+		it('correctly handles more than one pre-tag', inject(function(taSanitize){
+			var result = taSanitize('<p>&#10;Test &#10; &#9;Test 2&#10;&#9;</p><pre>&#9;Test &#10; &#9;Test 1&#10;&#9;</pre><p>&#10;Test &#10; &#9;Test 2&#10;&#9;</p><pre>&#9;Test &#10; &#9;Test 2&#10;&#9;</pre>', 'safe');
+			expect(result).toBe('<p>Test  Test 2</p><pre>&#9;Test &#10; &#9;Test 1&#10;&#9;</pre><p>Test  Test 2</p><pre>&#9;Test &#10; &#9;Test 2&#10;&#9;</pre>');
+		}));
 	});
 
 	describe('only certain style attributes are allowed', function(){

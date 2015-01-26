@@ -311,17 +311,22 @@ angular.module('textAngular.factories', [])
 		} catch (e){
 			safe = oldsafe || '';
 		}
+		
+		// Do processing for <pre> tags, removing tabs and return carriages outside of them
+		
 		var _preTags = safe.match(/(<pre[^>]*>.*?<\/pre[^>]*>)/ig);
-		safe = safe.replace(/(&#(9|10);)*/ig, '');
-		var re = /<pre[^>]*>.*?<\/pre[^>]*>/i;
+		processedSafe = safe.replace(/(&#(9|10);)*/ig, '');
+		var re = /<pre[^>]*>.*?<\/pre[^>]*>/ig;
 		var index = 0;
+		var lastIndex = 0;
 		var origTag;
-		while((origTag = re.exec(safe)) !== null && index < _preTags.length){
-			safe = safe.substring(0, origTag.index) + _preTags[index] + safe.substring(origTag.index + origTag[0].length);
-			re.lastIndex = Math.max(0, re.lastIndex + _preTags[index].length - origTag[0].length);
+		safe = '';
+		while((origTag = re.exec(processedSafe)) !== null && index < _preTags.length){
+			safe += processedSafe.substring(lastIndex, origTag.index) + _preTags[index];
+			lastIndex = origTag.index + origTag[0].length;
 			index++;
 		}
-		return safe;
+		return safe + processedSafe.substring(lastIndex);
 	};
 }]).factory('taToolExecuteAction', ['$q', '$log', function($q, $log){
 	// this must be called on a toolScope or instance
