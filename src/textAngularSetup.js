@@ -155,6 +155,17 @@ angular.module('textAngularSetup', [])
 		tooltip: 'Insert / edit link',
 		dialogPrompt: "Please enter a URL to insert"
 	},
+	editLink: {
+		reLinkButton: {
+			tooltip: "Relink"
+		},
+		unLinkButton: {
+			tooltip: "Unlink"
+		},
+		targetToggle: {
+			buttontext: "Open in New Window"
+		}
+	},
 	wordcount: {
 		tooltip: 'Display words Count'
 	},
@@ -606,7 +617,7 @@ angular.module('textAngularSetup', [])
 				});
 				container.append(link);
 				var buttonGroup = angular.element('<div class="btn-group pull-right">');
-				var reLinkButton = angular.element('<button type="button" class="btn btn-default btn-sm btn-small" tabindex="-1" unselectable="on"><i class="fa fa-edit icon-edit"></i></button>');
+				var reLinkButton = angular.element('<button type="button" class="btn btn-default btn-sm btn-small" tabindex="-1" unselectable="on" title="' + taTranslations.editLink.reLinkButton.tooltip + '"><i class="fa fa-edit icon-edit"></i></button>');
 				reLinkButton.on('click', function(event){
 					event.preventDefault();
 					var urlLink = $window.prompt(taTranslations.insertLink.dialogPrompt, $element.attr('href'));
@@ -617,7 +628,7 @@ angular.module('textAngularSetup', [])
 					editorScope.hidePopover();
 				});
 				buttonGroup.append(reLinkButton);
-				var unLinkButton = angular.element('<button type="button" class="btn btn-default btn-sm btn-small" tabindex="-1" unselectable="on"><i class="fa fa-unlink icon-unlink"></i></button>');
+				var unLinkButton = angular.element('<button type="button" class="btn btn-default btn-sm btn-small" tabindex="-1" unselectable="on" title="' + taTranslations.editLink.unLinkButton.tooltip + '"><i class="fa fa-unlink icon-unlink"></i></button>');
 				// directly before this click event is fired a digest is fired off whereby the reference to $element is orphaned off
 				unLinkButton.on('click', function(event){
 					event.preventDefault();
@@ -626,7 +637,7 @@ angular.module('textAngularSetup', [])
 					editorScope.hidePopover();
 				});
 				buttonGroup.append(unLinkButton);
-				var targetToggle = angular.element('<button type="button" class="btn btn-default btn-sm btn-small" tabindex="-1" unselectable="on">Open in New Window</button>');
+				var targetToggle = angular.element('<button type="button" class="btn btn-default btn-sm btn-small" tabindex="-1" unselectable="on">' + taTranslations.editLink.targetToggle.buttontext + '</button>');
 				if($element.attr('target') === '_blank'){
 					targetToggle.addClass('active');
 				}
