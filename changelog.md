@@ -1,3 +1,15 @@
+<a name="1.3.3"></a>
+### 1.3.3 (2015-01-28)
+
+
+#### Bug Fixes
+
+* **taBind._blankTest:** Fix for highly nested content. ([4bbfbaba](http://github.com/fraywing/textAngular/commit/4bbfbabae7f85c810f1a614bb515a1454d3fb29c), closes [#512](http://github.com/fraywing/textAngular/issues/512))
+* **textAngularSetup:**
+  * Add tooltips for buttons on edit link popover ([0f980d3f](http://github.com/fraywing/textAngular/commit/0f980d3fc72959e42a3ba81e068fad5911454014))
+  * Add translation for "Open in New Window" button on edit link popover ([d61ff1da](http://github.com/fraywing/textAngular/commit/d61ff1da442be64b647ba4341bc8099aea0e3967))
+
+
 <a name="1.3.2"></a>
 ### 1.3.2 (2015-01-27)
 
