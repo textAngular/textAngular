@@ -5,8 +5,7 @@
     "./src/textAngular.js",
     "./src/textAngular-sanitize.js",
     "./src/textAngularSetup.js",
-    "./src/textAngular.css",
-    "../rangy-official/rangy-selectionsaverestore.js"
+    "./src/textAngular.css"
   ],
   "description": "A radically powerful Text-Editor/Wysiwyg editor for Angular.js",
   "keywords": [
