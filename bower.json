@@ -11,8 +11,7 @@
   "keywords": [
     "editor",
     "angular",
-    "wysiwyg",
-    "jquery"
+    "wysiwyg"
   ],
   "ignore": [
     "**/.*",
@@ -25,7 +24,7 @@
   ],
   "dependencies": {
     "angular": "^1.2.x",
-    "bootstrap": "^3.0.x",
+    "bootstrap-css-only": "^3.0.x",
     "font-awesome": "^4.0.x",
     "rangy": "^1.2.0"
   },
