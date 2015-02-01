@@ -1,6 +1,5 @@
 {
   "name": "textangular",
-  "filename": "textAngular.min.js",
   "version": "1.3.3",
   "description": "A radically powerful Text-Editor/Wysiwyg editor for Angular.js",
   "maintainers": [
@@ -50,8 +49,7 @@
     "phantomjs": "^1.9.8"
   },
   "scripts": {
-    "test": "grunt travis-test --verbose",
-    "postinstall": "node ./node_modules/bower/bin/bower install --allow-root"
+    "test": "grunt travis-test --verbose"
   },
   "repository": {
     "type": "git",
