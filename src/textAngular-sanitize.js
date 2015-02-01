@@ -530,6 +530,8 @@ function validStyles(styleAttr){
 				(key === 'width' || key === 'height') && (
 					value.match(/[0-9\.]*(px|em|rem|%)/)
 				)
+			|| // Reference #520
+				(key === 'direction' && value.match(/^ltr|rtl|initial|inherit$/))
 			) result += key + ': ' + value + ';';
 		}
 	});
