@@ -1,3 +1,13 @@
+<a name="1.3.4"></a>
+### 1.3.4 (2015-02-02)
+
+
+#### Bug Fixes
+
+* **dependancies:** Changed Bootstrap to Bootstrap-css-only ([9250bf5a](http://github.com/fraywing/textAngular/commit/9250bf5a32ea5a76be0c7fb605bb499df775b1b4), closes [#527](http://github.com/fraywing/textAngular/issues/527))
+* **npm:** Fix installation issues with npm ([902fa692](http://github.com/fraywing/textAngular/commit/902fa692eed54211099af3e4e4a70eb060d46fe1), closes [#522](http://github.com/fraywing/textAngular/issues/522))
+
+
 <a name="1.3.3"></a>
 ### 1.3.3 (2015-01-28)
 
