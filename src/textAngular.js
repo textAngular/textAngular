@@ -1056,7 +1056,7 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 						if (element[0].childNodes && element[0].childNodes.length > 0) {
 							cb(savedcontent, _savedSelection);
 						} else {
-							that = {
+							var that = {
 								s: savedcontent,
 								_: _savedSelection,
 								cb: cb
@@ -1070,7 +1070,7 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 					var _processingPaste = false;
 					/* istanbul ignore next: phantom js cannot test this for some reason */
 					var processpaste = function(savedcontent, _savedSelection) {
-						text = element[0].innerHTML;
+						var text = element[0].innerHTML;
 						element[0].innerHTML = savedcontent;
 						
 						// restore selection
