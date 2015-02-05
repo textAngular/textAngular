@@ -1,3 +1,22 @@
+<a name="1.3.5"></a>
+### 1.3.5 (2015-02-05)
+
+
+#### Bug Fixes
+
+* **globals:** Fix document.head undefined in IE<9 ([da435392](http://github.com/fraywing/textAngular/commit/da435392a099d2ce7aaf63458556fe64831426f6), closes [#530](http://github.com/fraywing/textAngular/issues/530))
+* **sanitize:** Port script/style fix over from main repo. ([7975a26d](http://github.com/fraywing/textAngular/commit/7975a26d81b24c45c27af147ea86df6e12d2022d), closes [#533](http://github.com/fraywing/textAngular/issues/533))
+* **taBind.paste:** Fix some paste isuses. ([f989f6c2](http://github.com/fraywing/textAngular/commit/f989f6c2fd4251d94f80387d00098fe4f31970f0))
+* **taSelection:** Fix a bug in insert HTML. ([7003b27b](http://github.com/fraywing/textAngular/commit/7003b27bb110a5c7f0909e77f5c033fe35766fb0))
+
+
+#### Features
+
+* **ta-hidden-input:** Add new class for hidden inputs ([07eda5a8](http://github.com/fraywing/textAngular/commit/07eda5a8768c7171efc905d7b95f7fd5375d3c99))
+* **ta-paste:** Add attribute that allows intercetping of the pasted content. ([39698985](http://github.com/fraywing/textAngular/commit/39698985dbc6a7a83be7328b3f89b42b0d948d39))
+* **taDOM:** New services or dealing with html nodes ([a08bdc53](http://github.com/fraywing/textAngular/commit/a08bdc538b50f3cbc283877a90b380c6e77dacf1))
+
+
 <a name="1.3.4"></a>
 ### 1.3.4 (2015-02-02)
 
