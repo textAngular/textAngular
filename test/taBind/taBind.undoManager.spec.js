@@ -213,6 +213,22 @@ describe('taBind.undoManager', function () {
 				}
 				expect($rootScope.html).toBe(second);
 			}));
+			
+			it('not alt+z', inject(function($timeout){
+				if(angular.element === jQuery) {
+					event = jQuery.Event('keydown');
+					event.keyCode = 90;
+					event.altKey = true;
+					element.triggerHandler(event);
+				}else{
+					event = {
+						keyCode: 90,
+						altKey: true
+					};
+					element.triggerHandler('keydown', event);
+				}
+				expect($rootScope.html).toBe(third);
+			}));
 		});
 		
 		describe('should trigger redo on keydown', function(){

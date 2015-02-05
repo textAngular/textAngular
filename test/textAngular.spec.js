@@ -3,6 +3,9 @@ describe('textAngular', function(){
 		Display Tests
 	*/
 	'use strict';
+	afterEach(inject(function($document){
+		$document.find('body').html('');
+	}));
 	beforeEach(module('textAngular'));
 	var $window, element, $rootScope, textAngularManager, editorScope;
 	describe('Minimal Initiation', function(){
@@ -1197,6 +1200,34 @@ describe('textAngular', function(){
 			$timeout.flush();
 			// expect none to be disabled
 			expect(jQuery(toolbar[0]).find('button:not(:disabled)').length).toBe(28);
+		}));
+	});
+	
+	
+	
+	describe('handles the ta-paste event correctly', function(){
+		beforeEach(inject(function(_textAngularManager_){
+			textAngularManager = _textAngularManager_;
+		}));
+		it('allows conversion of html', inject(function($window, _$rootScope_, $compile, $document, $timeout){
+			$rootScope = _$rootScope_;
+			$rootScope.html = '<p>Test Contents</p>';
+			$rootScope.converter = function(html){
+				expect(html).toBe('<font>Test 4 Content</font>');
+				return '<b>Changed Content</b>';
+			};
+			element = $compile('<text-angular name="testpaste" ta-paste="converter($html)" ng-model="html"></text-angular>')($rootScope);
+			$document.find('body').append(element);
+			element = textAngularManager.retrieveEditor('testpaste').scope.displayElements.text;
+			$rootScope.$digest();
+			var sel = $window.rangy.getSelection();
+			var range = $window.rangy.createRangyRange();
+			range.selectNodeContents(element.find('p')[0]);
+			sel.setSingleRange(range);
+			triggerEvent('paste', element, {originalEvent: {clipboardData: {types: ['text/html'], getData: function(){ return '<font>Test 4 Content</font>';} }}});
+			$timeout.flush();
+			$rootScope.$digest();
+			expect($rootScope.html).toBe('<p><b>Changed Content</b></p>');
 		}));
 	});
 });
