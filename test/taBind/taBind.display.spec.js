@@ -93,6 +93,16 @@ describe('taBind.display', function () {
 				$rootScope.$digest();
 				expect(element.hasClass('placeholder-text')).toBe(false);
 			});
+			it('should not add the placeholder text back if focussed and blank', function () {
+				element.triggerHandler('focus');
+				$rootScope.$digest();
+				$rootScope.html = '<p>Lorem Ipsum</p>';
+				$rootScope.$digest();
+				$rootScope.html = '';
+				$rootScope.$digest();
+				expect($window.getComputedStyle(element[0], ':before').getPropertyValue('display')).toBe("");
+				expect(element.html()).toEqual('<p><br></p>');
+			});
 		});
 		describe('as contenteditable div initially with content', function(){
 			var $rootScope, element, $window;

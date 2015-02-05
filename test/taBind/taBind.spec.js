@@ -60,6 +60,14 @@ describe('taBind', function () {
 			$rootScope.$digest();
 			expect(element.html()).toBe('<div>Test 2 Content</div>');
 		});
+		it('should update display from model change while focussed', inject(function ($timeout) {
+			element.triggerHandler('focus');
+			$rootScope.$digest();
+			$rootScope.html = '<div>Test 2 Content</div>';
+			$rootScope.$digest();
+			$timeout.flush();
+			expect(element.html()).toBe('<div>Test 2 Content</div>');
+		}));
 		it('should wrap content from model change', function () {
 			$rootScope.html = 'Test 2 Content';
 			$rootScope.$digest();
