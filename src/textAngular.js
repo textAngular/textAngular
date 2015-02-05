@@ -2,7 +2,7 @@
 @license textAngular
 Author : Austin Anderson
 License : 2013 MIT
-Version 1.3.4
+Version 1.3.5
 
 See README.md or https://github.com/fraywing/textAngular/wiki for requirements and use.
 */
@@ -338,8 +338,6 @@ angular.module('textAngular.factories', [])
 		}
 	};
 }]);
-
-
 angular.module('textAngular.DOM', ['textAngular.factories'])
 .factory('taExecCommand', ['taSelection', 'taBrowserTag', '$document', function(taSelection, taBrowserTag, $document){
 	var listToDefault = function(listElement, defaultWrap){
