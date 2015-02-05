@@ -1,3 +1,17 @@
+<a name="1.3.6"></a>
+### 1.3.6 (2015-02-06)
+
+
+#### Bug Fixes
+
+* **taSelection:** Fix selecting end of element being after trailing <br> ([e1008dfc](http://github.com/fraywing/textAngular/commit/e1008dfc02592b8484ff618bafbcd7f30084b8e4))
+
+
+#### Features
+
+* **taBind:** Allow updates while focussed. ([452c7f01](http://github.com/fraywing/textAngular/commit/452c7f010aea73a69d09672623b5deb6b8a32bf4), closes [#38](http://github.com/fraywing/textAngular/issues/38))
+
+
 <a name="1.3.5"></a>
 ### 1.3.5 (2015-02-05)
 
