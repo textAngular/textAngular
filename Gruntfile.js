@@ -12,17 +12,18 @@ module.exports = function (grunt) {
 	grunt.loadNpmTasks('grunt-conventional-changelog');
 	grunt.loadNpmTasks('grunt-bump');
 	grunt.loadNpmTasks('grunt-git');
+	grunt.loadNpmTasks('grunt-shell');
 	
 	grunt.registerTask('compile', ['concat', 'jshint', 'uglify']);
 	grunt.registerTask('default', ['compile', 'test']);
 	grunt.registerTask('test', ['clean', 'jshint', 'karma', 'coverage']);
 	grunt.registerTask('travis-test', ['concat', 'jshint', 'karma', 'coverage', 'coveralls']);
 	
-	grunt.registerTask('release', ['bump-only','compile','changelog','gitcommit','bump-commit']);
-	grunt.registerTask('release:patch', ['bump-only:patch','compile','changelog','gitcommit','bump-commit']);
-	grunt.registerTask('release:minor', ['bump-only:minor','compile','changelog','gitcommit','bump-commit']);
-	grunt.registerTask('release:major', ['bump-only:major','compile','changelog','gitcommit','bump-commit']);
-	grunt.registerTask('release:prerelease', ['bump-only:prerelease','compile','changelog','gitcommit','bump-commit']);
+	grunt.registerTask('release', ['bump-only','compile','changelog','gitcommit','bump-commit', 'shell:publish']);
+	grunt.registerTask('release:patch', ['bump-only:patch','compile','changelog','gitcommit','bump-commit', 'shell:publish']);
+	grunt.registerTask('release:minor', ['bump-only:minor','compile','changelog','gitcommit','bump-commit', 'shell:publish']);
+	grunt.registerTask('release:major', ['bump-only:major','compile','changelog','gitcommit','bump-commit', 'shell:publish']);
+	grunt.registerTask('release:prerelease', ['bump-only:prerelease','compile','changelog','gitcommit','bump-commit', 'shell:publish']);
 	
 	var testConfig = function (configFile, customOptions) {
 		var options = { configFile: configFile, keepalive: true };
@@ -53,7 +54,11 @@ module.exports = function (grunt) {
 				}
 			}
 		},
-		
+		shell: {
+			publish: {
+				command: "npm publish"
+			}
+		},
 		clean: ["coverage"],
 		coverage: {
 		  options: {
