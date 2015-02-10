@@ -4,7 +4,7 @@ textAngular v1.3.0
 [![Build Status](https://travis-ci.org/fraywing/textAngular.png?branch=master)](https://travis-ci.org/fraywing/textAngular) [![Coverage Status](https://coveralls.io/repos/fraywing/textAngular/badge.png)](https://coveralls.io/r/fraywing/textAngular)
 
 
-Demo is available at: http://www.textangular.com (Or editable [Plunkr Demo](http://plnkr.co/edit/tpl:iwVyu2?p=preview))
+Demo is available at: http://www.textangular.com (Or editable [Plunkr Demo](http://plnkr.co/edit/tpl:8G84wkJVjabOvCl1DryF))
 
 #### Upgrading From 1.2.2 or earlier
 
