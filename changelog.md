@@ -1,3 +1,12 @@
+<a name="1.3.7"></a>
+### 1.3.7 (2015-02-13)
+
+
+#### Bug Fixes
+
+* **taSanitize:** Close XSS vector ([f5f27c26](http://github.com/fraywing/textAngular/commit/f5f27c26bc99dc6f8bb226d7beb99ce8bcada01a))
+
+
 <a name="1.3.6"></a>
 ### 1.3.6 (2015-02-06)
 
