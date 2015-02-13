@@ -200,25 +200,31 @@ angular.module('textAngular.factories', [])
 	// get whaterever rubbish is inserted in chrome
 	// should be passed an html string, returns an html string
 	var taFixChrome = function(html){
-		// default wrapper is a span so find all of them
-		var $html = angular.element('<div>' + html + '</div>');
-		var spans = angular.element($html).find('span');
-		for(var s = 0; s < spans.length; s++){
-			var span = angular.element(spans[s]);
-			// chrome specific string that gets inserted into the style attribute, other parts may vary. Second part is specific ONLY to hitting backspace in Headers
-			if(span.attr('style') && span.attr('style').match(/line-height: 1.428571429;|color: inherit; line-height: 1.1;/i)){
-				span.attr('style', span.attr('style').replace(/( |)font-family: inherit;|( |)line-height: 1.428571429;|( |)line-height:1.1;|( |)color: inherit;/ig, ''));
-				if(!span.attr('style') || span.attr('style') === ''){
-					if(span.next().length > 0 && span.next()[0].tagName === 'BR') span.next().remove();
-					span.replaceWith(span[0].innerHTML);
-				}
+		if(!html || !angular.isString(html) || html.length <= 0) return html;
+		// grab all elements with a style attibute
+		var spanMatch = /<([^>\/]+?)style=("([^"]+)"|'([^']+)')([^>]*)>/ig;
+		var match, styleVal, newTag, finalHtml = '', lastIndex = 0;
+		while(match = spanMatch.exec(html)){
+			// one of the quoted values ' or "
+			/* istanbul ignore next: quotations match */
+			styleVal = match[3] || match[4];
+			// test for chrome inserted junk
+			if(styleVal && styleVal.match(/line-height: 1.428571429;|color: inherit; line-height: 1.1;/i)){
+				// replace original tag with new tag
+				styleVal = styleVal.replace(/( |)font-family: inherit;|( |)line-height: 1.428571429;|( |)line-height:1.1;|( |)color: inherit;/ig, '');
+				newTag = '<' + match[1].trim();
+				if(styleVal.length > 0) newTag += ' style=' + match[2].substring(0,1) + styleVal + match[2].substring(0,1);
+				newTag += match[5].trim() + ">";
+				finalHtml += html.substring(lastIndex, match.index) + newTag;
+				lastIndex = match.index + match[0].length;
 			}
 		}
-		// regex to replace ONLY offending styles - these can be inserted into various other tags on delete
-		var result = $html[0].innerHTML.replace(/style="[^"]*?(line-height: 1.428571429;|color: inherit; line-height: 1.1;)[^"]*"/ig, '');
+		finalHtml += html.substring(lastIndex);
 		// only replace when something has changed, else we get focus problems on inserting lists
-		if(result !== $html[0].innerHTML) $html[0].innerHTML = result;
-		return $html[0].innerHTML;
+		if(lastIndex > 0){
+			// replace all empty strings
+			return finalHtml.replace(/<span\s*>(.*?)<\/span>(<br(\/|)>|)/ig, '$1');
+		} else return html;
 	};
 	return taFixChrome;
 }).factory('taSanitize', ['$sanitize', 'taDOM', function taSanitizeFactory($sanitize, taDOM){
@@ -235,45 +241,121 @@ angular.module('textAngular.factories', [])
 			tag: 'i'
 		}
 	];
-
-	function fixChildren( jq_elm ) {
-		var children = jq_elm.children();
-		if ( !children.length ) {
-			return;
+	
+	var styleMatch = [];
+	for(var i = 0; i < convert_infos.length; i++){
+		var _partialStyle = '(' + convert_infos[i].property + ':\\s*(';
+		for(j = 0; j < convert_infos[i].values.length; j++){
+			/* istanbul ignore next: not needed to be tested yet */
+			if(j > 0) _partialStyle += '|';
+			_partialStyle += convert_infos[i].values[j];
 		}
-		angular.forEach( children, function( child ) {
-			var jq_child = angular.element(child);
-			fixElement( jq_child );
-			fixChildren( jq_child );
-		});
+		_partialStyle += ');)';
+		styleMatch.push(_partialStyle);
 	}
-
-	function fixElement( jq_elm ) {
-		var styleString = jq_elm.attr('style');
-		if ( !styleString ) {
-			return;
+	var styleRegexString = '(' + styleMatch.join('|') + ')';
+	
+	function wrapNested(html, wrapTag) {
+		var depth = 0;
+		var lastIndex = 0;
+		var match;
+		var tagRegex = /<[^>]*>/ig;
+		while(match = tagRegex.exec(html)){
+			lastIndex = match.index;
+			if(match[0].substr(1, 1) === '/'){
+				if(depth === 0) break;
+				else depth--;
+			}else depth++;
 		}
-		angular.forEach( convert_infos, function( convert_info ) {
-			var css_key = convert_info.property;
-			var css_value = jq_elm.css(css_key);
-			if ( convert_info.values.indexOf(css_value) >= 0 && styleString.toLowerCase().indexOf(css_key) >= 0 ) {
-				jq_elm.css( css_key, '' );
-				var inner_html = jq_elm.html();
-				var tag = convert_info.tag;
-				inner_html = '<'+tag+'>' + inner_html + '</'+tag+'>';
-				jq_elm.html( inner_html );
+		return wrapTag +
+			html.substring(0, lastIndex) +
+			// get the start tags reversed - this is safe as we construct the strings with no content except the tags
+			angular.element(wrapTag)[0].outerHTML.substring(wrapTag.length) +
+			html.substring(lastIndex);
+	}
+	
+	function transformLegacyStyles(html){
+		if(!html || !angular.isString(html) || html.length <= 0) return html;
+		var i, j;
+		var styleElementMatch = /<([^>\/]+?)style=("([^"]+)"|'([^']+)')([^>]*)>/ig;
+		var match, styleVal, newTag, lastNewTag = '', newHtml, finalHtml = '', lastIndex = 0;
+		while(match = styleElementMatch.exec(html)){
+			// one of the quoted values ' or "
+			/* istanbul ignore next: quotations match */
+			styleVal = match[3] || match[4];
+			var styleRegex = new RegExp(styleRegexString, 'i');
+			// test for style values to change
+			if(angular.isString(styleVal) && styleRegex.test(styleVal)){
+				// remove build tag list
+				newTag = '';
+				// init regex here for exec
+				var styleRegexExec = new RegExp(styleRegexString, 'ig');
+				// find relevand tags and build a string of them
+				while(subMatch = styleRegexExec.exec(styleVal)){
+					for(i = 0; i < convert_infos.length; i++){
+						if(!!subMatch[(i*2) + 2]){
+							newTag += '<' + convert_infos[i].tag + '>';
+						}
+					}
+				}
+				// recursively find more legacy styles in html before this tag and after the previous match (if any)
+				newHtml = transformLegacyStyles(html.substring(lastIndex, match.index));
+				// build up html
+				if(lastNewTag.length > 0){
+					finalHtml += wrapNested(newHtml, lastNewTag);
+				}else finalHtml += newHtml;
+				// grab the style val without the transformed values
+				styleVal = styleVal.replace(new RegExp(styleRegexString, 'ig'), '');
+				// build the html tag
+				finalHtml += '<' + match[1].trim();
+				if(styleVal.length > 0) finalHtml += ' style="' + styleVal + '"';
+				finalHtml += match[5] + '>';
+				// update the start index to after this tag
+				lastIndex = match.index + match[0].length;
+				lastNewTag = newTag;
 			}
-		});
+		}
+		if(lastNewTag.length > 0){
+			finalHtml += wrapNested(html.substring(lastIndex), lastNewTag);
+		}
+		else finalHtml += html.substring(lastIndex);
+		return finalHtml;
 	}
-
+	
+	function transformLegacyAttributes(html){
+		if(!html || !angular.isString(html) || html.length <= 0) return html;
+		// replace all align='...' tags with text-align attributes
+		var attrElementMatch = /<([^>\/]+?)align=("([^"]+)"|'([^']+)')([^>]*)>/ig;
+		var match, finalHtml = '', lastIndex = 0;
+		// match all attr tags
+		while(match = attrElementMatch.exec(html)){
+			// add all html before this tag
+			finalHtml += html.substring(lastIndex, match.index);
+			// record last index after this tag
+			lastIndex = match.index + match[0].length;
+			// construct tag without the align attribute
+			newTag = '<' + match[1] + match[5];
+			// add the style attribute
+			if(/style=("([^"]+)"|'([^']+)')/ig.test(newTag)){
+				/* istanbul ignore next: quotations match */
+				newTag = newTag.replace(/style=("([^"]+)"|'([^']+)')/i, 'style="$2$3 text-align:' + (match[3] || match[4]) + ';"');
+			}else{
+				/* istanbul ignore next: quotations match */
+				newTag += ' style="text-align:' + (match[3] || match[4]) + ';"';
+			}
+			newTag += '>';
+			// add to html
+			finalHtml += newTag;
+		}
+		// return with remaining html
+		return finalHtml + html.substring(lastIndex);
+	}
+	
 	return function taSanitize(unsafe, oldsafe, ignore){
-
+		// unsafe html should NEVER built into a DOM object via angular.element. This allows XSS to be inserted and run.
 		if ( !ignore ) {
 			try {
-				var jq_container = angular.element('<div>' + unsafe + '</div>');
-				fixElement( jq_container );
-				fixChildren( jq_container );
-				unsafe = jq_container.html();
+				unsafe = transformLegacyStyles(unsafe);
 			} catch (e) {
 			}
 		}
@@ -281,16 +363,9 @@ angular.module('textAngular.factories', [])
 		// unsafe and oldsafe should be valid HTML strings
 		// any exceptions (lets say, color for example) should be made here but with great care
 		// setup unsafe element for modification
-		var unsafeElement = angular.element('<div>' + unsafe + '</div>');
-		// replace all align='...' tags with text-align attributes
-		angular.forEach(taDOM.getByAttribute(unsafeElement, 'align'), function(element){
-			element.css('text-align', element.attr('align'));
-			element.removeAttr('align');
-		});
-
-		// get the html string back
+		unsafe = transformLegacyAttributes(unsafe);
+		
 		var safe;
-		unsafe = unsafeElement[0].innerHTML;
 		try {
 			safe = $sanitize(unsafe);
 			// do this afterwards, then the $sanitizer should still throw for bad markup
@@ -1128,7 +1203,7 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 						return _html;
 					};
 					
-					ngModel.$formatters.push(function(htmlValue){
+					ngModel.$formatters.unshift(function(htmlValue){
 						// tabulate the HTML so it looks nicer
 						var _children = angular.element('<div>' + htmlValue + '</div>')[0].childNodes;
 						if(_children.length > 0){
@@ -1471,10 +1546,10 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 			};
 			// parsers trigger from the above keyup function or any other time that the viewValue is updated and parses it for storage in the ngModel
 			ngModel.$parsers.push(_sanitize);
-			ngModel.$parsers.push(_validity);
+			ngModel.$parsers.unshift(_validity);
 			// because textAngular is bi-directional (which is awesome) we need to also sanitize values going in from the server
 			ngModel.$formatters.push(_sanitize);
-			ngModel.$formatters.push(function(value){
+			ngModel.$formatters.unshift(function(value){
 				if(_blankTest(value)) return value;
 				var domTest = angular.element("<div>" + value + "</div>");
 				if(domTest.children().length === 0){
@@ -1482,8 +1557,8 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 				}
 				return value;
 			});
-			ngModel.$formatters.push(_validity);
-			ngModel.$formatters.push(function(value){
+			ngModel.$formatters.unshift(_validity);
+			ngModel.$formatters.unshift(function(value){
 				return ngModel.$undoManager.push(value || '');
 			});
 

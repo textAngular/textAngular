@@ -23,6 +23,12 @@ describe('taSanitize', function(){
 			expect(safe.attr('align')).not.toBeDefined();
 			expect(safe.css('text-align')).toBe('justify');
 		}));
+		it('should not affect existing styles', inject(function(taSanitize){
+			var safe = angular.element(taSanitize('<div style="color: red;" align="left"></div>'));
+			expect(safe.attr('align')).not.toBeDefined();
+			expect(safe.css('text-align')).toBe('left');
+			expect(safe.css('color')).toBe('red');
+		}));
 	});
 
 	describe('if invalid HTML', function(){
@@ -275,10 +281,14 @@ describe('taSanitize', function(){
 		}));
 	});
 
-	describe('check if style is satinized correctly', function(){
+	describe('check if style is sanitized correctly', function(){
 		it('should translate style to tag', inject(function(taSanitize, $sce){
 			var result = taSanitize('Q<b>W</b><i style="font-weight: bold;">E</i><u style="font-weight: bold; font-style: italic;">R</u>T');
-			expect(result).toBe('Q<b>W</b><i><b>E</b></i><u><i><b>R</b></i></u>T');
+			expect(result).toBe('Q<b>W</b><i><b>E</b></i><u><b><i>R</i></b></u>T');
+		}));
+		it('should translate style to tag, respecting nested tags', inject(function(taSanitize, $sce){
+			var result = taSanitize("Q<i style='font-weight: bold;'><u>E</u></i>T");
+			expect(result).toBe('Q<i><b><u>E</u></b></i>T');
 		}));
 	});
 });
