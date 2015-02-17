@@ -7,7 +7,7 @@ Version 1.3.7
 See README.md or https://github.com/fraywing/textAngular/wiki for requirements and use.
 */
 angular.module('textAngularSetup', [])
-	
+
 // Here we set up the global display defaults, to set your own use a angular $provider#decorator.
 .value('taOptions',  {
 	toolbar: [
@@ -104,7 +104,7 @@ angular.module('textAngularSetup', [])
 		tooltip: 'Ordered List'
 	},
 	quote: {
-		tooltip: 'Quote/unqoute selection or paragraph'
+		tooltip: 'Quote/unquote selection or paragraph'
 	},
 	undo: {
 		tooltip: 'Undo'
@@ -321,7 +321,7 @@ angular.module('textAngularSetup', [])
 			return this.$editor().wrapSelection("indent", null);
 		},
 		activeState: function(){
-			return this.$editor().queryFormatBlockState('blockquote'); 
+			return this.$editor().queryFormatBlockState('blockquote');
 		}
 	});
 	taRegisterTool('outdent', {
@@ -401,7 +401,7 @@ angular.module('textAngularSetup', [])
 				if(_preLis.length === 0 || _postLis.length === 0){
 					if(_postLis.length === 0) _parent.after(newElem);
 					else _parent[0].parentNode.insertBefore(newElem[0], _parent[0]);
-					
+
 					if(_preLis.length === 0 && _postLis.length === 0) _parent.remove();
 					else angular.element(possibleNodes[0]).remove();
 				}else{
@@ -431,7 +431,7 @@ angular.module('textAngularSetup', [])
 			restoreSelection();
 		}
 	});
-	
+
 	var imgOnSelectAction = function(event, $element, editorScope){
 		// setup the editor toolbar
 		// Credit to the work at http://hackerwins.github.io/summernote/ for this editbar logic/display
@@ -485,7 +485,7 @@ angular.module('textAngularSetup', [])
 		buttonGroup.append(quartButton);
 		buttonGroup.append(resetButton);
 		container.append(buttonGroup);
-		
+
 		buttonGroup = angular.element('<div class="btn-group" style="padding-right: 6px;">');
 		var floatLeft = angular.element('<button type="button" class="btn btn-default btn-sm btn-small" unselectable="on" tabindex="-1"><i class="fa fa-align-left"></i></button>');
 		floatLeft.on('click', function(event){
@@ -524,7 +524,7 @@ angular.module('textAngularSetup', [])
 		buttonGroup.append(floatNone);
 		buttonGroup.append(floatRight);
 		container.append(buttonGroup);
-		
+
 		buttonGroup = angular.element('<div class="btn-group">');
 		var remove = angular.element('<button type="button" class="btn btn-default btn-sm btn-small" unselectable="on" tabindex="-1"><i class="fa fa-trash-o"></i></button>');
 		remove.on('click', function(event){
@@ -534,11 +534,11 @@ angular.module('textAngularSetup', [])
 		});
 		buttonGroup.append(remove);
 		container.append(buttonGroup);
-		
+
 		editorScope.showPopover($element);
 		editorScope.showResizeOverlay($element);
 	};
-	
+
 	taRegisterTool('insertImage', {
 		iconclass: 'fa fa-picture-o',
 		tooltiptext: taTranslations.insertImage.tooltip,
@@ -581,7 +581,7 @@ angular.module('textAngularSetup', [])
 			onlyWithAttrs: ['ta-insert-video'],
 			action: imgOnSelectAction
 		}
-	});	
+	});
 	taRegisterTool('insertLink', {
 		tooltiptext: taTranslations.insertLink.tooltip,
 		iconclass: 'fa fa-link',
@@ -661,11 +661,11 @@ angular.module('textAngularSetup', [])
 			var textElement = this.$editor().displayElements.text;
 			var workingHTML = textElement[0].innerHTML;
 			var sourceText = workingHTML.replace(/(<[^>]*?>)/ig, ' '); // replace all html tags with spaces
-			
+
 			// Caculate number of words
 			var sourceTextMatches = sourceText.match(/\S+/g);
 			var noOfWords = sourceTextMatches && sourceTextMatches.length || 0;
-			
+
 			//Set current scope
 			this.wordcount = noOfWords;
 			//Set editor scope
@@ -680,7 +680,7 @@ angular.module('textAngularSetup', [])
 		activeState: function(){ // this fires on keyup
 			var textElement = this.$editor().displayElements.text;
 			var sourceText = textElement[0].innerText || textElement[0].textContent; // to cover the non-jquery use case.
-			
+
 			// Caculate number of chars
 			var noOfChars = sourceText.replace(/(\r\n|\n|\r)/gm,"").replace(/^\s+/g,' ').replace(/\s+$/g, ' ').length;
 			//Set current scope
