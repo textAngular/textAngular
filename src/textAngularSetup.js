@@ -16,6 +16,9 @@ angular.module('textAngularSetup', [])
 		['justifyLeft','justifyCenter','justifyRight','indent','outdent'],
 		['html', 'insertImage', 'insertLink', 'insertVideo', 'wordcount', 'charcount']
 	],
+	editLinkPopover: [
+		'unLinkButton', 'reLinkButton', 'targetToggle'
+	],
 	classes: {
 		focussed: "focussed",
 		toolbar: "btn-toolbar",
@@ -173,7 +176,7 @@ angular.module('textAngularSetup', [])
 		tooltip: 'Display characters Count'
 	}
 })
-.run(['taRegisterTool', '$window', 'taTranslations', 'taSelection', function(taRegisterTool, $window, taTranslations, taSelection){
+.run(['taRegisterTool', '$window', 'taOptions', 'taTranslations', 'taSelection', function(taRegisterTool, $window, taOptions, taTranslations, taSelection){
 	taRegisterTool("html", {
 		iconclass: 'fa fa-code',
 		tooltiptext: taTranslations.html.tooltip,
@@ -606,6 +609,7 @@ angular.module('textAngularSetup', [])
 				var container = editorScope.displayElements.popoverContainer;
 				container.empty();
 				container.css('line-height', '28px');
+
 				var link = angular.element('<a href="' + $element.attr('href') + '" target="_blank">' + $element.attr('href') + '</a>');
 				link.css({
 					'display': 'inline-block',
@@ -616,7 +620,9 @@ angular.module('textAngularSetup', [])
 					'vertical-align': 'middle'
 				});
 				container.append(link);
+
 				var buttonGroup = angular.element('<div class="btn-group pull-right">');
+
 				var reLinkButton = angular.element('<button type="button" class="btn btn-default btn-sm btn-small" tabindex="-1" unselectable="on" title="' + taTranslations.editLink.reLinkButton.tooltip + '"><i class="fa fa-edit icon-edit"></i></button>');
 				reLinkButton.on('click', function(event){
 					event.preventDefault();
@@ -627,7 +633,10 @@ angular.module('textAngularSetup', [])
 					}
 					editorScope.hidePopover();
 				});
-				buttonGroup.append(reLinkButton);
+				if (taOptions.editLinkPopover.indexOf('reLinkButton') >= 0) {
+					buttonGroup.append(reLinkButton);
+				}
+
 				var unLinkButton = angular.element('<button type="button" class="btn btn-default btn-sm btn-small" tabindex="-1" unselectable="on" title="' + taTranslations.editLink.unLinkButton.tooltip + '"><i class="fa fa-unlink icon-unlink"></i></button>');
 				// directly before this click event is fired a digest is fired off whereby the reference to $element is orphaned off
 				unLinkButton.on('click', function(event){
@@ -636,7 +645,10 @@ angular.module('textAngularSetup', [])
 					editorScope.updateTaBindtaTextElement();
 					editorScope.hidePopover();
 				});
-				buttonGroup.append(unLinkButton);
+				if (taOptions.editLinkPopover.indexOf('unLinkButton') >= 0) {
+					buttonGroup.append(unLinkButton);
+				}
+
 				var targetToggle = angular.element('<button type="button" class="btn btn-default btn-sm btn-small" tabindex="-1" unselectable="on">' + taTranslations.editLink.targetToggle.buttontext + '</button>');
 				if($element.attr('target') === '_blank'){
 					targetToggle.addClass('active');
@@ -647,7 +659,10 @@ angular.module('textAngularSetup', [])
 					targetToggle.toggleClass('active');
 					editorScope.updateTaBindtaTextElement();
 				});
-				buttonGroup.append(targetToggle);
+				if (taOptions.editLinkPopover.indexOf('targetToggle') >= 0) {
+					buttonGroup.append(targetToggle);
+				}
+
 				container.append(buttonGroup);
 				editorScope.showPopover($element);
 			}
