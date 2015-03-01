@@ -325,12 +325,12 @@ describe('taTools test tool actions', function(){
 		}));
 		
 		it('word count should be 13', function(){
-			expect(buttons.childNodes[0].innerHTML).toBe('Words:13');
+			expect(buttons.childNodes[0].childNodes[1].innerHTML).toBe('13');
 			expect(editorScope.wordcount).toBe(13);
 		});
 		
 		it('char count should be 62', function(){
-			expect(buttons.childNodes[1].innerHTML).toBe('Characters:62');
+			expect(buttons.childNodes[1].childNodes[1].innerHTML).toBe('62');
 			expect(editorScope.charcount).toBe(62);
 		});
 	});
