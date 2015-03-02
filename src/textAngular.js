@@ -8,7 +8,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 */
 
 (function(){ // encapsulate all variables so they don't become global vars
-"Use Strict";					
+"use strict";					
 // IE version detection - http://stackoverflow.com/questions/4169160/javascript-ie-detection-why-not-use-simple-conditional-comments
 // We need this as IE sometimes plays funny tricks with the contenteditable.
 // ----------------------------------------------------------
