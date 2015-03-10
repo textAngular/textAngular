@@ -20,6 +20,7 @@ module.exports = function (config) {
 			'src/textAngular-sanitize.js',
 			'src/textAngularSetup.js',
 			'src/textAngular.js',
+			'test/helpers.js',
 			'test/**/*.spec.js'
 		],
 

@@ -37,7 +37,7 @@ chances of your issue being dealt with quickly:
 * **Motivation for or Use Case** - explain why this is a bug for you
 * **Angular Version(s)** - is it a regression?
 * **Browsers and Operating System** - is this a problem with all browsers or only IE8?
-* **Reproduce the error** - provide a live example ([Plunkr](http://plnkr.co/edit/tpl:iwVyu2?p=preview)) or a unambiguous set of steps.
+* **Reproduce the error** - provide a live example ([Plunkr](http://plnkr.co/edit/tpl:RaBEszV5xrAZ0VRoZ7PM?p=preview)) or a unambiguous set of steps.
 * **Related issues** - has a similar issue been reported before?
 * **Suggest a Fix** - if you can't fix the bug yourself, perhaps you can point to what might be
   causing the problem (line of code or commit)

@@ -1,5 +1,5 @@
 /**
- * @license AngularJS v1.2.26
+ * @license AngularJS v1.3.10
  * (c) 2010-2014 Google, Inc. http://angularjs.org
  * License: MIT
  */
@@ -45,16 +45,16 @@ var $sanitizeMinErr = angular.$$minErr('$sanitize');
  * @kind function
  *
  * @description
- *   The input is sanitized by parsing the html into tokens. All safe tokens (from a whitelist) are
+ *   The input is sanitized by parsing the HTML into tokens. All safe tokens (from a whitelist) are
  *   then serialized back to properly escaped html string. This means that no unsafe input can make
  *   it into the returned string, however, since our parser is more strict than a typical browser
  *   parser, it's possible that some obscure input, which would be recognized as valid HTML by a
- *   browser, won't make it through the sanitizer.
+ *   browser, won't make it through the sanitizer. The input may also contain SVG markup.
  *   The whitelist is configured using the functions `aHrefSanitizationWhitelist` and
  *   `imgSrcSanitizationWhitelist` of {@link ng.$compileProvider `$compileProvider`}.
  *
- * @param {string} html Html input.
- * @returns {string} Sanitized html.
+ * @param {string} html HTML input.
+ * @returns {string} Sanitized HTML.
  *
  * @example
    <example module="sanitizeExample" deps="angular-sanitize.js">
@@ -226,21 +226,21 @@ var htmlAttrs = makeMap('abbr,align,alt,axis,bgcolor,border,cellpadding,cellspac
 
 // SVG attributes (without "id" and "name" attributes)
 // https://wiki.whatwg.org/wiki/Sanitization_rules#svg_Attributes
-var svgAttrs = makeMap('accent-height,accumulate,additive,alphabetic,arabic-form,ascent,'+
-    'attributeName,attributeType,baseProfile,bbox,begin,by,calcMode,cap-height,class,color,'+
-    'color-rendering,content,cx,cy,d,dx,dy,descent,display,dur,end,fill,fill-rule,font-family,'+
-    'font-size,font-stretch,font-style,font-variant,font-weight,from,fx,fy,g1,g2,glyph-name,'+
-    'gradientUnits,hanging,height,horiz-adv-x,horiz-origin-x,ideographic,k,keyPoints,'+
-    'keySplines,keyTimes,lang,marker-end,marker-mid,marker-start,markerHeight,markerUnits,'+
-    'markerWidth,mathematical,max,min,offset,opacity,orient,origin,overline-position,'+
-    'overline-thickness,panose-1,path,pathLength,points,preserveAspectRatio,r,refX,refY,'+
-    'repeatCount,repeatDur,requiredExtensions,requiredFeatures,restart,rotate,rx,ry,slope,stemh,'+
-    'stemv,stop-color,stop-opacity,strikethrough-position,strikethrough-thickness,stroke,'+
-    'stroke-dasharray,stroke-dashoffset,stroke-linecap,stroke-linejoin,stroke-miterlimit,'+
-    'stroke-opacity,stroke-width,systemLanguage,target,text-anchor,to,transform,type,u1,u2,'+
-    'underline-position,underline-thickness,unicode,unicode-range,units-per-em,values,version,'+
-    'viewBox,visibility,width,widths,x,x-height,x1,x2,xlink:actuate,xlink:arcrole,xlink:role,'+
-    'xlink:show,xlink:title,xlink:type,xml:base,xml:lang,xml:space,xmlns,xmlns:xlink,y,y1,y2,'+
+var svgAttrs = makeMap('accent-height,accumulate,additive,alphabetic,arabic-form,ascent,' +
+    'attributeName,attributeType,baseProfile,bbox,begin,by,calcMode,cap-height,class,color,' +
+    'color-rendering,content,cx,cy,d,dx,dy,descent,display,dur,end,fill,fill-rule,font-family,' +
+    'font-size,font-stretch,font-style,font-variant,font-weight,from,fx,fy,g1,g2,glyph-name,' +
+    'gradientUnits,hanging,height,horiz-adv-x,horiz-origin-x,ideographic,k,keyPoints,' +
+    'keySplines,keyTimes,lang,marker-end,marker-mid,marker-start,markerHeight,markerUnits,' +
+    'markerWidth,mathematical,max,min,offset,opacity,orient,origin,overline-position,' +
+    'overline-thickness,panose-1,path,pathLength,points,preserveAspectRatio,r,refX,refY,' +
+    'repeatCount,repeatDur,requiredExtensions,requiredFeatures,restart,rotate,rx,ry,slope,stemh,' +
+    'stemv,stop-color,stop-opacity,strikethrough-position,strikethrough-thickness,stroke,' +
+    'stroke-dasharray,stroke-dashoffset,stroke-linecap,stroke-linejoin,stroke-miterlimit,' +
+    'stroke-opacity,stroke-width,systemLanguage,target,text-anchor,to,transform,type,u1,u2,' +
+    'underline-position,underline-thickness,unicode,unicode-range,units-per-em,values,version,' +
+    'viewBox,visibility,width,widths,x,x-height,x1,x2,xlink:actuate,xlink:arcrole,xlink:role,' +
+    'xlink:show,xlink:title,xlink:type,xml:base,xml:lang,xml:space,xmlns,xmlns:xlink,y,y1,y2,' +
     'zoomAndPan');
 
 var validAttrs = angular.extend({},
@@ -341,7 +341,7 @@ function htmlParser(html, handler) {
       }
 
     } else {
-      html = html.replace(new RegExp("(.*)<\\s*\\/\\s*" + stack.last() + "[^>]*>", 'i'),
+      html = html.replace(new RegExp("([^]*)<\\s*\\/\\s*" + stack.last() + "[^>]*>", 'i'),
         function(all, text) {
           text = text.replace(COMMENT_REGEXP, "$1").replace(CDATA_REGEXP, "$1");
 
@@ -530,6 +530,8 @@ function validStyles(styleAttr){
 				(key === 'width' || key === 'height') && (
 					value.match(/[0-9\.]*(px|em|rem|%)/)
 				)
+			|| // Reference #520
+				(key === 'direction' && value.match(/^ltr|rtl|initial|inherit$/))
 			) result += key + ': ' + value + ';';
 		}
 	});
@@ -540,7 +542,7 @@ function validStyles(styleAttr){
 function validCustomTag(tag, attrs, lkey, value){
 	// catch the div placeholder for the iframe replacement
     if (tag === 'img' && attrs['ta-insert-video']){
-        if(lkey === 'ta-insert-video' || lkey === 'allowfullscreen' || lkey === 'frameborder' || (lkey === 'contenteditble' && value === 'false')) return true;
+        if(lkey === 'ta-insert-video' || lkey === 'allowfullscreen' || lkey === 'frameborder' || (lkey === 'contenteditable' && value === 'false')) return true;
     }
     return false;
 }
@@ -709,7 +711,7 @@ angular.module('ngSanitize', []).provider('$sanitize', $SanitizeProvider);
  */
 angular.module('ngSanitize').filter('linky', ['$sanitize', function($sanitize) {
   var LINKY_URL_REGEXP =
-        /((ftp|https?):\/\/|(mailto:)?[A-Za-z0-9._%+-]+@)\S*[^\s.;,(){}<>"]/,
+        /((ftp|https?):\/\/|(www\.)|(mailto:)?[A-Za-z0-9._%+-]+@)\S*[^\s.;,(){}<>"”’]/,
       MAILTO_REGEXP = /^mailto:/;
 
   return function(text, target) {
@@ -722,8 +724,10 @@ angular.module('ngSanitize').filter('linky', ['$sanitize', function($sanitize) {
     while ((match = raw.match(LINKY_URL_REGEXP))) {
       // We can not end in these as they are sometimes found at the end of the sentence
       url = match[0];
-      // if we did not match ftp/http/mailto then assume mailto
-      if (match[2] == match[3]) url = 'mailto:' + url;
+      // if we did not match ftp/http/www/mailto then assume mailto
+      if (!match[2] && !match[4]) {
+        url = (match[3] ? 'http://' : 'mailto:') + url;
+      }
       i = match.index;
       addText(raw.substr(0, i));
       addLink(url, match[0].replace(MAILTO_REGEXP, ''));
@@ -742,13 +746,13 @@ angular.module('ngSanitize').filter('linky', ['$sanitize', function($sanitize) {
     function addLink(url, text) {
       html.push('<a ');
       if (angular.isDefined(target)) {
-        html.push('target="');
-        html.push(target);
-        html.push('" ');
+        html.push('target="',
+                  target,
+                  '" ');
       }
-      html.push('href="');
-      html.push(url);
-      html.push('">');
+      html.push('href="',
+                url.replace(/"/g, '&quot;'),
+                '">');
       addText(text);
       html.push('</a>');
     }

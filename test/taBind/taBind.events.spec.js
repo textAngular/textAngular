@@ -62,9 +62,7 @@ describe('taBind.events', function () {
 				
 				it('non-ie based w/o paste content', inject(function($window){
 					element.triggerHandler('paste');
-					expect(function(){
-						$timeout.flush();
-					}).toThrow();
+					$timeout.flush();
 					$rootScope.$digest();
 					expect($rootScope.html).toBe('<p>Test Contents</p>');
 				}));
@@ -161,6 +159,27 @@ describe('taBind.events', function () {
 
 		});
 
+	});
+	
+	describe('handles the ta-paste event correctly', function(){
+		it('allows conversion of html', inject(function($window, $rootScope, _$compile_, $document, $timeout){
+			$rootScope.html = '<p>Test Contents</p>';
+			$rootScope.converter = function(html){
+				expect(html).toBe('<font>Test 4 Content</font>');
+				return '<b>Changed Content</b>';
+			};
+			var element = _$compile_('<div contenteditable="true" ta-paste="converter($html)" ta-bind ng-model="html"></div>')($rootScope);
+			$document.find('body').append(element);
+			$rootScope.$digest();
+			var sel = $window.rangy.getSelection();
+			var range = $window.rangy.createRangyRange();
+			range.selectNodeContents(element.find('p')[0]);
+			sel.setSingleRange(range);
+			element.triggerHandler('paste', {originalEvent: {clipboardData: {types: ['text/html'], getData: function(){ return '<font>Test 4 Content</font>';} }}});
+			$timeout.flush();
+			$rootScope.$digest();
+			expect($rootScope.html).toBe('<p><b>Changed Content</b></p>');
+		}));
 	});
 	
 	describe('emits the ta-drop-event event correctly', function(){
@@ -301,6 +320,47 @@ describe('taBind.events', function () {
 			targetElement.triggerHandler('click');
 			$rootScope.$digest();
 			expect(test).toBe(targetElement[0]);
+		});
+	});
+	
+	describe('handles tab key in textarea mode', function(){
+		var $rootScope, element;
+		beforeEach(inject(function (_$compile_, _$rootScope_) {
+			$rootScope = _$rootScope_;
+			$rootScope.html = '';
+			element = _$compile_('<textarea ta-bind ng-model="html"></div>')($rootScope);
+			$rootScope.html = '<p><a>Test Contents</a><img/></p>';
+			$rootScope.$digest();
+		}));
+		
+		it('should insert \\t on tab key', function(){
+			element.val('<p><a>Test Contents</a><img/></p>');
+			triggerEvent('keydown', element, {keyCode: 9});
+			expect(element.val()).toBe('\t<p><a>Test Contents</a><img/></p>');
+		});
+		
+		describe('should remove \\t on shift-tab', function(){
+			it('should remove \\t at start of line', function(){
+				element.val('\t<p><a>Test Contents</a><img/></p>');
+				triggerEvent('keydown', element, {keyCode: 9, shiftKey: true});
+				expect(element.val()).toBe('<p><a>Test Contents</a><img/></p>');
+			});
+			it('should remove only one \\t at start of line', function(){
+				element.val('\t\t<p><a>Test Contents</a><img/></p>');
+				triggerEvent('keydown', element, {keyCode: 9, shiftKey: true});
+				expect(element.val()).toBe('\t<p><a>Test Contents</a><img/></p>');
+			});
+			it('should do nothing if no \\t at start of line', function(){
+				element.val('<p><a>Test Contents</a><img/></p>');
+				triggerEvent('keydown', element, {keyCode: 9, shiftKey: true});
+				expect(element.val()).toBe('<p><a>Test Contents</a><img/></p>');
+			});
+			// Issue with phantomjs not setting target to end? It works just not in tests.
+			it('should remove only one \\t at start of the current line', function(){
+				element.val('\t\t<p><a>Test Contents</a><img/></p>\n\t\t<p><a>Test Contents</a><img/></p>');
+				triggerEvent('keydown', element, {keyCode: 9, shiftKey: true});
+				expect(element.val()).toBe('\t<p><a>Test Contents</a><img/></p>\n\t\t<p><a>Test Contents</a><img/></p>');
+			});
 		});
 	});
 });

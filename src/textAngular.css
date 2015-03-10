@@ -2,10 +2,23 @@
 @license textAngular
 Author : Austin Anderson
 License : 2013 MIT
-Version 1.3.0-pre9
+Version 1.3.7
 
 See README.md or https://github.com/fraywing/textAngular/wiki for requirements and use.
 */
+
+.ta-hidden-input {
+	width: 1px;
+	height: 1px;
+	border: none;
+	margin: 0;
+	padding: 0;
+	position: absolute;
+	top: -10000px;
+	left: -10000px;
+	opacity: 0;
+	overflow: hidden;
+}
 
 /* add generic styling for the editor */
 .ta-root.focussed > .ta-scroll-window.form-control {

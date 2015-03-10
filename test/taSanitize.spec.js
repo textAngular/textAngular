@@ -23,6 +23,12 @@ describe('taSanitize', function(){
 			expect(safe.attr('align')).not.toBeDefined();
 			expect(safe.css('text-align')).toBe('justify');
 		}));
+		it('should not affect existing styles', inject(function(taSanitize){
+			var safe = angular.element(taSanitize('<div style="color: red;" align="left"></div>'));
+			expect(safe.attr('align')).not.toBeDefined();
+			expect(safe.css('text-align')).toBe('left');
+			expect(safe.css('color')).toBe('red');
+		}));
 	});
 
 	describe('if invalid HTML', function(){
@@ -34,6 +40,73 @@ describe('taSanitize', function(){
 		it('should return an empty string if no oldsafe', inject(function(taSanitize){
 			var result = taSanitize('<broken><test');
 			expect(result).toBe('');
+		}));
+	});
+
+	describe('clears out unnecessary &#10; &#9;', function(){
+		it('at start both', inject(function(taSanitize){
+			var result = taSanitize('<p>&#10;&#9;Test Test 2</p>', 'safe');
+			expect(result).toBe('<p>Test Test 2</p>');
+		}));
+		
+		it('at start &#10;', inject(function(taSanitize){
+			var result = taSanitize('<p>&#10;Test Test 2</p>', 'safe');
+			expect(result).toBe('<p>Test Test 2</p>');
+		}));
+		
+		it('at start &#9;', inject(function(taSanitize){
+			var result = taSanitize('<p>&#9;Test Test 2</p>', 'safe');
+			expect(result).toBe('<p>Test Test 2</p>');
+		}));
+		
+		it('at middle both', inject(function(taSanitize){
+			var result = taSanitize('<p>Test &#10;&#9;Test 2</p>', 'safe');
+			expect(result).toBe('<p>Test Test 2</p>');
+		}));
+		
+		it('at middle &#10;', inject(function(taSanitize){
+			var result = taSanitize('<p>Test &#10;Test 2</p>', 'safe');
+			expect(result).toBe('<p>Test Test 2</p>');
+		}));
+		
+		it('at middle &#9;', inject(function(taSanitize){
+			var result = taSanitize('<p>Test &#9;Test 2</p>', 'safe');
+			expect(result).toBe('<p>Test Test 2</p>');
+		}));
+		
+		it('at end both', inject(function(taSanitize){
+			var result = taSanitize('<p>Test Test 2&#10;&#9;</p>', 'safe');
+			expect(result).toBe('<p>Test Test 2</p>');
+		}));
+		
+		it('at end &#10;', inject(function(taSanitize){
+			var result = taSanitize('<p>Test Test 2&#10;</p>', 'safe');
+			expect(result).toBe('<p>Test Test 2</p>');
+		}));
+		
+		it('at end &#9;', inject(function(taSanitize){
+			var result = taSanitize('<p>Test Test 2&#9;</p>', 'safe');
+			expect(result).toBe('<p>Test Test 2</p>');
+		}));
+		
+		it('combination', inject(function(taSanitize){
+			var result = taSanitize('<p>&#10;Test &#10; &#9;Test 2&#10;&#9;</p>', 'safe');
+			expect(result).toBe('<p>Test  Test 2</p>');
+		}));
+		
+		it('leaves them inbetween <pre> tags', inject(function(taSanitize){
+			var result = taSanitize('<pre>&#9;Test &#10; &#9;Test 2&#10;&#9;</pre>', 'safe');
+			expect(result).toBe('<pre>&#9;Test &#10; &#9;Test 2&#10;&#9;</pre>');
+		}));
+		
+		it('correctly handles a mixture', inject(function(taSanitize){
+			var result = taSanitize('<p>&#10;Test &#10; &#9;Test 2&#10;&#9;</p><pre>&#9;Test &#10; &#9;Test 2&#10;&#9;</pre>', 'safe');
+			expect(result).toBe('<p>Test  Test 2</p><pre>&#9;Test &#10; &#9;Test 2&#10;&#9;</pre>');
+		}));
+		
+		it('correctly handles more than one pre-tag', inject(function(taSanitize){
+			var result = taSanitize('<p>&#10;Test &#10; &#9;Test 2&#10;&#9;</p><pre>&#9;Test &#10; &#9;Test 1&#10;&#9;</pre><p>&#10;Test &#10; &#9;Test 2&#10;&#9;</p><pre>&#9;Test &#10; &#9;Test 2&#10;&#9;</pre>', 'safe');
+			expect(result).toBe('<p>Test  Test 2</p><pre>&#9;Test &#10; &#9;Test 1&#10;&#9;</pre><p>Test  Test 2</p><pre>&#9;Test &#10; &#9;Test 2&#10;&#9;</pre>');
 		}));
 	});
 
@@ -208,10 +281,14 @@ describe('taSanitize', function(){
 		}));
 	});
 
-	describe('check if style is satinized correctly', function(){
+	describe('check if style is sanitized correctly', function(){
 		it('should translate style to tag', inject(function(taSanitize, $sce){
 			var result = taSanitize('Q<b>W</b><i style="font-weight: bold;">E</i><u style="font-weight: bold; font-style: italic;">R</u>T');
-			expect(result).toBe('Q<b>W</b><i><b>E</b></i><u><i><b>R</b></i></u>T');
+			expect(result).toBe('Q<b>W</b><i><b>E</b></i><u><b><i>R</i></b></u>T');
+		}));
+		it('should translate style to tag, respecting nested tags', inject(function(taSanitize, $sce){
+			var result = taSanitize("Q<i style='font-weight: bold;'><u>E</u></i>T");
+			expect(result).toBe('Q<i><b><u>E</u></b></i>T');
 		}));
 	});
 });
