@@ -1401,8 +1401,8 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 								// restore selection
 								$window.rangy.restoreSelection(_savedSelection);
 								processpaste(_tempDiv[0].innerHTML);
+                element[0].focus();
 								_tempDiv.remove();
-								element[0].focus();
 							}, 0);
 						}
 					});
