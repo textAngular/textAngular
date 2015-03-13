@@ -1,3 +1,13 @@
+<a name="1.3.8"></a>
+### 1.3.8 (2015-03-13)
+
+
+#### Bug Fixes
+
+* **taBind:** Fix tab focus issue. ([8693e1d6](http://github.com/fraywing/textAngular/commit/8693e1d69daf44bb4ca6a94863bd2e43b598f571), closes [#483](http://github.com/fraywing/textAngular/issues/483), [#379](http://github.com/fraywing/textAngular/issues/379))
+* **textAngular.popover:** Add scroll top offset. ([f12eb86d](http://github.com/fraywing/textAngular/commit/f12eb86d7dd473244f09982dc1b13b0e0949ca5c))
+
+
 <a name="1.3.7"></a>
 ### 1.3.7 (2015-02-13)
 
