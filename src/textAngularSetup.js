@@ -602,7 +602,7 @@ angular.module('textAngularSetup', [])
 				// setup the editor toolbar
 				// Credit to the work at http://hackerwins.github.io/summernote/ for this editbar logic
 				event.preventDefault();
-				editorScope.displayElements.popover.css('width', '435px');
+				editorScope.displayElements.popover.css('width', '436px');
 				var container = editorScope.displayElements.popoverContainer;
 				container.empty();
 				container.css('line-height', '28px');
