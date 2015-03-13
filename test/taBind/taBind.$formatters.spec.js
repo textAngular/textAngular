@@ -32,5 +32,10 @@ describe('taBind.$formatters', function () {
 			$rootScope.$digest();
 			expect(element.val()).toBe('<ol>\n\t<li>Test Line 1</li>\n\t<ul>\n\t\t<li>Nested Line 1</li>\n\t\t<li>Nested Line 2</li>\n\t</ul>\n\t<li>Test Line 3</li>\n</ol>');
 		});
+		it('handles no tags (should wrap)', function(){
+			$rootScope.html = 'Test Line 1';
+			$rootScope.$digest();
+			expect(element.val()).toBe('<p>Test Line 1</p>');
+		});
 	});
 });
