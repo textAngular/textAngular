@@ -1,3 +1,12 @@
+<a name="1.3.9"></a>
+### 1.3.9 (2015-03-13)
+
+
+#### Bug Fixes
+
+* **taBind.$formatters:** Fix an issue where unwrapped tags broke the textarea display ([d39c7b63](http://github.com/fraywing/textAngular/commit/d39c7b63732b345b826068de4f9655d082d74262), closes [#566](http://github.com/fraywing/textAngular/issues/566))
+
+
 <a name="1.3.8"></a>
 ### 1.3.8 (2015-03-13)
 
