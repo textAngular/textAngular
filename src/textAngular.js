@@ -2,7 +2,7 @@
 @license textAngular
 Author : Austin Anderson
 License : 2013 MIT
-Version 1.3.8
+Version 1.3.9
 
 See README.md or https://github.com/fraywing/textAngular/wiki for requirements and use.
 */
@@ -1042,6 +1042,15 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 			
 			var _blankTest = _taBlankTest(_defaultTest);
 			
+			var _ensureContentWrapped = function(value){
+				if(_blankTest(value)) return value;
+				var domTest = angular.element("<div>" + value + "</div>");
+				if(domTest.children().length === 0){
+					value = "<" + attrs.taDefaultWrap + ">" + value + "</" + attrs.taDefaultWrap + ">";
+				}
+				return value;
+			};
+			
 			if(attrs.taPaste) _pasteHandler = $parse(attrs.taPaste);
 			
 			element.addClass('ta-bind');
@@ -1202,7 +1211,7 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 						_html += '\n' + _repeat('\t', tablevel-1) + listNode.outerHTML.substring(listNode.outerHTML.lastIndexOf('<'));
 						return _html;
 					};
-					
+					ngModel.$formatters.unshift(_ensureContentWrapped);
 					ngModel.$formatters.unshift(function(htmlValue){
 						// tabulate the HTML so it looks nicer
 						var _children = angular.element('<div>' + htmlValue + '</div>')[0].childNodes;
@@ -1555,14 +1564,7 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 			ngModel.$parsers.unshift(_validity);
 			// because textAngular is bi-directional (which is awesome) we need to also sanitize values going in from the server
 			ngModel.$formatters.push(_sanitize);
-			ngModel.$formatters.unshift(function(value){
-				if(_blankTest(value)) return value;
-				var domTest = angular.element("<div>" + value + "</div>");
-				if(domTest.children().length === 0){
-					value = "<" + attrs.taDefaultWrap + ">" + value + "</" + attrs.taDefaultWrap + ">";
-				}
-				return value;
-			});
+			ngModel.$formatters.unshift(_ensureContentWrapped);
 			ngModel.$formatters.unshift(_validity);
 			ngModel.$formatters.unshift(function(value){
 				return ngModel.$undoManager.push(value || '');
