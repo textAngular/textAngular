@@ -1461,7 +1461,7 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 								var _new = angular.element(_defaultVal);
 								if (/^<br(|\/)>$/i.test(selection.innerHTML.trim()) && selection.parentNode.tagName.toLowerCase() === 'blockquote' && !selection.nextSibling) {
 									// if last element in blockquote and element is blank, pull element outside of blockquote.
-									$selection = angular.element(selection);
+									var $selection = angular.element(selection);
 									var _parent = $selection.parent();
 									_parent.after(_new);
 									$selection.remove();
