@@ -1,3 +1,12 @@
+<a name="1.3.10"></a>
+### 1.3.10 (2015-03-16)
+
+
+#### Bug Fixes
+
+* **placeholder:** multiple textAngular will cause CSSRule index error ([943f08d5](http://github.com/fraywing/textAngular/commit/943f08d5b1ccc1c358071e67f5968267a0664299))
+
+
 <a name="1.3.9"></a>
 ### 1.3.9 (2015-03-13)
 
