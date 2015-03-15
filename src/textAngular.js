@@ -8,7 +8,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 */
 
 (function(){ // encapsulate all variables so they don't become global vars
-"Use Strict";					
+"use strict";					
 // IE version detection - http://stackoverflow.com/questions/4169160/javascript-ie-detection-why-not-use-simple-conditional-comments
 // We need this as IE sometimes plays funny tricks with the contenteditable.
 // ----------------------------------------------------------
@@ -98,7 +98,7 @@ function validElementString(string){
 	Custom stylesheet for the placeholders rules.
 	Credit to: http://davidwalsh.name/add-rules-stylesheets
 */
-var sheet, addCSSRule, removeCSSRule, _addCSSRule, _removeCSSRule;
+var sheet, addCSSRule, removeCSSRule, _addCSSRule, _removeCSSRule, _getRuleIndex;
 /* istanbul ignore else: IE <8 test*/
 if(_browserDetect.ie > 8 || _browserDetect.ie === undefined){
 	var _sheets = document.styleSheets;
@@ -261,7 +261,7 @@ angular.module('textAngular.factories', [])
 	var styleMatch = [];
 	for(var i = 0; i < convert_infos.length; i++){
 		var _partialStyle = '(' + convert_infos[i].property + ':\\s*(';
-		for(j = 0; j < convert_infos[i].values.length; j++){
+		for(var j = 0; j < convert_infos[i].values.length; j++){
 			/* istanbul ignore next: not needed to be tested yet */
 			if(j > 0) _partialStyle += '|';
 			_partialStyle += convert_infos[i].values[j];
@@ -294,7 +294,7 @@ angular.module('textAngular.factories', [])
 		if(!html || !angular.isString(html) || html.length <= 0) return html;
 		var i;
 		var styleElementMatch = /<([^>\/]+?)style=("([^"]+)"|'([^']+)')([^>]*)>/ig;
-		var match, styleVal, newTag, lastNewTag = '', newHtml, finalHtml = '', lastIndex = 0;
+		var match, subMatch, styleVal, newTag, lastNewTag = '', newHtml, finalHtml = '', lastIndex = 0;
 		while(match = styleElementMatch.exec(html)){
 			// one of the quoted values ' or "
 			/* istanbul ignore next: quotations match */
@@ -350,7 +350,7 @@ angular.module('textAngular.factories', [])
 			// record last index after this tag
 			lastIndex = match.index + match[0].length;
 			// construct tag without the align attribute
-			newTag = '<' + match[1] + match[5];
+			var newTag = '<' + match[1] + match[5];
 			// add the style attribute
 			if(/style=("([^"]+)"|'([^']+)')/ig.test(newTag)){
 				/* istanbul ignore next: quotations match */
@@ -393,7 +393,7 @@ angular.module('textAngular.factories', [])
 		// Do processing for <pre> tags, removing tabs and return carriages outside of them
 		
 		var _preTags = safe.match(/(<pre[^>]*>.*?<\/pre[^>]*>)/ig);
-		processedSafe = safe.replace(/(&#(9|10);)*/ig, '');
+		var processedSafe = safe.replace(/(&#(9|10);)*/ig, '');
 		var re = /<pre[^>]*>.*?<\/pre[^>]*>/ig;
 		var index = 0;
 		var lastIndex = 0;
@@ -1456,6 +1456,7 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 								}
 							/* istanbul ignore next: difficult to test as can't seem to select */
 							}else if(event.keyCode === 13 && !event.shiftKey){
+								var $selection;
 								var selection = taSelection.getSelectionElement();
 								if(!selection.tagName.match(VALIDELEMENTS)) return;
 								var _new = angular.element(_defaultVal);

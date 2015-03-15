@@ -1,5 +1,5 @@
 describe('taFixChrome', function(){
-	'Use Strict';
+	'use strict';
 	beforeEach(module('textAngular'));
 	var taFixChrome;
 	beforeEach(inject(function(_taFixChrome_){
