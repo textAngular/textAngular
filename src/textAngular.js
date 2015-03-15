@@ -137,7 +137,7 @@ if(_browserDetect.ie > 8 || _browserDetect.ie === undefined){
 		var insertIndex;
 		var insertedRule;
 		// This order is important as IE 11 has both cssRules and rules but they have different lengths - cssRules is correct, rules gives an error in IE 11
-		/* istanbul ignore else: firefox catch */
+		/* istanbul ignore next: browser catches */
 		if(_sheet.cssRules) insertIndex = Math.max(_sheet.cssRules.length - 1, 0);
 		else if(_sheet.rules) insertIndex = Math.max(_sheet.rules.length - 1, 0);
 		
@@ -148,6 +148,7 @@ if(_browserDetect.ie > 8 || _browserDetect.ie === undefined){
 		else {
 			_sheet.addRule(selector, rules, insertIndex);
 		}
+		/* istanbul ignore next: browser catches */
 		if(sheet.rules) insertedRule = sheet.rules[insertIndex];
 		else if(sheet.cssRules) insertedRule = sheet.cssRules[insertIndex];
 		// return the inserted stylesheet rule
@@ -157,6 +158,7 @@ if(_browserDetect.ie > 8 || _browserDetect.ie === undefined){
 	_getRuleIndex = function(rule, rules) {
 		var i, ruleIndex;
 		for (i=0; i < rules.length; i++) {
+			/* istanbul ignore else: check for correct rule */
 			if (rules[i].cssText === rule.cssText) {
 				ruleIndex = i;
 				break;
@@ -168,9 +170,8 @@ if(_browserDetect.ie > 8 || _browserDetect.ie === undefined){
 	removeCSSRule = function(rule){
 		_removeCSSRule(sheet, rule);
 	};
-
+	/* istanbul ignore next: tests are browser specific */
 	_removeCSSRule = function(sheet, rule){
-		/* istanbul ignore else: untestable IE option */
 		var ruleIndex = _getRuleIndex(rule, sheet.cssRules || sheet.rules);
 		if(sheet.removeRule){
 			sheet.removeRule(ruleIndex);
@@ -242,7 +243,7 @@ angular.module('textAngular.factories', [])
 		} else return html;
 	};
 	return taFixChrome;
-}).factory('taSanitize', ['$sanitize', 'taDOM', function taSanitizeFactory($sanitize, taDOM){
+}).factory('taSanitize', ['$sanitize', function taSanitizeFactory($sanitize){
 
 	var convert_infos = [
 		{
@@ -291,7 +292,7 @@ angular.module('textAngular.factories', [])
 	
 	function transformLegacyStyles(html){
 		if(!html || !angular.isString(html) || html.length <= 0) return html;
-		var i, j;
+		var i;
 		var styleElementMatch = /<([^>\/]+?)style=("([^"]+)"|'([^']+)')([^>]*)>/ig;
 		var match, styleVal, newTag, lastNewTag = '', newHtml, finalHtml = '', lastIndex = 0;
 		while(match = styleElementMatch.exec(html)){
@@ -753,7 +754,7 @@ function($window, $document, taDOM){
 		// from http://stackoverflow.com/questions/6690752/insert-html-at-caret-in-a-contenteditable-div
 		// topNode is the contenteditable normally, all manipulation MUST be inside this.
 		insertHtml: function(html, topNode){
-			var parent, secondParent, _childI, nodes, startIndex, startNodes, endNodes, i, lastNode, _tempFrag;
+			var parent, secondParent, _childI, nodes, i, lastNode, _tempFrag;
 			var element = angular.element("<div>" + html + "</div>");
 			var range = rangy.getSelection().getRangeAt(0);
 			var frag = _document.createDocumentFragment();
@@ -1400,7 +1401,7 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 						element.addClass('processing-paste');
 						var pastedContent;
 						var clipboardData = (e.originalEvent || e).clipboardData;
-						if (clipboardData && clipboardData.getData) {// Webkit - get data from clipboard, put into editdiv, cleanup, then cancel event
+						if (clipboardData && clipboardData.getData && clipboardData.types.length > 0) {// Webkit - get data from clipboard, put into editdiv, cleanup, then cancel event
 							var _types = "";
 							for(var _t = 0; _t < clipboardData.types.length; _t++){
 								_types += " " + clipboardData.types[_t];
@@ -1425,8 +1426,8 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 								// restore selection
 								$window.rangy.restoreSelection(_savedSelection);
 								processpaste(_tempDiv[0].innerHTML);
+								element[0].focus();
 								_tempDiv.remove();
-                element[0].focus();
 							}, 0);
 						}
 					});
@@ -1848,7 +1849,7 @@ textAngular.directive("textAngular", [
 				var _keydown, _keyup, _keypress, _mouseup, _focusin, _focusout,
 					_originalContents, _toolbars,
 					_serial = (attrs.serial) ? attrs.serial : Math.floor(Math.random() * 10000000000000000),
-					_taExecCommand, _resizeMouseDown;
+					_taExecCommand, _resizeMouseDown, _updateSelectedStylesTimeout;
 				
 				scope._name = (attrs.name) ? attrs.name : 'textAngularEditor' + _serial;
 
@@ -2313,13 +2314,15 @@ textAngular.directive("textAngular", [
 				// loop through all the tools polling their activeState function if it exists
 				scope.updateSelectedStyles = function(){
 					var _selection;
+					/* istanbul ignore next: This check is to ensure multiple timeouts don't exist */
+					if(_updateSelectedStylesTimeout) $timeout.cancel(_updateSelectedStylesTimeout);
 					// test if the common element ISN'T the root ta-text node
 					if((_selection = taSelection.getSelectionElement()) !== undefined && _selection.parentNode !== scope.displayElements.text[0]){
 						_toolbars.updateSelectedStyles(angular.element(_selection));
 					}else _toolbars.updateSelectedStyles();
 					// used to update the active state when a key is held down, ie the left arrow
 					/* istanbul ignore else: browser only check */
-					if(scope._bUpdateSelectedStyles) $timeout(scope.updateSelectedStyles, 200);
+					if(scope._bUpdateSelectedStyles) _updateSelectedStylesTimeout = $timeout(scope.updateSelectedStyles, 200);
 				};
 				// start updating on keydown
 				_keydown = function(){
