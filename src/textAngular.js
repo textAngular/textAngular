@@ -8,7 +8,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 */
 
 (function(){ // encapsulate all variables so they don't become global vars
-"use strict";					
+"use strict";
 // IE version detection - http://stackoverflow.com/questions/4169160/javascript-ie-detection-why-not-use-simple-conditional-comments
 // We need this as IE sometimes plays funny tricks with the contenteditable.
 // ----------------------------------------------------------
@@ -30,12 +30,12 @@ var _browserDetect = {
 			v = 3,
 			div = document.createElement('div'),
 			all = div.getElementsByTagName('i');
-		
+
 		while (
 			div.innerHTML = '<!--[if gt IE ' + (++v) + ']><i></i><![endif]-->',
 			all[0]
 		);
-		
+
 		return v > 4 ? v : undef;
 	}()),
 	webkit: /AppleWebKit\/([\d.]+)/i.test(navigator.userAgent)
@@ -63,7 +63,7 @@ if(_browserDetect.webkit) {
 					curelement.select(); // use select to place cursor for input elements.
 				}
 			}
-		}	
+		}
 		globalContentEditableBlur = false;
 	}, false); // add global click handler
 	angular.element(document).ready(function () {
@@ -140,7 +140,7 @@ if(_browserDetect.ie > 8 || _browserDetect.ie === undefined){
 		/* istanbul ignore next: browser catches */
 		if(_sheet.cssRules) insertIndex = Math.max(_sheet.cssRules.length - 1, 0);
 		else if(_sheet.rules) insertIndex = Math.max(_sheet.rules.length - 1, 0);
-		
+
 		/* istanbul ignore else: untestable IE option */
 		if(_sheet.insertRule) {
 			_sheet.insertRule(selector + "{" + rules + "}", insertIndex);
@@ -257,7 +257,7 @@ angular.module('textAngular.factories', [])
 			tag: 'i'
 		}
 	];
-	
+
 	var styleMatch = [];
 	for(var i = 0; i < convert_infos.length; i++){
 		var _partialStyle = '(' + convert_infos[i].property + ':\\s*(';
@@ -270,7 +270,7 @@ angular.module('textAngular.factories', [])
 		styleMatch.push(_partialStyle);
 	}
 	var styleRegexString = '(' + styleMatch.join('|') + ')';
-	
+
 	function wrapNested(html, wrapTag) {
 		var depth = 0;
 		var lastIndex = 0;
@@ -289,7 +289,7 @@ angular.module('textAngular.factories', [])
 			angular.element(wrapTag)[0].outerHTML.substring(wrapTag.length) +
 			html.substring(lastIndex);
 	}
-	
+
 	function transformLegacyStyles(html){
 		if(!html || !angular.isString(html) || html.length <= 0) return html;
 		var i;
@@ -337,7 +337,7 @@ angular.module('textAngular.factories', [])
 		else finalHtml += html.substring(lastIndex);
 		return finalHtml;
 	}
-	
+
 	function transformLegacyAttributes(html){
 		if(!html || !angular.isString(html) || html.length <= 0) return html;
 		// replace all align='...' tags with text-align attributes
@@ -366,7 +366,7 @@ angular.module('textAngular.factories', [])
 		// return with remaining html
 		return finalHtml + html.substring(lastIndex);
 	}
-	
+
 	return function taSanitize(unsafe, oldsafe, ignore){
 		// unsafe html should NEVER built into a DOM object via angular.element. This allows XSS to be inserted and run.
 		if ( !ignore ) {
@@ -380,7 +380,7 @@ angular.module('textAngular.factories', [])
 		// any exceptions (lets say, color for example) should be made here but with great care
 		// setup unsafe element for modification
 		unsafe = transformLegacyAttributes(unsafe);
-		
+
 		var safe;
 		try {
 			safe = $sanitize(unsafe);
@@ -389,9 +389,9 @@ angular.module('textAngular.factories', [])
 		} catch (e){
 			safe = oldsafe || '';
 		}
-		
+
 		// Do processing for <pre> tags, removing tabs and return carriages outside of them
-		
+
 		var _preTags = safe.match(/(<pre[^>]*>.*?<\/pre[^>]*>)/ig);
 		var processedSafe = safe.replace(/(&#(9|10);)*/ig, '');
 		var re = /<pre[^>]*>.*?<\/pre[^>]*>/ig;
@@ -711,39 +711,39 @@ function($window, $document, taDOM){
 		},
 		setSelection: function(el, start, end){
 			var range = rangy.createRange();
-			
+
 			range.setStart(el, start);
 			range.setEnd(el, end);
-			
+
 			rangy.getSelection().setSingleRange(range);
 		},
 		setSelectionBeforeElement: function (el){
 			var range = rangy.createRange();
-			
+
 			range.selectNode(el);
 			range.collapse(true);
-			
+
 			rangy.getSelection().setSingleRange(range);
 		},
 		setSelectionAfterElement: function (el){
 			var range = rangy.createRange();
-			
+
 			range.selectNode(el);
 			range.collapse(false);
-			
+
 			rangy.getSelection().setSingleRange(range);
 		},
 		setSelectionToElementStart: function (el){
 			var range = rangy.createRange();
-			
+
 			range.selectNodeContents(el);
 			range.collapse(true);
-			
+
 			rangy.getSelection().setSingleRange(range);
 		},
 		setSelectionToElementEnd: function (el){
 			var range = rangy.createRange();
-			
+
 			range.selectNodeContents(el);
 			range.collapse(false);
 			if(el.childNodes && el.childNodes[el.childNodes.length - 1] && el.childNodes[el.childNodes.length - 1].nodeName === 'br'){
@@ -760,7 +760,7 @@ function($window, $document, taDOM){
 			var frag = _document.createDocumentFragment();
 			var children = element[0].childNodes;
 			var isInline = true;
-			
+
 			if(children.length > 0){
 				// NOTE!! We need to do the following:
 				// check for blockelements - if they exist then we have to split the current element in half (and all others up to the closest block element) and insert all children in-between.
@@ -782,7 +782,7 @@ function($window, $document, taDOM){
 				// paste text of some sort
 				lastNode = frag = _document.createTextNode(html);
 			}
-			
+
 			// Other Edge case - selected data spans multiple blocks.
 			if(isInline){
 				range.deleteContents();
@@ -807,7 +807,7 @@ function($window, $document, taDOM){
 							secondParent = parent.cloneNode();
 							// split the nodes into two lists - before and after, splitting the node with the selection into 2 text nodes.
 							taDOM.splitNodes(parent.childNodes, parent, secondParent, range.startContainer, range.startOffset);
-							
+
 							// Escape out of the inline tags like b
 							while(!VALIDELEMENTS.test(parent.nodeName)){
 								angular.element(parent).after(secondParent);
@@ -822,12 +822,12 @@ function($window, $document, taDOM){
 							secondParent = parent.cloneNode();
 							taDOM.splitNodes(parent.childNodes, parent, secondParent, undefined, undefined, range.startOffset);
 						}
-						
+
 						angular.element(parent).after(secondParent);
 						// put cursor to end of inserted content
 						range.setStartAfter(parent);
 						range.setEndAfter(parent);
-						
+
 						if(/^(|<br(|\/)>)$/i.test(parent.innerHTML.trim())){
 							range.setStartBefore(parent);
 							range.setEndBefore(parent);
@@ -853,7 +853,7 @@ function($window, $document, taDOM){
 					range.deleteContents();
 				}
 			}
-			
+
 			range.insertNode(frag);
 			if(lastNode){
 				api.setSelectionToElementEnd(lastNode);
@@ -875,35 +875,35 @@ function($window, $document, taDOM){
 			if(element.attr(attribute) !== undefined) resultingElements.push(element);
 			return resultingElements;
 		},
-		
+
 		transferChildNodes: function(source, target){
 			// clear out target
 			target.innerHTML = '';
 			while(source.childNodes.length > 0) target.appendChild(source.childNodes[0]);
 			return target;
 		},
-		
+
 		splitNodes: function(nodes, target1, target2, splitNode, subSplitIndex, splitIndex){
 			if(!splitNode && isNaN(splitIndex)) throw new Error('taDOM.splitNodes requires a splitNode or splitIndex');
 			var startNodes = document.createDocumentFragment();
 			var endNodes = document.createDocumentFragment();
 			var index = 0;
-			
+
 			while(nodes.length > 0 && (isNaN(splitIndex) || splitIndex !== index) && nodes[0] !== splitNode){
 				startNodes.appendChild(nodes[0]); // this removes from the nodes array (if proper childNodes object.
 				index++;
 			}
-			
+
 			if(!isNaN(subSplitIndex) && subSplitIndex >= 0 && nodes[0]){
 				startNodes.appendChild(document.createTextNode(nodes[0].nodeValue.substring(0, subSplitIndex)));
 				nodes[0].nodeValue = nodes[0].nodeValue.substring(subSplitIndex);
 			}
 			while(nodes.length > 0) endNodes.appendChild(nodes[0]);
-			
+
 			taDOM.transferChildNodes(startNodes, target1);
 			taDOM.transferChildNodes(endNodes, target2);
 		},
-		
+
 		transferNodeAttributes: function(source, target){
 			for(var i = 0; i < source.attributes.length; i++) target.setAttribute(source.attributes[i].name, source.attributes[i].value);
 			return target;
@@ -991,7 +991,7 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 			var _firstMatch = /(^[^<]|>)[^<]/i.exec(_blankVal);
 			var _firstTagIndex;
 			if(!_firstMatch){
-				// find the end of the first tag removing all the 
+				// find the end of the first tag removing all the
 				// Don't do a global replace as that would be waaayy too long, just replace the first 4 occurences should be enough
 				_blankVal = _blankVal.toString().replace(/="[^"]*"/i, '').replace(/="[^"]*"/i, '').replace(/="[^"]*"/i, '').replace(/="[^"]*"/i, '');
 				_firstTagIndex = _blankVal.indexOf('>');
@@ -1033,7 +1033,7 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 			var BLOCKED_KEYS = /^(9|19|20|27|33|34|35|36|37|38|39|40|45|112|113|114|115|116|117|118|119|120|121|122|123|144|145)$/i;
 			var UNDO_TRIGGER_KEYS = /^(8|13|32|46|59|61|107|109|186|187|188|189|190|191|192|219|220|221|222)$/i; // spaces, enter, delete, backspace, all punctuation
 			var _pasteHandler;
-			
+
 			// defaults to the paragraph element, but we need the line-break or it doesn't allow you to type into the empty element
 			// non IE is '<p><br/></p>', ie is '<p></p>' as for once IE gets it correct...
 			var _defaultVal, _defaultTest;
@@ -1055,9 +1055,9 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 						'<' + attrs.taDefaultWrap.toUpperCase() + '>&nbsp;</' + attrs.taDefaultWrap.toUpperCase() + '>' :
 						'<' + attrs.taDefaultWrap + '>&nbsp;</' + attrs.taDefaultWrap + '>';
 			}
-			
+
 			var _blankTest = _taBlankTest(_defaultTest);
-			
+
 			var _ensureContentWrapped = function(value){
 				if(_blankTest(value)) return value;
 				var domTest = angular.element("<div>" + value + "</div>");
@@ -1066,13 +1066,13 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 				}
 				return value;
 			};
-			
+
 			if(attrs.taPaste) _pasteHandler = $parse(attrs.taPaste);
-			
+
 			element.addClass('ta-bind');
-			
+
 			var _undoKeyupTimeout;
-			
+
 			scope['$undoManager' + (attrs.id || '')] = ngModel.$undoManager = {
 				_stack: [],
 				_index: 0,
@@ -1106,7 +1106,7 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 					return this._stack[this._index];
 				}
 			};
-			
+
 			var _undo = scope['$undoTaBind' + (attrs.id || '')] = function(){
 				/* istanbul ignore else: can't really test it due to all changes being ignored as well in readonly */
 				if(!_isReadonly && _isContentEditable){
@@ -1120,7 +1120,7 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 					}
 				}
 			};
-			
+
 			var _redo = scope['$redoTaBind' + (attrs.id || '')] = function(){
 				/* istanbul ignore else: can't really test it due to all changes being ignored as well in readonly */
 				if(!_isReadonly && _isContentEditable){
@@ -1134,14 +1134,14 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 					}
 				}
 			};
-			
+
 			// in here we are undoing the converts used elsewhere to prevent the < > and & being displayed when they shouldn't in the code.
 			var _compileHtml = function(){
 				if(_isContentEditable) return element[0].innerHTML;
 				if(_isInputFriendly) return element.val();
 				throw ('textAngular Error: attempting to update non-editable taBind');
 			};
-			
+
 			var _setViewValue = function(_val, triggerUndo){
 				_skipRender = true;
 				if(typeof triggerUndo === "undefined" || triggerUndo === null) triggerUndo = true && _isContentEditable; // if not contentEditable then the native undo/redo is fine
@@ -1158,12 +1158,12 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 					}
 				}
 			};
-			
+
 			//used for updating when inserting wrapped elements
 			scope['updateTaBind' + (attrs.id || '')] = function(){
 				if(!_isReadonly) _setViewValue();
 			};
-			
+
 			//this code is used to update the models when data is entered/deleted
 			if(_isInputFriendly){
 				scope.events = {};
@@ -1172,7 +1172,7 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 					element.on('change blur', scope.events.change = scope.events.blur = function(){
 						if(!_isReadonly) ngModel.$setViewValue(_compileHtml());
 					});
-					
+
 					element.on('keydown', scope.events.keydown = function(event, eventData){
 						/* istanbul ignore else: this is for catching the jqLite testing*/
 						if(eventData) angular.extend(event, eventData);
@@ -1182,7 +1182,7 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 							// get caret position/selection
 							var start = this.selectionStart;
 							var end = this.selectionEnd;
-							
+
 							var value = element.val();
 							if(event.shiftKey){
 								// find \t
@@ -1190,14 +1190,14 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 								if(_tab !== -1 && _tab >= _linebreak){
 									// set textarea value to: text before caret + tab + text after caret
 									element.val(value.substring(0, _tab) + value.substring(_tab + 1));
-									
+
 									// put caret at right position again (add one for the tab)
 									this.selectionStart = this.selectionEnd = start - 1;
 								}
 							}else{
 								// set textarea value to: text before caret + tab + text after caret
 								element.val(value.substring(0, start) + "\t" + value.substring(end));
-								
+
 								// put caret at right position again (add one for the tab)
 								this.selectionStart = this.selectionEnd = start + 1;
 							}
@@ -1205,13 +1205,13 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 							event.preventDefault();
 						}
 					});
-					
+
 					var _repeat = function(string, n){
 						var result = '';
 						for(var _n = 0; _n < n; _n++) result += string;
 						return result;
 					};
-					
+
 					var recursiveListFormat = function(listNode, tablevel){
 						var _html = '', _children = listNode.childNodes;
 						tablevel++;
@@ -1242,7 +1242,7 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 								else htmlValue += '' + _children[i].outerHTML;
 							}
 						}
-						
+
 						return htmlValue;
 					});
 				}else{
@@ -1284,7 +1284,7 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 									if(!dom[0].childNodes[i] || dom[0].childNodes[i].nodeName === "#text" || dom[0].childNodes[i].tagName.toLowerCase() !== "p") continue;
 									var el = angular.element(dom[0].childNodes[i]);
 									var _listMatch = (el.attr('class') || '').match(/MsoList(Bullet|Number|Paragraph)(CxSp(First|Middle|Last)|)/i);
-									
+
 									if(_listMatch){
 										if(el[0].childNodes.length < 2 || el[0].childNodes[1].childNodes.length < 1){
 											continue;
@@ -1294,9 +1294,9 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 										var indent = parseFloat((_indentMatch)?_indentMatch[1]:0);
 										var _levelMatch = (el.attr('style') || '').match(/mso-list:l([0-9]+) level([0-9]+) lfo[0-9+]($|;)/i);
 										// prefers the mso-list syntax
-										
+
 										if(_levelMatch && _levelMatch[2]) indent = parseInt(_levelMatch[2]);
-										
+
 										if ((_levelMatch && (!_list.lastLevelMatch || _levelMatch[1] !== _list.lastLevelMatch[1])) || !_listMatch[3] || _listMatch[3].toLowerCase() === "first" || (_list.lastIndent.peek() === null) || (_list.isUl !== isUl && _list.lastIndent.peek() === indent)) {
 											_resetList(isUl);
 											targetDom.append(_list.element);
@@ -1321,7 +1321,7 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 												targetDom.append(_list.element);
 											}
 										}
-										
+
 										_list.lastLevelMatch = _levelMatch;
 										if(indent !== _list.lastIndent.peek()) _list.lastIndent.push(indent);
 										_list.lastLi = angular.element("<li>");
@@ -1338,7 +1338,7 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 									for(var _n = node[0].childNodes.length - 1; _n >= 0; _n--) node.after(node[0].childNodes[_n]);
 									node.remove();
 								};
-								
+
 								angular.forEach(targetDom.find('span'), function(node){
 									node.removeAttribute('lang');
 									if(node.attributes.length <= 0) _unwrapElement(node);
@@ -1370,11 +1370,11 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 								// Webkit on Apple tags
 								text = text.replace(/<br class="Apple-interchange-newline"[^>]*?>/ig, '').replace(/<span class="Apple-converted-space">( |&nbsp;)<\/span>/ig, '&nbsp;');
 							}
-							
+
 							text = taSanitize(text, '', _disableSanitizer);
-							
+
 							if(_pasteHandler) text = _pasteHandler(scope, {$html: text}) || text;
-							
+
 							taSelection.insertHtml(text, element[0]);
 							$timeout(function(){
 								ngModel.$setViewValue(_compileHtml());
@@ -1386,7 +1386,7 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 							element.removeClass('processing-paste');
 						}
 					};
-					
+
 					element.on('paste', scope.events.paste = function(e, eventData){
 						/* istanbul ignore else: this is for catching the jqLite testing*/
 						if(eventData) angular.extend(e, eventData);
@@ -1395,7 +1395,7 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 							e.preventDefault();
 							return false;
 						}
-						
+
 						// Code adapted from http://stackoverflow.com/questions/2176861/javascript-get-clipboard-data-on-paste-event-cross-browser/6804718#6804718
 						_processingPaste = true;
 						element.addClass('processing-paste');
@@ -1412,7 +1412,7 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 							} else if (/text\/plain/i.test(_types)) {
 								pastedContent = clipboardData.getData('text/plain');
 							}
-							
+
 							processpaste(pastedContent);
 							e.stopPropagation();
 							e.preventDefault();
@@ -1438,7 +1438,7 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 						}, 0);
 						else e.preventDefault();
 					});
-					
+
 					element.on('keydown', scope.events.keydown = function(event, eventData){
 						/* istanbul ignore else: this is for catching the jqLite testing*/
 						if(eventData) angular.extend(event, eventData);
@@ -1479,7 +1479,7 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 							}
 						}
 					});
-					
+
 					element.on('keyup', scope.events.keyup = function(event, eventData){
 						/* istanbul ignore else: this is for catching the jqLite testing*/
 						if(eventData) angular.extend(event, eventData);
@@ -1499,7 +1499,7 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 									while(!selection.tagName.match(VALIDELEMENTS) && selection !== element[0]){
 										selection = selection.parentNode;
 									}
-									
+
 									if(selection.tagName.toLowerCase() !== attrs.taDefaultWrap && selection.tagName.toLowerCase() !== 'li' && (selection.innerHTML.trim() === '' || selection.innerHTML.trim() === '<br>')){
 										var _new = angular.element(_defaultVal);
 										angular.element(selection).replaceWith(_new);
@@ -1550,12 +1550,12 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 						_focussed = true;
 						element.removeClass('placeholder-text');
 					});
-					
+
 					element.on('mouseup', scope.events.mouseup = function(){
 						var _selection = taSelection.getSelection();
 						if(_selection.start.element === element[0] && element.children().length) taSelection.setSelectionToElementStart(element.children()[0]);
 					});
-					
+
 					// prevent propagation on mousedown in editor, see #206
 					element.on('mousedown', scope.events.mousedown = function(event, eventData){
 						/* istanbul ignore else: this is for catching the jqLite testing*/
@@ -1564,13 +1564,13 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 					});
 				}
 			}
-			
+
 			// catch DOM XSS via taSanitize
 			// Sanitizing both ways is identical
 			var _sanitize = function(unsafe){
 				return (ngModel.$oldViewValue = taSanitize(taFixChrome(unsafe), ngModel.$oldViewValue, _disableSanitizer));
 			};
-			
+
 			// trigger the validation calls
 			var _validity = function(value){
 				if(attrs.required) ngModel.$setValidity('required', !_blankTest(value));
@@ -1620,16 +1620,16 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 							.on('click', selectorClickHandler);
 					});
 			};
-			
+
 			var _setInnerHTML = function(newval){
 				element[0].innerHTML = newval;
 			};
-			
+
 			// changes to the model variable from outside the html/text inputs
 			ngModel.$render = function(){
 				// catch model being null or undefined
 				var val = ngModel.$viewValue || '';
-				
+
 				// if the editor isn't focused it needs to be updated, otherwise it's receiving user input
 				if(!_skipRender){
 					/* istanbul ignore else: in other cases we don't care */
@@ -1680,7 +1680,7 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 				}
 				_skipRender = false;
 			};
-			
+
 			if(attrs.taReadonly){
 				//set initial value
 				_isReadonly = scope.$eval(attrs.taReadonly);
@@ -1851,8 +1851,8 @@ textAngular.directive("textAngular", [
 					_originalContents, _toolbars,
 					_serial = (attrs.serial) ? attrs.serial : Math.floor(Math.random() * 10000000000000000),
 					_taExecCommand, _resizeMouseDown, _updateSelectedStylesTimeout;
-				
-				scope._name = (attrs.name) ? attrs.name : 'textAngularEditor' + _serial;
+
+				scope._name = (attrs.name) ? attrs.name + _serial : 'textAngularEditor' + _serial;
 
 				var oneEvent = function(_element, event, action){
 					$timeout(function(){
@@ -2009,7 +2009,7 @@ textAngular.directive("textAngular", [
 								x: Math.max(0, startPosition.width + (event.clientX - startPosition.x)),
 								y: Math.max(0, startPosition.height + (event.clientY - startPosition.y))
 							};
-							
+
 							if(event.shiftKey){
 								// keep ratio
 								var newRatio = pos.y / pos.x;
@@ -2019,7 +2019,7 @@ textAngular.directive("textAngular", [
 							el = angular.element(_el);
 							el.attr('height', Math.max(0, pos.y));
 							el.attr('width', Math.max(0, pos.x));
-							
+
 							// reflow the popover tooltip
 							scope.reflowResizeOverlay(_el);
 						};
@@ -2062,18 +2062,18 @@ textAngular.directive("textAngular", [
 				});
 				scope.displayElements.scrollWindow.attr({'ng-hide': 'showHtml'});
 				if(attrs.taDefaultWrap) scope.displayElements.text.attr('ta-default-wrap', attrs.taDefaultWrap);
-				
+
 				if(attrs.taUnsafeSanitizer){
 					scope.displayElements.text.attr('ta-unsafe-sanitizer', attrs.taUnsafeSanitizer);
 					scope.displayElements.html.attr('ta-unsafe-sanitizer', attrs.taUnsafeSanitizer);
 				}
-				
+
 				// add the main elements to the origional element
 				scope.displayElements.scrollWindow.append(scope.displayElements.text);
 				element.append(scope.displayElements.scrollWindow);
 				element.append(scope.displayElements.html);
 
-				scope.displayElements.forminput.attr('name', scope._name);
+				scope.displayElements.forminput.attr('name', (attrs.name) ? attrs.name : scope._name);
 				element.append(scope.displayElements.forminput);
 
 				if(attrs.tabindex){
@@ -2100,14 +2100,14 @@ textAngular.directive("textAngular", [
 						}
 					});
 				}
-				
+
 				if(attrs.taPaste){
 					scope._pasteHandler = function(_html){
 						return $parse(attrs.taPaste)(scope.$parent, {$html: _html});
 					};
 					scope.displayElements.text.attr('ta-paste', '_pasteHandler($html)');
 				}
-				
+
 				// compile the scope with the text and html elements only - if we do this with the main element it causes a compile loop
 				$compile(scope.displayElements.scrollWindow)(scope);
 				$compile(scope.displayElements.html)(scope);
@@ -2167,11 +2167,11 @@ textAngular.directive("textAngular", [
 				};
 				scope.displayElements.html.on('blur', _focusout);
 				scope.displayElements.text.on('blur', _focusout);
-				
+
 				scope.displayElements.text.on('paste', function(event){
 					element.triggerHandler('paste', event);
 				});
-				
+
 				// Setup the default toolbar tools, this way allows the user to add new tools like plugins.
 				// This is on the editor for future proofing if we find a better way to do this.
 				scope.queryFormatBlockState = function(command){
@@ -2514,7 +2514,7 @@ textAngular.service('textAngularManager', ['taToolExecuteAction', 'taTools', 'ta
 										break;
 									}
 								}
-								if(result) break; 
+								if(result) break;
 							}
 						}
 						return result;
@@ -2676,10 +2676,10 @@ textAngular.directive('textAngularToolbar', [
 						toolElement = angular.element(toolDefinition.display);
 					}
 					else toolElement = angular.element("<button type='button'>");
-					
+
 					if(toolDefinition && toolDefinition["class"]) toolElement.addClass(toolDefinition["class"]);
 					else toolElement.addClass(scope.classes.toolbarButton);
-					
+
 					toolElement.attr('name', toolScope.name);
 					// important to not take focus from the main text/html entry
 					toolElement.attr('unselectable', 'on');
