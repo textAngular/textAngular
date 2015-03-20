@@ -117,6 +117,19 @@ When checking out, you need a node.js installation, running `npm install` and th
 All changes should be done in the lib folder, running `grunt compile` to compile the app or use `grunt watch` to compile the files as you save them.
 When you are ready to create A PR check that `grunt` passes without errors and you have created tests for your feature if necessary.
 
+## Customization
+
+It is possible to override the toolbar by using a decorator in the module's .config block. Simply set the taOptions.toolbar to an array of arrays comprised of button names. Each array of button names represents a button group. The default toolbar can be represented like so:
+```html
+  taOptions.toolbar = [
+      ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'pre', 'quote'],
+      ['bold', 'italics', 'underline', 'strikeThrough', 'ul', 'ol', 'redo', 'undo', 'clear'],
+      ['justifyLeft', 'justifyCenter', 'justifyRight', 'indent', 'outdent'],
+      ['html', 'insertImage','insertLink', 'insertVideo', 'wordcount', 'charcount']
+  ];
+```
+New buttons can be created using taRegisterTool. Examples can be found inside demo/static-demo.html
+
 ## License
 
 This project is licensed under the [MIT license](http://opensource.org/licenses/MIT).
