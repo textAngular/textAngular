@@ -659,19 +659,23 @@ angular.module('textAngularSetup', [])
 		disabled: true,
 		wordcount: 0,
 		activeState: function(){ // this fires on keyup
-			var textElement = this.$editor().displayElements.text;
-			var workingHTML = textElement[0].innerHTML;
-			var sourceText = workingHTML.replace(/(<[^>]*?>)/ig, ' '); // replace all html tags with spaces
+            var textElement = this.$editor().displayElements.text;
+            var workingHTML = textElement[0].innerHTML || '';
+            var noOfWords = 0;
 
-			// Caculate number of words
-			var sourceTextMatches = sourceText.match(/\S+/g);
-			var noOfWords = sourceTextMatches && sourceTextMatches.length || 0;
+            if (workingHTML && workingHTML.replace(/\s*<[^>]*?>\s*/g, '') !== '') {
+                noOfWords = workingHTML.replace(/(<[^>]*?>\s*<[^>]*?>)/ig, ' ') // replace adjacent tags with possible space between with a space
+                                        .replace(/(<[^>]*?>)/ig, '') // remove any singular tags
+                                        .replace(/\s+/ig, ' ') // condense spacing
+                                        .match(/\S+/g).length; // count remaining non-space strings
+            }
 
-			//Set current scope
-			this.wordcount = noOfWords;
-			//Set editor scope
-			this.$editor().wordcount = noOfWords;
-			return false;
+            //Set current scope
+            this.wordcount = noOfWords;
+            //Set editor scope
+            this.$editor().wordcount = noOfWords;
+
+            return false;
 		}
 	});
 	taRegisterTool('charcount', {
