@@ -660,17 +660,24 @@ angular.module('textAngularSetup', [])
 		wordcount: 0,
 		activeState: function(){ // this fires on keyup
 			var textElement = this.$editor().displayElements.text;
-			var workingHTML = textElement[0].innerHTML;
-			var sourceText = workingHTML.replace(/(<[^>]*?>)/ig, ' '); // replace all html tags with spaces
+			/* istanbul ignore next: will default to '' when undefined */
+			var workingHTML = textElement[0].innerHTML || '';
+			var noOfWords = 0;
 
-			// Caculate number of words
-			var sourceTextMatches = sourceText.match(/\S+/g);
-			var noOfWords = sourceTextMatches && sourceTextMatches.length || 0;
+			/* istanbul ignore if: will default to '' when undefined */
+			if (workingHTML.replace(/\s*<[^>]*?>\s*/g, '') !== '') {
+				noOfWords = workingHTML.replace(/<\/?(b|i|em|strong|span|u|strikethrough|a|img|small|sub|sup|label)( [^>*?])?>/gi, '') // remove inline tags without adding spaces
+										.replace(/(<[^>]*?>\s*<[^>]*?>)/ig, ' ') // replace adjacent tags with possible space between with a space
+										.replace(/(<[^>]*?>)/ig, '') // remove any singular tags
+										.replace(/\s+/ig, ' ') // condense spacing
+										.match(/\S+/g).length; // count remaining non-space strings
+			}
 
 			//Set current scope
 			this.wordcount = noOfWords;
 			//Set editor scope
 			this.$editor().wordcount = noOfWords;
+
 			return false;
 		}
 	});
