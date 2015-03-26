@@ -663,7 +663,7 @@ angular.module('textAngularSetup', [])
             var workingHTML = textElement[0].innerHTML || '';
             var noOfWords = 0;
 
-            if (workingHTML && workingHTML.replace(/\s*<[^>]*?>\s*/g, '') !== '') {
+            if (workingHTML.replace(/\s*<[^>]*?>\s*/g, '') !== '') {
                 noOfWords = workingHTML.replace(/(<[^>]*?>\s*<[^>]*?>)/ig, ' ') // replace adjacent tags with possible space between with a space
                                         .replace(/(<[^>]*?>)/ig, '') // remove any singular tags
                                         .replace(/\s+/ig, ' ') // condense spacing
