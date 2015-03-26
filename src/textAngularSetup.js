@@ -664,7 +664,10 @@ angular.module('textAngularSetup', [])
             var noOfWords = 0;
 
             if (workingHTML.replace(/\s*<[^>]*?>\s*/g, '') !== '') {
-                noOfWords = workingHTML.replace(/(<[^>]*?>\s*<[^>]*?>)/ig, ' ').replace(/(<[^>]*?>)/ig, '').replace(/\s+/ig, ' ').match(/\S+/g).length;
+                noOfWords = workingHTML.replace(/(<[^>]*?>\s*<[^>]*?>)/ig, ' ') // replace adjacent tags with possible space between with a space
+                                        .replace(/(<[^>]*?>)/ig, '') // remove any singular tags
+                                        .replace(/\s+/ig, ' ') // condense spacing
+                                        .match(/\S+/g).length; // count remaining non-space strings
             }
 
             //Set current scope
