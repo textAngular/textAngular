@@ -660,6 +660,7 @@ angular.module('textAngularSetup', [])
 		wordcount: 0,
 		activeState: function(){ // this fires on keyup
             var textElement = this.$editor().displayElements.text;
+            /* istanbul ignore else: will default to '' when undefined */
             var workingHTML = textElement[0].innerHTML || '';
             var noOfWords = 0;
 
