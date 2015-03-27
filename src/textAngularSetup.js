@@ -660,11 +660,11 @@ angular.module('textAngularSetup', [])
 		wordcount: 0,
 		activeState: function(){ // this fires on keyup
             var textElement = this.$editor().displayElements.text;
-            /* istanbul ignore else: will default to '' when undefined */
+            /* istanbul ignore next: will default to '' when undefined */
             var workingHTML = textElement[0].innerHTML || '';
             var noOfWords = 0;
 
-            /* istanbul ignore else: will default to '' when undefined */
+            /* istanbul ignore if: will default to '' when undefined */
             if (workingHTML.replace(/\s*<[^>]*?>\s*/g, '') !== '') {
                 noOfWords = workingHTML.replace(/(<[^>]*?>\s*<[^>]*?>)/ig, ' ') // replace adjacent tags with possible space between with a space
                                         .replace(/(<[^>]*?>)/ig, '') // remove any singular tags
