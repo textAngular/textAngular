@@ -1372,7 +1372,7 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 							}
 							text = taSanitize(text, '', _disableSanitizer);
 
-							if (/(?!<ul(\s.*)?>|<ol(\s.*)?>).*<li(\s.*)?>/i.test(text)) {
+							if (/<li(\s.*)?>/i.test(text) && /(<ul(\s.*)?>|<ol(\s.*)?>).*<li(\s.*)?>/i.test(text) === false) {
 								// insert missing parent of li element
 								text = text.replace(/<li(\s.*)?>.*<\/li(\s.*)?>/i, '<ul>$&</ul>');
 							}
