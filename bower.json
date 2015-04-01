@@ -23,10 +23,10 @@
     "package.json"
   ],
   "dependencies": {
-    "angular": "^1.2.x",
-    "bootstrap-css-only": "^3.0.x",
-    "font-awesome": "^4.0.x",
-    "rangy": "^1.2.0"
+    "angular": ">=1.2.x",
+    "bootstrap-css-only": ">=3.0.x",
+    "font-awesome": ">=4.0.x",
+    "rangy": ">=1.2.0"
   },
   "devDependencies": {
     "angular-mocks": "~1.2.x",
