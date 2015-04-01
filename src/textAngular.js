@@ -1370,8 +1370,12 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 								// Webkit on Apple tags
 								text = text.replace(/<br class="Apple-interchange-newline"[^>]*?>/ig, '').replace(/<span class="Apple-converted-space">( |&nbsp;)<\/span>/ig, '&nbsp;');
 							}
-							
 							text = taSanitize(text, '', _disableSanitizer);
+
+							if (/(?!<ul(\s.*)?>|<ol(\s.*)?>).*<li(\s.*)?>/i.test(text)) {
+								// insert missing parent of li element
+								text = text.replace(/<li(\s.*)?>.*<\/li(\s.*)?>/i, '<ul>$&</ul>');
+							}
 							
 							if(_pasteHandler) text = _pasteHandler(scope, {$html: text}) || text;
 							
