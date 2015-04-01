@@ -1444,7 +1444,7 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 						if(eventData) angular.extend(event, eventData);
 						/* istanbul ignore else: readonly check */
 						if(!_isReadonly){
-							if(!event.altKey && event.metaKey || event.ctrlKey){
+							if(!event.altKey && (event.metaKey || event.ctrlKey)){
 								// covers ctrl/command + z
 								if((event.keyCode === 90 && !event.shiftKey)){
 									_undo();
