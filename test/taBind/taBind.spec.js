@@ -502,5 +502,11 @@ describe('taBind', function () {
 			$rootScope.$digest();
 			expect($rootScope.html).toBe('<p>f</p>'); //but apparently it is just 'f'
 		});
+		it('should wrap inline tags and chars into a <p>-tag', function(){
+			element.html('<b>Test</b> Line 1');
+			triggerKeyup(element, {keyCode: 70});
+			$rootScope.$digest();
+			expect($rootScope.html).toBe('<p><b>Test</b> Line 1</p>');
+		});
 	});
 });
