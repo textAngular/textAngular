@@ -1852,16 +1852,11 @@ textAngular.config([function(){
 	angular.forEach(taTools, function(value, key){ delete taTools[key];	});
 }]);
 
-textAngular.run([function(){
+textAngular.run(['$window', function($window){
 	/* istanbul ignore next: not sure how to test this */
-	// Require Rangy and rangy savedSelection module.
-	if(!window.rangy){
+	// Require Rangy.
+	if(!$window.rangy){
 		throw("rangy-core.js and rangy-selectionsaverestore.js are required for textAngular to work correctly, rangy-core is not yet loaded.");
-	}else{
-		window.rangy.init();
-		if(!window.rangy.saveSelection){
-			throw("rangy-selectionsaverestore.js is required for textAngular to work correctly.");
-		}
 	}
 }]);
 
