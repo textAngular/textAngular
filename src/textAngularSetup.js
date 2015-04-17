@@ -659,26 +659,26 @@ angular.module('textAngularSetup', [])
 		disabled: true,
 		wordcount: 0,
 		activeState: function(){ // this fires on keyup
-            var textElement = this.$editor().displayElements.text;
-            /* istanbul ignore next: will default to '' when undefined */
-            var workingHTML = textElement[0].innerHTML || '';
-            var noOfWords = 0;
+			var textElement = this.$editor().displayElements.text;
+			/* istanbul ignore next: will default to '' when undefined */
+			var workingHTML = textElement[0].innerHTML || '';
+			var noOfWords = 0;
 
-            /* istanbul ignore if: will default to '' when undefined */
-            if (workingHTML.replace(/\s*<[^>]*?>\s*/g, '') !== '') {
-                noOfWords = workingHTML.replace(/<\/?(b|i|em|strong|span|u|strikethrough|a|img|small|sub|sup|label)( [^>*?])?>/gi, '') // remove inline tags without adding spaces
-                                        .replace(/(<[^>]*?>\s*<[^>]*?>)/ig, ' ') // replace adjacent tags with possible space between with a space
-                                        .replace(/(<[^>]*?>)/ig, '') // remove any singular tags
-                                        .replace(/\s+/ig, ' ') // condense spacing
-                                        .match(/\S+/g).length; // count remaining non-space strings
-            }
+			/* istanbul ignore if: will default to '' when undefined */
+			if (workingHTML.replace(/\s*<[^>]*?>\s*/g, '') !== '') {
+				noOfWords = workingHTML.replace(/<\/?(b|i|em|strong|span|u|strikethrough|a|img|small|sub|sup|label)( [^>*?])?>/gi, '') // remove inline tags without adding spaces
+										.replace(/(<[^>]*?>\s*<[^>]*?>)/ig, ' ') // replace adjacent tags with possible space between with a space
+										.replace(/(<[^>]*?>)/ig, '') // remove any singular tags
+										.replace(/\s+/ig, ' ') // condense spacing
+										.match(/\S+/g).length; // count remaining non-space strings
+			}
 
-            //Set current scope
-            this.wordcount = noOfWords;
-            //Set editor scope
-            this.$editor().wordcount = noOfWords;
+			//Set current scope
+			this.wordcount = noOfWords;
+			//Set editor scope
+			this.$editor().wordcount = noOfWords;
 
-            return false;
+			return false;
 		}
 	});
 	taRegisterTool('charcount', {

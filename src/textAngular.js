@@ -413,13 +413,14 @@ angular.module('textAngular.factories', [])
 		var deferred = $q.defer(),
 			promise = deferred.promise,
 			_editor = this.$editor();
-		promise['finally'](function(){
-			_editor.endAction.call(_editor);
-		});
 		// pass into the action the deferred function and also the function to reload the current selection if rangy available
 		var result;
 		try{
 			result = this.action(deferred, _editor.startAction());
+			// We set the .finally callback here to make sure it doesn't get executed before any other .then callback.
+			promise['finally'](function(){
+				_editor.endAction.call(_editor);
+			});
 		}catch(exc){
 			$log.error(exc);
 		}
@@ -1063,6 +1064,29 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 				var domTest = angular.element("<div>" + value + "</div>");
 				if(domTest.children().length === 0){
 					value = "<" + attrs.taDefaultWrap + ">" + value + "</" + attrs.taDefaultWrap + ">";
+				}else{
+					var _children = domTest[0].childNodes;
+					var i;
+					var _foundBlockElement = false;
+					for(i = 0; i < _children.length; i++){
+						if(_foundBlockElement = _children[i].nodeName.toLowerCase().match(BLOCKELEMENTS)) break;
+					}
+					if(!_foundBlockElement){
+						value = "<" + attrs.taDefaultWrap + ">" + value + "</" + attrs.taDefaultWrap + ">";
+					}else{
+						value = "";
+						for(i = 0; i < _children.length; i++){
+							if(!_children[i].nodeName.toLowerCase().match(BLOCKELEMENTS)){
+								var _subVal = (_children[i].outerHTML || _children[i].nodeValue);
+								/* istanbul ignore else: Doesn't seem to trigger on tests, is tested though */
+								if(_subVal.trim() !== '')
+									value += "<" + attrs.taDefaultWrap + ">" + _subVal + "</" + attrs.taDefaultWrap + ">";
+								else value += _subVal;
+							}else{
+								value += _children[i].outerHTML;
+							}
+						}
+					}
 				}
 				return value;
 			};
@@ -1164,6 +1188,29 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 				if(!_isReadonly) _setViewValue();
 			};
 			
+			// catch DOM XSS via taSanitize
+			// Sanitizing both ways is identical
+			var _sanitize = function(unsafe){
+				return (ngModel.$oldViewValue = taSanitize(taFixChrome(unsafe), ngModel.$oldViewValue, _disableSanitizer));
+			};
+			
+			// trigger the validation calls
+			var _validity = function(value){
+				if(attrs.required) ngModel.$setValidity('required', !_blankTest(value));
+				return value;
+			};
+			// parsers trigger from the above keyup function or any other time that the viewValue is updated and parses it for storage in the ngModel
+			ngModel.$parsers.push(_sanitize);
+			ngModel.$parsers.unshift(_ensureContentWrapped);
+			ngModel.$parsers.unshift(_validity);
+			// because textAngular is bi-directional (which is awesome) we need to also sanitize values going in from the server
+			ngModel.$formatters.push(_sanitize);
+			ngModel.$formatters.unshift(_ensureContentWrapped);
+			ngModel.$formatters.unshift(_validity);
+			ngModel.$formatters.unshift(function(value){
+				return ngModel.$undoManager.push(value || '');
+			});
+			
 			//this code is used to update the models when data is entered/deleted
 			if(_isInputFriendly){
 				scope.events = {};
@@ -1227,7 +1274,6 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 						_html += '\n' + _repeat('\t', tablevel-1) + listNode.outerHTML.substring(listNode.outerHTML.lastIndexOf('<'));
 						return _html;
 					};
-					ngModel.$formatters.unshift(_ensureContentWrapped);
 					ngModel.$formatters.unshift(function(htmlValue){
 						// tabulate the HTML so it looks nicer
 						var _children = angular.element('<div>' + htmlValue + '</div>')[0].childNodes;
@@ -1372,6 +1418,10 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 							}
 							
 							text = taSanitize(text, '', _disableSanitizer);
+							if (/<li(\s.*)?>/i.test(text) && /(<ul(\s.*)?>|<ol(\s.*)?>).*<li(\s.*)?>/i.test(text) === false) {
+								// insert missing parent of li element
+								text = text.replace(/<li(\s.*)?>.*<\/li(\s.*)?>/i, '<ul>$&</ul>');
+							}
 							
 							if(_pasteHandler) text = _pasteHandler(scope, {$html: text}) || text;
 							
@@ -1444,7 +1494,7 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 						if(eventData) angular.extend(event, eventData);
 						/* istanbul ignore else: readonly check */
 						if(!_isReadonly){
-							if(!event.altKey && event.metaKey || event.ctrlKey){
+							if(!event.altKey && (event.metaKey || event.ctrlKey)){
 								// covers ctrl/command + z
 								if((event.keyCode === 90 && !event.shiftKey)){
 									_undo();
@@ -1564,28 +1614,6 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 					});
 				}
 			}
-			
-			// catch DOM XSS via taSanitize
-			// Sanitizing both ways is identical
-			var _sanitize = function(unsafe){
-				return (ngModel.$oldViewValue = taSanitize(taFixChrome(unsafe), ngModel.$oldViewValue, _disableSanitizer));
-			};
-			
-			// trigger the validation calls
-			var _validity = function(value){
-				if(attrs.required) ngModel.$setValidity('required', !_blankTest(value));
-				return value;
-			};
-			// parsers trigger from the above keyup function or any other time that the viewValue is updated and parses it for storage in the ngModel
-			ngModel.$parsers.push(_sanitize);
-			ngModel.$parsers.unshift(_validity);
-			// because textAngular is bi-directional (which is awesome) we need to also sanitize values going in from the server
-			ngModel.$formatters.push(_sanitize);
-			ngModel.$formatters.unshift(_ensureContentWrapped);
-			ngModel.$formatters.unshift(_validity);
-			ngModel.$formatters.unshift(function(value){
-				return ngModel.$undoManager.push(value || '');
-			});
 
 			var selectorClickHandler = function(event){
 				// emit the element-select event, pass the element
@@ -1755,6 +1783,7 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 		}
 	};
 }]);
+
 // this global var is used to prevent multiple fires of the drop event. Needs to be global to the textAngular file.
 var dropFired = false;
 var textAngular = angular.module("textAngular", ['ngSanitize', 'textAngularSetup', 'textAngular.factories', 'textAngular.DOM', 'textAngular.validators', 'textAngular.taBind']); //This makes ngSanitize required
@@ -2016,7 +2045,7 @@ textAngular.directive("textAngular", [
 								pos.x = ratio > newRatio ? pos.x : pos.y / ratio;
 								pos.y = ratio > newRatio ? pos.x * ratio : pos.y;
 							}
-							el = angular.element(_el);
+							var el = angular.element(_el);
 							el.attr('height', Math.max(0, pos.y));
 							el.attr('width', Math.max(0, pos.x));
 							

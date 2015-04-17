@@ -214,16 +214,18 @@ describe('taBind.undoManager', function () {
 				expect($rootScope.html).toBe(second);
 			}));
 			
-			it('not alt+z', inject(function($timeout){
+			it('not alt+ctrl+z #518', inject(function($timeout){
 				if(angular.element === jQuery) {
 					event = jQuery.Event('keydown');
 					event.keyCode = 90;
 					event.altKey = true;
+					event.ctrlKey = true;
 					element.triggerHandler(event);
 				}else{
 					event = {
 						keyCode: 90,
-						altKey: true
+						altKey: true,
+						ctrlKey: true
 					};
 					element.triggerHandler('keydown', event);
 				}

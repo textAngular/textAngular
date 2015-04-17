@@ -19,13 +19,13 @@ describe('taBind.sanitize', function () {
 			element.append('<bad-tag>Test 2 Content</bad-tag>');
 			$rootScope.updateTaBind();
 			$rootScope.$digest();
-			expect($rootScope.html).toBe('<p>Test Contents</p>Test 2 Content');
+			expect($rootScope.html).toBe('<p>Test Contents</p><p>Test 2 Content</p>');
 		});
 
 		it('format from model change', function () {
 			$rootScope.html += '<bad-tag>Test 2 Content</bad-tag>';
 			$rootScope.$digest();
-			expect(element.html()).toBe('<p>Test Contents</p>Test 2 Content');
+			expect(element.html()).toBe('<p>Test Contents</p><p>Test 2 Content</p>');
 		});
 	});
 	
@@ -42,7 +42,7 @@ describe('taBind.sanitize', function () {
 			element.append('<bad-tag>Test 2 Content</bad-tag>');
 			$rootScope.updateTaBind();
 			$rootScope.$digest();
-			expect($rootScope.html).toBe('<p>Test Contents</p><bad-tag>Test 2 Content</bad-tag>');
+			expect($rootScope.html).toBe('<p>Test Contents</p><p><bad-tag>Test 2 Content</bad-tag></p>');
 		});
 		
 		it('not allow malformed html', function () {

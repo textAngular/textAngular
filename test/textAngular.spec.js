@@ -611,7 +611,7 @@ describe('textAngular', function(){
 				element.append('<bad-tag>Test 2 Content</bad-tag>');
 				element.triggerHandler('keyup');
 				$rootScope.$digest();
-				expect(element2.val()).toBe('<p>Test Contents</p>\n<bad-tag>Test 2 Content</bad-tag>');
+				expect(element2.val()).toBe('<p>Test Contents</p>\n<p><bad-tag>Test 2 Content</bad-tag></p>');
 			});
 			
 			it('not allow malformed html', function () {
@@ -636,7 +636,7 @@ describe('textAngular', function(){
 				element.append('<bad-tag>Test 2 Content</bad-tag>');
 				element.triggerHandler('keyup');
 				$rootScope.$digest();
-				expect($rootScope.html).toBe('<p>Test Contents</p><bad-tag>Test 2 Content</bad-tag>');
+				expect($rootScope.html).toBe('<p>Test Contents</p><p><bad-tag>Test 2 Content</bad-tag></p>');
 			});
 			
 			it('not allow malformed html', function () {
