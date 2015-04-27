@@ -73,7 +73,7 @@ describe('taExecCommand', function(){
 			expect($element.html()).toBe('bananna');
 		}));
 	});
-	
+
 	describe('catches collapsed link creation and fills them in', function(){
 		beforeEach(function(){
 			module(function($provide){
@@ -99,12 +99,102 @@ describe('taExecCommand', function(){
 				});
 			});
 		});
-		
-		it('correctly', inject(function(taExecCommand, taSelection){
+
+		it('correctly with target attribute default', inject(function(taExecCommand, taSelection){
 			$element = angular.element('<div class="ta-bind"></div>');
 			taSelection.element = $element[0];
-			taExecCommand()('createLink', false, 'http://test.com');
-			expect($element.html()).toBe('<a href="http://test.com">http://test.com</a>');
+			taExecCommand()('createLink', false, 'http://test.com', {"a":{"target":"_blank"}});
+			expect($element.html()).toBe('<a href="http://test.com" target="_blank">http://test.com</a>');
+		}));
+
+		it('correctly without target attribute default', inject(function(taExecCommand, taSelection){
+			$element = angular.element('<div class="ta-bind"></div>');
+			taSelection.element = $element[0];
+			taExecCommand()('createLink', false, 'http://test.com', {"a":{"target":""}});
+			expect($element.html()).toBe('<a href="http://test.com" target="">http://test.com</a>');
+		}));
+	});
+
+	describe('catches NON-collapsed link creation and fills them in', function(){
+		beforeEach(function(){
+			module(function($provide){
+				$provide.value('taSelection', {
+					element: undefined,
+					getSelection: function(){return {
+						start: {
+							element: this.element,
+							offset: 2
+						},
+						end: {
+							element: this.element,
+							offset: 1
+						},
+						container: this.element,
+						collapsed: false
+					};},
+					insertHtml: function(html){ angular.element(this.element).html(html); },
+					getSelectionElement: function (){ return this.element; },
+					getOnlySelectedElements: function(){ return [].slice.call(this.element.childNodes); },
+					setSelectionToElementStart: function (){ return; },
+					setSelectionToElementEnd: function (){ return; }
+				});
+			});
+		});
+
+		it('correctly with target attribute default', inject(function(taExecCommand, taSelection, $window, _$document_){
+			var sel = $window.rangy.getSelection(),
+				range = $window.rangy.createRangyRange(),
+				$document, contents;
+			$document = _$document_;
+			contents = angular.element('<div>');
+			contents.append('<p>foo</p>');
+			$document.find('body').append(contents);
+			$element = contents.find('p');
+
+			range.selectNodeContents($element[0]);
+			sel.setSingleRange(range);
+			taSelection.element = $element[0];
+			taExecCommand()('createLink', false, 'http://test.com', {"a":{"target":"_blank"}});
+			expect($element.html()).toBe('<a href="http://test.com" target="_blank">foo</a>');
+		}));
+
+		it('correctly without target attribute default', inject(function(taExecCommand, taSelection, $window, _$document_){
+			var sel = $window.rangy.getSelection(),
+				range = $window.rangy.createRangyRange(),
+				$document, contents;
+			$document = _$document_;
+			contents = angular.element('<div>');
+			contents.append('<p>foo</p>');
+			$document.find('body').append(contents);
+			$element = contents.find('p');
+
+			range.selectNodeContents($element[0]);
+			sel.setSingleRange(range);
+			taSelection.element = $element[0];
+			taExecCommand()('createLink', false, 'http://test.com', {"a":{"target":""}});
+			expect($element.html()).toBe('<a href="http://test.com" target="">foo</a>');
+		}));
+	});
+	describe('link creation no operation path', function() {
+		beforeEach(function(){
+			module(function($provide){
+				$provide.value('taSelection', {
+					element: null,
+					getSelection: function(){return {
+						collapsed: false
+					};},
+					getSelectionElement: function (){ return this.element; }
+				});
+			});
+		});
+
+		it('ignore createlink commands where the selection is not collapsed and cannot be surrounded', inject(function(taExecCommand, taSelection){
+			$element = angular.element('<p>');
+			taSelection.element = $element[0];
+			var mock = {id:"mock", getRangeAt: function () {return {canSurroundContents: function () {return false;}};}};
+			spyOn(rangy, "getSelection").andReturn(mock);
+			taExecCommand()('createLink', false, 'http://test.com', {"a":{"target":""}});
+			expect($element.html()).toBe('');
 		}));
 	});
 });

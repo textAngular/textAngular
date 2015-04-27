@@ -160,7 +160,7 @@ describe('textAngular', function(){
 			});
 		});
 	});
-	
+
 	describe('Disable the editor', function(){
 		beforeEach(inject(function (_$compile_, _$rootScope_) {
 			$rootScope = _$rootScope_;
@@ -187,16 +187,36 @@ describe('textAngular', function(){
 			});
 		});
 	});
-	
+
 	it('respects the taShowHtml attribute',inject(function ($compile, $rootScope, $document) {
-			element = $compile('<text-angular name="test" ta-show-html="true"></text-angular>')($rootScope);
-			$document.find('body').append(element);
-			$rootScope.$digest();
-			expect(jQuery('.ta-text', element[0]).is(':visible')).toBe(false);
-			expect(jQuery('.ta-html', element[0]).is(':visible')).toBe(true);
-			element.remove();
-		}));
-	
+		element = $compile('<text-angular name="test" ta-show-html="true"></text-angular>')($rootScope);
+		$document.find('body').append(element);
+		$rootScope.$digest();
+		expect(jQuery('.ta-text', element[0]).is(':visible')).toBe(false);
+		expect(jQuery('.ta-html', element[0]).is(':visible')).toBe(true);
+		element.remove();
+	}));
+
+	it('respects the taDefaultTagAttributes attribute',inject(function ($compile, $rootScope, $document, textAngularManager) {
+		$rootScope.taTestDefaultTagAttributes = {a:{target:"_blank"}};
+		element = $compile('<text-angular name="test" ta-default-tag-attributes="{{taTestDefaultTagAttributes}}"></text-angular>')($rootScope);
+		$document.find('body').append(element);
+		editorScope = textAngularManager.retrieveEditor('test').scope;
+		$rootScope.$digest();
+		expect(editorScope.defaultTagAttributes).toEqual($rootScope.taTestDefaultTagAttributes);
+		element.remove();
+	}));
+
+	it('uses the default defaultTagAttributes when the taDefaultTabAttributes attribute throws a JSON parse error',inject(function ($compile, $rootScope, $document, textAngularManager) {
+		var taTestDefaultTagAttributes = {a:{target:""}};
+		element = $compile('<text-angular name="test" ta-default-tag-attributes="invalidJSON"></text-angular>')($rootScope);
+		$document.find('body').append(element);
+		editorScope = textAngularManager.retrieveEditor('test').scope;
+		$rootScope.$digest();
+		expect(editorScope.defaultTagAttributes).toEqual(taTestDefaultTagAttributes);
+		element.remove();
+	}));
+
 	describe('Check view change', function(){
 		beforeEach(inject(function (_$compile_, _$rootScope_, textAngularManager, $document) {
 			$rootScope = _$rootScope_;
