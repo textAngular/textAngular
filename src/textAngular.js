@@ -1926,19 +1926,20 @@ textAngular.directive("textAngular", [
 				if(attrs.taFocussedClass)			scope.classes.focussed = attrs.taFocussedClass;
 				if(attrs.taTextEditorClass)			scope.classes.textEditor = attrs.taTextEditorClass;
 				if(attrs.taHtmlEditorClass)			scope.classes.htmlEditor = attrs.taHtmlEditorClass;
+				if(attrs.taDefaultTagAttributes){
+					try	{
+						//	TODO: This should use angular.merge to enhance functionality when angular 1.4 is required
+						angular.extend(scope.defaultTagAttributes, angular.fromJson(attrs.taDefaultTagAttributes));
+					} catch (error) {
+						$log.error(error);
+					}
+				}
 				// optional setup functions
 				if(attrs.taTextEditorSetup)			scope.setup.textEditorSetup = scope.$parent.$eval(attrs.taTextEditorSetup);
 				if(attrs.taHtmlEditorSetup)			scope.setup.htmlEditorSetup = scope.$parent.$eval(attrs.taHtmlEditorSetup);
 				// optional fileDropHandler function
 				if(attrs.taFileDrop)				scope.fileDropHandler = scope.$parent.$eval(attrs.taFileDrop);
 				else								scope.fileDropHandler = scope.defaultFileDropHandler;
-				if(attrs.taDefaultTagAttributes){
-					try	{
-						scope.defaultTagAttributes = angular.fromJson(attrs.taDefaultTagAttributes);
-					} catch (error) {
-						$log.error(error);
-					}
-				}
 
 				_originalContents = element[0].innerHTML;
 				// clear the original content

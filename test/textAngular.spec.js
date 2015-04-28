@@ -198,7 +198,7 @@ describe('textAngular', function(){
 	}));
 
 	it('respects the taDefaultTagAttributes attribute',inject(function ($compile, $rootScope, $document, textAngularManager) {
-		$rootScope.taTestDefaultTagAttributes = {a:{target:"_blank"}};
+		$rootScope.taTestDefaultTagAttributes = {a:{target:"_blank"}, li:{test:"testing"}};
 		element = $compile('<text-angular name="test" ta-default-tag-attributes="{{taTestDefaultTagAttributes}}"></text-angular>')($rootScope);
 		$document.find('body').append(element);
 		editorScope = textAngularManager.retrieveEditor('test').scope;
@@ -207,7 +207,7 @@ describe('textAngular', function(){
 		element.remove();
 	}));
 
-	it('uses the default defaultTagAttributes when the taDefaultTabAttributes attribute throws a JSON parse error',inject(function ($compile, $rootScope, $document, textAngularManager) {
+	it('uses the default defaultTagAttributes when the taDefaultTagAttributes attribute throws a JSON parse error',inject(function ($compile, $rootScope, $document, textAngularManager) {
 		var taTestDefaultTagAttributes = {a:{target:""}};
 		element = $compile('<text-angular name="test" ta-default-tag-attributes="invalidJSON"></text-angular>')($rootScope);
 		$document.find('body').append(element);
