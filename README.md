@@ -18,7 +18,7 @@ To upgrade from version 1.2.2 or earlier you need to follow these steps:
 1. `AngularJS` ≥ `1.2.x`
 2. `Rangy` ≥ `1.2.x`, Both rangy-core and rangy-saveselection are required. (There is a minified combination of these two included in the dist folder)
 3. `Font-Awesome` ≥ `4.x` for the default icons on the toolbar
-1. `Bootstrap` ≥ `3.x` for the default styles (Can use `bootstrap-css-only` as in bower requirements)
+1. `Bootstrap` ≥ `3.x` for the default styles (Can use `bootstrap-css-only`, you must add this to your bower or include this manually)
 
 ### Where to get it
 
@@ -102,6 +102,8 @@ If you find something, please let me know - throw me a message, or submit a issu
 
 ### FAQ
 
+1. **Toolbar shows up with some being blank instead of icons**<br/>
+You need to include font-awesome on your page or nothing will show up.
 1. **Youtube Insert embeds a ```<img>``` tag and aren't showing the video.**<br/>
 The problems with iFrames are that they are a security risk so the sanitizer by default strips them out. Instead of changing the sanitizer to allow iFrames we use a placeholder for youtube videos which has the added advantage of allowing you to edit their size and placement in the editor. To display the youtube videos when you aren't in the editor use the following html: ```<div ta-bind ng-model="data.htmlcontent"></div>```. This invokes our custom renderers to convert the ```<img>``` tags back into the youtube video you expect.
 2. **But I want to use Youtube outside of angular**<br/>
