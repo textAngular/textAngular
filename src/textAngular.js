@@ -1142,6 +1142,7 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 				}
 			};
 			
+			var _redoUndoTimeout;
 			var _undo = scope['$undoTaBind' + (attrs.id || '')] = function(){
 				/* istanbul ignore else: can't really test it due to all changes being ignored as well in readonly */
 				if(!_isReadonly && _isContentEditable){
@@ -1149,9 +1150,11 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 					if(typeof content !== "undefined" && content !== null){
 						_setInnerHTML(content);
 						_setViewValue(content, false);
-						/* istanbul ignore else: browser catch */
-						if(element[0].childNodes.length) taSelection.setSelectionToElementEnd(element[0].childNodes[element[0].childNodes.length-1]);
-						else taSelection.setSelectionToElementEnd(element[0]);
+						if(_redoUndoTimeout) $timeout.cancel(_redoUndoTimeout);
+						_redoUndoTimeout = $timeout(function(){
+							element[0].focus();
+							taSelection.setSelectionToElementEnd(element[0]);
+						}, 1);
 					}
 				}
 			};
@@ -1163,9 +1166,12 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 					if(typeof content !== "undefined" && content !== null){
 						_setInnerHTML(content);
 						_setViewValue(content, false);
-						/* istanbul ignore else: browser catch */
-						if(element[0].childNodes.length) taSelection.setSelectionToElementEnd(element[0].childNodes[element[0].childNodes.length-1]);
-						else taSelection.setSelectionToElementEnd(element[0]);
+						/* istanbul ignore next */
+						if(_redoUndoTimeout) $timeout.cancel(_redoUndoTimeout);
+						_redoUndoTimeout = $timeout(function(){
+							element[0].focus();
+							taSelection.setSelectionToElementEnd(element[0]);
+						}, 1);
 					}
 				}
 			};

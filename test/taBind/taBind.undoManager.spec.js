@@ -107,11 +107,13 @@ describe('taBind.undoManager', function () {
 			$rootScope.$digest();
 		});
 		describe('should update', function(){
-			beforeEach(function(){
+			beforeEach(inject(function($timeout){
 				$rootScope.$undoTaBindTest();
 				$rootScope.$undoTaBindTest();
+				$timeout.flush();
 				$rootScope.$redoTaBindTest();
-			});
+				$timeout.flush();
+			}));
 			it('model', function(){
 				expect($rootScope.$undoManagerTest.current()).toBe(second);
 			});
@@ -123,6 +125,7 @@ describe('taBind.undoManager', function () {
 		describe('should handle when no redo available', function(){
 			it('not error', function(){
 				expect(function(){
+					$rootScope.$redoTaBindTest();
 					$rootScope.$redoTaBindTest();
 				}).not.toThrow();
 			});
