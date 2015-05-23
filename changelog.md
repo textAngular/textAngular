@@ -1,6 +1,9 @@
 <a name="1.4.0"></a>
 ## 1.4.0 (2015-05-24)
 
+#### Breaking Changes
+
+The minimum required versions of AngularJS is 1.3 and Rangy is 1.3.
 
 #### Bug Fixes
 
