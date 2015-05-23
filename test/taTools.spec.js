@@ -73,6 +73,40 @@ describe('taToolsExecuteFunction', function(){
 			expect(editor.finishCount).toBe(0);
 		});
 	});
+	
+	describe('promise works correctly', function(){
+		it('start and end once promise resolved', function(){
+			var _deferred;
+			scope.action = function(deferred, startActionResult){
+				_deferred = deferred;
+				return false;
+			};
+			$rootScope.$apply(function(){ scope.taToolExecuteAction(); });
+			expect(editor.startCount).toBe(1);
+			expect(editor.finishCount).toBe(0);
+			$rootScope.$apply(function(){ _deferred.resolve(); });
+			expect(editor.startCount).toBe(1);
+			expect(editor.finishCount).toBe(1);
+		});
+		
+		it('.then promises called before .finally', function(){
+			var _deferred;
+			scope.action = function(deferred, startActionResult){
+				_deferred = deferred;
+				_deferred.promise.then(function(){
+					expect(editor.startCount).toBe(1);
+					expect(editor.finishCount).toBe(0);
+				});
+				return false;
+			};
+			$rootScope.$apply(function(){ scope.taToolExecuteAction(); });
+			expect(editor.startCount).toBe(1);
+			expect(editor.finishCount).toBe(0);
+			$rootScope.$apply(function(){ _deferred.resolve(); });
+			expect(editor.startCount).toBe(1);
+			expect(editor.finishCount).toBe(1);
+		});
+	});
 });
 
 function buttonByName(element, name){
