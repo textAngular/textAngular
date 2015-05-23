@@ -566,6 +566,7 @@ describe('taTools test tool actions', function(){
 			
 			it('opens on click', function(){
 				editorScope.displayElements.text.find('p').find('a').triggerHandler('click');
+				editorScope.$parent.$digest();
 				expect(editorScope.displayElements.popover.hasClass('in')).toBe(true);
 			});
 			
@@ -648,6 +649,7 @@ describe('taTools test tool actions', function(){
 		
 		it('opens on click', function(){
 			editorScope.displayElements.text.find('p').find('img').triggerHandler('click');
+			editorScope.$parent.$digest();
 			expect(editorScope.displayElements.popover.hasClass('in')).toBe(true);
 		});
 		

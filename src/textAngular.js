@@ -172,7 +172,9 @@ if(_browserDetect.ie > 8 || _browserDetect.ie === undefined){
 	};
 	/* istanbul ignore next: tests are browser specific */
 	_removeCSSRule = function(sheet, rule){
-		var ruleIndex = _getRuleIndex(rule, sheet.cssRules || sheet.rules);
+		var rules = sheet.cssRules || sheet.rules;
+		if(!rules) return;
+		var ruleIndex = _getRuleIndex(rule, rules);
 		if(sheet.removeRule){
 			sheet.removeRule(ruleIndex);
 		}else{
@@ -935,23 +937,14 @@ angular.module('textAngular.validators', [])
 					throw('Max text must be an integer');
 				}
 				if (ctrl.$dirty){
-					ctrl.$setViewValue(ctrl.$viewValue);
+					ctrl.$validate();
 				}
 			});
-			function validator (viewValue){
+			ctrl.$validators.taMaxText = function(viewValue){
 				var source = angular.element('<div/>');
 				source.html(viewValue);
-				var length = source.text().length;
-				if (length <= max){
-					ctrl.$setValidity('taMaxText', true);
-					return viewValue;
-				}
-				else{
-					ctrl.$setValidity('taMaxText', false);
-					return undefined;
-				}
-			}
-			ctrl.$parsers.unshift(validator);
+				return source.text().length <= max;
+			};
 		}
 	};
 }).directive('taMinText', function(){
@@ -969,23 +962,14 @@ angular.module('textAngular.validators', [])
 					throw('Min text must be an integer');
 				}
 				if (ctrl.$dirty){
-					ctrl.$setViewValue(ctrl.$viewValue);
+					ctrl.$validate();
 				}
 			});
-			function validator (viewValue){
+			ctrl.$validators.taMinText = function(viewValue){
 				var source = angular.element('<div/>');
 				source.html(viewValue);
-				var length = source.text().length;
-				if (!length || length >= min){
-					ctrl.$setValidity('taMinText', true);
-					return viewValue;
-				}
-				else{
-					ctrl.$setValidity('taMinText', false);
-					return undefined;
-				}
-			}
-			ctrl.$parsers.unshift(validator);
+				return !source.text().length || source.text().length >= min;
+			};
 		}
 	};
 });
@@ -1017,6 +1001,20 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 		};
 	};
 }])
+.directive('taButton', [function(){
+	return {
+		link: function(scope, element, attrs){
+			element.attr('unselectable', 'on');
+			element.on('mousedown', function(e, eventData){
+				/* istanbul ignore else: this is for catching the jqLite testing*/
+				if(eventData) angular.extend(e, eventData);
+				// this prevents focusout from firing on the editor when clicking toolbar buttons
+				e.preventDefault();
+				return false;
+			});
+		}
+	};
+}])
 .directive('taBind', [
 		'taSanitize', '$timeout', '$window', '$document', 'taFixChrome', 'taBrowserTag',
 		'taSelection', 'taSelectableElements', 'taApplyCustomRenderers', 'taOptions',
@@ -1028,8 +1026,11 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 	// Uses for this are textarea or input with ng-model and ta-bind='text'
 	// OR any non-form element with contenteditable="contenteditable" ta-bind="html|text" ng-model
 	return {
-		require: 'ngModel',
-		link: function(scope, element, attrs, ngModel){
+		priority: 2, // So we override validators correctly
+		require: ['ngModel','?ngModelOptions'],
+		link: function(scope, element, attrs, controller){
+			var ngModel = controller[0];
+			var ngModelOptions = controller[1] || {};
 			// the option to use taBind on an input or textarea is required as it will sanitize all input into it correctly.
 			var _isContentEditable = element.attr('contenteditable') !== undefined && element.attr('contenteditable');
 			var _isInputFriendly = _isContentEditable || element[0].tagName.toLowerCase() === 'textarea' || element[0].tagName.toLowerCase() === 'input';
@@ -1063,6 +1064,9 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 						'<' + attrs.taDefaultWrap.toUpperCase() + '>&nbsp;</' + attrs.taDefaultWrap.toUpperCase() + '>' :
 						'<' + attrs.taDefaultWrap + '>&nbsp;</' + attrs.taDefaultWrap + '>';
 			}
+			
+			/* istanbul ignore else */
+			if(!ngModelOptions.$options) ngModelOptions.$options = {}; // ng-model-options support
 			
 			var _blankTest = _taBlankTest(_defaultTest);
 			
@@ -1173,8 +1177,8 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 				throw ('textAngular Error: attempting to update non-editable taBind');
 			};
 			
-			var _setViewValue = function(_val, triggerUndo){
-				_skipRender = true;
+			var _setViewValue = function(_val, triggerUndo, skipRender){
+				_skipRender = skipRender || false;
 				if(typeof triggerUndo === "undefined" || triggerUndo === null) triggerUndo = true && _isContentEditable; // if not contentEditable then the native undo/redo is fine
 				if(typeof _val === "undefined" || _val === null) _val = _compileHtml();
 				if(_blankTest(_val)){
@@ -1188,11 +1192,12 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 						if(triggerUndo) ngModel.$undoManager.push(_val);
 					}
 				}
+				ngModel.$render();
 			};
 			
 			//used for updating when inserting wrapped elements
 			scope['updateTaBind' + (attrs.id || '')] = function(){
-				if(!_isReadonly) _setViewValue();
+				if(!_isReadonly) _setViewValue(undefined, undefined, true);
 			};
 			
 			// catch DOM XSS via taSanitize
@@ -1202,18 +1207,15 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 			};
 			
 			// trigger the validation calls
-			var _validity = function(value){
-				if(attrs.required) ngModel.$setValidity('required', !_blankTest(value));
-				return value;
+			if(element.attr('required')) ngModel.$validators.required = function(modelValue, viewValue) {
+				return !_blankTest(modelValue || viewValue);
 			};
 			// parsers trigger from the above keyup function or any other time that the viewValue is updated and parses it for storage in the ngModel
 			ngModel.$parsers.push(_sanitize);
 			ngModel.$parsers.unshift(_ensureContentWrapped);
-			ngModel.$parsers.unshift(_validity);
 			// because textAngular is bi-directional (which is awesome) we need to also sanitize values going in from the server
 			ngModel.$formatters.push(_sanitize);
 			ngModel.$formatters.unshift(_ensureContentWrapped);
-			ngModel.$formatters.unshift(_validity);
 			ngModel.$formatters.unshift(function(value){
 				return ngModel.$undoManager.push(value || '');
 			});
@@ -1536,7 +1538,7 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 							}
 						}
 					});
-					
+					var _keyupTimeout;
 					element.on('keyup', scope.events.keyup = function(event, eventData){
 						/* istanbul ignore else: this is for catching the jqLite testing*/
 						if(eventData) angular.extend(event, eventData);
@@ -1576,7 +1578,10 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 								$window.rangy.restoreSelection(_savedSelection);
 							}
 							var triggerUndo = _lastKey !== event.keyCode && UNDO_TRIGGER_KEYS.test(event.keyCode);
-							_setViewValue(val, triggerUndo);
+							if(_keyupTimeout) $timeout.cancel(_keyupTimeout);
+							_keyupTimeout = $timeout(function() {
+								_setViewValue(val, triggerUndo, true);
+							}, ngModelOptions.$options.debounce || 400);
 							if(!triggerUndo) _undoKeyupTimeout = $timeout(function(){ ngModel.$undoManager.push(val); }, 250);
 							_lastKey = event.keyCode;
 						}
@@ -1586,10 +1591,11 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 						_focussed = false;
 						/* istanbul ignore else: if readonly don't update model */
 						if(!_isReadonly){
-							_setViewValue();
+							_setViewValue(undefined, undefined, true);
+						}else{
+							_skipRender = true; // don't redo the whole thing, just check the placeholder logic
+							ngModel.$render();
 						}
-						_skipRender = true; // don't redo the whole thing, just check the placeholder logic
-						ngModel.$render();
 					});
 
 					// Placeholders not supported on ie 8 and below
@@ -1640,7 +1646,7 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 					scope.$emit('ta-drop-event', this, event, dataTransfer);
 					$timeout(function(){
 						dropFired = false;
-						_setViewValue();
+						_setViewValue(undefined, undefined, true);
 					}, 100);
 				}
 			};
@@ -1659,22 +1665,29 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 			var _setInnerHTML = function(newval){
 				element[0].innerHTML = newval;
 			};
-			
+			var _renderTimeout;
+			var _renderInProgress = false;
 			// changes to the model variable from outside the html/text inputs
 			ngModel.$render = function(){
+				/* istanbul ignore if: Catches rogue renders, hard to replicate in tests */
+				if(_renderInProgress) return;
+				else _renderInProgress = true;
 				// catch model being null or undefined
 				var val = ngModel.$viewValue || '';
-				
 				// if the editor isn't focused it needs to be updated, otherwise it's receiving user input
 				if(!_skipRender){
 					/* istanbul ignore else: in other cases we don't care */
 					if(_isContentEditable && _focussed){
-						// element is focussed, test for placeholder
+						// update while focussed
 						element.removeClass('placeholder-text');
-						element[0].blur();
-						$timeout(function(){
-							element[0].focus();
-							taSelection.setSelectionToElementEnd(element.children()[element.children().length - 1]);
+						if(_renderTimeout) $timeout.cancel(_renderTimeout);
+						_renderTimeout = $timeout(function(){
+							/* istanbul ignore if: Can't be bothered testing this... */ 
+							if(!_focussed){
+								element[0].focus();
+								taSelection.setSelectionToElementEnd(element.children()[element.children().length - 1]);
+							}
+							_renderTimeout = undefined;
 						}, 1);
 					}
 					if(_isContentEditable){
@@ -1713,7 +1726,7 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 						element.removeClass('placeholder-text');
 					}
 				}
-				_skipRender = false;
+				_renderInProgress = _skipRender = false;
 			};
 			
 			if(attrs.taReadonly){
@@ -1881,6 +1894,7 @@ textAngular.directive("textAngular", [
 			require: '?ngModel',
 			scope: {},
 			restrict: "EA",
+			priority: 2, // So we override validators correctly
 			link: function(scope, element, attrs, ngModel){
 				// all these vars should not be accessable outside this directive
 				var _keydown, _keyup, _keypress, _mouseup, _focusin, _focusout,
@@ -2096,13 +2110,15 @@ textAngular.directive("textAngular", [
 					'id': 'taHtmlElement' + _serial,
 					'ng-show': 'showHtml',
 					'ta-bind': 'ta-bind',
-					'ng-model': 'html'
+					'ng-model': 'html',
+					'ng-model-options': element.attr('ng-model-options')
 				});
 				scope.displayElements.text.attr({
 					'id': 'taTextElement' + _serial,
 					'contentEditable': 'true',
 					'ta-bind': 'ta-bind',
-					'ng-model': 'html'
+					'ng-model': 'html',
+					'ng-model-options': element.attr('ng-model-options')
 				});
 				scope.displayElements.scrollWindow.attr({'ng-hide': 'showHtml'});
 				if(attrs.taDefaultWrap) scope.displayElements.text.attr('ta-default-wrap', attrs.taDefaultWrap);
@@ -2177,7 +2193,15 @@ textAngular.directive("textAngular", [
 				};
 				scope.endAction = function(){
 					scope._actionRunning = false;
-					if(_savedSelection) $window.rangy.removeMarkers(_savedSelection);
+					if(_savedSelection){
+						if(scope.showHtml){
+							scope.displayElements.html[0].focus();
+						}else{
+							scope.displayElements.text[0].focus();
+						}
+						$window.rangy.restoreSelection(_savedSelection);
+						$window.rangy.removeMarkers(_savedSelection);
+					}
 					_savedSelection = false;
 					scope.updateSelectedStyles();
 					// only update if in text or WYSIWYG mode
@@ -2268,19 +2292,13 @@ textAngular.directive("textAngular", [
 						}
 						scope.displayElements.forminput.val(ngModel.$viewValue);
 						// if the editors aren't focused they need to be updated, otherwise they are doing the updating
-						/* istanbul ignore else: don't care */
-						if(!scope._elementSelectTriggered){
-							// catch model being null or undefined
-							scope.html = ngModel.$viewValue || '';
-						}
+						scope.html = ngModel.$viewValue || '';
 					};
 					// trigger the validation calls
-					var _validity = function(value){
-						if(attrs.required) ngModel.$setValidity('required', !(!value || value.trim() === ''));
-						return value;
+					if(element.attr('required')) ngModel.$validators.required = function(modelValue, viewValue) {
+						var value = modelValue || viewValue;
+						return !(!value || value.trim() === '');
 					};
-					ngModel.$parsers.push(_validity);
-					ngModel.$formatters.push(_validity);
 				}else{
 					// if no ngModel then update from the contents of the origional html.
 					scope.displayElements.forminput.val(_originalContents);
@@ -2726,7 +2744,7 @@ textAngular.directive('textAngularToolbar', [
 					
 					toolElement.attr('name', toolScope.name);
 					// important to not take focus from the main text/html entry
-					toolElement.attr('unselectable', 'on');
+					toolElement.attr('ta-button', 'ta-button');
 					toolElement.attr('ng-disabled', 'isDisabled()');
 					toolElement.attr('tabindex', '-1');
 					toolElement.attr('ng-click', 'executeAction()');
@@ -2735,14 +2753,6 @@ textAngular.directive('textAngularToolbar', [
 					if (toolDefinition && toolDefinition.tooltiptext) {
 						toolElement.attr('title', toolDefinition.tooltiptext);
 					}
-
-					toolElement.on('mousedown', function(e, eventData){
-						/* istanbul ignore else: this is for catching the jqLite testing*/
-						if(eventData) angular.extend(e, eventData);
-						// this prevents focusout from firing on the editor when clicking toolbar buttons
-						e.preventDefault();
-						return false;
-					});
 					if(toolDefinition && !toolDefinition.display && !toolScope._display){
 						// first clear out the current contents if any
 						toolElement[0].innerHTML = '';

@@ -31,6 +31,8 @@
 	position: fixed;
 	top: 12px;
 	z-index: 200;
+	left: 0;
+	right: 0;
 }
 </style>
 
@@ -46,30 +48,36 @@
   <h1>Editor</h1>
   <button ng-click="disabled = !disabled" unselectable>Disable text-angular Toggle</button>
   <div text-angular-toolbar name="htmlcontenttools"></div>
-  <div ng-if="true">
-	  <div text-angular="text-angular" name="htmlcontent" ng-model="data.htmlcontent3" ta-disabled='disabled' placeholder='Placeholder Text ONe' ta-target-toolbars='htmlcontenttools,statictoolbar'></div>
-	  <textarea ng-model="data.htmlcontent3" style="width: 100%"></textarea>
-  </div>
-  <text-angular ta-paste="testPaste($html)" ng-if="canEdit" name="htmlcontent2" ng-model="data.htmlcontent" ta-disabled='disabled' placeholder='Placeholder Text' ta-default-wrap="p" ta-target-toolbars='htmlcontenttools,statictoolbar'></text-angular>
   <button ng-click="canEdit = !canEdit">Can Edit</button>
-  <h1>Raw HTML in a text area</h1>
-  <textarea ng-model="data.htmlcontent" style="width: 100%"></textarea>
-  <h1>Bound with ng-bind-html</h1>
-  <div ng-bind-html="data.htmlcontent"></div>
-  <h1>Bound with ta-bind, our internal html-binding directive</h1>
-  <div ta-bind="text" ng-model="data.htmlcontent" ta-readonly='disabled'></div>
-  <button type="button" ng-click="data.htmlcontent = data.orightml">Reset</button>
-  <button type="button" ng-click="clear()">clear</button>
-  <button type="button">Does Nothing</button>
-  <p>Note: although we support classes and styles, angularjs' ng-bind-html directive will strip out all style attributes.</p>
-  
-  <div text-angular ng-model="bio"></div>
-  
+  <button type="button" ta-button ng-click="reset()">Reset</button>
+  <button type="button" ta-button ng-click="clear()">clear</button>
+  <button type="button" ta-button>Does Nothing</button>
   <form name="validationForm">
     <label for="name">Name:</label> <input type="text" tabindex="1" id="name" ng-model="name">
     <label for="website">Website:</label> <input type="url" tabindex="2" id="website" ng-model="website">
     formValid: pristine {{validationForm.testValidation.$pristine}} valid {{validationForm.testValidation.$valid}} dirty {{validationForm.testValidation.$dirty}} invalid {{validationForm.testValidation.$invalid}}
-    Bio: <div text-angular name="testValidation" ng-model="bio" tabindex="3" placeholder="test placeholder" required></div>
+    Bio: <text-angular
+    	name="testValidation"
+    	ta-paste="testPaste($html)"
+    	ng-if="canEdit"
+    	ng-model="data.htmlcontent"
+    	tabindex="3"
+    	placeholder="test placeholder"
+    	required
+    	ta-disabled='disabled'
+    	ta-default-wrap="p"
+    	ta-target-toolbars='htmlcontenttools,statictoolbar'
+    	ng-model-options="{debounce: 1000}"
+    ></text-angular>
+    
+    <div
+    	ta-bind
+    	name="testValidation"
+    	ng-model="data.htmlcontent"
+    	placeholder="test placeholder"
+    	required
+    	ng-model-options="{debounce: 1000}"
+    ></text-angular>
 </form>
   
   <h1>Option to masquerade as a fancy text-area - complete with form submission and optional ngModel</h1>
@@ -124,8 +132,7 @@ $provide.decorator('taTools', ['$delegate', function(taTools){
 	.controller('wysiwygeditor', function($scope, textAngularManager, $document) {
 		$scope.data = {orightml: '<h2>Try me!</h2><p>textAngular is a super cool WYSIWYG Text Editor directive for AngularJS</p><p><img class="ta-insert-video" ta-insert-video="https://www.youtube.com/embed/2maA1-mvicY" src="https://img.youtube.com/vi/2maA1-mvicY/hqdefault.jpg" allowfullscreen="true" width="300" frameborder="0" height="250"/></p><p><b>Features:</b></p><ol><li>Automatic Seamless Two-Way-Binding</li><li>Super Easy <b>Theming</b> Options</li><li style="color: green;">Simple Editor Instance Creation</li><li>Safely Parses Html for Custom Toolbar Icons</li><li class="text-danger">Doesn&apos;t Use an iFrame</li><li>Works with Firefox, Chrome, and IE8+</li></ol><p><b>Code at GitHub:</b> <a href="https://github.com/fraywing/textAngular">Here</a> </p><p>昮朐 魡 燚璒瘭 譾躒鑅, 皾籈譧 紵脭脧 逯郹酟 煃 瑐瑍, 踆跾踄 趡趛踠 顣飁 廞 熥獘 豥 蔰蝯蝺 廦廥彋 蕍蕧螛 溹溦 幨懅憴 妎岓岕 緁, 滍 蘹蠮 蟷蠉蟼 鱐鱍鱕, 阰刲 鞮鞢騉 烳牼翐 魡 骱 銇韎餀 媓幁惁 嵉愊惵 蛶觢, 犝獫 嶵嶯幯 縓罃蔾 魵 踄 罃蔾 獿譿躐 峷敊浭, 媓幁 黐曮禷 椵楘溍 輗 漀 摲摓 墐墆墏 捃挸栚 蛣袹跜, 岓岕 溿 斶檎檦 匢奾灱 逜郰傃</p>'};
 		$scope.data.htmlcontent = $scope.data.orightml;
-		$scope.data.htmlcontent3 = 'Test Unbound Content!';
-		$scope.$watch('data.htmlcontent3', function(val){console.log(val);});
+		//$scope.$watch('data.htmlcontent', function(val){console.log('htmlcontent changed to:', val);});
 		$scope.disabled = false;
 		$scope.canEdit = true;
 		$scope.changetesth1 = function(){
@@ -156,6 +163,9 @@ $provide.decorator('taTools', ['$delegate', function(taTools){
 		};
 		$scope.clear = function(){
 			$scope.data = {orightml: '<h2>Try me!</h2><p>textAngular is a super cool WYSIWYG Text Editor directive for AngularJS</p><p><b>Features:</b></p><ol><li>Automatic Seamless Two-Way-Binding</li><li>Super Easy <b>Theming</b> Options</li><li style="color: green;">Simple Editor Instance Creation</li><li>Safely Parses Html for Custom Toolbar Icons</li><li class="text-danger">Doesn&apos;t Use an iFrame</li><li>Works with Firefox, Chrome, and IE8+</li></ol><p><b>Code at GitHub:</b> <a href="https://github.com/fraywing/textAngular">Here</a> </p>'};
+		};
+		$scope.reset = function(){
+			$scope.data.htmlcontent = $scope.data.orightml;
 		};
 		$scope.testPaste = function($html){
 			console.log('Hit Paste', arguments);

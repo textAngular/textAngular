@@ -153,20 +153,8 @@ describe('taBind.undoManager', function () {
 				element.triggerHandler('keyup');
 				element.triggerHandler('keyup');
 				expect($rootScope.$undoManagerTest.current()).not.toBe('<p>Test</p>');
-				expect(function(){ $timeout.flush(); }).not.toThrow();
+				$timeout.flush();
 				expect($rootScope.$undoManagerTest.current()).toBe('<p>Test</p>');
-			}));
-			it('should trigger on trigger_key and no $timeout', inject(function($timeout){
-				if(angular.element === jQuery) {
-					event = jQuery.Event('keyup');
-					event.keyCode = 8;
-					element.triggerHandler(event);
-				}else{
-					event = {keyCode: 8};
-					element.triggerHandler('keyup', event);
-				}
-				expect($rootScope.$undoManagerTest.current()).toBe('<p>Test</p>');
-				expect(function(){ $timeout.flush(); }).toThrow();
 			}));
 		});
 	});

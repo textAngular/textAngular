@@ -168,12 +168,13 @@ describe('taBind.display', function () {
 		it('should display model contents', function () {
 			expect(element.html()).toBe('<p>Test Contents</p>');
 		});
-		it('should NOT update model from keyup', function () {
+		it('should NOT update model from keyup', inject(function ($timeout) {
 			element.html('<div>Test 2 Content</div>');
 			element.triggerHandler('keyup');
 			$rootScope.$digest();
+			$timeout.flush();
 			expect($rootScope.html).toBe('<p>Test Contents</p>');
-		});
+		}));
 		it('should error on update model from update function', function () {
 			element.html('<div>Test 2 Content</div>');
 			expect(function () {

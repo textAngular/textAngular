@@ -1,10 +1,11 @@
 describe('taMaxText', function(){
 	'use strict';
-	var $rootScope, $compile;
+	var $rootScope, $compile, $timeout;
 	beforeEach(module('textAngular'));
-	beforeEach(inject(function (_$compile_, _$rootScope_) {
+	beforeEach(inject(function (_$compile_, _$rootScope_, _$timeout_) {
 		$rootScope = _$rootScope_;
 		$compile = _$compile_;
+		$timeout = _$timeout_;
 	}));
 
 	it('should fail without ngmodel', function(){
@@ -41,25 +42,30 @@ describe('taMaxText', function(){
 
 		it('should fail when text exceeds limit', function(){
 			$scope.form.html.$setViewValue('<strong>textAngular_</strong>');
+			$timeout.flush();
 			expect($scope.form.html.$error.taMaxText).toBe(true);
 		});
 
 		it('should pass when text is within limit', function(){
 			$scope.form.html.$setViewValue('<strong>textAngular</strong>');
-			expect($scope.form.html.$error.taMaxText).toBe(false);
+			$timeout.flush();
+			expect($scope.form.html.$error.taMaxText).toBe(undefined);
 		});
 
 		it('behaviour should change when max text limit is changed', function(){
 			$scope.form.html.$setViewValue('<strong>textAngular_</strong>');
+			$timeout.flush();
 			expect($scope.form.html.$error.taMaxText).toBe(true);
 			$scope.$apply(function(){
 				$scope.maxText = 11;
 			});
-			expect($scope.form.html.$error.taMaxText).toBe(false);
+			$scope.$digest();
+			expect($scope.form.html.$error.taMaxText).toBe(undefined);
 		});
 
 		it('should fail when max text limit is changed to non numeric value', function(){
-			$scope.form.html.$setViewValue('<strong>textAngular_</strong>');
+			$scope.form.html.$setViewValue('<strong>textAngular__</strong>');
+			$timeout.flush();
 			expect($scope.form.html.$error.taMaxText).toBe(true);
 			expect(function() {
 				$scope.$apply(function(){

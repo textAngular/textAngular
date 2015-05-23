@@ -46,12 +46,12 @@ describe('taMinText', function(){
 
 		it('should pass when text is empty', function(){
 			$scope.form.html.$setViewValue('<strong></strong>');
-			expect($scope.form.html.$error.taMinText).toBe(false);
+			expect($scope.form.html.$error.taMinText).toBe(undefined);
 		});
 
 		it('should pass when text is above limit', function(){
 			$scope.form.html.$setViewValue('<strong>textAngular_</strong>');
-			expect($scope.form.html.$error.taMinText).toBe(false);
+			expect($scope.form.html.$error.taMinText).toBe(undefined);
 		});
 
 		it('behaviour should change when min text limit is changed', function(){
@@ -60,7 +60,7 @@ describe('taMinText', function(){
 			$scope.$apply(function(){
 				$scope.minText = 12;
 			});
-			expect($scope.form.html.$error.taMinText).toBe(false);
+			expect($scope.form.html.$error.taMinText).toBe(undefined);
 		});
 
 		it('should fail when min text limit is changed to non numeric value', function(){

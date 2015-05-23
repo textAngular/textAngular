@@ -13,6 +13,7 @@ describe('taBind.events', function () {
 			event = jQuery.Event('mousedown');
 			element.triggerHandler(event);
 			$rootScope.$digest();
+			
 			expect(event.isPropagationStopped()).toBe(true);
 		}else{
 			var _stopPropagation = false;
@@ -102,20 +103,16 @@ describe('taBind.events', function () {
 						getData: function(){ return 'Test 2 Content'; }
 					};
 					element.triggerHandler('paste');
-					expect(function(){
-						$timeout.flush();
-					}).toThrow();
 					$rootScope.$digest();
+					$timeout.flush();
 					expect($rootScope.html).toBe('<p>Test Contents</p>');
 					$window.clipboardData = undefined;
 				}));
 				
 				it('non-ie based', inject(function($window){
 					element.triggerHandler('paste', {clipboardData: {types: ['text/plain'], getData: function(){ return 'Test 3 Content'; }}});
-					expect(function(){
-						$timeout.flush();
-					}).toThrow();
 					$rootScope.$digest();
+					$timeout.flush();
 					expect($rootScope.html).toBe('<p>Test Contents</p>');
 				}));
 			});

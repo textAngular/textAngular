@@ -14,7 +14,7 @@ describe('taBind._taBlankTest', function () {
 		it('undefined', inject(function (_taBlankTest) {
 			expect(_taBlankTest('<p><br></p>')()).toBe(true);
 		}));
-		angular.forEach(['<p></p>','<p><br></p>',''], testString(true));
+		angular.forEach(['<p></p>','<p><br></p>','', '<pre><br/></pre>'], testString(true));
 	});
 	
 	describe('should return false for', function () {

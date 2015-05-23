@@ -1,17 +1,22 @@
-var triggerKeyup = function(element, options){
-	var event;
-	if(angular.element === jQuery){
-		event = jQuery.Event('keyup');
-		angular.extend(event, options);
-		element.triggerHandler(event);
-	}else{
-		element.triggerHandler('keyup', options);
-	}
-};
+var triggerKeyup;
 
 describe('taBind', function () {
 	'use strict';
 	beforeEach(module('textAngular'));
+	beforeEach(inject(function($rootScope, $timeout){
+		triggerKeyup = function(element, options, skipTimeout){
+			var event;
+			if(angular.element === jQuery){
+				event = jQuery.Event('keyup');
+				angular.extend(event, options);
+				element.triggerHandler(event);
+			}else{
+				element.triggerHandler('keyup', options);
+			}
+			$rootScope.$digest();
+			if(!skipTimeout) $timeout.flush();
+		};
+	}));
 	afterEach(inject(function($document){
 		$document.find('body').html('');
 	}));
@@ -213,7 +218,7 @@ describe('taBind', function () {
 					$window.rangy.getSelection().setSingleRange(range);
 
 					BLOCKED_KEYS.forEach(function(key) {
-						triggerKeyup(element, {keyCode: key});
+						triggerKeyup(element, {keyCode: key}, true);
 						$rootScope.$digest();
 						expect(eventSpy).not.toHaveBeenCalled();
 					});
