@@ -1,3 +1,22 @@
+<a name="1.4.0"></a>
+## 1.4.0 (2015-05-24)
+
+
+#### Bug Fixes
+
+* **chrome:** Make the matcher for detecting bad chorem tags more lenient ([05fe7a61](http://github.com/fraywing/textAngular/commit/05fe7a61470d41b6533f5220894ec1a3451dc801))
+* **taBind:** Updating while focussed. ([cc6d89be](http://github.com/fraywing/textAngular/commit/cc6d89bee18de5a2666aae075c707ae7aa68cb9f), closes [#38](http://github.com/fraywing/textAngular/issues/38))
+* **taBind.formatters:** Catch unwrapped content ([0cd98dd3](http://github.com/fraywing/textAngular/commit/0cd98dd3115f4e7d09263eeeb0136ec9d2ccaafa), closes [#584](http://github.com/fraywing/textAngular/issues/584))
+* **taBind.keyevents:** Attempted fix for polish character issues ([26226dda](http://github.com/fraywing/textAngular/commit/26226ddaa9f5468977f3a4849e265904ca2fad6a), closes [#518](http://github.com/fraywing/textAngular/issues/518))
+* **taBinde.undomanager:** Fix a bug with redo/undo beyond the borders ([dd023c30](http://github.com/fraywing/textAngular/commit/dd023c30537cd79550de630f7d4360331eb02975), closes [#558](http://github.com/fraywing/textAngular/issues/558))
+
+
+#### Features
+
+* **bootstrap:** Bootstrap is no longer required in bower ([5e7459eb](http://github.com/fraywing/textAngular/commit/5e7459eb03bf66c62d05b8b42225c7b5e1e75da5), closes [#649](http://github.com/fraywing/textAngular/issues/649))
+* **taTools:** Added options for tools in taOptions ([7fb00a02](http://github.com/fraywing/textAngular/commit/7fb00a02993f8c02b09f8a24c3c267b6ba4f8fbd))
+
+
 <a name="1.3.11"></a>
 ### 1.3.11 (2015-03-16)
 
