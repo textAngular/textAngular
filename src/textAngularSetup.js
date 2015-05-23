@@ -26,6 +26,9 @@ angular.module('textAngularSetup', [])
 		textEditor: 'form-control',
 		htmlEditor: 'form-control'
 	},
+	defaultTagAttributes : {
+		a: {target:""}
+	},
 	setup: {
 		// wysiwyg mode
 		textEditorSetup: function($element){ /* Do some processing here */ },
