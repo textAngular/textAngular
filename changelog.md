@@ -1,3 +1,12 @@
+<a name="1.4.1"></a>
+### 1.4.1 (2015-05-25)
+
+
+#### Bug Fixes
+
+* **taPaste:** Fix the taPaste order s.t. sanitizer is called after paste handler. ([108857f6](http://github.com/fraywing/textAngular/commit/108857f69ac611f970ded65ba5c1207b8a6964d0), closes [#686](http://github.com/fraywing/textAngular/issues/686))
+
+
 <a name="1.4.0"></a>
 ## 1.4.0 (2015-05-24)
 
