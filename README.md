@@ -116,7 +116,7 @@ See Issue [#240](https://github.com/fraywing/textAngular/issues/240) for specifi
 ## Developer Notes
 
 When checking out, you need a node.js installation, running `npm install` and then `bower install` will get you setup with everything to run the unit tests and minification.
-All changes should be done in the lib folder, running `grunt compile` to compile the app or use `grunt watch` to compile the files as you save them.
+All changes should be done in the src folder, running `grunt compile` to compile the app or use `grunt watch` to compile the files as you save them.
 When you are ready to create A PR check that `grunt` passes without errors and you have created tests for your feature if necessary.
 
 ## Customization
