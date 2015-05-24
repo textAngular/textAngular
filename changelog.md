@@ -1,6 +1,11 @@
 <a name="1.4.1"></a>
 ### 1.4.1 (2015-05-25)
 
+#### Breaking Changes
+
+This changes the structure of the files - all production files are now in the dist folder, this makes where PR's should be done a little more clear.
+
+If you were referencing the src/*.js files they will need to be updated to dist/*js.
 
 #### Bug Fixes
 
