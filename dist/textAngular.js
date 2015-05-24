@@ -1432,13 +1432,14 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 								text = text.replace(/<br class="Apple-interchange-newline"[^>]*?>/ig, '').replace(/<span class="Apple-converted-space">( |&nbsp;)<\/span>/ig, '&nbsp;');
 							}
 							
-							text = taSanitize(text, '', _disableSanitizer);
 							if (/<li(\s.*)?>/i.test(text) && /(<ul(\s.*)?>|<ol(\s.*)?>).*<li(\s.*)?>/i.test(text) === false) {
 								// insert missing parent of li element
 								text = text.replace(/<li(\s.*)?>.*<\/li(\s.*)?>/i, '<ul>$&</ul>');
 							}
 							
 							if(_pasteHandler) text = _pasteHandler(scope, {$html: text}) || text;
+							
+							text = taSanitize(text, '', _disableSanitizer);
 							
 							taSelection.insertHtml(text, element[0]);
 							$timeout(function(){

@@ -4,6 +4,7 @@ module.exports = function (grunt) {
 	grunt.loadNpmTasks('grunt-contrib-jshint');
 	grunt.loadNpmTasks('grunt-contrib-uglify');
 	grunt.loadNpmTasks('grunt-contrib-clean');
+	grunt.loadNpmTasks('grunt-contrib-copy');
 	grunt.loadNpmTasks('grunt-contrib-watch');
 	grunt.loadNpmTasks('grunt-contrib-concat');
 	grunt.loadNpmTasks('grunt-istanbul-coverage');
@@ -14,10 +15,10 @@ module.exports = function (grunt) {
 	grunt.loadNpmTasks('grunt-git');
 	grunt.loadNpmTasks('grunt-shell');
 	
-	grunt.registerTask('compile', ['concat', 'jshint', 'uglify']);
+	grunt.registerTask('compile', ['concat', 'copy:setupFiles', 'jshint', 'uglify']);
 	grunt.registerTask('default', ['compile', 'test']);
 	grunt.registerTask('test', ['clean', 'jshint', 'karma', 'coverage']);
-	grunt.registerTask('travis-test', ['concat', 'jshint', 'karma', 'coverage', 'coveralls']);
+	grunt.registerTask('travis-test', ['concat', 'copy:setupFiles', 'jshint', 'karma', 'coverage', 'coveralls']);
 	
 	grunt.registerTask('release', ['bump-only','compile','changelog','gitcommit','bump-commit', 'shell:publish']);
 	grunt.registerTask('release:patch', ['bump-only:patch','compile','changelog','gitcommit','bump-commit', 'shell:publish']);
@@ -61,15 +62,15 @@ module.exports = function (grunt) {
 		},
 		clean: ["coverage"],
 		coverage: {
-		  options: {
-		  	thresholds: {
-			  'statements': 100,
-			  'branches': 100,
-			  'lines': 100,
-			  'functions': 100
+			options: {
+			thresholds: {
+				'statements': 100,
+				'branches': 100,
+				'lines': 100,
+				'functions': 100
 			},
 			dir: 'coverage'
-		  }
+			}
 		},
 		coveralls: {
 			options: {
@@ -79,26 +80,34 @@ module.exports = function (grunt) {
 			}
 		},
 		karma: {
-		  jquery: {
-			options: testConfig('karma-jquery.conf.js')
-		  },
-		  jqlite: {
-			options: testConfig('karma-jqlite.conf.js')
-		  }
+			jquery: {
+				options: testConfig('karma-jquery.conf.js')
+			},
+			jqlite: {
+				options: testConfig('karma-jqlite.conf.js')
+			}
 		},
 		jshint: {
-		  files: ['lib/*.js', 'src/textAngularSetup.js', 'test/*.spec.js', 'test/taBind/*.spec.js'],// don't hint the textAngularSanitize as they will fail
-		  options: {
-			eqeqeq: true,
-			immed: true,
-			latedef: true,
-			newcap: true,
-			noarg: true,
-			sub: true,
-			boss: true,
-			eqnull: true,
-			globals: {}
-		  }
+			files: ['src/*.js', 'test/*.spec.js', 'test/taBind/*.spec.js', '!src/textAngular-sanitize.js'],// don't hint the textAngularSanitize as they will fail
+			options: {
+				eqeqeq: true,
+				immed: true,
+				latedef: true,
+				newcap: true,
+				noarg: true,
+				sub: true,
+				boss: true,
+				eqnull: true,
+				globals: {}
+			}
+		},
+		copy: {
+			setupFiles: {
+				expand: true,
+				cwd: 'src/',
+				src: ['textAngularSetup.js', 'textAngular.css', 'textAngular-sanitize.js'],
+				dest: 'dist/'
+			}
 		},
 		concat: {
 			options: {
@@ -106,8 +115,8 @@ module.exports = function (grunt) {
 				footer: "})();"
 			},
 			dist: {
-				src: ['lib/globals.js','lib/factories.js','lib/DOM.js','lib/validators.js','lib/taBind.js','lib/main.js'],
-				dest: 'src/textAngular.js'
+				src: ['src/globals.js','src/factories.js','src/DOM.js','src/validators.js','src/taBind.js','src/main.js'],
+				dest: 'dist/textAngular.js'
 			}
 		},
 		uglify: {
@@ -120,7 +129,7 @@ module.exports = function (grunt) {
 			my_target: {
 				files: {
 					'dist/textAngular-rangy.min.js': ['bower_components/rangy/rangy-core.js', 'bower_components/rangy/rangy-selectionsaverestore.js'],
-					'dist/textAngular.min.js': ['src/textAngularSetup.js','src/textAngular.js'],
+					'dist/textAngular.min.js': ['dist/textAngularSetup.js','dist/textAngular.js'],
 					'dist/textAngular-sanitize.min.js': ['src/textAngular-sanitize.js']
 				}
 			}

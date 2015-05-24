@@ -10,7 +10,7 @@ Demo is available at: http://www.textangular.com (Or editable [Plunkr Demo](http
 
 To upgrade from version 1.2.2 or earlier you need to follow these steps:
 
-1. The styling for textAngular is now in the `src/textAngular.css` file, you will need to include this or a copy of it with your own modifications.
+1. The styling for textAngular is now in the `dist/textAngular.css` file, you will need to include this or a copy of it with your own modifications.
 2. The rangy library is now required, you will need both the `rangy-core` and `rangy-saveselection` modules, alternatively you can include the compressed version (`textAngular-rangy.min.js`) in the dist folder
 
 ## Requirements
@@ -29,7 +29,7 @@ To upgrade from version 1.2.2 or earlier you need to follow these steps:
 Run `bower install textAngular` from the command line.
 Include script tags similar to the following:
 ```html
-<link rel='stylesheet' href='/bower_components/textAngular/src/textAngular.css'>
+<link rel='stylesheet' href='/bower_components/textAngular/dist/textAngular.css'>
 <script src='/bower_components/textAngular/dist/textAngular-rangy.min.js'></script>
 <script src='/bower_components/textAngular/dist/textAngular-sanitize.min.js'></script>
 <script src='/bower_components/textAngular/dist/textAngular.min.js'></script>
@@ -40,7 +40,7 @@ Include script tags similar to the following:
 Run `npm install textangular` from the command line.
 Include script tags similar to the following:
 ```html
-<link rel='stylesheet' href='/node_modules/textangular/src/textAngular.css'>
+<link rel='stylesheet' href='/node_modules/textangular/dist/textAngular.css'>
 <script src='/node_modules/textangular/dist/textAngular-rangy.min.js'></script>
 <script src='/node_modules/textangular/dist/textAngular-sanitize.min.js'></script>
 <script src='/node_modules/textangular/dist/textAngular.min.js'></script>
@@ -65,7 +65,7 @@ Include script tag similar to the following: (For details on how this works see:
 
 Download the code from [https://github.com/fraywing/textAngular/releases/latest](https://github.com/fraywing/textAngular/releases/latest), unzip the files then add script tags similar to the following:
 ```html
-<link rel='stylesheet' href='/path/to/unzipped/files/src/textAngular.min.css'>
+<link rel='stylesheet' href='/path/to/unzipped/files/dist/textAngular.min.css'>
 <script src='/path/to/unzipped/files/dist/textAngular-rangy.min.js'></script>
 <script src='/path/to/unzipped/files/dist/textAngular-sanitize.min.js'></script>
 <script src='/path/to/unzipped/files/dist/textAngular.min.js'></script>

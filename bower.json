@@ -2,10 +2,10 @@
   "name": "textAngular",
   "version": "1.4.0",
   "main": [
-    "./src/textAngular.js",
-    "./src/textAngular-sanitize.js",
-    "./src/textAngularSetup.js",
-    "./src/textAngular.css"
+    "./dist/textAngular.js",
+    "./dist/textAngular-sanitize.js",
+    "./dist/textAngularSetup.js",
+    "./dist/textAngular.css"
   ],
   "description": "A radically powerful Text-Editor/Wysiwyg editor for Angular.js",
   "keywords": [
