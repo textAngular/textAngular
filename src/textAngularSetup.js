@@ -325,7 +325,8 @@ angular.module('textAngularSetup', [])
 		},
 		activeState: function(){
 			return this.$editor().queryFormatBlockState('blockquote');
-		}
+		},
+		commandKeyCode: 9
 	});
 	taRegisterTool('outdent', {
 		iconclass: 'fa fa-outdent',
@@ -334,8 +335,9 @@ angular.module('textAngularSetup', [])
 			return this.$editor().wrapSelection("outdent", null);
 		},
 		activeState: function(){
-			return false;
-		}
+		  	return false;
+		},
+		commandKeyCode: 999999
 	});
 	taRegisterTool('italics', {
 		iconclass: 'fa fa-italic',
