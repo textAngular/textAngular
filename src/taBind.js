@@ -223,7 +223,6 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 						if(triggerUndo) ngModel.$undoManager.push(_val);
 					}
 				}
-				ngModel.$render();
 			};
 			
 			//used for updating when inserting wrapped elements
@@ -449,9 +448,6 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 										}
 										text = _el.html().replace('<br class="Apple-interchange-newline">', '');
 									}
-								}else if(text.match(/^<span/)){
-									// in case of pasting only a span - chrome paste, remove them. THis is just some wierd formatting
-									text = text.replace(/<(|\/)span[^>]*?>/ig, '');
 								}
 								// Webkit on Apple tags
 								text = text.replace(/<br class="Apple-interchange-newline"[^>]*?>/ig, '').replace(/<span class="Apple-converted-space">( |&nbsp;)<\/span>/ig, '&nbsp;');
@@ -462,7 +458,7 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 								text = text.replace(/<li(\s.*)?>.*<\/li(\s.*)?>/i, '<ul>$&</ul>');
 							}
 							
-							if(_pasteHandler) text = _pasteHandler(scope, {$html: text}) || text;
+							if(_pasteHandler) text = _pasteHandler(scope, {$html: text, $editor: scope}) || text;
 							
 							text = taSanitize(text, '', _disableSanitizer);
 							
