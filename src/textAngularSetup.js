@@ -335,7 +335,7 @@ angular.module('textAngularSetup', [])
 			return this.$editor().wrapSelection("outdent", null);
 		},
 		activeState: function(){
-		  	return false;
+			return false;
 		},
 		commandKeyCode: 999999
 	});

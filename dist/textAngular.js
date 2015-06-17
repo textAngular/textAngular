@@ -2395,17 +2395,7 @@ textAngular.directive("textAngular", [
 					if(scope._bUpdateSelectedStyles) _updateSelectedStylesTimeout = $timeout(scope.updateSelectedStyles, 200);
 				};
 				// start updating on keydown
-				_keydown = function(event){
-					// keyCode 9 is the TAB key
-					if (event.ctrlKey===false && event.metaKey===false && event.keyCode==9) {
-					  event.preventDefault();
-					  if (event.shiftKey) {
-					    event.which=999999;
-					  }
-					  event.metaKey = true;
-					  // since nether tab nor shift-tab generate a keypress event, we call directly
-					  _keypress(event);
-					}
+				_keydown = function(){
 					/* istanbul ignore next: ie catch */
 					if(!scope.focussed){
 						scope._bUpdateSelectedStyles = false;
