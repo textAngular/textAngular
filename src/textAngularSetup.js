@@ -277,6 +277,7 @@ angular.module('textAngularSetup', [])
 		},
 		activeState: function(commonElement){
 			var result = false;
+			if (!commonElement || commonElement.nodeName === '#document') return false;
 			if(commonElement) result =
 				commonElement.css('text-align') === 'left' ||
 				commonElement.attr('align') === 'left' ||
@@ -299,6 +300,7 @@ angular.module('textAngularSetup', [])
 		},
 		activeState: function(commonElement){
 			var result = false;
+			if (!commonElement || commonElement.nodeName === '#document') return false;
 			if(commonElement) result = commonElement.css('text-align') === 'right';
 			result = result || this.$editor().queryCommandState('justifyRight');
 			return result;
@@ -312,6 +314,7 @@ angular.module('textAngularSetup', [])
 		},
 		activeState: function(commonElement){
 			var result = false;
+			if (!commonElement || commonElement.nodeName === '#document') return false;
 			if(commonElement) result = commonElement.css('text-align') === 'center';
 			result = result || this.$editor().queryCommandState('justifyCenter');
 			return result;
