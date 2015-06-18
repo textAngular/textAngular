@@ -283,7 +283,8 @@ textAngular.directive("textAngular", [
 						event.stopPropagation();
 						event.preventDefault();
 					};
-
+					
+					scope.displayElements.resize.anchors[3].off('mousedown');
 					scope.displayElements.resize.anchors[3].on('mousedown', _resizeMouseDown);
 
 					scope.reflowResizeOverlay(_el);
