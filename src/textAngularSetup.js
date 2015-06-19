@@ -590,17 +590,17 @@ angular.module('textAngularSetup', [])
     iconclass: 'fa fa-youtube-play',
     tooltiptext: taTranslations.insertVideo.tooltip,
     action: function(){ 
-      var urlPrompt;          
+      var urlPrompt, urlLink, embed;          
       urlPrompt = $window.prompt(taTranslations.insertVideo.dialogPrompt, 'https://');
       
       if (urlPrompt && urlPrompt !== '' && urlPrompt !== 'https://') {
         var vimeoMatch = urlPrompt.match(/https?:\/\/(www\.)?vimeo.com\/(\d+)($|\/)/);                    
         if (vimeoMatch && vimeoMatch.length > 0) {              
           // create the embed link
-          var urlLink = "https://player.vimeo.com/video/" + vimeoMatch[2] + "?byline=0&portrait=0";
+          urlLink = "https://player.vimeo.com/video/" + vimeoMatch[2] + "?byline=0&portrait=0";
           // create the HTML
           //Loaded image is just a default image since vimeo requires requests to get images
-          var embed = '<div class="video-container"><img class="ta-insert-video vimeo-video img-responsive" src="https://i.vimeocdn.com/video/1111111_1280x800.jpg" video-type="vimeo"  video-id="' + vimeoMatch[2] + '" ta-insert-video="' + urlLink + '" contenteditable="false" allowfullscreen="true" frameborder="0" /></div>';
+          embed = '<div class="video-container"><img class="ta-insert-video vimeo-video img-responsive" src="https://i.vimeocdn.com/video/0000000_1280x800.jpg" video-type="vimeo"  video-id="' + vimeoMatch[2] + '" ta-insert-video="' + urlLink + '" contenteditable="false" allowfullscreen="true" frameborder="0" /></div>';
           // insert
           return this.$editor().wrapSelection('insertHTML', embed, true);              
         } else {
@@ -609,11 +609,11 @@ angular.module('textAngularSetup', [])
           /* istanbul ignore else: if it's invalid don't worry - though probably should show some kind of error message */
           if (ids && ids.length > 0) {
             // create the embed link
-            var urlLink = "https://www.youtube.com/embed/" + ids[0].substring(3);
+            urlLink = "https://www.youtube.com/embed/" + ids[0].substring(3);
             // create the HTML
             // for all options see: http://stackoverflow.com/questions/2068344/how-do-i-get-a-youtube-video-thumbnail-from-the-youtube-api
             // maxresdefault.jpg seems to be undefined on some.
-            var embed = '<div class="video-container"><img class="ta-insert-video youtube-video img-responsive" src="https://img.youtube.com/vi/' + ids[0].substring(3) + '/maxresdefault.jpg" video-type="youtube" video-id="' + ids[0].substring(3) + '" ta-insert-video="' + urlLink + '" contenteditable="false" webkitallowfullscreen="true" mozallowfullscreen="true" allowfullscreen="true" frameborder="0" /></div>';
+            embed = '<div class="video-container"><img class="ta-insert-video youtube-video img-responsive" src="https://img.youtube.com/vi/' + ids[0].substring(3) + '/maxresdefault.jpg" video-type="youtube" video-id="' + ids[0].substring(3) + '" ta-insert-video="' + urlLink + '" contenteditable="false" webkitallowfullscreen="true" mozallowfullscreen="true" allowfullscreen="true" frameborder="0" /></div>';
             // insert
             return this.$editor().wrapSelection('insertHTML', embed, true);
           }
