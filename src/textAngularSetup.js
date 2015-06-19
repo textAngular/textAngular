@@ -435,6 +435,34 @@ angular.module('textAngularSetup', [])
 			restoreSelection();
 		}
 	});
+  
+  var videoOnSelectAction = function(event, $element, editorScope){
+    // setup the editor toolbar
+    // Credit to the work at http://hackerwins.github.io/summernote/ for this editbar logic/display
+    var finishEdit = function(){
+      editorScope.updateTaBindtaTextElement();
+      editorScope.hidePopover();
+    };
+    
+    event.preventDefault();
+    editorScope.displayElements.popover.css('width', '175px');
+    
+    var container = editorScope.displayElements.popoverContainer;
+    container.empty();      
+    
+    var videoInfo = angular.element('<div class="form-inline"><div class="form-group"><label>Type : &nbsp;&nbsp;</label><span>' + $element.attr('video-type') + '</span></div></div><div class="form-inline"><div class="form-group"><label>Id : &nbsp;&nbsp;</label><span><a href="' + $element.attr('ta-insert-video') + '" target="_blank">' + $element.attr('video-id') + '</a></span></div></div>'); 
+    container.append(videoInfo);
+  
+    var remove = angular.element('<button type="button" class="btn btn-default btn-sm btn-small btn-block" unselectable="on" tabindex="-1"><i class="fa fa-trash-o"></i></button>');
+    remove.on('click', function(event){
+      event.preventDefault();
+      $element.remove();
+      finishEdit();
+    });
+    container.append(remove);
+
+    editorScope.showPopover($element);
+  };
 
 	var imgOnSelectAction = function(event, $element, editorScope){
 		// setup the editor toolbar
@@ -558,34 +586,46 @@ angular.module('textAngularSetup', [])
 			action: imgOnSelectAction
 		}
 	});
-	taRegisterTool('insertVideo', {
-		iconclass: 'fa fa-youtube-play',
-		tooltiptext: taTranslations.insertVideo.tooltip,
-		action: function(){
-			var urlPrompt;
-			urlPrompt = $window.prompt(taTranslations.insertVideo.dialogPrompt, 'https://');
-			if (urlPrompt && urlPrompt !== '' && urlPrompt !== 'https://') {
-				// get the video ID
-				var ids = urlPrompt.match(/(\?|&)v=[^&]*/);
-				/* istanbul ignore else: if it's invalid don't worry - though probably should show some kind of error message */
-				if(ids && ids.length > 0){
-					// create the embed link
-					var urlLink = "https://www.youtube.com/embed/" + ids[0].substring(3);
-					// create the HTML
-					// for all options see: http://stackoverflow.com/questions/2068344/how-do-i-get-a-youtube-video-thumbnail-from-the-youtube-api
-					// maxresdefault.jpg seems to be undefined on some.
-					var embed = '<img class="ta-insert-video" src="https://img.youtube.com/vi/' + ids[0].substring(3) + '/hqdefault.jpg" ta-insert-video="' + urlLink + '" contenteditable="false" allowfullscreen="true" frameborder="0" />';
-					// insert
-					return this.$editor().wrapSelection('insertHTML', embed, true);
-				}
-			}
-		},
-		onElementSelect: {
-			element: 'img',
-			onlyWithAttrs: ['ta-insert-video'],
-			action: imgOnSelectAction
-		}
-	});
+  taRegisterTool('insertVideo', {
+    iconclass: 'fa fa-youtube-play',
+    tooltiptext: taTranslations.insertVideo.tooltip,
+    action: function(){ 
+      var urlPrompt;          
+      urlPrompt = $window.prompt(taTranslations.insertVideo.dialogPrompt, 'https://');
+      
+      if (urlPrompt && urlPrompt !== '' && urlPrompt !== 'https://') {
+        var vimeoMatch = urlPrompt.match(/https?:\/\/(www\.)?vimeo.com\/(\d+)($|\/)/);                    
+        if (vimeoMatch && vimeoMatch.length > 0) {              
+          // create the embed link
+          var urlLink = "https://player.vimeo.com/video/" + vimeoMatch[2] + "?byline=0&portrait=0";
+          // create the HTML
+          //Loaded image is just a default image since vimeo requires requests to get images
+          var embed = '<div class="video-container"><img class="ta-insert-video vimeo-video img-responsive" src="https://i.vimeocdn.com/video/1111111_1280x800.jpg" video-type="vimeo"  video-id="' + vimeoMatch[2] + '" ta-insert-video="' + urlLink + '" contenteditable="false" allowfullscreen="true" frameborder="0" /></div>';
+          // insert
+          return this.$editor().wrapSelection('insertHTML', embed, true);              
+        } else {
+          // get the video ID
+          var ids = urlPrompt.match(/(\?|&)v=[^&]*/);
+          /* istanbul ignore else: if it's invalid don't worry - though probably should show some kind of error message */
+          if (ids && ids.length > 0) {
+            // create the embed link
+            var urlLink = "https://www.youtube.com/embed/" + ids[0].substring(3);
+            // create the HTML
+            // for all options see: http://stackoverflow.com/questions/2068344/how-do-i-get-a-youtube-video-thumbnail-from-the-youtube-api
+            // maxresdefault.jpg seems to be undefined on some.
+            var embed = '<div class="video-container"><img class="ta-insert-video youtube-video img-responsive" src="https://img.youtube.com/vi/' + ids[0].substring(3) + '/maxresdefault.jpg" video-type="youtube" video-id="' + ids[0].substring(3) + '" ta-insert-video="' + urlLink + '" contenteditable="false" webkitallowfullscreen="true" mozallowfullscreen="true" allowfullscreen="true" frameborder="0" /></div>';
+            // insert
+            return this.$editor().wrapSelection('insertHTML', embed, true);
+          }
+        }
+      }
+    },
+    onElementSelect: {
+      element: 'img',
+      onlyWithAttrs: ['ta-insert-video'],
+      action: videoOnSelectAction
+    }
+  });
 	taRegisterTool('insertLink', {
 		tooltiptext: taTranslations.insertLink.tooltip,
 		iconclass: 'fa fa-link',
