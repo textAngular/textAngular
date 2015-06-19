@@ -215,10 +215,12 @@ textAngular.directive("textAngular", [
 				};
 				scope.hidePopover = function(){
 					/* istanbul ignore next: dosen't test with mocked animate */
-					scope.displayElements.popover.css('display', '');
-					scope.displayElements.popoverContainer.attr('style', '');
-					scope.displayElements.popoverContainer.attr('class', 'popover-content');
-					scope.displayElements.popover.removeClass('in');
+					var doneCb = function(){
+						scope.displayElements.popover.css('display', '');
+						scope.displayElements.popoverContainer.attr('style', '');
+						scope.displayElements.popoverContainer.attr('class', 'popover-content');
+					};
+					$q.when($animate.removeClass(scope.displayElements.popover, 'in', doneCb)).then(doneCb);
 				};
 
 				// setup the resize overlay
