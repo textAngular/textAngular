@@ -590,7 +590,9 @@ angular.module('textAngularSetup', [])
     iconclass: 'fa fa-youtube-play',
     tooltiptext: taTranslations.insertVideo.tooltip,
     action: function(){ 
-      var urlPrompt, urlLink, embed;          
+      var urlPrompt;
+      var urlLink = '';
+      var embed = '';
       urlPrompt = $window.prompt(taTranslations.insertVideo.dialogPrompt, 'https://');
       
       if (urlPrompt && urlPrompt !== '' && urlPrompt !== 'https://') {
