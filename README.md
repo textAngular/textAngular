@@ -45,6 +45,21 @@ Include script tags similar to the following:
 <script src='/node_modules/textangular/dist/textAngular-sanitize.min.js'></script>
 <script src='/node_modules/textangular/dist/textAngular.min.js'></script>
 ```
+Install using commonjs (eg componentjs, Webpack, Browserify):
+```
+angular.module('myModule', [require('angular-sanitize'), require('textAngular')]);
+```
+Optionally, install textAngular-santize.min.js by requiring it BEFORE requring textAngular:
+```
+require('textangular/dist/textAngular-sanitize.min');
+angular.module('myModule', [require('textAngular')]);
+```
+For CSS support with Webpack, install the style-loader, css-loader (and postcss-loader) and configure the loader in your webpack.config.js similar to the following:
+```
+loaders: [
+  {test: /\.css$/, loader: 'style!css!postcss'}
+]
+```
 
 **Via CDNJS:**
 
