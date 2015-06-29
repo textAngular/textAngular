@@ -393,7 +393,7 @@ textAngular.directive("textAngular", [
 						}else{
 							scope.displayElements.text[0].focus();
 						}
-						$window.rangy.restoreSelection(_savedSelection);
+						// $window.rangy.restoreSelection(_savedSelection);
 						$window.rangy.removeMarkers(_savedSelection);
 					}
 					_savedSelection = false;
