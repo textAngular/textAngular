@@ -69,12 +69,26 @@ textAngular.config([function(){
 textAngular.run([function(){
 	/* istanbul ignore next: not sure how to test this */
 	// Require Rangy and rangy savedSelection module.
-	if(!window.rangy){
-		throw("rangy-core.js and rangy-selectionsaverestore.js are required for textAngular to work correctly, rangy-core is not yet loaded.");
-	}else{
-		window.rangy.init();
-		if(!window.rangy.saveSelection){
-			throw("rangy-selectionsaverestore.js is required for textAngular to work correctly.");
+	if (typeof define === 'function' && define.amd) {
+		// AMD. Register as an anonymous module.
+		define(function(require) {
+			window.rangy = require('rangy');
+			window.rangy.saveSelection = require('rangy/lib/rangy-selectionsaverestore');
+		});
+	} else if (typeof module !== 'undefined' && typeof exports === 'object') {
+		// Node/CommonJS style
+		window.rangy = require('rangy');
+		window.rangy.saveSelection = require('rangy/lib/rangy-selectionsaverestore');
+	} else {
+		// Ensure that rangy and rangy.saveSelection exists on the window (global scope).
+		// TODO: Refactor so that the global scope is no longer used.
+		if(!window.rangy){
+			throw("rangy-core.js and rangy-selectionsaverestore.js are required for textAngular to work correctly, rangy-core is not yet loaded.");
+		}else{
+			window.rangy.init();
+			if(!window.rangy.saveSelection){
+				throw("rangy-selectionsaverestore.js is required for textAngular to work correctly.");
+			}
 		}
 	}
 }]);
