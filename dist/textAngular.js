@@ -2206,7 +2206,7 @@ textAngular.directive("textAngular", [
 						}else{
 							scope.displayElements.text[0].focus();
 						}
-						$window.rangy.restoreSelection(_savedSelection);
+						// $window.rangy.restoreSelection(_savedSelection);
 						$window.rangy.removeMarkers(_savedSelection);
 					}
 					_savedSelection = false;
@@ -2396,6 +2396,17 @@ textAngular.directive("textAngular", [
 				};
 				// start updating on keydown
 				_keydown = function(){
+					// keyCode 9 is the TAB key
+					/* istanbul ignore next: not sure how to test this  */
+					if (event.ctrlKey===false && event.metaKey===false && event.keyCode===9) {
+						event.preventDefault();
+						var extraEventData = { specialKey: 'TabKey' };
+						if (event.shiftKey) {
+							extraEventData.specialKey = 'ShiftTabKey';
+						}
+						// since nether tab nor shift-tab generate a keypress event, we call directly
+						_keypress(event, extraEventData);
+					}
 					/* istanbul ignore next: ie catch */
 					if(!scope.focussed){
 						scope._bUpdateSelectedStyles = false;
@@ -2516,8 +2527,8 @@ textAngular.service('textAngularManager', ['taToolExecuteAction', 'taTools', 'ta
 					sendKeyCommand: function(event){
 						// we return true if we applied an action, false otherwise
 						var result = false;
-						if(event.ctrlKey || event.metaKey) angular.forEach(taTools, function(tool, name){
-							if(tool.commandKeyCode && tool.commandKeyCode === event.which){
+						if(event.ctrlKey || event.metaKey || event.specialKey) angular.forEach(taTools, function(tool, name){
+							if(tool.commandKeyCode && (tool.commandKeyCode === event.which || tool.commandKeyCode === event.specialKey)){
 								for(var _t = 0; _t < _toolbars.length; _t++){
 									if(_toolbars[_t].tools[name] !== undefined){
 										taToolExecuteAction.call(_toolbars[_t].tools[name], scope);
