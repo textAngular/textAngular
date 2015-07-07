@@ -1,5 +1,5 @@
 module.exports = function (grunt) {
-	
+
 	// load all grunt tasks
 	grunt.loadNpmTasks('grunt-contrib-jshint');
 	grunt.loadNpmTasks('grunt-contrib-uglify');
@@ -14,29 +14,29 @@ module.exports = function (grunt) {
 	grunt.loadNpmTasks('grunt-bump');
 	grunt.loadNpmTasks('grunt-git');
 	grunt.loadNpmTasks('grunt-shell');
-	
+
 	grunt.registerTask('compile', ['concat', 'copy:setupFiles', 'jshint', 'uglify']);
 	grunt.registerTask('default', ['compile', 'test']);
 	grunt.registerTask('test', ['clean', 'jshint', 'karma', 'coverage']);
 	grunt.registerTask('travis-test', ['concat', 'copy:setupFiles', 'jshint', 'karma', 'coverage', 'coveralls']);
-	
+
 	grunt.registerTask('release', ['bump-only','compile','changelog','gitcommit','bump-commit', 'shell:publish']);
 	grunt.registerTask('release:patch', ['bump-only:patch','compile','changelog','gitcommit','bump-commit', 'shell:publish']);
 	grunt.registerTask('release:minor', ['bump-only:minor','compile','changelog','gitcommit','bump-commit', 'shell:publish']);
 	grunt.registerTask('release:major', ['bump-only:major','compile','changelog','gitcommit','bump-commit', 'shell:publish']);
 	grunt.registerTask('release:prerelease', ['bump-only:prerelease','compile','changelog','gitcommit','bump-commit', 'shell:publish']);
-	
+
 	var testConfig = function (configFile, customOptions) {
 		var options = { configFile: configFile, keepalive: true };
 		var travisOptions = process.env.TRAVIS && { browsers: ['PhantomJS'], reporters: ['dots','coverage'] };
 		return grunt.util._.extend(options, customOptions, travisOptions);
 	};
-	
+
 	// Project configuration.
 	grunt.initConfig({
 		pkg: grunt.file.readJSON('package.json'),
 		changelog: {options: {dest: 'changelog.md'}},
-		
+
 		bump: {
 			options: {
 				files: ['package.json','bower.json'],
@@ -135,8 +135,8 @@ module.exports = function (grunt) {
 			}
 		},
 		watch: {
-			files: "lib/*.js",
-			tasks: "concat"
+			files: "src/*.js",
+			tasks: "compile"
 		}
 	});
 };
