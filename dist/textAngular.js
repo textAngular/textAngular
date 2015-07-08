@@ -2076,15 +2076,15 @@ textAngular.directive("textAngular", [
 								y: Math.max(0, startPosition.height + (event.clientY - startPosition.y))
 							};
 
-							if(event.shiftKey){
-								// keep ratio
+							var keepRatio = (attrs.taImageResizeKeepAspectRatio !== undefined);
+							if(keepRatio || event.shiftKey) {
 								var newRatio = pos.y / pos.x;
 								pos.x = ratio > newRatio ? pos.x : pos.y / ratio;
 								pos.y = ratio > newRatio ? pos.x * ratio : pos.y;
 							}
 							var el = angular.element(_el);
-							el.attr('height', Math.max(0, pos.y));
-							el.attr('width', Math.max(0, pos.x));
+							el.css('height', Math.round(Math.max(0, pos.y)));
+							el.css('width', Math.round(Math.max(0, pos.x)));
 
 							// reflow the popover tooltip
 							scope.reflowResizeOverlay(_el);
