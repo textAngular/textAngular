@@ -439,18 +439,18 @@ angular.module('textAngularSetup', [])
 			return this.$editor().wrapSelection("justifyLeft", null);
 		},
 		activeState: function(commonElement){
+			/* istanbul ignore next: */
+			if (commonElement && commonElement.nodeName === '#document') return false;
 			var result = false;
-			if (!commonElement || commonElement.nodeName === '#document') return false;
-			if(commonElement) result =
-				commonElement.css('text-align') === 'left' ||
-				commonElement.attr('align') === 'left' ||
-				(
-					commonElement.css('text-align') !== 'right' &&
-					commonElement.css('text-align') !== 'center' &&
-					commonElement.css('text-align') !== 'justify' &&
-					!this.$editor().queryCommandState('justifyRight') &&
-					!this.$editor().queryCommandState('justifyCenter')
-				) && !this.$editor().queryCommandState('justifyFull');
+			if (commonElement)
+				result =
+					commonElement.css('text-align') === 'left' ||
+					commonElement.attr('align') === 'left' ||
+					(
+						commonElement.css('text-align') !== 'right' &&
+						commonElement.css('text-align') !== 'center' &&
+						commonElement.css('text-align') !== 'justify' && !this.$editor().queryCommandState('justifyRight') && !this.$editor().queryCommandState('justifyCenter')
+					) && !this.$editor().queryCommandState('justifyFull');
 			result = result || this.$editor().queryCommandState('justifyLeft');
 			return result;
 		}
@@ -462,8 +462,9 @@ angular.module('textAngularSetup', [])
 			return this.$editor().wrapSelection("justifyRight", null);
 		},
 		activeState: function(commonElement){
+			/* istanbul ignore next: */
+			if (commonElement && commonElement.nodeName === '#document') return false;
 			var result = false;
-			if (!commonElement || commonElement.nodeName === '#document') return false;
 			if(commonElement) result = commonElement.css('text-align') === 'right';
 			result = result || this.$editor().queryCommandState('justifyRight');
 			return result;
@@ -476,8 +477,9 @@ angular.module('textAngularSetup', [])
 			return this.$editor().wrapSelection("justifyCenter", null);
 		},
 		activeState: function(commonElement){
+			/* istanbul ignore next: */
+			if (commonElement && commonElement.nodeName === '#document') return false;
 			var result = false;
-			if (!commonElement || commonElement.nodeName === '#document') return false;
 			if(commonElement) result = commonElement.css('text-align') === 'center';
 			result = result || this.$editor().queryCommandState('justifyCenter');
 			return result;
