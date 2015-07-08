@@ -262,8 +262,8 @@ textAngular.directive("textAngular", [
 								y: Math.max(0, startPosition.height + (event.clientY - startPosition.y))
 							};
 
-							if(event.shiftKey){
-								// keep ratio
+							var keepRatio = (attrs.taImageResizeKeepAspectRatio !== undefined);
+							if(keepRatio || event.shiftKey) {
 								var newRatio = pos.y / pos.x;
 								pos.x = ratio > newRatio ? pos.x : pos.y / ratio;
 								pos.y = ratio > newRatio ? pos.x * ratio : pos.y;
