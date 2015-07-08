@@ -358,7 +358,7 @@ textAngular.directive("textAngular", [
 
 				if(attrs.taPaste){
 					scope._pasteHandler = function(_html){
-						return $parse(attrs.taPaste)(scope.$parent, {$html: _html});
+						return $parse(attrs.taPaste)(scope.$parent, {$html: _html, $editor: scope});
 					};
 					scope.displayElements.text.attr('ta-paste', '_pasteHandler($html)');
 				}
