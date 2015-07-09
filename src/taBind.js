@@ -644,6 +644,7 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 					element.on('focus', scope.events.focus = function(){
 						_focussed = true;
 						element.removeClass('placeholder-text');
+						_reApplyOnSelectorHandlers();
 					});
 					
 					element.on('mouseup', scope.events.mouseup = function(){

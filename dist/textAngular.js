@@ -8,7 +8,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 */
 
 (function(){ // encapsulate all variables so they don't become global vars
-"use strict";					
+"use strict";
 // IE version detection - http://stackoverflow.com/questions/4169160/javascript-ie-detection-why-not-use-simple-conditional-comments
 // We need this as IE sometimes plays funny tricks with the contenteditable.
 // ----------------------------------------------------------
@@ -30,12 +30,12 @@ var _browserDetect = {
 			v = 3,
 			div = document.createElement('div'),
 			all = div.getElementsByTagName('i');
-		
+
 		while (
 			div.innerHTML = '<!--[if gt IE ' + (++v) + ']><i></i><![endif]-->',
 			all[0]
 		);
-		
+
 		return v > 4 ? v : undef;
 	}()),
 	webkit: /AppleWebKit\/([\d.]+)/i.test(navigator.userAgent)
@@ -63,11 +63,11 @@ if(_browserDetect.webkit) {
 					curelement.select(); // use select to place cursor for input elements.
 				}
 			}
-		}	
+		}
 		globalContentEditableBlur = false;
 	}, false); // add global click handler
 	angular.element(document).ready(function () {
-		angular.element(document.body).append(angular.element('<input id="textAngular-editableFix-010203040506070809" class="ta-hidden-input" unselectable="on" tabIndex="-1">'));
+		angular.element(document.body).append(angular.element('<input id="textAngular-editableFix-010203040506070809" class="ta-hidden-input" aria-hidden="true" unselectable="on" tabIndex="-1">'));
 	});
 }
 
@@ -140,7 +140,7 @@ if(_browserDetect.ie > 8 || _browserDetect.ie === undefined){
 		/* istanbul ignore next: browser catches */
 		if(_sheet.cssRules) insertIndex = Math.max(_sheet.cssRules.length - 1, 0);
 		else if(_sheet.rules) insertIndex = Math.max(_sheet.rules.length - 1, 0);
-		
+
 		/* istanbul ignore else: untestable IE option */
 		if(_sheet.insertRule) {
 			_sheet.insertRule(selector + "{" + rules + "}", insertIndex);
@@ -182,6 +182,7 @@ if(_browserDetect.ie > 8 || _browserDetect.ie === undefined){
 		}
 	};
 }
+
 angular.module('textAngular.factories', [])
 .factory('taBrowserTag', [function(){
 	return function(tag){
@@ -1619,6 +1620,7 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 					element.on('focus', scope.events.focus = function(){
 						_focussed = true;
 						element.removeClass('placeholder-text');
+						_reApplyOnSelectorHandlers();
 					});
 					
 					element.on('mouseup', scope.events.mouseup = function(){
@@ -1908,7 +1910,7 @@ textAngular.directive("textAngular", [
 					_originalContents, _toolbars,
 					_serial = (attrs.serial) ? attrs.serial : Math.floor(Math.random() * 10000000000000000),
 					_taExecCommand, _resizeMouseDown, _updateSelectedStylesTimeout;
-				
+
 				scope._name = (attrs.name) ? attrs.name : 'textAngularEditor' + _serial;
 
 				var oneEvent = function(_element, event, action){
@@ -2074,17 +2076,17 @@ textAngular.directive("textAngular", [
 								x: Math.max(0, startPosition.width + (event.clientX - startPosition.x)),
 								y: Math.max(0, startPosition.height + (event.clientY - startPosition.y))
 							};
-							
-							if(event.shiftKey){
-								// keep ratio
+
+							var keepRatio = (attrs.taImageResizeKeepAspectRatio !== undefined);
+							if(keepRatio || event.shiftKey) {
 								var newRatio = pos.y / pos.x;
 								pos.x = ratio > newRatio ? pos.x : pos.y / ratio;
 								pos.y = ratio > newRatio ? pos.x * ratio : pos.y;
 							}
 							var el = angular.element(_el);
-							el.attr('height', Math.max(0, pos.y));
-							el.attr('width', Math.max(0, pos.x));
-							
+							el.css('height', Math.round(Math.max(0, pos.y)));
+							el.css('width', Math.round(Math.max(0, pos.x)));
+
 							// reflow the popover tooltip
 							scope.reflowResizeOverlay(_el);
 						};
@@ -2099,6 +2101,7 @@ textAngular.directive("textAngular", [
 						event.preventDefault();
 					};
 
+					scope.displayElements.resize.anchors[3].off('mousedown');
 					scope.displayElements.resize.anchors[3].on('mousedown', _resizeMouseDown);
 
 					scope.reflowResizeOverlay(_el);
@@ -2129,12 +2132,12 @@ textAngular.directive("textAngular", [
 				});
 				scope.displayElements.scrollWindow.attr({'ng-hide': 'showHtml'});
 				if(attrs.taDefaultWrap) scope.displayElements.text.attr('ta-default-wrap', attrs.taDefaultWrap);
-				
+
 				if(attrs.taUnsafeSanitizer){
 					scope.displayElements.text.attr('ta-unsafe-sanitizer', attrs.taUnsafeSanitizer);
 					scope.displayElements.html.attr('ta-unsafe-sanitizer', attrs.taUnsafeSanitizer);
 				}
-				
+
 				// add the main elements to the origional element
 				scope.displayElements.scrollWindow.append(scope.displayElements.text);
 				element.append(scope.displayElements.scrollWindow);
@@ -2167,14 +2170,14 @@ textAngular.directive("textAngular", [
 						}
 					});
 				}
-				
+
 				if(attrs.taPaste){
 					scope._pasteHandler = function(_html){
 						return $parse(attrs.taPaste)(scope.$parent, {$html: _html});
 					};
 					scope.displayElements.text.attr('ta-paste', '_pasteHandler($html)');
 				}
-				
+
 				// compile the scope with the text and html elements only - if we do this with the main element it causes a compile loop
 				$compile(scope.displayElements.scrollWindow)(scope);
 				$compile(scope.displayElements.html)(scope);
@@ -2206,7 +2209,7 @@ textAngular.directive("textAngular", [
 						}else{
 							scope.displayElements.text[0].focus();
 						}
-						$window.rangy.restoreSelection(_savedSelection);
+						// $window.rangy.restoreSelection(_savedSelection);
 						$window.rangy.removeMarkers(_savedSelection);
 					}
 					_savedSelection = false;
@@ -2242,11 +2245,11 @@ textAngular.directive("textAngular", [
 				};
 				scope.displayElements.html.on('blur', _focusout);
 				scope.displayElements.text.on('blur', _focusout);
-				
+
 				scope.displayElements.text.on('paste', function(event){
 					element.triggerHandler('paste', event);
 				});
-				
+
 				// Setup the default toolbar tools, this way allows the user to add new tools like plugins.
 				// This is on the editor for future proofing if we find a better way to do this.
 				scope.queryFormatBlockState = function(command){
@@ -2396,6 +2399,17 @@ textAngular.directive("textAngular", [
 				};
 				// start updating on keydown
 				_keydown = function(){
+					// keyCode 9 is the TAB key
+					/* istanbul ignore next: not sure how to test this  */
+					if (event.ctrlKey===false && event.metaKey===false && event.keyCode===9) {
+						event.preventDefault();
+						var extraEventData = { specialKey: 'TabKey' };
+						if (event.shiftKey) {
+							extraEventData.specialKey = 'ShiftTabKey';
+						}
+						// since nether tab nor shift-tab generate a keypress event, we call directly
+						_keypress(event, extraEventData);
+					}
 					/* istanbul ignore next: ie catch */
 					if(!scope.focussed){
 						scope._bUpdateSelectedStyles = false;
@@ -2516,8 +2530,8 @@ textAngular.service('textAngularManager', ['taToolExecuteAction', 'taTools', 'ta
 					sendKeyCommand: function(event){
 						// we return true if we applied an action, false otherwise
 						var result = false;
-						if(event.ctrlKey || event.metaKey) angular.forEach(taTools, function(tool, name){
-							if(tool.commandKeyCode && tool.commandKeyCode === event.which){
+						if(event.ctrlKey || event.metaKey || event.specialKey) angular.forEach(taTools, function(tool, name){
+							if(tool.commandKeyCode && (tool.commandKeyCode === event.which || tool.commandKeyCode === event.specialKey)){
 								for(var _t = 0; _t < _toolbars.length; _t++){
 									if(_toolbars[_t].tools[name] !== undefined){
 										taToolExecuteAction.call(_toolbars[_t].tools[name], scope);
@@ -2583,7 +2597,7 @@ textAngular.service('textAngularManager', ['taToolExecuteAction', 'taTools', 'ta
 										break;
 									}
 								}
-								if(result) break; 
+								if(result) break;
 							}
 						}
 						return result;
@@ -2745,10 +2759,10 @@ textAngular.directive('textAngularToolbar', [
 						toolElement = angular.element(toolDefinition.display);
 					}
 					else toolElement = angular.element("<button type='button'>");
-					
+
 					if(toolDefinition && toolDefinition["class"]) toolElement.addClass(toolDefinition["class"]);
 					else toolElement.addClass(scope.classes.toolbarButton);
-					
+
 					toolElement.attr('name', toolScope.name);
 					// important to not take focus from the main text/html entry
 					toolElement.attr('ta-button', 'ta-button');
