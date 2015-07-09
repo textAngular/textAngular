@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>textAngular 1.4.1 Demo</title>
+    <title>textAngular <%=version %> Demo</title>
     <meta name="robots" content="noindex">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
     <link rel='stylesheet prefetch' href='../bower_components/font-awesome/css/font-awesome.css'>
@@ -27,13 +27,9 @@
         right: 0;
     }
     </style>
-    
-      <script src='../dist/textAngular-rangy.min.js'></script>
-    
-      <script src='../dist/textAngular-sanitize.min.js'></script>
-    
-      <script src='../dist/textAngular.min.js'></script>
-    
+    <% js.forEach(function(each){ %>
+      <script src='../<%= each %>'></script>
+    <% }); %>
 </head>
 
 <body>
