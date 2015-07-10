@@ -1,4 +1,4 @@
-					
+
 // IE version detection - http://stackoverflow.com/questions/4169160/javascript-ie-detection-why-not-use-simple-conditional-comments
 // We need this as IE sometimes plays funny tricks with the contenteditable.
 // ----------------------------------------------------------
@@ -20,12 +20,12 @@ var _browserDetect = {
 			v = 3,
 			div = document.createElement('div'),
 			all = div.getElementsByTagName('i');
-		
+
 		while (
 			div.innerHTML = '<!--[if gt IE ' + (++v) + ']><i></i><![endif]-->',
 			all[0]
 		);
-		
+
 		return v > 4 ? v : undef;
 	}()),
 	webkit: /AppleWebKit\/([\d.]+)/i.test(navigator.userAgent)
@@ -53,11 +53,11 @@ if(_browserDetect.webkit) {
 					curelement.select(); // use select to place cursor for input elements.
 				}
 			}
-		}	
+		}
 		globalContentEditableBlur = false;
 	}, false); // add global click handler
 	angular.element(document).ready(function () {
-		angular.element(document.body).append(angular.element('<input id="textAngular-editableFix-010203040506070809" class="ta-hidden-input" unselectable="on" tabIndex="-1">'));
+		angular.element(document.body).append(angular.element('<input id="textAngular-editableFix-010203040506070809" class="ta-hidden-input" aria-hidden="true" unselectable="on" tabIndex="-1">'));
 	});
 }
 
@@ -130,7 +130,7 @@ if(_browserDetect.ie > 8 || _browserDetect.ie === undefined){
 		/* istanbul ignore next: browser catches */
 		if(_sheet.cssRules) insertIndex = Math.max(_sheet.cssRules.length - 1, 0);
 		else if(_sheet.rules) insertIndex = Math.max(_sheet.rules.length - 1, 0);
-		
+
 		/* istanbul ignore else: untestable IE option */
 		if(_sheet.insertRule) {
 			_sheet.insertRule(selector + "{" + rules + "}", insertIndex);

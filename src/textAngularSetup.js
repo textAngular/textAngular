@@ -176,7 +176,170 @@ angular.module('textAngularSetup', [])
 		tooltip: 'Display characters Count'
 	}
 })
-.run(['taRegisterTool', '$window', 'taTranslations', 'taSelection', function(taRegisterTool, $window, taTranslations, taSelection){
+.factory('taToolFunctions', ['$window','taTranslations', function($window, taTranslations) {
+	return {
+		imgOnSelectAction: function(event, $element, editorScope){
+			// setup the editor toolbar
+			// Credit to the work at http://hackerwins.github.io/summernote/ for this editbar logic/display
+			var finishEdit = function(){
+				editorScope.updateTaBindtaTextElement();
+				editorScope.hidePopover();
+			};
+			event.preventDefault();
+			editorScope.displayElements.popover.css('width', '375px');
+			var container = editorScope.displayElements.popoverContainer;
+			container.empty();
+			var buttonGroup = angular.element('<div class="btn-group" style="padding-right: 6px;">');
+			var fullButton = angular.element('<button type="button" class="btn btn-default btn-sm btn-small" unselectable="on" tabindex="-1">100% </button>');
+			fullButton.on('click', function(event){
+				event.preventDefault();
+				$element.css({
+					'width': '100%',
+					'height': ''
+				});
+				finishEdit();
+			});
+			var halfButton = angular.element('<button type="button" class="btn btn-default btn-sm btn-small" unselectable="on" tabindex="-1">50% </button>');
+			halfButton.on('click', function(event){
+				event.preventDefault();
+				$element.css({
+					'width': '50%',
+					'height': ''
+				});
+				finishEdit();
+			});
+			var quartButton = angular.element('<button type="button" class="btn btn-default btn-sm btn-small" unselectable="on" tabindex="-1">25% </button>');
+			quartButton.on('click', function(event){
+				event.preventDefault();
+				$element.css({
+					'width': '25%',
+					'height': ''
+				});
+				finishEdit();
+			});
+			var resetButton = angular.element('<button type="button" class="btn btn-default btn-sm btn-small" unselectable="on" tabindex="-1">Reset</button>');
+			resetButton.on('click', function(event){
+				event.preventDefault();
+				$element.css({
+					width: '',
+					height: ''
+				});
+				finishEdit();
+			});
+			buttonGroup.append(fullButton);
+			buttonGroup.append(halfButton);
+			buttonGroup.append(quartButton);
+			buttonGroup.append(resetButton);
+			container.append(buttonGroup);
+
+			buttonGroup = angular.element('<div class="btn-group" style="padding-right: 6px;">');
+			var floatLeft = angular.element('<button type="button" class="btn btn-default btn-sm btn-small" unselectable="on" tabindex="-1"><i class="fa fa-align-left"></i></button>');
+			floatLeft.on('click', function(event){
+				event.preventDefault();
+				// webkit
+				$element.css('float', 'left');
+				// firefox
+				$element.css('cssFloat', 'left');
+				// IE < 8
+				$element.css('styleFloat', 'left');
+				finishEdit();
+			});
+			var floatRight = angular.element('<button type="button" class="btn btn-default btn-sm btn-small" unselectable="on" tabindex="-1"><i class="fa fa-align-right"></i></button>');
+			floatRight.on('click', function(event){
+				event.preventDefault();
+				// webkit
+				$element.css('float', 'right');
+				// firefox
+				$element.css('cssFloat', 'right');
+				// IE < 8
+				$element.css('styleFloat', 'right');
+				finishEdit();
+			});
+			var floatNone = angular.element('<button type="button" class="btn btn-default btn-sm btn-small" unselectable="on" tabindex="-1"><i class="fa fa-align-justify"></i></button>');
+			floatNone.on('click', function(event){
+				event.preventDefault();
+				// webkit
+				$element.css('float', '');
+				// firefox
+				$element.css('cssFloat', '');
+				// IE < 8
+				$element.css('styleFloat', '');
+				finishEdit();
+			});
+			buttonGroup.append(floatLeft);
+			buttonGroup.append(floatNone);
+			buttonGroup.append(floatRight);
+			container.append(buttonGroup);
+
+			buttonGroup = angular.element('<div class="btn-group">');
+			var remove = angular.element('<button type="button" class="btn btn-default btn-sm btn-small" unselectable="on" tabindex="-1"><i class="fa fa-trash-o"></i></button>');
+			remove.on('click', function(event){
+				event.preventDefault();
+				$element.remove();
+				finishEdit();
+			});
+			buttonGroup.append(remove);
+			container.append(buttonGroup);
+
+			editorScope.showPopover($element);
+			editorScope.showResizeOverlay($element);
+		},
+		aOnSelectAction: function(event, $element, editorScope){
+			// setup the editor toolbar
+			// Credit to the work at http://hackerwins.github.io/summernote/ for this editbar logic
+			event.preventDefault();
+			editorScope.displayElements.popover.css('width', '436px');
+			var container = editorScope.displayElements.popoverContainer;
+			container.empty();
+			container.css('line-height', '28px');
+			var link = angular.element('<a href="' + $element.attr('href') + '" target="_blank">' + $element.attr('href') + '</a>');
+			link.css({
+				'display': 'inline-block',
+				'max-width': '200px',
+				'overflow': 'hidden',
+				'text-overflow': 'ellipsis',
+				'white-space': 'nowrap',
+				'vertical-align': 'middle'
+			});
+			container.append(link);
+			var buttonGroup = angular.element('<div class="btn-group pull-right">');
+			var reLinkButton = angular.element('<button type="button" class="btn btn-default btn-sm btn-small" tabindex="-1" unselectable="on" title="' + taTranslations.editLink.reLinkButton.tooltip + '"><i class="fa fa-edit icon-edit"></i></button>');
+			reLinkButton.on('click', function(event){
+				event.preventDefault();
+				var urlLink = $window.prompt(taTranslations.insertLink.dialogPrompt, $element.attr('href'));
+				if(urlLink && urlLink !== '' && urlLink !== 'http://'){
+					$element.attr('href', urlLink);
+					editorScope.updateTaBindtaTextElement();
+				}
+				editorScope.hidePopover();
+			});
+			buttonGroup.append(reLinkButton);
+			var unLinkButton = angular.element('<button type="button" class="btn btn-default btn-sm btn-small" tabindex="-1" unselectable="on" title="' + taTranslations.editLink.unLinkButton.tooltip + '"><i class="fa fa-unlink icon-unlink"></i></button>');
+			// directly before this click event is fired a digest is fired off whereby the reference to $element is orphaned off
+			unLinkButton.on('click', function(event){
+				event.preventDefault();
+				$element.replaceWith($element.contents());
+				editorScope.updateTaBindtaTextElement();
+				editorScope.hidePopover();
+			});
+			buttonGroup.append(unLinkButton);
+			var targetToggle = angular.element('<button type="button" class="btn btn-default btn-sm btn-small" tabindex="-1" unselectable="on">' + taTranslations.editLink.targetToggle.buttontext + '</button>');
+			if($element.attr('target') === '_blank'){
+				targetToggle.addClass('active');
+			}
+			targetToggle.on('click', function(event){
+				event.preventDefault();
+				$element.attr('target', ($element.attr('target') === '_blank') ? '' : '_blank');
+				targetToggle.toggleClass('active');
+				editorScope.updateTaBindtaTextElement();
+			});
+			buttonGroup.append(targetToggle);
+			container.append(buttonGroup);
+			editorScope.showPopover($element);
+		}
+	};
+}])
+.run(['taRegisterTool', '$window', 'taTranslations', 'taSelection', 'taToolFunctions', function(taRegisterTool, $window, taTranslations, taSelection, taToolFunctions){
 	taRegisterTool("html", {
 		iconclass: 'fa fa-code',
 		tooltiptext: taTranslations.html.tooltip,
@@ -276,17 +439,18 @@ angular.module('textAngularSetup', [])
 			return this.$editor().wrapSelection("justifyLeft", null);
 		},
 		activeState: function(commonElement){
+			/* istanbul ignore next: */
+			if (commonElement && commonElement.nodeName === '#document') return false;
 			var result = false;
-			if(commonElement) result =
-				commonElement.css('text-align') === 'left' ||
-				commonElement.attr('align') === 'left' ||
-				(
-					commonElement.css('text-align') !== 'right' &&
-					commonElement.css('text-align') !== 'center' &&
-					commonElement.css('text-align') !== 'justify' &&
-					!this.$editor().queryCommandState('justifyRight') &&
-					!this.$editor().queryCommandState('justifyCenter')
-				) && !this.$editor().queryCommandState('justifyFull');
+			if (commonElement)
+				result =
+					commonElement.css('text-align') === 'left' ||
+					commonElement.attr('align') === 'left' ||
+					(
+						commonElement.css('text-align') !== 'right' &&
+						commonElement.css('text-align') !== 'center' &&
+						commonElement.css('text-align') !== 'justify' && !this.$editor().queryCommandState('justifyRight') && !this.$editor().queryCommandState('justifyCenter')
+					) && !this.$editor().queryCommandState('justifyFull');
 			result = result || this.$editor().queryCommandState('justifyLeft');
 			return result;
 		}
@@ -298,6 +462,8 @@ angular.module('textAngularSetup', [])
 			return this.$editor().wrapSelection("justifyRight", null);
 		},
 		activeState: function(commonElement){
+			/* istanbul ignore next: */
+			if (commonElement && commonElement.nodeName === '#document') return false;
 			var result = false;
 			if(commonElement) result = commonElement.css('text-align') === 'right';
 			result = result || this.$editor().queryCommandState('justifyRight');
@@ -311,6 +477,8 @@ angular.module('textAngularSetup', [])
 			return this.$editor().wrapSelection("justifyCenter", null);
 		},
 		activeState: function(commonElement){
+			/* istanbul ignore next: */
+			if (commonElement && commonElement.nodeName === '#document') return false;
 			var result = false;
 			if(commonElement) result = commonElement.css('text-align') === 'center';
 			result = result || this.$editor().queryCommandState('justifyCenter');
@@ -325,7 +493,8 @@ angular.module('textAngularSetup', [])
 		},
 		activeState: function(){
 			return this.$editor().queryFormatBlockState('blockquote');
-		}
+		},
+		commandKeyCode: 'TabKey'
 	});
 	taRegisterTool('outdent', {
 		iconclass: 'fa fa-outdent',
@@ -335,7 +504,8 @@ angular.module('textAngularSetup', [])
 		},
 		activeState: function(){
 			return false;
-		}
+		},
+		commandKeyCode: 'ShiftTabKey'
 	});
 	taRegisterTool('italics', {
 		iconclass: 'fa fa-italic',
@@ -436,112 +606,6 @@ angular.module('textAngularSetup', [])
 		}
 	});
 
-	var imgOnSelectAction = function(event, $element, editorScope){
-		// setup the editor toolbar
-		// Credit to the work at http://hackerwins.github.io/summernote/ for this editbar logic/display
-		var finishEdit = function(){
-			editorScope.updateTaBindtaTextElement();
-			editorScope.hidePopover();
-		};
-		event.preventDefault();
-		editorScope.displayElements.popover.css('width', '375px');
-		var container = editorScope.displayElements.popoverContainer;
-		container.empty();
-		var buttonGroup = angular.element('<div class="btn-group" style="padding-right: 6px;">');
-		var fullButton = angular.element('<button type="button" class="btn btn-default btn-sm btn-small" unselectable="on" tabindex="-1">100% </button>');
-		fullButton.on('click', function(event){
-			event.preventDefault();
-			$element.css({
-				'width': '100%',
-				'height': ''
-			});
-			finishEdit();
-		});
-		var halfButton = angular.element('<button type="button" class="btn btn-default btn-sm btn-small" unselectable="on" tabindex="-1">50% </button>');
-		halfButton.on('click', function(event){
-			event.preventDefault();
-			$element.css({
-				'width': '50%',
-				'height': ''
-			});
-			finishEdit();
-		});
-		var quartButton = angular.element('<button type="button" class="btn btn-default btn-sm btn-small" unselectable="on" tabindex="-1">25% </button>');
-		quartButton.on('click', function(event){
-			event.preventDefault();
-			$element.css({
-				'width': '25%',
-				'height': ''
-			});
-			finishEdit();
-		});
-		var resetButton = angular.element('<button type="button" class="btn btn-default btn-sm btn-small" unselectable="on" tabindex="-1">Reset</button>');
-		resetButton.on('click', function(event){
-			event.preventDefault();
-			$element.css({
-				width: '',
-				height: ''
-			});
-			finishEdit();
-		});
-		buttonGroup.append(fullButton);
-		buttonGroup.append(halfButton);
-		buttonGroup.append(quartButton);
-		buttonGroup.append(resetButton);
-		container.append(buttonGroup);
-
-		buttonGroup = angular.element('<div class="btn-group" style="padding-right: 6px;">');
-		var floatLeft = angular.element('<button type="button" class="btn btn-default btn-sm btn-small" unselectable="on" tabindex="-1"><i class="fa fa-align-left"></i></button>');
-		floatLeft.on('click', function(event){
-			event.preventDefault();
-			// webkit
-			$element.css('float', 'left');
-			// firefox
-			$element.css('cssFloat', 'left');
-			// IE < 8
-			$element.css('styleFloat', 'left');
-			finishEdit();
-		});
-		var floatRight = angular.element('<button type="button" class="btn btn-default btn-sm btn-small" unselectable="on" tabindex="-1"><i class="fa fa-align-right"></i></button>');
-		floatRight.on('click', function(event){
-			event.preventDefault();
-			// webkit
-			$element.css('float', 'right');
-			// firefox
-			$element.css('cssFloat', 'right');
-			// IE < 8
-			$element.css('styleFloat', 'right');
-			finishEdit();
-		});
-		var floatNone = angular.element('<button type="button" class="btn btn-default btn-sm btn-small" unselectable="on" tabindex="-1"><i class="fa fa-align-justify"></i></button>');
-		floatNone.on('click', function(event){
-			event.preventDefault();
-			// webkit
-			$element.css('float', '');
-			// firefox
-			$element.css('cssFloat', '');
-			// IE < 8
-			$element.css('styleFloat', '');
-			finishEdit();
-		});
-		buttonGroup.append(floatLeft);
-		buttonGroup.append(floatNone);
-		buttonGroup.append(floatRight);
-		container.append(buttonGroup);
-
-		buttonGroup = angular.element('<div class="btn-group">');
-		var remove = angular.element('<button type="button" class="btn btn-default btn-sm btn-small" unselectable="on" tabindex="-1"><i class="fa fa-trash-o"></i></button>');
-		remove.on('click', function(event){
-			event.preventDefault();
-			$element.remove();
-			finishEdit();
-		});
-		buttonGroup.append(remove);
-		container.append(buttonGroup);
-
-		editorScope.showPopover($element);
-		editorScope.showResizeOverlay($element);
-	};
 
 	taRegisterTool('insertImage', {
 		iconclass: 'fa fa-picture-o',
@@ -555,7 +619,7 @@ angular.module('textAngularSetup', [])
 		},
 		onElementSelect: {
 			element: 'img',
-			action: imgOnSelectAction
+			action: taToolFunctions.imgOnSelectAction
 		}
 	});
 	taRegisterTool('insertVideo', {
@@ -583,7 +647,7 @@ angular.module('textAngularSetup', [])
 		onElementSelect: {
 			element: 'img',
 			onlyWithAttrs: ['ta-insert-video'],
-			action: imgOnSelectAction
+			action: taToolFunctions.imgOnSelectAction
 		}
 	});
 	taRegisterTool('insertLink', {
@@ -602,59 +666,7 @@ angular.module('textAngularSetup', [])
 		},
 		onElementSelect: {
 			element: 'a',
-			action: function(event, $element, editorScope){
-				// setup the editor toolbar
-				// Credit to the work at http://hackerwins.github.io/summernote/ for this editbar logic
-				event.preventDefault();
-				editorScope.displayElements.popover.css('width', '436px');
-				var container = editorScope.displayElements.popoverContainer;
-				container.empty();
-				container.css('line-height', '28px');
-				var link = angular.element('<a href="' + $element.attr('href') + '" target="_blank">' + $element.attr('href') + '</a>');
-				link.css({
-					'display': 'inline-block',
-					'max-width': '200px',
-					'overflow': 'hidden',
-					'text-overflow': 'ellipsis',
-					'white-space': 'nowrap',
-					'vertical-align': 'middle'
-				});
-				container.append(link);
-				var buttonGroup = angular.element('<div class="btn-group pull-right">');
-				var reLinkButton = angular.element('<button type="button" class="btn btn-default btn-sm btn-small" tabindex="-1" unselectable="on" title="' + taTranslations.editLink.reLinkButton.tooltip + '"><i class="fa fa-edit icon-edit"></i></button>');
-				reLinkButton.on('click', function(event){
-					event.preventDefault();
-					var urlLink = $window.prompt(taTranslations.insertLink.dialogPrompt, $element.attr('href'));
-					if(urlLink && urlLink !== '' && urlLink !== 'http://'){
-						$element.attr('href', urlLink);
-						editorScope.updateTaBindtaTextElement();
-					}
-					editorScope.hidePopover();
-				});
-				buttonGroup.append(reLinkButton);
-				var unLinkButton = angular.element('<button type="button" class="btn btn-default btn-sm btn-small" tabindex="-1" unselectable="on" title="' + taTranslations.editLink.unLinkButton.tooltip + '"><i class="fa fa-unlink icon-unlink"></i></button>');
-				// directly before this click event is fired a digest is fired off whereby the reference to $element is orphaned off
-				unLinkButton.on('click', function(event){
-					event.preventDefault();
-					$element.replaceWith($element.contents());
-					editorScope.updateTaBindtaTextElement();
-					editorScope.hidePopover();
-				});
-				buttonGroup.append(unLinkButton);
-				var targetToggle = angular.element('<button type="button" class="btn btn-default btn-sm btn-small" tabindex="-1" unselectable="on">' + taTranslations.editLink.targetToggle.buttontext + '</button>');
-				if($element.attr('target') === '_blank'){
-					targetToggle.addClass('active');
-				}
-				targetToggle.on('click', function(event){
-					event.preventDefault();
-					$element.attr('target', ($element.attr('target') === '_blank') ? '' : '_blank');
-					targetToggle.toggleClass('active');
-					editorScope.updateTaBindtaTextElement();
-				});
-				buttonGroup.append(targetToggle);
-				container.append(buttonGroup);
-				editorScope.showPopover($element);
-			}
+			action: taToolFunctions.aOnSelectAction
 		}
 	});
 	taRegisterTool('wordcount', {
