@@ -140,6 +140,9 @@ var $sanitizeMinErr = angular.$$minErr('$sanitize');
 function $SanitizeProvider() {
   this.$get = ['$$sanitizeUri', function($$sanitizeUri) {
     return function(html) {
+      if (typeof arguments[1] != 'undefined') {
+        arguments[1].version = 'taSanitize';
+      }
       var buf = [];
       htmlParser(html, htmlSanitizeWriter(buf, function(uri, isImage) {
         return !/^unsafe/.test($$sanitizeUri(uri, isImage));
