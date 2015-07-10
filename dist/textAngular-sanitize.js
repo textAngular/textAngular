@@ -140,6 +140,9 @@ var $sanitizeMinErr = angular.$$minErr('$sanitize');
 function $SanitizeProvider() {
   this.$get = ['$$sanitizeUri', function($$sanitizeUri) {
     return function(html) {
+      if (typeof arguments[1] != 'undefined') {
+        arguments[1].version = 'taSanitize';
+      }
       var buf = [];
       htmlParser(html, htmlSanitizeWriter(buf, function(uri, isImage) {
         return !/^unsafe/.test($$sanitizeUri(uri, isImage));
@@ -178,7 +181,7 @@ var START_TAG_REGEXP =
 
 // Safe Void Elements - HTML5
 // http://dev.w3.org/html5/spec/Overview.html#void-elements
-var voidElements = makeMap("area,br,col,hr,img,wbr");
+var voidElements = makeMap("area,br,col,hr,img,wbr,input");
 
 // Elements that you can, intentionally, leave open (and which close themselves)
 // http://dev.w3.org/html5/spec/Overview.html#optional-tags
