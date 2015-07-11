@@ -1,3 +1,27 @@
+<a name"1.4.2"></a>
+### 1.4.2 (2015-07-10)
+
+#### Bug Fixes
+
+* **taBind:** Reapply selector handles on focus ([f05857e3](https://github.com/fraywing/textAngular/commit/f05857e3))
+* **textAngular:** Fixed resize image issue ([52fb20c0](https://github.com/fraywing/textAngular/commit/52fb20c0))
+* **grunt:** Update javascript path in watch target ([58df955d](https://github.com/fraywing/textAngular/commit/58df955d))
+* **textAngular:**
+  * Fixed test coverage when commonElement is document ([b807423b](https://github.com/fraywing/textAngular/commit/b807423b ))
+  * Fixed corner case when commonElement is document ([dbea6244](https://github.com/fraywing/textAngular/commit/dbea6244))
+  * Use CSS instead of html attributes to resize image. ([a84f6df4](https://github.com/fraywing/textAngular/commit/a84f6df4))
+  * Fix resize image issue ([52fb20c0](https://github.com/fraywing/textAngular/commit/52fb20c0))
+
+#### Features
+
+* **textAngular:** 
+   * Added directives ta-resize-keep-aspect-ratio and ta-resize-maintain-aspect-ratio to control image-resize ([32697058](https://github.com/fraywing/textAngular/commit/32697058))
+   * Added input to the safe element list ([945cfa00](https://github.com/fraywing/textAngular/commit/945cfa00))
+* **textAngularDemo:** Updated the demo to be in synch with this release ([93fd4048](https://github.com/fraywing/textAngular/commit/93fd4048))
+* **globals:** Added aria-hidden to hidden input, to hide it from screen readers ([b49bf814](https://github.com/fraywing/textAngular/commit/b49bf814))
+* **textAngularSetup:** Enhanced toolbar to handle TAB and SHIFT-TAB KEYS. ([8df51fb](https://github.com/fraywing/textAngular/commit/8df51fb))
+* **taToolFunctions:** Create factory for sharable functions ([032611dd](https://github.com/fraywing/textAngular/commit/032611dd))
+
 <a name="1.4.1"></a>
 ### 1.4.1 (2015-05-25)
 
