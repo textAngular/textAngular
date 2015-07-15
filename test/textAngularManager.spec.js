@@ -1,35 +1,35 @@
 describe('textAngularManager', function(){
 	'use strict';
 	beforeEach(module('textAngular'));
-	
+
 	describe('toolbar', function(){
 		describe('registration', function(){
 			it('should require a scope object', inject(function(textAngularManager){
 				expect(textAngularManager.registerToolbar).toThrow("textAngular Error: A toolbar requires a scope");
 			}));
-			
+
 			it('should require a name', inject(function(textAngularManager){
 				expect(function(){textAngularManager.registerToolbar({});}).toThrow("textAngular Error: A toolbar requires a name");
 				expect(function(){textAngularManager.registerToolbar({name: ''});}).toThrow("textAngular Error: A toolbar requires a name");
 			}));
-			
+
 			it('should require a unique name', inject(function(textAngularManager){
 				textAngularManager.registerToolbar({name: 'test'});
 				expect(function(){textAngularManager.registerToolbar({name: 'test'});}).toThrow('textAngular Error: A toolbar with name "test" already exists');
 			}));
 		});
-		
+
 		describe('retrieval', function(){
 			it('should be undefined for no registered toolbar', inject(function(textAngularManager){
 				expect(textAngularManager.retrieveToolbar('test')).toBeUndefined();
 			}));
-			
+
 			it('should get the correct toolbar', inject(function(textAngularManager){
 				var scope = {name: 'test'};
 				textAngularManager.registerToolbar(scope);
 				expect(textAngularManager.retrieveToolbar('test')).toBe(scope);
 			}));
-			
+
 			it('should get the correct toolbar via editor', inject(function(textAngularManager){
 				var scope = {name: 'test'};
 				textAngularManager.registerToolbar(scope);
@@ -37,7 +37,7 @@ describe('textAngularManager', function(){
 				expect(textAngularManager.retrieveToolbarsViaEditor('testeditor')[0]).toBe(scope);
 			}));
 		});
-		
+
 		describe('unregister', function(){
 			it('should get the correct toolbar', inject(function(textAngularManager){
 				textAngularManager.registerToolbar({name: 'test'});
@@ -45,7 +45,7 @@ describe('textAngularManager', function(){
 				expect(textAngularManager.retrieveToolbar('test')).toBeUndefined();
 			}));
 		});
-		
+
 		describe('modification', function(){
 			var $rootScope, toolbar1, toolbar2, textAngularManager;
 			beforeEach(inject(function(_textAngularManager_){
@@ -57,7 +57,7 @@ describe('textAngularManager', function(){
 				toolbar2 = jQuery(_$compile_('<text-angular-toolbar name="test2"></text-angular-toolbar>')($rootScope)[0]);
 				$rootScope.$digest();
 			}));
-			
+
 			describe('throws error on no toolbar', function(){
 				it('when update tool', function(){
 					expect(function(){
@@ -70,7 +70,7 @@ describe('textAngularManager', function(){
 					}).toThrow('textAngular Error: No Toolbar with name "test" exists');
 				});
 			});
-			
+
 			describe('single toolbar', function(){
 				// we test these by adding an icon with a specific class and then testing for it's existance
 				it('should update only one button on one toolbar', function(){
@@ -113,7 +113,7 @@ describe('textAngularManager', function(){
 					expect(jQuery('[name="h1"] i.test-icon-class, [name="h2"] i.test-icon-class2', toolbar2).length).toBe(0);
 				});
 			});
-			
+
 			describe('dynamically add tool', function(){
 				it('to all toolbars', function(){
 					textAngularManager.addTool('newtool', {buttontext: 'Test Add Tool'}, 0, 0);
@@ -126,7 +126,7 @@ describe('textAngularManager', function(){
 					expect(toolbar2.find('[name="newtool"]').length).toBe(0);
 				});
 			});
-			
+
 			describe('dynamically remove tool', function(){
 				it('from all toolbars', function(){
 					textAngularManager.addTool('newtool', {buttontext: 'Test Add Tool'}, 0, 0);
@@ -143,56 +143,56 @@ describe('textAngularManager', function(){
 			});
 		});
 	});
-	
+
 	describe('editor', function(){
 		describe('registration', function(){
 			it('should require a name', inject(function(textAngularManager){
 				expect(textAngularManager.registerEditor).toThrow("textAngular Error: An editor requires a name");
 				expect(function(){textAngularManager.registerEditor('');}).toThrow("textAngular Error: An editor requires a name");
 			}));
-			
+
 			it('should require a scope object', inject(function(textAngularManager){
 				expect(function(){textAngularManager.registerEditor('test');}).toThrow("textAngular Error: An editor requires a scope");
 			}));
-			
+
 			it('should require a unique name', inject(function(textAngularManager){
 				textAngularManager.registerEditor('test', {});
 				expect(function(){textAngularManager.registerEditor('test', {});}).toThrow('textAngular Error: An Editor with name "test" already exists');
 			}));
-			
+
 			it('should return a disable function', inject(function(textAngularManager){
 				expect(textAngularManager.registerEditor('test', {}).disable).toBeDefined();
 			}));
-			
+
 			it('should return a enable function', inject(function(textAngularManager){
 				expect(textAngularManager.registerEditor('test', {}).enable).toBeDefined();
 			}));
-			
+
 			it('should return a focus function', inject(function(textAngularManager){
 				expect(textAngularManager.registerEditor('test', {}).focus).toBeDefined();
 			}));
-			
+
 			it('should return a unfocus function', inject(function(textAngularManager){
 				expect(textAngularManager.registerEditor('test', {}).unfocus).toBeDefined();
 			}));
-			
+
 			it('should return a updateSelectedStyles function', inject(function(textAngularManager){
 				expect(textAngularManager.registerEditor('test', {}).updateSelectedStyles).toBeDefined();
 			}));
 		});
-		
+
 		describe('retrieval', function(){
 			it('should be undefined for no registered editor', inject(function(textAngularManager){
 				expect(textAngularManager.retrieveEditor('test')).toBeUndefined();
 			}));
-			
+
 			it('should get the correct editor', inject(function(textAngularManager){
 				var scope = {};
 				textAngularManager.registerEditor('test', scope);
 				expect(textAngularManager.retrieveEditor('test').scope).toBe(scope);
 			}));
 		});
-		
+
 		describe('unregister', function(){
 			it('should get the correct editor', inject(function(textAngularManager){
 				textAngularManager.registerEditor('test', {});
@@ -200,14 +200,14 @@ describe('textAngularManager', function(){
 				expect(textAngularManager.retrieveEditor('test')).toBeUndefined();
 			}));
 		});
-		
+
 		describe('interacting', function(){
 			var $rootScope, textAngularManager, editorFuncs, testbar1, testbar2, testbar3;
 			var editorScope = {};
 			beforeEach(inject(function(_textAngularManager_){
 				textAngularManager = _textAngularManager_;
 			}));
-			
+
 			describe('active state', function(){
 				beforeEach(inject(function (_$rootScope_) {
 					$rootScope = _$rootScope_;
@@ -269,7 +269,7 @@ describe('textAngularManager', function(){
 					});
 				});
 			});
-			
+
 			describe('actions passthrough', function(){
 				var editorScope, element;
 				beforeEach(inject(function(taRegisterTool, taOptions, _$rootScope_, _$compile_){
@@ -334,6 +334,20 @@ describe('textAngularManager', function(){
 							}
 						}
 					});
+					taRegisterTool('specialkey', {
+						buttontext: 'specialkey',
+						action: function(){
+							return this.$element.attr('hit-this', 'true');
+						},
+						commandKeyCode: 'TabKey',
+						onElementSelect: {
+							element: 'i',
+							onlyWithAttrs: ['src','href'],
+							action: function(event, element, editorScope){
+								return this.$element.attr('hit-this', 'true');
+							}
+						}
+					});
 					taRegisterTool('unused', {
 						buttontext: 'Button Is Not Used',
 						action: function(){
@@ -347,7 +361,7 @@ describe('textAngularManager', function(){
 							}
 						}
 					});
-					taOptions.toolbar = [['noactivestate','activeonrangyrange','inactiveonrangyrange','onselect','onselectattr','onselectattr_specific']];
+					taOptions.toolbar = [['noactivestate','activeonrangyrange','inactiveonrangyrange','onselect','onselectattr','onselectattr_specific', 'specialkey']];
 					$rootScope = _$rootScope_;
 					element = jQuery(_$compile_('<text-angular name="test"><p>Test Content</p></text-angular>')($rootScope)[0]);
 					$rootScope.$digest();
@@ -367,74 +381,77 @@ describe('textAngularManager', function(){
 						});
 					});
 				});
-				
+
 				describe('sendKeyCommand', function(){
 					it('should return true if there is a relevantCommandKeyCode on a tool', function(){
 						expect(editorScope.editorFunctions.sendKeyCommand({metaKey: true, which: 21})).toBe(true);
 					});
-					
+
 					it('should call the action of the specified tool', function(){
 						editorScope.editorFunctions.sendKeyCommand({metaKey: true, which: 21});
 						$rootScope.$digest();
 						expect(element.find('.ta-toolbar button[name=activeonrangyrange]').attr('hit-this')).toBe('true');
 					});
-					
+
 					it('should react only when modifiers present', function(){
 						editorScope.editorFunctions.sendKeyCommand({which: 21});
 						$rootScope.$digest();
 						expect(element.find('.ta-toolbar button[name=activeonrangyrange]').attr('hit-this')).toBeUndefined();
 					});
-					
+
 					it('should react to metaKey', function(){
 						editorScope.editorFunctions.sendKeyCommand({metaKey: true, which: 21});
 						$rootScope.$digest();
 						expect(element.find('.ta-toolbar button[name=activeonrangyrange]').attr('hit-this')).toBe('true');
 					});
-					
+
 					it('should react to ctrlKey', function(){
 						editorScope.editorFunctions.sendKeyCommand({ctrlKey: true, which: 21});
 						$rootScope.$digest();
 						expect(element.find('.ta-toolbar button[name=activeonrangyrange]').attr('hit-this')).toBe('true');
 					});
-					
-					it('should do nothing if button not added', function(){
-						expect(function(){
-							editorScope.editorFunctions.sendKeyCommand({ctrlKey: true, which: 42});
-						}).not.toThrow();
+
+					it('should react to tabKey', function(){
+						var event = {shiftKey: false, which: 9, specialKey: 'TabKey',
+							preventDefault: function () {}};
+						var fakeEditorScope =  { updateSelectedStyles: function() {}};
+						textAngularManager.sendKeyCommand(fakeEditorScope, event);
+						$rootScope.$digest();
+						expect(element.find('.ta-toolbar button[name=specialkey]').attr('hit-this')).toBe('true');
 					});
 				});
-				
+
 				describe('onElementSelect', function(){
 					it('should do nothing if button not added', function(){
 						expect(function(){
 							editorScope.editorFunctions.triggerElementSelect({}, '<b>');
 						}).not.toThrow();
 					});
-					
+
 					it('should return true if there is a relevant select element on a tool', function(){
 						expect(editorScope.editorFunctions.triggerElementSelect({}, '<i>')).toBe(true);
 					});
-					
+
 					it('should call the onElementSelect.action handler of defined tools', function(){
 						editorScope.editorFunctions.triggerElementSelect({}, '<i>');
 						$rootScope.$digest();
 						expect(element.find('.ta-toolbar button[name=onselect]').attr('hit-this')).toBe('true');
 					});
-					
+
 					it('should call the onElementSelect.action handler of defined tools with attr', function(){
 						editorScope.editorFunctions.triggerElementSelect({}, '<i src="test">');
 						$rootScope.$digest();
 						expect(element.find('.ta-toolbar button[name=onselect]').attr('hit-this')).toBeUndefined();
 						expect(element.find('.ta-toolbar button[name=onselectattr]').attr('hit-this')).toBe('true');
 					});
-					
+
 					it('should call only the most specific handler when ambigious', function(){
 						editorScope.editorFunctions.triggerElementSelect({}, '<i src="test" href="test">');
 						$rootScope.$digest();
 						expect(element.find('.ta-toolbar button[name=onselectattr_specific]').attr('hit-this')).toBe('true');
 						expect(element.find('.ta-toolbar button[name=onselectattr]').attr('hit-this')).toBeUndefined();
 					});
-					
+
 					it('should not call more specific', function(){
 						editorScope.editorFunctions.triggerElementSelect({}, '<i src="test">');
 						$rootScope.$digest();
@@ -444,7 +461,7 @@ describe('textAngularManager', function(){
 				});
 			});
 		});
-		
+
 		describe('linking toolbar to existing editor', function(){
 			it('should link when referenced', inject(function(textAngularManager) {
 				var scope = {name: 'test'};
@@ -459,7 +476,7 @@ describe('textAngularManager', function(){
 				expect(textAngularManager.retrieveToolbarsViaEditor('testeditor').length).toBe(0);
 			}));
 		});
-		
+
 		describe('updating', function(){
 			var $rootScope, element;
 			beforeEach(inject(function (_$compile_, _$rootScope_) {

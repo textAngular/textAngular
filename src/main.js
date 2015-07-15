@@ -591,17 +591,6 @@ textAngular.directive("textAngular", [
 				};
 				// start updating on keydown
 				_keydown = function(){
-					// keyCode 9 is the TAB key
-					/* istanbul ignore next: not sure how to test this  */
-					if (event.ctrlKey===false && event.metaKey===false && event.keyCode===9) {
-						event.preventDefault();
-						var extraEventData = { specialKey: 'TabKey' };
-						if (event.shiftKey) {
-							extraEventData.specialKey = 'ShiftTabKey';
-						}
-						// since nether tab nor shift-tab generate a keypress event, we call directly
-						_keypress(event, extraEventData);
-					}
 					/* istanbul ignore next: ie catch */
 					if(!scope.focussed){
 						scope._bUpdateSelectedStyles = false;
@@ -913,6 +902,20 @@ textAngular.service('textAngularManager', ['taToolExecuteAction', 'taTools', 'ta
 				/* istanbul ignore else: phase catch */
 				if(!editors[name].scope.$$phase) editors[name].scope.$digest();
 			}else throw('textAngular Error: No Editor with name "' + name + '" exists');
+		},
+		// this is used by taBind to send a key command in response to a special key event
+		sendKeyCommand: function(scope, event){
+			angular.forEach(editors, function(_editor){
+				/* istanbul ignore else: if nothing to do, do nothing */
+				if (_editor.editorFunctions.sendKeyCommand(event)){
+					/* istanbul ignore else: don't run if already running */
+					if(!scope._bUpdateSelectedStyles){
+						scope.updateSelectedStyles();
+					}
+					event.preventDefault();
+					return false;
+				} 
+			});
 		}
 	};
 }]);
