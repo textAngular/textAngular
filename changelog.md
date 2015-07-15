@@ -1,8 +1,9 @@
 <a name"1.4.2"></a>
-### 1.4.2 (2015-07-10)
+### 1.4.2 (2015-07-15)
 
 #### Bug Fixes
 
+* **textAngular:** corrected undefined event #796 ([6186ed52](https://github.com/fraywing/textAngular/commit/6186ed52))
 * **taBind:** Reapply selector handles on focus ([f05857e3](https://github.com/fraywing/textAngular/commit/f05857e3))
 * **textAngular:** Fixed resize image issue ([52fb20c0](https://github.com/fraywing/textAngular/commit/52fb20c0))
 * **grunt:** Update javascript path in watch target ([58df955d](https://github.com/fraywing/textAngular/commit/58df955d))
