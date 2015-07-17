@@ -10,6 +10,9 @@ angular.module('textAngularSetup', [])
 
 // Here we set up the global display defaults, to set your own use a angular $provider#decorator.
 .value('taOptions',  {
+    // set false to allow the textAngular-sanitize provider to be replaced
+    // with angular-sanitize or a custom provider.
+	forceTextAngularSanitize: true,
 	toolbar: [
 		['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'pre', 'quote'],
 		['bold', 'italics', 'underline', 'strikeThrough', 'ul', 'ol', 'redo', 'undo', 'clear'],
@@ -339,7 +342,14 @@ angular.module('textAngularSetup', [])
 		}
 	};
 }])
-.run(['taRegisterTool', '$window', 'taTranslations', 'taSelection', 'taToolFunctions', function(taRegisterTool, $window, taTranslations, taSelection, taToolFunctions){
+.run(['taRegisterTool', '$window', 'taTranslations', 'taSelection', 'taToolFunctions', '$sanitize', 'taOptions', function(taRegisterTool, $window, taTranslations, taSelection, taToolFunctions, $sanitize, taOptions){
+	// test for the version of $sanitize that is in use
+	// You can disable this check by setting taOptions.textAngularSanitize == false
+	var gv = {}; $sanitize('', gv);
+	/* istanbul ignore next, throws error */
+	if ((taOptions.forceTextAngularSanitize===true) && (gv.version !== 'taSanitize')) {
+		throw angular.$$minErr('textAngular')("textAngularSetup", "The textAngular-sanitize provider has been replaced by another -- have you included angular-sanitize by mistake?");
+	}
 	taRegisterTool("html", {
 		iconclass: 'fa fa-code',
 		tooltiptext: taTranslations.html.tooltip,
