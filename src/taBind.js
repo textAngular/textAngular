@@ -64,13 +64,68 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 			var _skipRender = false;
 			var _disableSanitizer = attrs.taUnsafeSanitizer || taOptions.disableSanitizer;
 			var _lastKey;
+			// see http://www.javascripter.net/faq/keycodes.htm for good information
+			// NOTE Mute On|Off 173 (Opera MSIE Safari Chrome) 181 (Firefox)
+			// BLOCKED_KEYS are special keys...
+			// Tab, pause/break, CapsLock, Esc, Page Up, End, Home,
+			// Left arrow, Up arrow, Right arrow, Down arrow, Insert, Delete,
+			// f1, f2, f3, f4, f5, f6, f7, f8, f9, f10, f11, f12
+			// NumLock, ScrollLock
 			var BLOCKED_KEYS = /^(9|19|20|27|33|34|35|36|37|38|39|40|45|112|113|114|115|116|117|118|119|120|121|122|123|144|145)$/i;
-			var UNDO_TRIGGER_KEYS = /^(8|13|32|46|59|61|107|109|186|187|188|189|190|191|192|219|220|221|222)$/i; // spaces, enter, delete, backspace, all punctuation
+			// UNDO_TRIGGER_KEYS - spaces, enter, delete, backspace, all punctuation
+			// Backspace, Enter, Space, Delete, (; :) (Firefox), (= +) (Firefox),
+			// Numpad +, Numpad -, (; :), (= +),
+			// (, <), (- _), (. >), (/ ?), (` ~), ([ {), (\ |), (] }), (' ")
+			// NOTE - Firefox: 173 = (- _) -- adding this to UNDO_TRIGGER_KEYS
+			var UNDO_TRIGGER_KEYS = /^(8|13|32|46|59|61|107|109|173|186|187|188|189|190|191|192|219|220|221|222)$/i;
 			var _pasteHandler;
 
 			// defaults to the paragraph element, but we need the line-break or it doesn't allow you to type into the empty element
 			// non IE is '<p><br/></p>', ie is '<p></p>' as for once IE gets it correct...
 			var _defaultVal, _defaultTest;
+
+			// map events to special keys...
+			// mappings is an array of maps from events to specialKeys as declared in textAngularSetup
+			// For example:
+			// var mappings = [
+			//		ctrl/command + z
+			//		{specialKey: 'UndoKey', forbiddenModifiers: ALT_KEY+SHIFT_KEY, mustHaveModifiers: [META_KEY+CTRL_KEY], keyCode: 90},
+			//		ctrl/command + shift + z
+			//		{specialKey: 'RedoKey', forbiddenModifiers: ALT_KEY, mustHaveModifiers: [SHIFT_KEY, META_KEY+CTRL_KEY], keyCode: 90},
+			//		ctrl/command + y
+			//		{specialKey: 'RedoKey', forbiddenModifiers: ALT_KEY+SHIFT_KEY, mustHaveModifiers: [META_KEY+CTRL_KEY], keyCode: 89},
+			//		TabKey
+			//		{specialKey: 'TabKey', forbiddenModifiers: META_KEY+SHIFT_KEY+ALT_KEY+CTRL_KEY, mustHaveModifiers: [], keyCode: 9},
+			//		{specialKey: 'ShiftTabKey', forbiddenModifiers: [META_KEY+ALT_KEY+CTRL_KEY], mustHaveModifiers: [SHIFT_KEY], keyCode: 9},
+			// ];
+			//
+			function _mapKeys(event) {
+				var specialKey;
+				var CTRL_KEY = 0x0001;
+				var META_KEY = 0x0002;
+				var ALT_KEY = 0x0004;
+				var SHIFT_KEY = 0x0008;
+				/* istanbul ignore next: just a consistency test */
+				if ((CTRL_KEY !== taOptions.keyMappings.bitCodes.CTRL_KEY) ||
+					(META_KEY !== taOptions.keyMappings.bitCodes.META_KEY) ||
+					(ALT_KEY !== taOptions.keyMappings.bitCodes.ALT_KEY) ||
+					(SHIFT_KEY !== taOptions.keyMappings.bitCodes.SHIFT_KEY))
+				throw "CTRL_KEY, META_KEY, ALT_KEY, SHIFT_KEY codes do not match!";
+				taOptions.keyMappings.mappings.forEach(function (map){
+					if (map.keyCode === event.keyCode) {
+						var netModifiers = (event.metaKey ? META_KEY: 0) +
+							(event.ctrlKey ? CTRL_KEY: 0) +
+							(event.shiftKey ? SHIFT_KEY: 0) +
+							(event.altKey ? ALT_KEY: 0);
+						if (map.forbiddenModifiers & netModifiers) return;
+						if (map.mustHaveModifiers.every(function (modifier) { return netModifiers & modifier; })){
+							specialKey = map.specialKey;
+						}
+					}
+				});
+				return specialKey;
+			}
+
 			// set the default to be a paragraph value
 			if(attrs.taDefaultWrap === undefined) attrs.taDefaultWrap = 'p';
 			/* istanbul ignore next: ie specific test */
@@ -533,30 +588,24 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 					element.on('keydown', scope.events.keydown = function(event, eventData){
 						/* istanbul ignore else: this is for catching the jqLite testing*/
 						if(eventData) angular.extend(event, eventData);
-						// keyCode 9 is the TAB key
-						/* istanbul ignore next: not sure how to test this  */
-						if (event.ctrlKey===false && event.metaKey===false && event.keyCode===9) {
+						event.specialKey = _mapKeys(event);
+						/* istanbul ignore next: difficult to test as can't seem to select */
+						if ((event.specialKey==='TabKey') || (event.specialKey==='ShiftTabKey')) {
 							event.preventDefault();
-							event.specialKey = 'TabKey';
-							if (event.shiftKey) {
-								event.specialKey = 'ShiftTabKey';
-							}
 							textAngularManager.sendKeyCommand(scope, event);
 						}
 						/* istanbul ignore else: readonly check */
 						if(!_isReadonly){
-							if(!event.altKey && (event.metaKey || event.ctrlKey)){
-								// covers ctrl/command + z
-								if((event.keyCode === 90 && !event.shiftKey)){
-									_undo();
-									event.preventDefault();
-								// covers ctrl + y, command + shift + z
-								}else if((event.keyCode === 90 && event.shiftKey) || (event.keyCode === 89 && !event.shiftKey)){
-									_redo();
-									event.preventDefault();
-								}
+							if (event.specialKey==='UndoKey') {
+								_undo();
+								event.preventDefault();
+							}
+							if (event.specialKey==='RedoKey') {
+								_redo();
+								event.preventDefault();
+							}
 							/* istanbul ignore next: difficult to test as can't seem to select */
-							}else if(event.keyCode === 13 && !event.shiftKey){
+							if(event.keyCode === 13 && !event.shiftKey){
 								var $selection;
 								var selection = taSelection.getSelectionElement();
 								if(!selection.tagName.match(VALIDELEMENTS)) return;
