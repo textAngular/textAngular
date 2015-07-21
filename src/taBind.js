@@ -618,6 +618,12 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 							if (mapping.testForKey(event)) {
 								userSpecialKey = mapping.commandKeyCode;
 							}
+							if ((mapping.commandKeyCode === 'UndoKey') || (mapping.commandKeyCode === 'RedoKey')) {
+								// this is necessary to fully stop the propagation.
+								if (!mapping.enablePropagation) {
+									event.preventDefault();
+								}
+							}
 						});
 						/* istanbul ignore next: difficult to test */
 						if (typeof userSpecialKey !== 'undefined') {
