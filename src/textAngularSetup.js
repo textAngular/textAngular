@@ -6,13 +6,62 @@ Version 1.3.7
 
 See README.md or https://github.com/fraywing/textAngular/wiki for requirements and use.
 */
-angular.module('textAngularSetup', [])
 
+angular.module('textAngularSetup', [])
 // Here we set up the global display defaults, to set your own use a angular $provider#decorator.
 .value('taOptions',  {
     // set false to allow the textAngular-sanitize provider to be replaced
     // with angular-sanitize or a custom provider.
 	forceTextAngularSanitize: true,
+	// allow customizable keyMappings for specialized key boards or languages
+	keyMappings : (function () {
+		// bit codes used to map modifiers for mappings for specialKeys in taBind
+		var CTRL_KEY = 0x0001;
+		var META_KEY = 0x0002;
+		var ALT_KEY = 0x0004;
+		var SHIFT_KEY = 0x0008;
+		var bitCodes = { CTRL_KEY: CTRL_KEY, META_KEY: META_KEY, ALT_KEY: ALT_KEY, SHIFT_KEY: SHIFT_KEY };
+		return {
+			bitCodes: bitCodes,
+			// modify these mappings if you need to use different keys for undo, redo, etc.
+			mappings: [
+				//		ctrl/command + z
+				{
+					specialKey: 'UndoKey',
+					forbiddenModifiers: ALT_KEY + SHIFT_KEY,
+					mustHaveModifiers: [META_KEY + CTRL_KEY],
+					keyCode: 90
+				},
+				//		ctrl/command + shift + z
+				{
+					specialKey: 'RedoKey',
+					forbiddenModifiers: ALT_KEY,
+					mustHaveModifiers: [META_KEY + CTRL_KEY, SHIFT_KEY],
+					keyCode: 90
+				},
+				//		ctrl/command + y
+				{
+					specialKey: 'RedoKey',
+					forbiddenModifiers: ALT_KEY + SHIFT_KEY,
+					mustHaveModifiers: [META_KEY + CTRL_KEY],
+					keyCode: 89
+				},
+				//		TabKey
+				{
+					specialKey: 'TabKey',
+					forbiddenModifiers: META_KEY + SHIFT_KEY + ALT_KEY + CTRL_KEY,
+					mustHaveModifiers: [],
+					keyCode: 9
+				},
+				//		shift + TabKey
+				{
+					specialKey: 'ShiftTabKey',
+					forbiddenModifiers: [META_KEY + ALT_KEY + CTRL_KEY],
+					mustHaveModifiers: [SHIFT_KEY],
+					keyCode: 9
+				}
+			]};
+	})(),
 	toolbar: [
 		['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'pre', 'quote'],
 		['bold', 'italics', 'underline', 'strikeThrough', 'ul', 'ol', 'redo', 'undo', 'clear'],
