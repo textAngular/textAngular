@@ -84,39 +84,57 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 			// non IE is '<p><br/></p>', ie is '<p></p>' as for once IE gets it correct...
 			var _defaultVal, _defaultTest;
 
+			var _CTRL_KEY = 0x0001;
+			var _META_KEY = 0x0002;
+			var _ALT_KEY = 0x0004;
+			var _SHIFT_KEY = 0x0008;
 			// map events to special keys...
 			// mappings is an array of maps from events to specialKeys as declared in textAngularSetup
-			// For example:
-			// var mappings = [
-			//		ctrl/command + z
-			//		{specialKey: 'UndoKey', forbiddenModifiers: ALT_KEY+SHIFT_KEY, mustHaveModifiers: [META_KEY+CTRL_KEY], keyCode: 90},
-			//		ctrl/command + shift + z
-			//		{specialKey: 'RedoKey', forbiddenModifiers: ALT_KEY, mustHaveModifiers: [SHIFT_KEY, META_KEY+CTRL_KEY], keyCode: 90},
-			//		ctrl/command + y
-			//		{specialKey: 'RedoKey', forbiddenModifiers: ALT_KEY+SHIFT_KEY, mustHaveModifiers: [META_KEY+CTRL_KEY], keyCode: 89},
-			//		TabKey
-			//		{specialKey: 'TabKey', forbiddenModifiers: META_KEY+SHIFT_KEY+ALT_KEY+CTRL_KEY, mustHaveModifiers: [], keyCode: 9},
-			//		{specialKey: 'ShiftTabKey', forbiddenModifiers: [META_KEY+ALT_KEY+CTRL_KEY], mustHaveModifiers: [SHIFT_KEY], keyCode: 9},
-			// ];
-			//
+			var _keyMappings = [
+				//		ctrl/command + z
+				{
+					specialKey: 'UndoKey',
+					forbiddenModifiers: _ALT_KEY + _SHIFT_KEY,
+					mustHaveModifiers: [_META_KEY + _CTRL_KEY],
+					keyCode: 90
+				},
+				//		ctrl/command + shift + z
+				{
+					specialKey: 'RedoKey',
+					forbiddenModifiers: _ALT_KEY,
+					mustHaveModifiers: [_META_KEY + _CTRL_KEY, _SHIFT_KEY],
+					keyCode: 90
+				},
+				//		ctrl/command + y
+				{
+					specialKey: 'RedoKey',
+					forbiddenModifiers: _ALT_KEY + _SHIFT_KEY,
+					mustHaveModifiers: [_META_KEY + _CTRL_KEY],
+					keyCode: 89
+				},
+				//		TabKey
+				{
+					specialKey: 'TabKey',
+					forbiddenModifiers: _META_KEY + _SHIFT_KEY + _ALT_KEY + _CTRL_KEY,
+					mustHaveModifiers: [],
+					keyCode: 9
+				},
+				//		shift + TabKey
+				{
+					specialKey: 'ShiftTabKey',
+					forbiddenModifiers: _META_KEY + _ALT_KEY + _CTRL_KEY,
+					mustHaveModifiers: [_SHIFT_KEY],
+					keyCode: 9
+				}
+			];
 			function _mapKeys(event) {
 				var specialKey;
-				var CTRL_KEY = 0x0001;
-				var META_KEY = 0x0002;
-				var ALT_KEY = 0x0004;
-				var SHIFT_KEY = 0x0008;
-				/* istanbul ignore next: just a consistency test */
-				if ((CTRL_KEY !== taOptions.keyMappings.bitCodes.CTRL_KEY) ||
-					(META_KEY !== taOptions.keyMappings.bitCodes.META_KEY) ||
-					(ALT_KEY !== taOptions.keyMappings.bitCodes.ALT_KEY) ||
-					(SHIFT_KEY !== taOptions.keyMappings.bitCodes.SHIFT_KEY))
-				throw "CTRL_KEY, META_KEY, ALT_KEY, SHIFT_KEY codes do not match!";
-				taOptions.keyMappings.mappings.forEach(function (map){
+				_keyMappings.forEach(function (map){
 					if (map.keyCode === event.keyCode) {
-						var netModifiers = (event.metaKey ? META_KEY: 0) +
-							(event.ctrlKey ? CTRL_KEY: 0) +
-							(event.shiftKey ? SHIFT_KEY: 0) +
-							(event.altKey ? ALT_KEY: 0);
+						var netModifiers = (event.metaKey ? _META_KEY: 0) +
+							(event.ctrlKey ? _CTRL_KEY: 0) +
+							(event.shiftKey ? _SHIFT_KEY: 0) +
+							(event.altKey ? _ALT_KEY: 0);
 						if (map.forbiddenModifiers & netModifiers) return;
 						if (map.mustHaveModifiers.every(function (modifier) { return netModifiers & modifier; })){
 							specialKey = map.specialKey;
@@ -589,8 +607,26 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 						/* istanbul ignore else: this is for catching the jqLite testing*/
 						if(eventData) angular.extend(event, eventData);
 						event.specialKey = _mapKeys(event);
+						var userSpecialKey;
+						/* istanbul ignore next: difficult to test */
+						taOptions.keyMappings.forEach(function (mapping) {
+							if (event.specialKey === mapping.commandKeyCode) {
+								// taOptions has remapped this binding... so
+								// we disable our own
+								event.specialKey = undefined;
+							}
+							if (mapping.testForKey(event)) {
+								userSpecialKey = mapping.commandKeyCode;
+							}
+						});
+						/* istanbul ignore next: difficult to test */
+						if (typeof userSpecialKey !== 'undefined') {
+							event.specialKey = userSpecialKey;
+						}
 						/* istanbul ignore next: difficult to test as can't seem to select */
-						if ((event.specialKey==='TabKey') || (event.specialKey==='ShiftTabKey')) {
+						if ((typeof event.specialKey !== 'undefined') && (
+								event.specialKey !== 'UndoKey' || event.specialKey !== 'RedoKey'
+							)) {
 							event.preventDefault();
 							textAngularManager.sendKeyCommand(scope, event);
 						}

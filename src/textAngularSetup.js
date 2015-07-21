@@ -7,61 +7,41 @@ Version 1.3.7
 See README.md or https://github.com/fraywing/textAngular/wiki for requirements and use.
 */
 
+
 angular.module('textAngularSetup', [])
 // Here we set up the global display defaults, to set your own use a angular $provider#decorator.
 .value('taOptions',  {
+	//////////////////////////////////////////////////////////////////////////////////////
+    // forceTextAngularSanitize
     // set false to allow the textAngular-sanitize provider to be replaced
     // with angular-sanitize or a custom provider.
 	forceTextAngularSanitize: true,
+	///////////////////////////////////////////////////////////////////////////////////////
+	// keyMappings
 	// allow customizable keyMappings for specialized key boards or languages
-	keyMappings : (function () {
-		// bit codes used to map modifiers for mappings for specialKeys in taBind
-		var CTRL_KEY = 0x0001;
-		var META_KEY = 0x0002;
-		var ALT_KEY = 0x0004;
-		var SHIFT_KEY = 0x0008;
-		var bitCodes = { CTRL_KEY: CTRL_KEY, META_KEY: META_KEY, ALT_KEY: ALT_KEY, SHIFT_KEY: SHIFT_KEY };
-		return {
-			bitCodes: bitCodes,
-			// modify these mappings if you need to use different keys for undo, redo, etc.
-			mappings: [
-				//		ctrl/command + z
-				{
-					specialKey: 'UndoKey',
-					forbiddenModifiers: ALT_KEY + SHIFT_KEY,
-					mustHaveModifiers: [META_KEY + CTRL_KEY],
-					keyCode: 90
-				},
-				//		ctrl/command + shift + z
-				{
-					specialKey: 'RedoKey',
-					forbiddenModifiers: ALT_KEY,
-					mustHaveModifiers: [META_KEY + CTRL_KEY, SHIFT_KEY],
-					keyCode: 90
-				},
-				//		ctrl/command + y
-				{
-					specialKey: 'RedoKey',
-					forbiddenModifiers: ALT_KEY + SHIFT_KEY,
-					mustHaveModifiers: [META_KEY + CTRL_KEY],
-					keyCode: 89
-				},
-				//		TabKey
-				{
-					specialKey: 'TabKey',
-					forbiddenModifiers: META_KEY + SHIFT_KEY + ALT_KEY + CTRL_KEY,
-					mustHaveModifiers: [],
-					keyCode: 9
-				},
-				//		shift + TabKey
-				{
-					specialKey: 'ShiftTabKey',
-					forbiddenModifiers: [META_KEY + ALT_KEY + CTRL_KEY],
-					mustHaveModifiers: [SHIFT_KEY],
-					keyCode: 9
-				}
-			]};
-	})(),
+	//
+	// keyMappings provides key mappings that are attached to a given commandKeyCode.
+	// To modify a specific keyboard binding, simply provide function which returns true
+	// for the event you wish to map to.
+	// Or to disable a specific keyboard binding, provide a function which returns false.
+	// Note: 'RedoKey' and 'UndoKey' are internally bound to the redo and undo functionality.
+	// At present, the following commandKeyCodes are in use:
+	// 98, 'TabKey', 'ShiftTabKey', 105, 117, 'UndoKey', 'RedoKey'
+	//
+	// To map to an new commandKeyCode, add a new key mapping such as:
+	// {commandKeyCode: 'CustomKey', testForKey: function (event) {
+	//  if (event.keyCode=57 && event.ctrlKey && !event.shiftKey && !event.altKey) return true;
+	// } }
+	// to the keyMappings. This example maps ctrl+9 to 'CustomKey'
+	// Then where taRegisterTool(...) is called, add a commandKeyCode: 'CustomKey' and your
+	// tool will be bound to ctrl+9.
+	//
+	// To disble one of the already bound commandKeyCodes such as 'RedoKey' or 'UndoKey' add:
+	// {commandKeyCode: 'RedoKey', testForKey: function (event) { return false; } },
+	// {commandKeyCode: 'UndoKey', testForKey: function (event) { return false; } },
+	// to disable them.
+	//
+	keyMappings : [],
 	toolbar: [
 		['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'pre', 'quote'],
 		['bold', 'italics', 'underline', 'strikeThrough', 'ul', 'ol', 'redo', 'undo', 'clear'],
