@@ -6,13 +6,42 @@ Version 1.3.7
 
 See README.md or https://github.com/fraywing/textAngular/wiki for requirements and use.
 */
-angular.module('textAngularSetup', [])
 
+
+angular.module('textAngularSetup', [])
 // Here we set up the global display defaults, to set your own use a angular $provider#decorator.
 .value('taOptions',  {
+	//////////////////////////////////////////////////////////////////////////////////////
+    // forceTextAngularSanitize
     // set false to allow the textAngular-sanitize provider to be replaced
     // with angular-sanitize or a custom provider.
 	forceTextAngularSanitize: true,
+	///////////////////////////////////////////////////////////////////////////////////////
+	// keyMappings
+	// allow customizable keyMappings for specialized key boards or languages
+	//
+	// keyMappings provides key mappings that are attached to a given commandKeyCode.
+	// To modify a specific keyboard binding, simply provide function which returns true
+	// for the event you wish to map to.
+	// Or to disable a specific keyboard binding, provide a function which returns false.
+	// Note: 'RedoKey' and 'UndoKey' are internally bound to the redo and undo functionality.
+	// At present, the following commandKeyCodes are in use:
+	// 98, 'TabKey', 'ShiftTabKey', 105, 117, 'UndoKey', 'RedoKey'
+	//
+	// To map to an new commandKeyCode, add a new key mapping such as:
+	// {commandKeyCode: 'CustomKey', testForKey: function (event) {
+	//  if (event.keyCode=57 && event.ctrlKey && !event.shiftKey && !event.altKey) return true;
+	// } }
+	// to the keyMappings. This example maps ctrl+9 to 'CustomKey'
+	// Then where taRegisterTool(...) is called, add a commandKeyCode: 'CustomKey' and your
+	// tool will be bound to ctrl+9.
+	//
+	// To disble one of the already bound commandKeyCodes such as 'RedoKey' or 'UndoKey' add:
+	// {commandKeyCode: 'RedoKey', testForKey: function (event) { return false; } },
+	// {commandKeyCode: 'UndoKey', testForKey: function (event) { return false; } },
+	// to disable them.
+	//
+	keyMappings : [],
 	toolbar: [
 		['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'pre', 'quote'],
 		['bold', 'italics', 'underline', 'strikeThrough', 'ul', 'ol', 'redo', 'undo', 'clear'],
