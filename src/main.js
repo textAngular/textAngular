@@ -276,8 +276,8 @@ textAngular.directive("textAngular", [
 								pos.y = ratio > newRatio ? pos.x * ratio : pos.y;
 							}
 							var el = angular.element(_el);
-							el.css('height', Math.round(Math.max(0, pos.y)));
-							el.css('width', Math.round(Math.max(0, pos.x)));
+							el.css('height', Math.round(Math.max(0, pos.y) + 'px'));
+							el.css('width', Math.round(Math.max(0, pos.x) + 'px'));
 
 							// reflow the popover tooltip
 							scope.reflowResizeOverlay(_el);
@@ -914,7 +914,7 @@ textAngular.service('textAngularManager', ['taToolExecuteAction', 'taTools', 'ta
 					}
 					event.preventDefault();
 					return false;
-				} 
+				}
 			});
 		}
 	};
