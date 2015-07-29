@@ -163,7 +163,7 @@ if(_browserDetect.ie > 8 || _browserDetect.ie === undefined){
 	/* istanbul ignore next: tests are browser specific */
 	_removeCSSRule = function(sheet, rule){
 		var rules = sheet.cssRules || sheet.rules;
-		if(!rules) return;
+		if(!rules || rules.length === 0) return;
 		var ruleIndex = _getRuleIndex(rule, rules);
 		if(sheet.removeRule){
 			sheet.removeRule(ruleIndex);
