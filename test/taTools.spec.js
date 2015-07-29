@@ -20,7 +20,7 @@ describe('taToolsExecuteFunction', function(){
 			}
 		};
 	}));
-	
+
 	describe('executes the action passing the correct parameters', function(){
 		it('should pass the result of startAction Result', function(){
 			scope.action = function(deferred, startActionResult){
@@ -38,19 +38,19 @@ describe('taToolsExecuteFunction', function(){
 			$rootScope.$apply(function(){ scope.taToolExecuteAction(); });
 		});
 	});
-	
+
 	it('doesn\'t error when action not present', function(){
 		expect(function(){
 			$rootScope.$apply(function(){ scope.taToolExecuteAction(); });
 		}).not.toThrow();
 	});
-	
+
 	it('sets the correct editor if passed', function(){
 		var _editor = {endAction: function(){}, startAction: function(){}};
 		scope.taToolExecuteAction(_editor);
 		expect(scope.$editor()).toBe(_editor);
 	});
-	
+
 	describe('calls editor action', function(){
 		it('start and end when action returns truthy', function(){
 			scope.action = function(deferred, startActionResult){ return true; };
@@ -58,14 +58,14 @@ describe('taToolsExecuteFunction', function(){
 			expect(editor.startCount).toBe(1);
 			expect(editor.finishCount).toBe(1);
 		});
-		
+
 		it('start and end when action returns undefined', function(){
 			scope.action = function(deferred, startActionResult){};
 			$rootScope.$apply(function(){ scope.taToolExecuteAction(); });
 			expect(editor.startCount).toBe(1);
 			expect(editor.finishCount).toBe(1);
 		});
-		
+
 		it('start and not end when action returns false', function(){
 			scope.action = function(deferred, startActionResult){ return false; };
 			$rootScope.$apply(function(){ scope.taToolExecuteAction(); });
@@ -73,7 +73,7 @@ describe('taToolsExecuteFunction', function(){
 			expect(editor.finishCount).toBe(0);
 		});
 	});
-	
+
 	describe('promise works correctly', function(){
 		it('start and end once promise resolved', function(){
 			var _deferred;
@@ -88,7 +88,7 @@ describe('taToolsExecuteFunction', function(){
 			expect(editor.startCount).toBe(1);
 			expect(editor.finishCount).toBe(1);
 		});
-		
+
 		it('.then promises called before .finally', function(){
 			var _deferred;
 			scope.action = function(deferred, startActionResult){
@@ -132,111 +132,116 @@ describe('taTools test tool actions', function(){
 	var findButton = function(name){
 		return buttonByName(element, name);
 	};
-	
+
 	// We use an assumption here and only test whether the button reports as being activated
 	// it ended up being too difficult to reselect and un-apply
-	
+
 	var testAllButtons = function(){
 		it('h1 button should function correctly', function(){
 			button = findAndTriggerButton('h1');
 			expect(button.hasClass('active'));
 		});
-		
+
 		it('h2 button should function correctly', function(){
 			button = findAndTriggerButton('h2');
 			expect(button.hasClass('active'));
 		});
-		
+
 		it('h3 button should function correctly', function(){
 			button = findAndTriggerButton('h3');
 			expect(button.hasClass('active'));
 		});
-		
+
 		it('h4 button should function correctly', function(){
 			button = findAndTriggerButton('h4');
 			expect(button.hasClass('active'));
 		});
-		
+
 		it('h5 button should function correctly', function(){
 			button = findAndTriggerButton('h5');
 			expect(button.hasClass('active'));
 		});
-		
+
 		it('h6 button should function correctly', function(){
 			button = findAndTriggerButton('h6');
 			expect(button.hasClass('active'));
 		});
-		
+
 		it('p button should function correctly', function(){
 			button = findAndTriggerButton('p');
 			expect(button.hasClass('active'));
 		});
-		
+
 		it('pre button should function correctly', function(){
 			button = findAndTriggerButton('pre');
 			expect(button.hasClass('active'));
 		});
-		
+
 		it('quote button should function correctly', function(){
 			button = findAndTriggerButton('quote');
 			expect(button.hasClass('active'));
 		});
-		
+
 		it('bold button should function correctly', function(){
 			button = findAndTriggerButton('bold');
 			expect(button.hasClass('active'));
 		});
-		
+
 		it('italics button should function correctly', function(){
 			button = findAndTriggerButton('italics');
 			expect(button.hasClass('active'));
 		});
-		
+
 		it('underline button should function correctly', function(){
 			button = findAndTriggerButton('underline');
 			expect(button.hasClass('active'));
 		});
-		
+
 		it('strikeThrough button should function correctly', function(){
 			button = findAndTriggerButton('strikeThrough');
 			expect(button.hasClass('active'));
 		});
-		
+
 		it('ul button should function correctly', function(){
 			button = findAndTriggerButton('ul');
 			expect(button.hasClass('active'));
 		});
-		
+
 		it('ol button should function correctly', function(){
 			button = findAndTriggerButton('ol');
 			expect(button.hasClass('active'));
 		});
-		
+
 		it('justifyLeft button should function correctly', function(){
 			button = findAndTriggerButton('justifyLeft');
 			expect(button.hasClass('active'));
 		});
-		
+
 		it('justifyCenter button should function correctly', function(){
 			button = findAndTriggerButton('justifyCenter');
 			expect(button.hasClass('active'));
 		});
-		
+
 		it('justifyRight button should function correctly', function(){
 			button = findAndTriggerButton('justifyRight');
 			expect(button.hasClass('active'));
 		});
-		
+
+		it('justifyFull button should function correctly', function(){
+			button = findAndTriggerButton('justifyFull');
+			expect(button.hasClass('active'));
+		});
+
 		it('indent button should function correctly', function(){
 			button = findAndTriggerButton('indent');
 			expect(button.hasClass('active'));
 		});
-		
+
 		it('outdent button should function correctly', function(){
 			button = findAndTriggerButton('outdent');
 			expect(button.hasClass('active'));
 		});
-		
+
 		it('html button should function correctly', inject(function($timeout){
 			button = findAndTriggerButton('html');
 			$timeout.flush();
@@ -273,7 +278,7 @@ describe('taTools test tool actions', function(){
 
 
 		});
-		
+
 		describe('check untestables don\'t error - ', function(){
 			it('redo', function(){
 				expect(function(){
@@ -297,7 +302,7 @@ describe('taTools test tool actions', function(){
 			});
 		});
 	};
-	
+
 	describe('with un-wrapped content', function(){
 		beforeEach(module('textAngular'));
 		beforeEach(inject(function (_$compile_, _$rootScope_, $document, textAngularManager, _$window_) {
@@ -317,10 +322,10 @@ describe('taTools test tool actions', function(){
 		afterEach(function(){
 			element.remove();
 		});
-		
+
 		testAllButtons();
 	});
-	
+
 	describe('with wrapped content', function(){
 		beforeEach(module('textAngular'));
 		beforeEach(inject(function (_$compile_, _$rootScope_, $document, textAngularManager, _$window_) {
@@ -339,10 +344,10 @@ describe('taTools test tool actions', function(){
 		afterEach(function(){
 			element.remove();
 		});
-		
+
 		testAllButtons();
 	});
-	
+
 	describe('test count buttons', function(){
 		beforeEach(module('textAngular'));
 		var buttons;
@@ -357,12 +362,12 @@ describe('taTools test tool actions', function(){
 			textAngularManager.retrieveEditor('test').editorFunctions.updateSelectedStyles();
 			$rootScope.$digest();
 		}));
-		
+
 		it('word count should be 13', function(){
 			expect(buttons.childNodes[0].childNodes[1].innerHTML).toBe('13');
 			expect(editorScope.wordcount).toBe(13);
 		});
-		
+
 		it('char count should be 62', function(){
 			expect(buttons.childNodes[1].childNodes[1].innerHTML).toBe('62');
 			expect(editorScope.charcount).toBe(62);
@@ -394,7 +399,7 @@ describe('taTools test tool actions', function(){
 						expect(editorScope.charcount).toBe(62);
 				});
 		});
-	
+
 	describe('test clear button', function(){
 		beforeEach(module('textAngular'));
 		beforeEach(inject(function (_$compile_, _$rootScope_, $document, textAngularManager, _$window_) {
@@ -415,20 +420,20 @@ describe('taTools test tool actions', function(){
 		afterEach(function(){
 			element.remove();
 		});
-		
+
 		it('doesn\'t error', function(){
 			expect(function(){
 				findAndTriggerButton('clear');
 			}).not.toThrow();
 		});
-		
+
 		it('clears out all formatting', function(){
 			findAndTriggerButton('clear');
 			//expect($rootScope.htmlcontent).toBe('<p>Test Content that should be cleared</p><p>Test Other Tags</p><p>Test 1</p><p>Test 2</p>');
 			// bug in phantom JS
 			expect($rootScope.htmlcontent).toBe('<p>Test Content that should be cleared</p><h1>Test Other Tags</h1><p>Test 1</p><p>Test 2</p>');
 		});
-		
+
 		it('doesn\'t remove partially selected list elements, but clears them of formatting', function(){
 			var sel = $window.rangy.getSelection();
 			var range = $window.rangy.createRangyRange();
@@ -439,7 +444,7 @@ describe('taTools test tool actions', function(){
 			findAndTriggerButton('clear');
 			expect($rootScope.htmlcontent).toBe('<p class="test-class" style="text-align: left;">Test Content <b>that</b> <u>should</u> be cleared</p><h1>Test Other Tags</h1><ul><li>Test 1</li><li>Test 2</li></ul>');
 		});
-		
+
 		it('doesn\'t clear wholly selected list elements, but clears them of formatting', function(){
 			var sel = $window.rangy.getSelection();
 			var range = $window.rangy.createRangyRange();
@@ -449,7 +454,7 @@ describe('taTools test tool actions', function(){
 			findAndTriggerButton('clear');
 			expect($rootScope.htmlcontent).toBe('<p class="test-class" style="text-align: left;">Test Content <b>that</b> <u>should</u> be cleared</p><h1>Test Other Tags</h1><ul><li>Test 1</li><li>Test 2</li></ul>');
 		});
-		
+
 		it('doesn\'t clear singly selected list elements, but clears them of formatting', function(){
 			var sel = $window.rangy.getSelection();
 			var range = $window.rangy.createRangyRange();
@@ -460,7 +465,7 @@ describe('taTools test tool actions', function(){
 			findAndTriggerButton('clear');
 			expect($rootScope.htmlcontent).toBe('<p class="test-class" style="text-align: left;">Test Content <b>that</b> <u>should</u> be cleared</p><h1>Test Other Tags</h1><ul><li>Test 1</li><li>Test 2</li></ul>');
 		});
-		
+
 		it('doesn\'t clear singly selected list elements, but clears them of formatting', function(){
 			var sel = $window.rangy.getSelection();
 			var range = $window.rangy.createRangyRange();
@@ -471,7 +476,7 @@ describe('taTools test tool actions', function(){
 			findAndTriggerButton('clear');
 			expect($rootScope.htmlcontent).toBe('<p class="test-class" style="text-align: left;">Test Content <b>that</b> <u>should</u> be cleared</p><h1>Test Other Tags</h1><ul><li>Test 1</li><li>Test 2</li></ul>');
 		});
-		
+
 		describe('collapsed selection in list escapse list element', function(){
 			it('as only in list', function(){
 				$rootScope.htmlcontent = '<ul><li>Test <b>1</b></li></ul>';
@@ -485,7 +490,7 @@ describe('taTools test tool actions', function(){
 				findAndTriggerButton('clear');
 				expect($rootScope.htmlcontent).toBe('<p>Test <b>1</b></p>');
 			});
-			
+
 			it('as first in list', function(){
 				$rootScope.htmlcontent = '<ul><li>Test <b>1</b></li><li>Test 2</li></ul>';
 				$rootScope.$digest();
@@ -498,7 +503,7 @@ describe('taTools test tool actions', function(){
 				findAndTriggerButton('clear');
 				expect($rootScope.htmlcontent).toBe('<p>Test <b>1</b></p><ul><li>Test 2</li></ul>');
 			});
-			
+
 			it('as last in list', function(){
 				$rootScope.htmlcontent = '<ul><li>Test <b>1</b></li><li>Test 2</li></ul>';
 				$rootScope.$digest();
@@ -511,7 +516,7 @@ describe('taTools test tool actions', function(){
 				findAndTriggerButton('clear');
 				expect($rootScope.htmlcontent).toBe('<ul><li>Test <b>1</b></li></ul><p>Test 2</p>');
 			});
-			
+
 			it('as middle in list', function(){
 				$rootScope.htmlcontent = '<ul><li>Test <b>1</b></li><li>Test 2</li><li>Test 3</li></ul>';
 				$rootScope.$digest();
@@ -526,7 +531,7 @@ describe('taTools test tool actions', function(){
 			});
 		});
 	});
-	
+
 	describe('test link functions and button', function(){
 		beforeEach(module('textAngular'));
 		beforeEach(inject(function (_$compile_, _$rootScope_, $document, textAngularManager, _$window_) {
@@ -545,31 +550,31 @@ describe('taTools test tool actions', function(){
 		afterEach(function(){
 			element.remove();
 		});
-		
+
 		it('doesn\'t error', function(){
 			expect(function(){
 				findAndTriggerButton('insertLink');
 			}).not.toThrow();
 		});
-		
+
 		it('creates a link', function(){
 			$window.prompt = function(){ return 'testval'; };
 			findAndTriggerButton('insertLink');
 			expect(editorScope.displayElements.text.find('p').find('a').attr('href')).toBe('testval');
 		});
-		
+
 		describe('interacts with the popover', function(){
 			beforeEach(function(){
 				$window.prompt = function(){ return 'testval'; };
 				findAndTriggerButton('insertLink');
 			});
-			
+
 			it('opens on click', function(){
 				editorScope.displayElements.text.find('p').find('a').triggerHandler('click');
 				editorScope.$parent.$digest();
 				expect(editorScope.displayElements.popover.hasClass('in')).toBe(true);
 			});
-			
+
 			it('has correct content', function(){
 				editorScope.displayElements.text.find('p').find('a').triggerHandler('click');
 				var contents = editorScope.displayElements.popoverContainer.contents();
@@ -577,14 +582,14 @@ describe('taTools test tool actions', function(){
 				expect(contents.eq(0).html()).toBe('testval');
 				expect(contents.eq(0).attr('href')).toBe('testval');
 			});
-			
+
 			it('has functioning unlink button', function(){
 				editorScope.displayElements.text.find('p').find('a').triggerHandler('click');
 				editorScope.displayElements.popoverContainer.find('button').eq(1).triggerHandler('click');
 				$rootScope.$digest();
 				expect(editorScope.displayElements.text.find('p').find('a').length).toBe(0);
 			});
-			
+
 			it('has functioning edit button', function(){
 				$window.prompt = function(){ return 'newval'; };
 				editorScope.displayElements.text.find('p').find('a').triggerHandler('click');
@@ -592,7 +597,7 @@ describe('taTools test tool actions', function(){
 				$rootScope.$digest();
 				expect(editorScope.displayElements.text.find('p').find('a').attr('href')).toBe('newval');
 			});
-			
+
 			it('has functioning edit button when blank passed', function(){
 				$window.prompt = function(){ return ''; };
 				editorScope.displayElements.text.find('p').find('a').triggerHandler('click');
@@ -600,7 +605,7 @@ describe('taTools test tool actions', function(){
 				$rootScope.$digest();
 				expect(editorScope.displayElements.text.find('p').find('a').attr('href')).toBe('testval');
 			});
-			
+
 			describe('has functioning target button', function(){
 				it('adds target', function(){
 					editorScope.displayElements.text.find('p').find('a').triggerHandler('click');
@@ -631,7 +636,7 @@ describe('taTools test tool actions', function(){
 			});
 		});
 	});
-	
+
 	describe('test image popover logic', function(){
 		beforeEach(module('textAngular'));
 		beforeEach(inject(function (_$compile_, _$rootScope_, $document, textAngularManager, _$window_) {
@@ -646,13 +651,13 @@ describe('taTools test tool actions', function(){
 		afterEach(function(){
 			element.remove();
 		});
-		
+
 		it('opens on click', function(){
 			editorScope.displayElements.text.find('p').find('img').triggerHandler('click');
 			editorScope.$parent.$digest();
 			expect(editorScope.displayElements.popover.hasClass('in')).toBe(true);
 		});
-		
+
 		it('has correct content', function(){
 			editorScope.displayElements.text.find('p').find('img').triggerHandler('click');
 			var contents = editorScope.displayElements.popoverContainer.contents();
@@ -667,7 +672,7 @@ describe('taTools test tool actions', function(){
 			if(jQuery === angular.element) expect(val).toBe('384px');
 			else expect(val).toBe('100%');
 		});
-		
+
 		it('has functioning 50% button', function(){
 			editorScope.displayElements.text.find('p').find('img').triggerHandler('click');
 			editorScope.displayElements.popoverContainer.find('button').eq(1).triggerHandler('click');
@@ -676,7 +681,7 @@ describe('taTools test tool actions', function(){
 			if(jQuery === angular.element) expect(val).toBe('192px');
 			else expect(val).toBe('50%');
 		});
-		
+
 		it('has functioning 25% button', function(){
 			editorScope.displayElements.text.find('p').find('img').triggerHandler('click');
 			editorScope.displayElements.popoverContainer.find('button').eq(2).triggerHandler('click');
@@ -685,7 +690,7 @@ describe('taTools test tool actions', function(){
 			if(jQuery === angular.element) expect(val).toBe('96px');
 			else expect(val).toBe('25%');
 		});
-		
+
 		it('has functioning reset-size button', function(){
 			editorScope.displayElements.text.find('p').find('img').triggerHandler('click');
 			editorScope.displayElements.popoverContainer.find('button').eq(3).triggerHandler('click');
@@ -694,14 +699,14 @@ describe('taTools test tool actions', function(){
 			if(jQuery === angular.element) expect(val === '0px' || val === '4px').toBe(true); // catch a phantomJS inconsistency
 			else expect(val).toBe('');
 		});
-		
+
 		it('has functioning float-left button', function(){
 			editorScope.displayElements.text.find('p').find('img').triggerHandler('click');
 			editorScope.displayElements.popoverContainer.find('button').eq(4).triggerHandler('click');
 			$rootScope.$digest();
 			expect(editorScope.displayElements.text.find('p').find('img').css('float')).toBe('left');
 		});
-		
+
 		it('has functioning float-none button', function(){
 			editorScope.displayElements.text.find('p').find('img').triggerHandler('click');
 			editorScope.displayElements.popoverContainer.find('button').eq(4).triggerHandler('click');
@@ -712,14 +717,14 @@ describe('taTools test tool actions', function(){
 			if(jQuery === angular.element) expect(editorScope.displayElements.text.find('p').find('img').css('float')).toBe('none');
 			else expect(editorScope.displayElements.text.find('p').find('img').css('float')).toBe('');
 		});
-		
+
 		it('has functioning float-right button', function(){
 			editorScope.displayElements.text.find('p').find('img').triggerHandler('click');
 			editorScope.displayElements.popoverContainer.find('button').eq(6).triggerHandler('click');
 			$rootScope.$digest();
 			expect(editorScope.displayElements.text.find('p').find('img').css('float')).toBe('right');
 		});
-		
+
 		it('has functioning remove button', function(){
 			editorScope.displayElements.text.find('p').find('img').triggerHandler('click');
 			editorScope.displayElements.popoverContainer.find('button').eq(7).triggerHandler('click');

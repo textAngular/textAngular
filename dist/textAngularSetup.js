@@ -45,7 +45,7 @@ angular.module('textAngularSetup', [])
 	toolbar: [
 		['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'pre', 'quote'],
 		['bold', 'italics', 'underline', 'strikeThrough', 'ul', 'ol', 'redo', 'undo', 'clear'],
-		['justifyLeft','justifyCenter','justifyRight','indent','outdent'],
+		['justifyLeft','justifyCenter','justifyRight','justifyFull','indent','outdent'],
 		['html', 'insertImage', 'insertLink', 'insertVideo', 'wordcount', 'charcount']
 	],
 	classes: {
@@ -164,6 +164,9 @@ angular.module('textAngularSetup', [])
 	},
 	justifyRight: {
 		tooltip: 'Align text right'
+	},
+	justifyFull: {
+		tooltip: 'Justify text'
 	},
 	justifyCenter: {
 		tooltip: 'Center'
@@ -506,6 +509,19 @@ angular.module('textAngularSetup', [])
 			var result = false;
 			if(commonElement) result = commonElement.css('text-align') === 'right';
 			result = result || this.$editor().queryCommandState('justifyRight');
+			return result;
+		}
+	});
+	taRegisterTool('justifyFull', {
+		iconclass: 'fa fa-align-justify',
+		tooltiptext: taTranslations.justifyFull.tooltip,
+		action: function(){
+			return this.$editor().wrapSelection("justifyFull", null);
+		},
+		activeState: function(commonElement){
+			var result = false;
+			if(commonElement) result = commonElement.css('text-align') === 'justify';
+			result = result || this.$editor().queryCommandState('justifyFull');
 			return result;
 		}
 	});
