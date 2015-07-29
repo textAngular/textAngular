@@ -34,7 +34,7 @@ describe('taToolFunctions', function(){
 				'http://www.youtube.com/embed/0zM3Mg?rel=0',
 				'http://www.youtube.com/watch?v=0znApSvMg',
 				'http://youtu.be/0zM3nAvMg',
-				'https://www.youtube-nocookie.com/embed/0zM3nApSvMg'
+				'https://www.youtube-nocookie.com/embed/0zM3nAvMg'
 			];
 
 			angular.forEach(invalidYoutubeVideUrlVariations, function(youtubeVideUrl) {
