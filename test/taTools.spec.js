@@ -308,7 +308,7 @@ describe('taTools test tool actions', function(){
 		beforeEach(inject(function (_$compile_, _$rootScope_, $document, textAngularManager, _$window_) {
 			$window = _$window_;
 			// prompt such that we actually get to test all of the insertVideo code
-			$window.prompt = function(){ return 'hello?v=asoeustnhe&'; };
+			$window.prompt = function(){ return 'https://www.youtube.com/watch?v=6T8LeO-01I4'; };
 			$rootScope = _$rootScope_;
 			element = _$compile_('<text-angular name="test">Test Content</text-angular>')($rootScope);
 			$document.find('body').append(element);
