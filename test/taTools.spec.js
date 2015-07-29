@@ -295,7 +295,14 @@ describe('taTools test tool actions', function(){
 					findAndTriggerButton('insertImage');
 				}).not.toThrow();
 			});
-			it('insertVideo', function(){
+			it('insertVideo youtube.com link', function(){
+				expect(function(){
+					findAndTriggerButton('insertVideo');
+				}).not.toThrow();				
+			});
+			it('insertVideo youtu.be link', function(){
+				$window.prompt = function(){ return 'youtu.be/asoeustnhe&'; };
+				
 				expect(function(){
 					findAndTriggerButton('insertVideo');
 				}).not.toThrow();
@@ -308,7 +315,7 @@ describe('taTools test tool actions', function(){
 		beforeEach(inject(function (_$compile_, _$rootScope_, $document, textAngularManager, _$window_) {
 			$window = _$window_;
 			// prompt such that we actually get to test all of the insertVideo code
-			$window.prompt = function(){ return 'hello?v=asoeustnhe&'; };
+			$window.prompt = function(){ return 'youtube.com?v=asoeustnhe&'; };
 			$rootScope = _$rootScope_;
 			element = _$compile_('<text-angular name="test">Test Content</text-angular>')($rootScope);
 			$document.find('body').append(element);
