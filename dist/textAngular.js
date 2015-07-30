@@ -2,7 +2,7 @@
 @license textAngular
 Author : Austin Anderson
 License : 2013 MIT
-Version 1.4.2
+Version 1.4.3
 
 See README.md or https://github.com/fraywing/textAngular/wiki for requirements and use.
 */
@@ -173,7 +173,7 @@ if(_browserDetect.ie > 8 || _browserDetect.ie === undefined){
 	/* istanbul ignore next: tests are browser specific */
 	_removeCSSRule = function(sheet, rule){
 		var rules = sheet.cssRules || sheet.rules;
-		if(!rules) return;
+		if(!rules || rules.length === 0) return;
 		var ruleIndex = _getRuleIndex(rule, rules);
 		if(sheet.removeRule){
 			sheet.removeRule(ruleIndex);
@@ -1040,13 +1040,86 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 			var _skipRender = false;
 			var _disableSanitizer = attrs.taUnsafeSanitizer || taOptions.disableSanitizer;
 			var _lastKey;
+			// see http://www.javascripter.net/faq/keycodes.htm for good information
+			// NOTE Mute On|Off 173 (Opera MSIE Safari Chrome) 181 (Firefox)
+			// BLOCKED_KEYS are special keys...
+			// Tab, pause/break, CapsLock, Esc, Page Up, End, Home,
+			// Left arrow, Up arrow, Right arrow, Down arrow, Insert, Delete,
+			// f1, f2, f3, f4, f5, f6, f7, f8, f9, f10, f11, f12
+			// NumLock, ScrollLock
 			var BLOCKED_KEYS = /^(9|19|20|27|33|34|35|36|37|38|39|40|45|112|113|114|115|116|117|118|119|120|121|122|123|144|145)$/i;
-			var UNDO_TRIGGER_KEYS = /^(8|13|32|46|59|61|107|109|186|187|188|189|190|191|192|219|220|221|222)$/i; // spaces, enter, delete, backspace, all punctuation
+			// UNDO_TRIGGER_KEYS - spaces, enter, delete, backspace, all punctuation
+			// Backspace, Enter, Space, Delete, (; :) (Firefox), (= +) (Firefox),
+			// Numpad +, Numpad -, (; :), (= +),
+			// (, <), (- _), (. >), (/ ?), (` ~), ([ {), (\ |), (] }), (' ")
+			// NOTE - Firefox: 173 = (- _) -- adding this to UNDO_TRIGGER_KEYS
+			var UNDO_TRIGGER_KEYS = /^(8|13|32|46|59|61|107|109|173|186|187|188|189|190|191|192|219|220|221|222)$/i;
 			var _pasteHandler;
 
 			// defaults to the paragraph element, but we need the line-break or it doesn't allow you to type into the empty element
 			// non IE is '<p><br/></p>', ie is '<p></p>' as for once IE gets it correct...
 			var _defaultVal, _defaultTest;
+
+			var _CTRL_KEY = 0x0001;
+			var _META_KEY = 0x0002;
+			var _ALT_KEY = 0x0004;
+			var _SHIFT_KEY = 0x0008;
+			// map events to special keys...
+			// mappings is an array of maps from events to specialKeys as declared in textAngularSetup
+			var _keyMappings = [
+				//		ctrl/command + z
+				{
+					specialKey: 'UndoKey',
+					forbiddenModifiers: _ALT_KEY + _SHIFT_KEY,
+					mustHaveModifiers: [_META_KEY + _CTRL_KEY],
+					keyCode: 90
+				},
+				//		ctrl/command + shift + z
+				{
+					specialKey: 'RedoKey',
+					forbiddenModifiers: _ALT_KEY,
+					mustHaveModifiers: [_META_KEY + _CTRL_KEY, _SHIFT_KEY],
+					keyCode: 90
+				},
+				//		ctrl/command + y
+				{
+					specialKey: 'RedoKey',
+					forbiddenModifiers: _ALT_KEY + _SHIFT_KEY,
+					mustHaveModifiers: [_META_KEY + _CTRL_KEY],
+					keyCode: 89
+				},
+				//		TabKey
+				{
+					specialKey: 'TabKey',
+					forbiddenModifiers: _META_KEY + _SHIFT_KEY + _ALT_KEY + _CTRL_KEY,
+					mustHaveModifiers: [],
+					keyCode: 9
+				},
+				//		shift + TabKey
+				{
+					specialKey: 'ShiftTabKey',
+					forbiddenModifiers: _META_KEY + _ALT_KEY + _CTRL_KEY,
+					mustHaveModifiers: [_SHIFT_KEY],
+					keyCode: 9
+				}
+			];
+			function _mapKeys(event) {
+				var specialKey;
+				_keyMappings.forEach(function (map){
+					if (map.keyCode === event.keyCode) {
+						var netModifiers = (event.metaKey ? _META_KEY: 0) +
+							(event.ctrlKey ? _CTRL_KEY: 0) +
+							(event.shiftKey ? _SHIFT_KEY: 0) +
+							(event.altKey ? _ALT_KEY: 0);
+						if (map.forbiddenModifiers & netModifiers) return;
+						if (map.mustHaveModifiers.every(function (modifier) { return netModifiers & modifier; })){
+							specialKey = map.specialKey;
+						}
+					}
+				});
+				return specialKey;
+			}
+
 			// set the default to be a paragraph value
 			if(attrs.taDefaultWrap === undefined) attrs.taDefaultWrap = 'p';
 			/* istanbul ignore next: ie specific test */
@@ -1509,30 +1582,48 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 					element.on('keydown', scope.events.keydown = function(event, eventData){
 						/* istanbul ignore else: this is for catching the jqLite testing*/
 						if(eventData) angular.extend(event, eventData);
-						// keyCode 9 is the TAB key
-						/* istanbul ignore next: not sure how to test this  */
-						if (event.ctrlKey===false && event.metaKey===false && event.keyCode===9) {
-							event.preventDefault();
-							event.specialKey = 'TabKey';
-							if (event.shiftKey) {
-								event.specialKey = 'ShiftTabKey';
+						event.specialKey = _mapKeys(event);
+						var userSpecialKey;
+						/* istanbul ignore next: difficult to test */
+						taOptions.keyMappings.forEach(function (mapping) {
+							if (event.specialKey === mapping.commandKeyCode) {
+								// taOptions has remapped this binding... so
+								// we disable our own
+								event.specialKey = undefined;
 							}
+							if (mapping.testForKey(event)) {
+								userSpecialKey = mapping.commandKeyCode;
+							}
+							if ((mapping.commandKeyCode === 'UndoKey') || (mapping.commandKeyCode === 'RedoKey')) {
+								// this is necessary to fully stop the propagation.
+								if (!mapping.enablePropagation) {
+									event.preventDefault();
+								}
+							}
+						});
+						/* istanbul ignore next: difficult to test */
+						if (typeof userSpecialKey !== 'undefined') {
+							event.specialKey = userSpecialKey;
+						}
+						/* istanbul ignore next: difficult to test as can't seem to select */
+						if ((typeof event.specialKey !== 'undefined') && (
+								event.specialKey !== 'UndoKey' || event.specialKey !== 'RedoKey'
+							)) {
+							event.preventDefault();
 							textAngularManager.sendKeyCommand(scope, event);
 						}
 						/* istanbul ignore else: readonly check */
 						if(!_isReadonly){
-							if(!event.altKey && (event.metaKey || event.ctrlKey)){
-								// covers ctrl/command + z
-								if((event.keyCode === 90 && !event.shiftKey)){
-									_undo();
-									event.preventDefault();
-								// covers ctrl + y, command + shift + z
-								}else if((event.keyCode === 90 && event.shiftKey) || (event.keyCode === 89 && !event.shiftKey)){
-									_redo();
-									event.preventDefault();
-								}
+							if (event.specialKey==='UndoKey') {
+								_undo();
+								event.preventDefault();
+							}
+							if (event.specialKey==='RedoKey') {
+								_redo();
+								event.preventDefault();
+							}
 							/* istanbul ignore next: difficult to test as can't seem to select */
-							}else if(event.keyCode === 13 && !event.shiftKey){
+							if(event.keyCode === 13 && !event.shiftKey){
 								var $selection;
 								var selection = taSelection.getSelectionElement();
 								if(!selection.tagName.match(VALIDELEMENTS)) return;
@@ -2101,8 +2192,8 @@ textAngular.directive("textAngular", [
 								pos.y = ratio > newRatio ? pos.x * ratio : pos.y;
 							}
 							var el = angular.element(_el);
-							el.css('height', Math.round(Math.max(0, pos.y)));
-							el.css('width', Math.round(Math.max(0, pos.x)));
+							el.css('height', Math.round(Math.max(0, pos.y) + 'px'));
+							el.css('width', Math.round(Math.max(0, pos.x) + 'px'));
 
 							// reflow the popover tooltip
 							scope.reflowResizeOverlay(_el);
@@ -2739,7 +2830,7 @@ textAngular.service('textAngularManager', ['taToolExecuteAction', 'taTools', 'ta
 					}
 					event.preventDefault();
 					return false;
-				} 
+				}
 			});
 		}
 	};

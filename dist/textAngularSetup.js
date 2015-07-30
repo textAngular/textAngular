@@ -6,14 +6,46 @@ Version 1.3.7
 
 See README.md or https://github.com/fraywing/textAngular/wiki for requirements and use.
 */
-angular.module('textAngularSetup', [])
 
+
+angular.module('textAngularSetup', [])
 // Here we set up the global display defaults, to set your own use a angular $provider#decorator.
 .value('taOptions',  {
+	//////////////////////////////////////////////////////////////////////////////////////
+    // forceTextAngularSanitize
+    // set false to allow the textAngular-sanitize provider to be replaced
+    // with angular-sanitize or a custom provider.
+	forceTextAngularSanitize: true,
+	///////////////////////////////////////////////////////////////////////////////////////
+	// keyMappings
+	// allow customizable keyMappings for specialized key boards or languages
+	//
+	// keyMappings provides key mappings that are attached to a given commandKeyCode.
+	// To modify a specific keyboard binding, simply provide function which returns true
+	// for the event you wish to map to.
+	// Or to disable a specific keyboard binding, provide a function which returns false.
+	// Note: 'RedoKey' and 'UndoKey' are internally bound to the redo and undo functionality.
+	// At present, the following commandKeyCodes are in use:
+	// 98, 'TabKey', 'ShiftTabKey', 105, 117, 'UndoKey', 'RedoKey'
+	//
+	// To map to an new commandKeyCode, add a new key mapping such as:
+	// {commandKeyCode: 'CustomKey', testForKey: function (event) {
+	//  if (event.keyCode=57 && event.ctrlKey && !event.shiftKey && !event.altKey) return true;
+	// } }
+	// to the keyMappings. This example maps ctrl+9 to 'CustomKey'
+	// Then where taRegisterTool(...) is called, add a commandKeyCode: 'CustomKey' and your
+	// tool will be bound to ctrl+9.
+	//
+	// To disble one of the already bound commandKeyCodes such as 'RedoKey' or 'UndoKey' add:
+	// {commandKeyCode: 'RedoKey', testForKey: function (event) { return false; } },
+	// {commandKeyCode: 'UndoKey', testForKey: function (event) { return false; } },
+	// to disable them.
+	//
+	keyMappings : [],
 	toolbar: [
 		['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'pre', 'quote'],
 		['bold', 'italics', 'underline', 'strikeThrough', 'ul', 'ol', 'redo', 'undo', 'clear'],
-		['justifyLeft','justifyCenter','justifyRight','indent','outdent'],
+		['justifyLeft','justifyCenter','justifyRight','justifyFull','indent','outdent'],
 		['html', 'insertImage', 'insertLink', 'insertVideo', 'wordcount', 'charcount']
 	],
 	classes: {
@@ -132,6 +164,9 @@ angular.module('textAngularSetup', [])
 	},
 	justifyRight: {
 		tooltip: 'Align text right'
+	},
+	justifyFull: {
+		tooltip: 'Justify text'
 	},
 	justifyCenter: {
 		tooltip: 'Center'
@@ -336,10 +371,22 @@ angular.module('textAngularSetup', [])
 			buttonGroup.append(targetToggle);
 			container.append(buttonGroup);
 			editorScope.showPopover($element);
+		},
+		extractYoutubeVideoId: function(url) {
+			var re = /(?:youtube(?:-nocookie)?\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/i;
+			var match = url.match(re);
+			return (match && match[1]) || null;
 		}
 	};
 }])
-.run(['taRegisterTool', '$window', 'taTranslations', 'taSelection', 'taToolFunctions', function(taRegisterTool, $window, taTranslations, taSelection, taToolFunctions){
+.run(['taRegisterTool', '$window', 'taTranslations', 'taSelection', 'taToolFunctions', '$sanitize', 'taOptions', function(taRegisterTool, $window, taTranslations, taSelection, taToolFunctions, $sanitize, taOptions){
+	// test for the version of $sanitize that is in use
+	// You can disable this check by setting taOptions.textAngularSanitize == false
+	var gv = {}; $sanitize('', gv);
+	/* istanbul ignore next, throws error */
+	if ((taOptions.forceTextAngularSanitize===true) && (gv.version !== 'taSanitize')) {
+		throw angular.$$minErr('textAngular')("textAngularSetup", "The textAngular-sanitize provider has been replaced by another -- have you included angular-sanitize by mistake?");
+	}
 	taRegisterTool("html", {
 		iconclass: 'fa fa-code',
 		tooltiptext: taTranslations.html.tooltip,
@@ -467,6 +514,19 @@ angular.module('textAngularSetup', [])
 			var result = false;
 			if(commonElement) result = commonElement.css('text-align') === 'right';
 			result = result || this.$editor().queryCommandState('justifyRight');
+			return result;
+		}
+	});
+	taRegisterTool('justifyFull', {
+		iconclass: 'fa fa-align-justify',
+		tooltiptext: taTranslations.justifyFull.tooltip,
+		action: function(){
+			return this.$editor().wrapSelection("justifyFull", null);
+		},
+		activeState: function(commonElement){
+			var result = false;
+			if(commonElement) result = commonElement.css('text-align') === 'justify';
+			result = result || this.$editor().queryCommandState('justifyFull');
 			return result;
 		}
 	});
@@ -629,16 +689,17 @@ angular.module('textAngularSetup', [])
 			var urlPrompt;
 			urlPrompt = $window.prompt(taTranslations.insertVideo.dialogPrompt, 'https://');
 			if (urlPrompt && urlPrompt !== '' && urlPrompt !== 'https://') {
-				// get the video ID
-				var ids = urlPrompt.match(/(\?|&)v=[^&]*/);
+
+				videoId = taToolFunctions.extractYoutubeVideoId(urlPrompt);
+
 				/* istanbul ignore else: if it's invalid don't worry - though probably should show some kind of error message */
-				if(ids && ids.length > 0){
+				if(videoId){
 					// create the embed link
-					var urlLink = "https://www.youtube.com/embed/" + ids[0].substring(3);
+					var urlLink = "https://www.youtube.com/embed/" + videoId;
 					// create the HTML
 					// for all options see: http://stackoverflow.com/questions/2068344/how-do-i-get-a-youtube-video-thumbnail-from-the-youtube-api
 					// maxresdefault.jpg seems to be undefined on some.
-					var embed = '<img class="ta-insert-video" src="https://img.youtube.com/vi/' + ids[0].substring(3) + '/hqdefault.jpg" ta-insert-video="' + urlLink + '" contenteditable="false" allowfullscreen="true" frameborder="0" />';
+					var embed = '<img class="ta-insert-video" src="https://img.youtube.com/vi/' + videoId + '/hqdefault.jpg" ta-insert-video="' + urlLink + '" contenteditable="false" allowfullscreen="true" frameborder="0" />';
 					// insert
 					return this.$editor().wrapSelection('insertHTML', embed, true);
 				}
