@@ -535,17 +535,14 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 								text = text.replace(/<li(\s.*)?>.*<\/li(\s.*)?>/i, '<ul>$&</ul>');
 							}
 							
-							// match all whitespace at beginning of the line
+							// parse whitespace from plaintext input, starting with preceding spaces that get stripped on paste
 							text = text.replace(/^[ |\u00A0]+/gm, function (match) {
 								var result = '';
 								for (var i = 0; i < match.length; i++) {
 										result += '&nbsp;';
 								}
 								return result;
-							});
-							
-							text = text.replace(/\n|\r\n|\r/g, '<br />');
-							text = text.replace(/\t/g, '&nbsp;&nbsp;&nbsp;&nbsp;');
+							}).replace(/\n|\r\n|\r/g, '<br />').replace(/\t/g, '&nbsp;&nbsp;&nbsp;&nbsp;');
 
 							if(_pasteHandler) text = _pasteHandler(scope, {$html: text}) || text;
 
