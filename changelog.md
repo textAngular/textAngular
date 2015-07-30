@@ -1,3 +1,27 @@
+<a name"1.4.3"></a>
+### 1.4.3 (2015-07-30)
+
+
+#### Bug Fixes
+
+* **textAngular:** Fix image resize broken for chrome ([86072d4b](https://github.com/fraywing/textAngular/commit/86072d4b))
+* **textAngularSetup:** Inorder to fully block Undo or Redo, one must also call event.preventDefault() ([aedc38e4](https://github.com/fraywing/textAngular/commit/aedc38e4))
+* **textAngular:** Fix remove CSSRule-when-no-rules ([0eb2f38](https://github.com/fraywing/textAngular/commit/86072d4b))
+
+#### Features
+
+* **taToolbar:** Update insertVideo to handle youtube link variants ([1372bc1d](https://github.com/fraywing/textAngular/commit/1372bc1d))
+* **test:** Added coverage for 'justifyFull' button. ([72cca334](https://github.com/fraywing/textAngular/commit/72cca334))
+* **textAngularSetup:**
+  * Added taOptions.keyMappings to customize key bindings. ([05546ab4](https://github.com/fraywing/textAngular/commit/05546ab4))
+  * Added taOptions.keyMappings to adjustment the key bindings for Redo, Undo, ... ([de12e3e3](https://github.com/fraywing/textAngular/commit/de12e3e3))
+  * Added a taOptions:forceTextAngularSanitize to verify sanitizer provider. ([ad04836b](https://github.com/fraywing/textAngular/commit/ad04836b))
+  * Added a taOptions:forceTextAngularSanitize to verify sanitizer provider. ([8e642c15](https://github.com/fraywing/textAngular/commit/8e642c15))
+
+#### Breaking Changes
+
+If you were using a different sanitize provider instead of textAngular-sanitize we will now detect this and throw an error.  To eliminate this error set taOptions.forceTextAngularSanitize: false
+
 <a name"1.4.2"></a>
 ### 1.4.2 (2015-07-15)
 
