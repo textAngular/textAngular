@@ -69,7 +69,7 @@ module.exports = function (grunt) {
 					message: "chore(release): Build Dist files"
 				},
 				files: {
-					src: ['src/*','dist/*']
+					src: ['src/*', 'src/demo/*','dist/*']
 				}
 			}
 		},
