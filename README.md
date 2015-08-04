@@ -4,7 +4,7 @@ textAngular v1.4.0
 [![Build Status](https://travis-ci.org/fraywing/textAngular.png?branch=master)](https://travis-ci.org/fraywing/textAngular) [![Coverage Status](https://coveralls.io/repos/fraywing/textAngular/badge.png)](https://coveralls.io/r/fraywing/textAngular)
 
 
-Demo is available at: http://www.textangular.com (Or editable [Plunkr Demo](http://plnkr.co/edit/tpl:RaBEszV5xrAZ0VRoZ7PM))
+Demo is available at: http://www.textangular.com (Or editable [Plunkr Demo](http://plnkr.co/edit/kKPfk0LCXWrMpZ1gkblb?p=preview))
 
 #### Upgrading From 1.2.2 or earlier
 
@@ -15,7 +15,7 @@ To upgrade from version 1.2.2 or earlier you need to follow these steps:
 
 ## Requirements
 
-1. `AngularJS` ≥ `1.3.x` 
+1. `AngularJS` ≥ `1.3.x`
 2. `Rangy` ≥ `1.3.x`, Both rangy-core and rangy-saveselection are required. (There is a minified combination of these two included in the dist folder)
 3. `Font-Awesome` ≥ `4.x` for the default icons on the toolbar
 1. `Bootstrap` ≥ `3.x` for the default styles (Can use `bootstrap-css-only`, you must add this to your bower or include this manually)
@@ -89,14 +89,14 @@ OR
 This acts similar to a regular AngularJS / form input if you give it a name attribute, allowing for form submission and AngularJS form validation.
 
 Have fun!
- 
+
 **Important Note:** Though textAngular supports the use of all attributes in it's input, please note that angulars ng-bind-html **WILL** strip out all of your style attributes if you are using `angular-sanitize.js`.
 
 For Additional options see the [github Wiki](https://github.com/fraywing/textAngular/wiki).
 
 ### Issues?
 
-textAngular uses ```execCommand``` for the rich-text functionality. 
+textAngular uses ```execCommand``` for the rich-text functionality.
 That being said, its still a fairly experimental browser feature-set, and may not behave the same in all browsers - see http://tifftiff.de/contenteditable/compliance_test.html for a full compliance list.
 It has been tested to work on Chrome, Safari, Opera, Firefox and Internet Explorer 8+.
 If you find something, please let me know - throw me a message, or submit a issue request!
@@ -140,6 +140,6 @@ This project is licensed under the [MIT license](http://opensource.org/licenses/
 
 ## Contributers
 
-Special thanks to all the contributions thus far! 
+Special thanks to all the contributions thus far!
 
 For a full list see: https://github.com/fraywing/textAngular/graphs/contributors
