@@ -2192,8 +2192,11 @@ textAngular.directive("textAngular", [
 								pos.y = ratio > newRatio ? pos.x * ratio : pos.y;
 							}
 							var el = angular.element(_el);
-							el.css('height', Math.round(Math.max(0, pos.y) + 'px'));
-							el.css('width', Math.round(Math.max(0, pos.x) + 'px'));
+							function roundedMaxVal(val) {
+								return Math.round(Math.max(0, val));
+							}
+							el.css('height', roundedMaxVal(pos.y) + 'px');
+							el.css('width', roundedMaxVal(pos.x) + 'px');
 
 							// reflow the popover tooltip
 							scope.reflowResizeOverlay(_el);
