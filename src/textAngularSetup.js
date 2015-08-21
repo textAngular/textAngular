@@ -52,7 +52,7 @@ angular.module('textAngularSetup', [])
 		focussed: "focussed",
 		toolbar: "btn-toolbar",
 		toolbarGroup: "btn-group",
-		toolbarButton: "btn btn-default",
+		toolbarButton: "waves-effect waves-teal btn-flat",
 		toolbarButtonActive: "active",
 		disabled: "disabled",
 		textEditor: 'form-control',
@@ -224,8 +224,8 @@ angular.module('textAngularSetup', [])
 			editorScope.displayElements.popover.css('width', '375px');
 			var container = editorScope.displayElements.popoverContainer;
 			container.empty();
-			var buttonGroup = angular.element('<div class="btn-group" style="padding-right: 6px;">');
-			var fullButton = angular.element('<button type="button" class="btn btn-default btn-sm btn-small" unselectable="on" tabindex="-1">100% </button>');
+			var buttonGroup = angular.element('<div style="padding-right: 6px;">');
+			var fullButton = angular.element('<a class="waves-effect waves-teal btn-flat" unselectable="on" tabindex="-1">100% </a>');
 			fullButton.on('click', function(event){
 				event.preventDefault();
 				$element.css({
@@ -234,7 +234,7 @@ angular.module('textAngularSetup', [])
 				});
 				finishEdit();
 			});
-			var halfButton = angular.element('<button type="button" class="btn btn-default btn-sm btn-small" unselectable="on" tabindex="-1">50% </button>');
+			var halfButton = angular.element('<a class="waves-effect waves-teal btn-flat" unselectable="on" tabindex="-1">50% </a>');
 			halfButton.on('click', function(event){
 				event.preventDefault();
 				$element.css({
@@ -243,7 +243,7 @@ angular.module('textAngularSetup', [])
 				});
 				finishEdit();
 			});
-			var quartButton = angular.element('<button type="button" class="btn btn-default btn-sm btn-small" unselectable="on" tabindex="-1">25% </button>');
+			var quartButton = angular.element('<a class="waves-effect waves-teal btn-flat" unselectable="on" tabindex="-1">25% </a>');
 			quartButton.on('click', function(event){
 				event.preventDefault();
 				$element.css({
@@ -252,7 +252,7 @@ angular.module('textAngularSetup', [])
 				});
 				finishEdit();
 			});
-			var resetButton = angular.element('<button type="button" class="btn btn-default btn-sm btn-small" unselectable="on" tabindex="-1">Reset</button>');
+			var resetButton = angular.element('<a class="waves-effect waves-teal btn-flat" unselectable="on" tabindex="-1">Reset</a>');
 			resetButton.on('click', function(event){
 				event.preventDefault();
 				$element.css({
@@ -267,8 +267,8 @@ angular.module('textAngularSetup', [])
 			buttonGroup.append(resetButton);
 			container.append(buttonGroup);
 
-			buttonGroup = angular.element('<div class="btn-group" style="padding-right: 6px;">');
-			var floatLeft = angular.element('<button type="button" class="btn btn-default btn-sm btn-small" unselectable="on" tabindex="-1"><i class="fa fa-align-left"></i></button>');
+			buttonGroup = angular.element('<div style="padding-right: 6px;">');
+			var floatLeft = angular.element('<a class="waves-effect waves-teal btn-flat" unselectable="on" tabindex="-1"><i class="material-icons">format_align_left</i></a>');
 			floatLeft.on('click', function(event){
 				event.preventDefault();
 				// webkit
@@ -279,7 +279,7 @@ angular.module('textAngularSetup', [])
 				$element.css('styleFloat', 'left');
 				finishEdit();
 			});
-			var floatRight = angular.element('<button type="button" class="btn btn-default btn-sm btn-small" unselectable="on" tabindex="-1"><i class="fa fa-align-right"></i></button>');
+			var floatRight = angular.element('<a class="waves-effect waves-teal btn-flat" unselectable="on" tabindex="-1"><i class="material-icons">format_align_right</i></a>');
 			floatRight.on('click', function(event){
 				event.preventDefault();
 				// webkit
@@ -290,7 +290,7 @@ angular.module('textAngularSetup', [])
 				$element.css('styleFloat', 'right');
 				finishEdit();
 			});
-			var floatNone = angular.element('<button type="button" class="btn btn-default btn-sm btn-small" unselectable="on" tabindex="-1"><i class="fa fa-align-justify"></i></button>');
+			var floatNone = angular.element('<a class="waves-effect waves-teal btn-flat" unselectable="on" tabindex="-1"><i class="material-icons">format_align_justify</i></a>');
 			floatNone.on('click', function(event){
 				event.preventDefault();
 				// webkit
@@ -306,8 +306,8 @@ angular.module('textAngularSetup', [])
 			buttonGroup.append(floatRight);
 			container.append(buttonGroup);
 
-			buttonGroup = angular.element('<div class="btn-group">');
-			var remove = angular.element('<button type="button" class="btn btn-default btn-sm btn-small" unselectable="on" tabindex="-1"><i class="fa fa-trash-o"></i></button>');
+			buttonGroup = angular.element('<div>');
+			var remove = angular.element('<a class="waves-effect waves-teal btn-flat" unselectable="on" tabindex="-1"><i class="">delete</i></a>');
 			remove.on('click', function(event){
 				event.preventDefault();
 				$element.remove();
@@ -388,7 +388,7 @@ angular.module('textAngularSetup', [])
 		throw angular.$$minErr('textAngular')("textAngularSetup", "The textAngular-sanitize provider has been replaced by another -- have you included angular-sanitize by mistake?");
 	}
 	taRegisterTool("html", {
-		iconclass: 'fa fa-code',
+		buttontext:'<i class="material-icons">code</i>',
 		tooltiptext: taTranslations.html.tooltip,
 		action: function(){
 			this.$editor().switchView();
@@ -431,7 +431,7 @@ angular.module('textAngularSetup', [])
 		activeState: function(){ return this.$editor().queryFormatBlockState('pre'); }
 	});
 	taRegisterTool('ul', {
-		iconclass: 'fa fa-list-ul',
+		buttontext:'<i class="material-icons">format_list_bulleted</i>',
 		tooltiptext: taTranslations.ul.tooltip,
 		action: function(){
 			return this.$editor().wrapSelection("insertUnorderedList", null);
@@ -439,7 +439,7 @@ angular.module('textAngularSetup', [])
 		activeState: function(){ return this.$editor().queryCommandState('insertUnorderedList'); }
 	});
 	taRegisterTool('ol', {
-		iconclass: 'fa fa-list-ol',
+		buttontext:'<i class="material-icons">format_list_numbered</i>',
 		tooltiptext: taTranslations.ol.tooltip,
 		action: function(){
 			return this.$editor().wrapSelection("insertOrderedList", null);
@@ -447,7 +447,7 @@ angular.module('textAngularSetup', [])
 		activeState: function(){ return this.$editor().queryCommandState('insertOrderedList'); }
 	});
 	taRegisterTool('quote', {
-		iconclass: 'fa fa-quote-right',
+		buttontext:'<i class="material-icons">format_quote</i>',
 		tooltiptext: taTranslations.quote.tooltip,
 		action: function(){
 			return this.$editor().wrapSelection("formatBlock", "<BLOCKQUOTE>");
@@ -455,21 +455,21 @@ angular.module('textAngularSetup', [])
 		activeState: function(){ return this.$editor().queryFormatBlockState('blockquote'); }
 	});
 	taRegisterTool('undo', {
-		iconclass: 'fa fa-undo',
+		buttontext:'<i class="material-icons">undo</i>',
 		tooltiptext: taTranslations.undo.tooltip,
 		action: function(){
 			return this.$editor().wrapSelection("undo", null);
 		}
 	});
 	taRegisterTool('redo', {
-		iconclass: 'fa fa-repeat',
+		buttontext:'<i class="material-icons">redo</i>',
 		tooltiptext: taTranslations.redo.tooltip,
 		action: function(){
 			return this.$editor().wrapSelection("redo", null);
 		}
 	});
 	taRegisterTool('bold', {
-		iconclass: 'fa fa-bold',
+		buttontext:'<i class="material-icons">format_bold</i>',
 		tooltiptext: taTranslations.bold.tooltip,
 		action: function(){
 			return this.$editor().wrapSelection("bold", null);
@@ -480,7 +480,7 @@ angular.module('textAngularSetup', [])
 		commandKeyCode: 98
 	});
 	taRegisterTool('justifyLeft', {
-		iconclass: 'fa fa-align-left',
+		buttontext:'<i class="material-icons">format_align_left</i>',
 		tooltiptext: taTranslations.justifyLeft.tooltip,
 		action: function(){
 			return this.$editor().wrapSelection("justifyLeft", null);
@@ -503,7 +503,7 @@ angular.module('textAngularSetup', [])
 		}
 	});
 	taRegisterTool('justifyRight', {
-		iconclass: 'fa fa-align-right',
+		buttontext:'<i class="material-icons">format_align_right</i>',
 		tooltiptext: taTranslations.justifyRight.tooltip,
 		action: function(){
 			return this.$editor().wrapSelection("justifyRight", null);
@@ -518,7 +518,7 @@ angular.module('textAngularSetup', [])
 		}
 	});
 	taRegisterTool('justifyFull', {
-		iconclass: 'fa fa-align-justify',
+		buttontext:'<i class="material-icons">format_align_justify</i>',
 		tooltiptext: taTranslations.justifyFull.tooltip,
 		action: function(){
 			return this.$editor().wrapSelection("justifyFull", null);
@@ -531,7 +531,7 @@ angular.module('textAngularSetup', [])
 		}
 	});
 	taRegisterTool('justifyCenter', {
-		iconclass: 'fa fa-align-center',
+		buttontext:'<i class="material-icons">format_align_center</i>',
 		tooltiptext: taTranslations.justifyCenter.tooltip,
 		action: function(){
 			return this.$editor().wrapSelection("justifyCenter", null);
@@ -546,7 +546,7 @@ angular.module('textAngularSetup', [])
 		}
 	});
 	taRegisterTool('indent', {
-		iconclass: 'fa fa-indent',
+		buttontext:'<i class="material-icons">format_indent_increase</i>',
 		tooltiptext: taTranslations.indent.tooltip,
 		action: function(){
 			return this.$editor().wrapSelection("indent", null);
@@ -557,7 +557,7 @@ angular.module('textAngularSetup', [])
 		commandKeyCode: 'TabKey'
 	});
 	taRegisterTool('outdent', {
-		iconclass: 'fa fa-outdent',
+		buttontext:'<i class="material-icons">format_indent_decrease</i>',
 		tooltiptext: taTranslations.outdent.tooltip,
 		action: function(){
 			return this.$editor().wrapSelection("outdent", null);
@@ -568,7 +568,7 @@ angular.module('textAngularSetup', [])
 		commandKeyCode: 'ShiftTabKey'
 	});
 	taRegisterTool('italics', {
-		iconclass: 'fa fa-italic',
+		buttontext:'<i class="material-icons">format_italic</i>',
 		tooltiptext: taTranslations.italic.tooltip,
 		action: function(){
 			return this.$editor().wrapSelection("italic", null);
@@ -579,7 +579,7 @@ angular.module('textAngularSetup', [])
 		commandKeyCode: 105
 	});
 	taRegisterTool('underline', {
-		iconclass: 'fa fa-underline',
+		buttontext:'<i class="material-icons">format_underlined</i>',		
 		tooltiptext: taTranslations.underline.tooltip,
 		action: function(){
 			return this.$editor().wrapSelection("underline", null);
@@ -590,7 +590,7 @@ angular.module('textAngularSetup', [])
 		commandKeyCode: 117
 	});
 	taRegisterTool('strikeThrough', {
-		iconclass: 'fa fa-strikethrough',
+		buttontext:'<i class="material-icons">format_strikethrough</i>',
 		tooltiptext: taTranslations.strikeThrough.tooltip,
 		action: function(){
 			return this.$editor().wrapSelection("strikeThrough", null);
@@ -600,7 +600,7 @@ angular.module('textAngularSetup', [])
 		}
 	});
 	taRegisterTool('clear', {
-		iconclass: 'fa fa-ban',
+		buttontext:'<i class="material-icons">clear</i>',
 		tooltiptext: taTranslations.clear.tooltip,
 		action: function(deferred, restoreSelection){
 			var i;
@@ -668,7 +668,7 @@ angular.module('textAngularSetup', [])
 
 
 	taRegisterTool('insertImage', {
-		iconclass: 'fa fa-picture-o',
+		buttontext:'<i class="material-icons">image</i>',
 		tooltiptext: taTranslations.insertImage.tooltip,
 		action: function(){
 			var imageLink;
@@ -683,7 +683,7 @@ angular.module('textAngularSetup', [])
 		}
 	});
 	taRegisterTool('insertVideo', {
-		iconclass: 'fa fa-youtube-play',
+		buttontext:'<i class="material-icons">play_circle_filled</i>',
 		tooltiptext: taTranslations.insertVideo.tooltip,
 		action: function(){
 			var urlPrompt;
@@ -713,7 +713,7 @@ angular.module('textAngularSetup', [])
 	});
 	taRegisterTool('insertLink', {
 		tooltiptext: taTranslations.insertLink.tooltip,
-		iconclass: 'fa fa-link',
+		buttontext:'<i class="material-icons">link</i>',
 		action: function(){
 			var urlLink;
 			urlLink = $window.prompt(taTranslations.insertLink.dialogPrompt, 'http://');
