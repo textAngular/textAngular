@@ -1261,4 +1261,11 @@ describe('textAngular', function(){
 			expect($rootScope.html).toBe('<p><b>Changed Content</b></p>');
 		}));
 	});
+
+    describe('checks rangy support for commonjs', function(){
+        it('should have rangy loaded', inject(function($window, $log){
+            expect($window.rangy).not.toBe(undefined);
+            expect($window.rangy.saveSelection).not.toBe(undefined);
+        }));
+    });
 });
