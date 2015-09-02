@@ -109,7 +109,7 @@ textAngular.directive("textAngular", [
 					_originalContents, _toolbars,
 					_serial = (attrs.serial) ? attrs.serial : Math.floor(Math.random() * 10000000000000000),
 					_taExecCommand, _resizeMouseDown, _updateSelectedStylesTimeout;
-				
+
 				scope._name = (attrs.name) ? attrs.name : 'textAngularEditor' + _serial;
 
 				var oneEvent = function(_element, event, action){
@@ -228,13 +228,10 @@ textAngular.directive("textAngular", [
 					scope.displayElements.popoverArrow.css('margin-left', (Math.min(_targetLeft, (Math.max(0, _targetLeft - _maxLeft))) - 11) + 'px');
 				};
 				scope.hidePopover = function(){
-					/* istanbul ignore next: dosen't test with mocked animate */
-					var doneCb = function(){
-						scope.displayElements.popover.css('display', '');
-						scope.displayElements.popoverContainer.attr('style', '');
-						scope.displayElements.popoverContainer.attr('class', 'popover-content');
-					};
-					$q.when($animate.removeClass(scope.displayElements.popover, 'in', doneCb)).then(doneCb);
+					scope.displayElements.popover.css('display', '');
+					scope.displayElements.popoverContainer.attr('style', '');
+					scope.displayElements.popoverContainer.attr('class', 'popover-content');
+					scope.displayElements.popover.removeClass('in');
 				};
 
 				// setup the resize overlay
@@ -275,17 +272,27 @@ textAngular.directive("textAngular", [
 								x: Math.max(0, startPosition.width + (event.clientX - startPosition.x)),
 								y: Math.max(0, startPosition.height + (event.clientY - startPosition.y))
 							};
-							
-							if(event.shiftKey){
-								// keep ratio
+
+							// DEFAULT: the aspect ratio is not locked unless the Shift key is pressed.
+							//
+							// attribute: ta-resize-force-aspect-ratio -- locks resize into maintaing the aspect ratio
+							var bForceAspectRatio = (attrs.taResizeForceAspectRatio !== undefined);
+							// attribute: ta-resize-maintain-aspect-ratio=true causes the space ratio to remain locked
+							// unless the Shift key is pressed
+							var bFlipKeyBinding = attrs.taResizeMaintainAspectRatio;
+							var bKeepRatio =  bForceAspectRatio || (bFlipKeyBinding && !event.shiftKey);
+							if(bKeepRatio) {
 								var newRatio = pos.y / pos.x;
 								pos.x = ratio > newRatio ? pos.x : pos.y / ratio;
 								pos.y = ratio > newRatio ? pos.x * ratio : pos.y;
 							}
 							var el = angular.element(_el);
-							el.attr('height', Math.max(0, pos.y));
-							el.attr('width', Math.max(0, pos.x));
-							
+							function roundedMaxVal(val) {
+								return Math.round(Math.max(0, val));
+							}
+							el.css('height', roundedMaxVal(pos.y) + 'px');
+							el.css('width', roundedMaxVal(pos.x) + 'px');
+
 							// reflow the popover tooltip
 							scope.reflowResizeOverlay(_el);
 						};
@@ -300,6 +307,7 @@ textAngular.directive("textAngular", [
 						event.preventDefault();
 					};
 
+					scope.displayElements.resize.anchors[3].off('mousedown');
 					scope.displayElements.resize.anchors[3].on('mousedown', _resizeMouseDown);
 
 					scope.reflowResizeOverlay(_el);
@@ -330,12 +338,12 @@ textAngular.directive("textAngular", [
 				});
 				scope.displayElements.scrollWindow.attr({'ng-hide': 'showHtml'});
 				if(attrs.taDefaultWrap) scope.displayElements.text.attr('ta-default-wrap', attrs.taDefaultWrap);
-				
+
 				if(attrs.taUnsafeSanitizer){
 					scope.displayElements.text.attr('ta-unsafe-sanitizer', attrs.taUnsafeSanitizer);
 					scope.displayElements.html.attr('ta-unsafe-sanitizer', attrs.taUnsafeSanitizer);
 				}
-				
+
 				// add the main elements to the origional element
 				scope.displayElements.scrollWindow.append(scope.displayElements.text);
 				element.append(scope.displayElements.scrollWindow);
@@ -368,14 +376,14 @@ textAngular.directive("textAngular", [
 						}
 					});
 				}
-				
+
 				if(attrs.taPaste){
 					scope._pasteHandler = function(_html){
 						return $parse(attrs.taPaste)(scope.$parent, {$html: _html});
 					};
 					scope.displayElements.text.attr('ta-paste', '_pasteHandler($html)');
 				}
-				
+
 				// compile the scope with the text and html elements only - if we do this with the main element it causes a compile loop
 				$compile(scope.displayElements.scrollWindow)(scope);
 				$compile(scope.displayElements.html)(scope);
@@ -407,7 +415,7 @@ textAngular.directive("textAngular", [
 						}else{
 							scope.displayElements.text[0].focus();
 						}
-						$window.rangy.restoreSelection(_savedSelection);
+						// $window.rangy.restoreSelection(_savedSelection);
 						$window.rangy.removeMarkers(_savedSelection);
 					}
 					_savedSelection = false;
@@ -443,11 +451,11 @@ textAngular.directive("textAngular", [
 				};
 				scope.displayElements.html.on('blur', _focusout);
 				scope.displayElements.text.on('blur', _focusout);
-				
+
 				scope.displayElements.text.on('paste', function(event){
 					element.triggerHandler('paste', event);
 				});
-				
+
 				// Setup the default toolbar tools, this way allows the user to add new tools like plugins.
 				// This is on the editor for future proofing if we find a better way to do this.
 				scope.queryFormatBlockState = function(command){
@@ -717,8 +725,8 @@ textAngular.service('textAngularManager', ['taToolExecuteAction', 'taTools', 'ta
 					sendKeyCommand: function(event){
 						// we return true if we applied an action, false otherwise
 						var result = false;
-						if(event.ctrlKey || event.metaKey) angular.forEach(taTools, function(tool, name){
-							if(tool.commandKeyCode && tool.commandKeyCode === event.which){
+						if(event.ctrlKey || event.metaKey || event.specialKey) angular.forEach(taTools, function(tool, name){
+							if(tool.commandKeyCode && (tool.commandKeyCode === event.which || tool.commandKeyCode === event.specialKey)){
 								for(var _t = 0; _t < _toolbars.length; _t++){
 									if(_toolbars[_t].tools[name] !== undefined){
 										taToolExecuteAction.call(_toolbars[_t].tools[name], scope);
@@ -784,7 +792,7 @@ textAngular.service('textAngularManager', ['taToolExecuteAction', 'taTools', 'ta
 										break;
 									}
 								}
-								if(result) break; 
+								if(result) break;
 							}
 						}
 						return result;
@@ -908,6 +916,20 @@ textAngular.service('textAngularManager', ['taToolExecuteAction', 'taTools', 'ta
 				/* istanbul ignore else: phase catch */
 				if(!editors[name].scope.$$phase) editors[name].scope.$digest();
 			}else throw('textAngular Error: No Editor with name "' + name + '" exists');
+		},
+		// this is used by taBind to send a key command in response to a special key event
+		sendKeyCommand: function(scope, event){
+			angular.forEach(editors, function(_editor){
+				/* istanbul ignore else: if nothing to do, do nothing */
+				if (_editor.editorFunctions.sendKeyCommand(event)){
+					/* istanbul ignore else: don't run if already running */
+					if(!scope._bUpdateSelectedStyles){
+						scope.updateSelectedStyles();
+					}
+					event.preventDefault();
+					return false;
+				}
+			});
 		}
 	};
 }]);
@@ -946,10 +968,10 @@ textAngular.directive('textAngularToolbar', [
 						toolElement = angular.element(toolDefinition.display);
 					}
 					else toolElement = angular.element("<button type='button'>");
-					
+
 					if(toolDefinition && toolDefinition["class"]) toolElement.addClass(toolDefinition["class"]);
 					else toolElement.addClass(scope.classes.toolbarButton);
-					
+
 					toolElement.attr('name', toolScope.name);
 					// important to not take focus from the main text/html entry
 					toolElement.attr('ta-button', 'ta-button');
