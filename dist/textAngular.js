@@ -7,10 +7,11 @@ Version 1.4.3
 See README.md or https://github.com/fraywing/textAngular/wiki for requirements and use.
 */
 
-/* 
-Commonjs package manager support (eg componentjs) 
+/*
+Commonjs package manager support (eg componentjs).
 */
-"undefined"!=typeof module&&"undefined"!=typeof exports&&module.exports===exports&&(module.exports="textAngular");
+
+'undefined'!=typeof module&&'undefined'!=typeof exports&&module.exports===exports&&(module.exports='textAngular');
 
 (function(){ // encapsulate all variables so they don't become global vars
 "use strict";
@@ -1991,18 +1992,18 @@ textAngular.run([function(){
 	/* istanbul ignore next: not sure how to test this */
 	// Require Rangy and rangy savedSelection module.
 	if (typeof define === 'function' && define.amd) {
-        // AMD. Register as an anonymous module.
-        define(function(require) {
-        	window.rangy = require('rangy');
-        	window.rangy.saveSelection = require('rangy/lib/rangy-selectionsaverestore');
-        });
-    } else if (typeof module !== 'undefined' && typeof exports === 'object') {
-        // Node/CommonJS style
-        window.rangy = require('rangy');
-        window.rangy.saveSelection = require('rangy/lib/rangy-selectionsaverestore');
-    } else {
-    	// Ensure that rangy and rangy.saveSelection exists on the window (global scope).
-    	// TODO: Refactor so that the global scope is no longer used.
+		// AMD. Register as an anonymous module.
+		define(function(require) {
+			window.rangy = require('rangy');
+			window.rangy.saveSelection = require('rangy/lib/rangy-selectionsaverestore');
+		});
+	} else if (typeof module !== 'undefined' && typeof exports === 'object') {
+		// Node/CommonJS style
+		window.rangy = require('rangy');
+		window.rangy.saveSelection = require('rangy/lib/rangy-selectionsaverestore');
+	} else {
+		// Ensure that rangy and rangy.saveSelection exists on the window (global scope).
+		// TODO: Refactor so that the global scope is no longer used.
 		if(!window.rangy){
 			throw("rangy-core.js and rangy-selectionsaverestore.js are required for textAngular to work correctly, rangy-core is not yet loaded.");
 		}else{
@@ -2149,13 +2150,10 @@ textAngular.directive("textAngular", [
 					scope.displayElements.popoverArrow.css('margin-left', (Math.min(_targetLeft, (Math.max(0, _targetLeft - _maxLeft))) - 11) + 'px');
 				};
 				scope.hidePopover = function(){
-					/* istanbul ignore next: dosen't test with mocked animate */
-					var doneCb = function(){
-						scope.displayElements.popover.css('display', '');
-						scope.displayElements.popoverContainer.attr('style', '');
-						scope.displayElements.popoverContainer.attr('class', 'popover-content');
-					};
-					$q.when($animate.removeClass(scope.displayElements.popover, 'in', doneCb)).then(doneCb);
+					scope.displayElements.popover.css('display', '');
+					scope.displayElements.popoverContainer.attr('style', '');
+					scope.displayElements.popoverContainer.attr('class', 'popover-content');
+					scope.displayElements.popover.removeClass('in');
 				};
 
 				// setup the resize overlay
