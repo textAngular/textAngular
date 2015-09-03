@@ -539,7 +539,7 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 							text = text.replace(/^[ |\u00A0]+/gm, function (match) {
 								var result = '';
 								for (var i = 0; i < match.length; i++) {
-																	result += '&nbsp;';
+									result += '&nbsp;';
 								}
 								return result;
 							}).replace(/\n|\r\n|\r/g, '<br />').replace(/\t/g, '&nbsp;&nbsp;&nbsp;&nbsp;');
