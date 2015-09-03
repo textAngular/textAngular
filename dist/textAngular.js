@@ -11,6 +11,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 Commonjs package manager support (eg componentjs).
 */
 
+/* istanbul ignore next:  */
 'undefined'!=typeof module&&'undefined'!=typeof exports&&module.exports===exports&&(module.exports='textAngular');
 
 (function(){ // encapsulate all variables so they don't become global vars
@@ -1516,6 +1517,15 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 								// insert missing parent of li element
 								text = text.replace(/<li(\s.*)?>.*<\/li(\s.*)?>/i, '<ul>$&</ul>');
 							}
+														
+							// parse whitespace from plaintext input, starting with preceding spaces that get stripped on paste
+							text = text.replace(/^[ |\u00A0]+/gm, function (match) {
+								var result = '';
+								for (var i = 0; i < match.length; i++) {
+									result += '&nbsp;';
+								}
+								return result;
+							}).replace(/\n|\r\n|\r/g, '<br />').replace(/\t/g, '&nbsp;&nbsp;&nbsp;&nbsp;');
 
 							if(_pasteHandler) text = _pasteHandler(scope, {$html: text}) || text;
 
