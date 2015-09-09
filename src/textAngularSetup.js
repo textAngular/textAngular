@@ -8,7 +8,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 */
 
 
-angular.module('textAngularSetup', [])
+angular.module('textAngularSetup', ['textAngular'])
 // Here we set up the global display defaults, to set your own use a angular $provider#decorator.
 .value('taOptions',  {
 	//////////////////////////////////////////////////////////////////////////////////////
