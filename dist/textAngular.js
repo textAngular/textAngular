@@ -2479,6 +2479,7 @@ textAngular.directive("textAngular", [
 
 				scope.$on('$destroy', function(){
 					textAngularManager.unregisterEditor(scope._name);
+					angular.element(window).off('blur');
 				});
 
 				// catch element select event and pass to toolbar tools
