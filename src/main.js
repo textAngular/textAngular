@@ -75,7 +75,7 @@ textAngular.run([function(){
 			window.rangy = require('rangy');
 			window.rangy.saveSelection = require('rangy/lib/rangy-selectionsaverestore');
 		});
-	} else if (typeof module !== 'undefined' && typeof exports === 'object') {
+	} else if (typeof require ==='function' && typeof module !== 'undefined' && typeof exports === 'object') {
 		// Node/CommonJS style
 		window.rangy = require('rangy');
 		window.rangy.saveSelection = require('rangy/lib/rangy-selectionsaverestore');
