@@ -1,3 +1,25 @@
+<a name"1.4.4"></a>
+### 1.4.4 (2015-09-12)
+
+
+#### Bug Fixes
+
+* **coverage:** Gruntfile -- coverage back to 100% and fixed the banner. ([55f2c9a3](https://github.com/fraywing/textAngular/commit/55f2c9a3))
+* **gitcommit:** Demo pages was not being included ([aa570e87](https://github.com/fraywing/textAngular/commit/aa570e87))
+* **textAngular:**
+  * Fix memory leak for event window.blur ([bd3e84f1](https://github.com/fraywing/textAngular/commit/bd3e84f1))
+  * Fix 644 parse whitespace from plaintext ([5c028f5b](https://github.com/fraywing/textAngular/commit/5c028f5b))
+  * Fix(Readme): Plunkr was not loading ([e10644de](https://github.com/fraywing/textAngular/commit/e10644de2))
+  * Fix image resize ([e9d6f079](https://github.com/fraywing/textAngular/commit/e9d6f079))
+  * fix popover requires 2 clicks to hide ([fed6cca0](https://github.com/fraywing/textAngular/commit/fed6cca0))
+
+
+#### Features
+
+* **textAngular:** Full support for commonjs (Closes #737, #712, #713, #716, #708, #709, #853) ([a0a84553](https://github.com/fraywing/textAngular/commit/a0a84553))
+* **demo:** Updated the demo pages to 1.4.3 ([ddd000df](https://github.com/fraywing/textAngular/commit/ddd000df))
+
+
 <a name"1.4.3"></a>
 ### 1.4.3 (2015-07-30)
 
