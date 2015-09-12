@@ -7,6 +7,8 @@
 * **coverage:** Gruntfile -- coverage back to 100% and fixed the banner. ([55f2c9a3](https://github.com/fraywing/textAngular/commit/55f2c9a3))
 * **gitcommit:** Demo pages was not being included ([aa570e87](https://github.com/fraywing/textAngular/commit/aa570e87))
 * **textAngular:**
+  * Fix(main): tests weren't running without requireJS ([e40874ad](https://github.com/fraywing/textAngular/commit/e40874ad)
+  * Fix issue with two baners being included in the build ([776db53](https://github.com/fraywing/textAngular/commit/776db53))
   * Fix memory leak for event window.blur ([bd3e84f1](https://github.com/fraywing/textAngular/commit/bd3e84f1))
   * Fix 644 parse whitespace from plaintext ([5c028f5b](https://github.com/fraywing/textAngular/commit/5c028f5b))
   * Fix(Readme): Plunkr was not loading ([e10644de](https://github.com/fraywing/textAngular/commit/e10644de2))
