@@ -2,7 +2,7 @@
 @license textAngular
 Author : Austin Anderson
 License : 2013 MIT
-Version 1.4.5
+Version 1.4.4
 
 See README.md or https://github.com/fraywing/textAngular/wiki for requirements and use.
 */
@@ -2007,7 +2007,7 @@ textAngular.run([function(){
 			window.rangy = require('rangy');
 			window.rangy.saveSelection = require('rangy/lib/rangy-selectionsaverestore');
 		});
-	} else if (typeof module !== 'undefined' && typeof exports === 'object') {
+	} else if (typeof require ==='function' && typeof module !== 'undefined' && typeof exports === 'object') {
 		// Node/CommonJS style
 		window.rangy = require('rangy');
 		window.rangy.saveSelection = require('rangy/lib/rangy-selectionsaverestore');
