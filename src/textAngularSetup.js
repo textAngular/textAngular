@@ -1,13 +1,3 @@
-/*
-@license textAngular
-Author : Austin Anderson
-License : 2013 MIT
-Version 1.3.7
-
-See README.md or https://github.com/fraywing/textAngular/wiki for requirements and use.
-*/
-
-
 angular.module('textAngularSetup', [])
 // Here we set up the global display defaults, to set your own use a angular $provider#decorator.
 .value('taOptions',  {
