@@ -126,7 +126,7 @@ module.exports = function (grunt) {
 			setupFiles: {
 				expand: true,
 				cwd: 'src/',
-				src: ['textAngularSetup.js', 'textAngular-sanitize.js'],
+				src: ['textAngularSetup.js', 'textAngular.css', 'textAngular-sanitize.js'],
 				dest: 'dist/'
 			}
 		},
@@ -138,8 +138,6 @@ module.exports = function (grunt) {
 			dist: {
                 files:{
                     'dist/textAngular.js': ['src/globals.js','src/factories.js','src/DOM.js','src/validators.js','src/taBind.js','src/main.js'],
-                    // This one is just for reusing the banner and have it automatically generated to include the current version
-                    'dist/textAngular.css': ['src/textAngular.css'],
                 }
 			},
 		},

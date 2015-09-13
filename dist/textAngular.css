@@ -1,21 +1,4 @@
-/*
-@license textAngular
-Author : Austin Anderson
-License : 2013 MIT
-Version 1.4.4
-
-See README.md or https://github.com/fraywing/textAngular/wiki for requirements and use.
-*/
-
-/*
-Commonjs package manager support (eg componentjs).
-*/
-
-/* istanbul ignore next:  */
-'undefined'!=typeof module&&'undefined'!=typeof exports&&module.exports===exports&&(module.exports='textAngular');
-
-(function(){ // encapsulate all variables so they don't become global vars
-"use strict";.ta-hidden-input {
+.ta-hidden-input {
 	width: 1px;
 	height: 1px;
 	border: none;
@@ -208,4 +191,3 @@ Commonjs package manager support (eg componentjs).
 	border-top-width: 0;
 	border-bottom-color: #fff;
 }
-})();
