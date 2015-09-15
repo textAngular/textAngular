@@ -69,12 +69,26 @@ textAngular.config([function(){
 textAngular.run([function(){
 	/* istanbul ignore next: not sure how to test this */
 	// Require Rangy and rangy savedSelection module.
-	if(!window.rangy){
-		throw("rangy-core.js and rangy-selectionsaverestore.js are required for textAngular to work correctly, rangy-core is not yet loaded.");
-	}else{
-		window.rangy.init();
-		if(!window.rangy.saveSelection){
-			throw("rangy-selectionsaverestore.js is required for textAngular to work correctly.");
+	if (typeof define === 'function' && define.amd) {
+		// AMD. Register as an anonymous module.
+		define(function(require) {
+			window.rangy = require('rangy');
+			window.rangy.saveSelection = require('rangy/lib/rangy-selectionsaverestore');
+		});
+	} else if (typeof require ==='function' && typeof module !== 'undefined' && typeof exports === 'object') {
+		// Node/CommonJS style
+		window.rangy = require('rangy');
+		window.rangy.saveSelection = require('rangy/lib/rangy-selectionsaverestore');
+	} else {
+		// Ensure that rangy and rangy.saveSelection exists on the window (global scope).
+		// TODO: Refactor so that the global scope is no longer used.
+		if(!window.rangy){
+			throw("rangy-core.js and rangy-selectionsaverestore.js are required for textAngular to work correctly, rangy-core is not yet loaded.");
+		}else{
+			window.rangy.init();
+			if(!window.rangy.saveSelection){
+				throw("rangy-selectionsaverestore.js is required for textAngular to work correctly.");
+			}
 		}
 	}
 }]);
@@ -214,13 +228,10 @@ textAngular.directive("textAngular", [
 					scope.displayElements.popoverArrow.css('margin-left', (Math.min(_targetLeft, (Math.max(0, _targetLeft - _maxLeft))) - 11) + 'px');
 				};
 				scope.hidePopover = function(){
-					/* istanbul ignore next: dosen't test with mocked animate */
-					var doneCb = function(){
-						scope.displayElements.popover.css('display', '');
-						scope.displayElements.popoverContainer.attr('style', '');
-						scope.displayElements.popoverContainer.attr('class', 'popover-content');
-					};
-					$q.when($animate.removeClass(scope.displayElements.popover, 'in', doneCb)).then(doneCb);
+					scope.displayElements.popover.css('display', '');
+					scope.displayElements.popoverContainer.attr('style', '');
+					scope.displayElements.popoverContainer.attr('class', 'popover-content');
+					scope.displayElements.popover.removeClass('in');
 				};
 
 				// setup the resize overlay
@@ -276,8 +287,11 @@ textAngular.directive("textAngular", [
 								pos.y = ratio > newRatio ? pos.x * ratio : pos.y;
 							}
 							var el = angular.element(_el);
-							el.css('height', Math.round(Math.max(0, pos.y)));
-							el.css('width', Math.round(Math.max(0, pos.x)));
+							function roundedMaxVal(val) {
+								return Math.round(Math.max(0, val));
+							}
+							el.css('height', roundedMaxVal(pos.y) + 'px');
+							el.css('width', roundedMaxVal(pos.x) + 'px');
 
 							// reflow the popover tooltip
 							scope.reflowResizeOverlay(_el);
@@ -533,6 +547,7 @@ textAngular.directive("textAngular", [
 
 				scope.$on('$destroy', function(){
 					textAngularManager.unregisterEditor(scope._name);
+					angular.element(window).off('blur');
 				});
 
 				// catch element select event and pass to toolbar tools
@@ -591,17 +606,6 @@ textAngular.directive("textAngular", [
 				};
 				// start updating on keydown
 				_keydown = function(){
-					// keyCode 9 is the TAB key
-					/* istanbul ignore next: not sure how to test this  */
-					if (event.ctrlKey===false && event.metaKey===false && event.keyCode===9) {
-						event.preventDefault();
-						var extraEventData = { specialKey: 'TabKey' };
-						if (event.shiftKey) {
-							extraEventData.specialKey = 'ShiftTabKey';
-						}
-						// since nether tab nor shift-tab generate a keypress event, we call directly
-						_keypress(event, extraEventData);
-					}
 					/* istanbul ignore next: ie catch */
 					if(!scope.focussed){
 						scope._bUpdateSelectedStyles = false;
@@ -913,6 +917,20 @@ textAngular.service('textAngularManager', ['taToolExecuteAction', 'taTools', 'ta
 				/* istanbul ignore else: phase catch */
 				if(!editors[name].scope.$$phase) editors[name].scope.$digest();
 			}else throw('textAngular Error: No Editor with name "' + name + '" exists');
+		},
+		// this is used by taBind to send a key command in response to a special key event
+		sendKeyCommand: function(scope, event){
+			angular.forEach(editors, function(_editor){
+				/* istanbul ignore else: if nothing to do, do nothing */
+				if (_editor.editorFunctions.sendKeyCommand(event)){
+					/* istanbul ignore else: don't run if already running */
+					if(!scope._bUpdateSelectedStyles){
+						scope.updateSelectedStyles();
+					}
+					event.preventDefault();
+					return false;
+				}
+			});
 		}
 	};
 }]);
