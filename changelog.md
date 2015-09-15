@@ -1,3 +1,7 @@
+<a name"1.4.5"></a>
+### 1.4.5 (2015-09-15)
+ * Fix(css): fixed css/js mistake in the 1.4.4 release!
+
 <a name"1.4.4"></a>
 ### 1.4.4 (2015-09-12)
 
