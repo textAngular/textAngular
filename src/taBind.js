@@ -168,34 +168,35 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 
 			var _blankTest = _taBlankTest(_defaultTest);
 
-			var _ensureContentWrapped = function(value){
-				if(_blankTest(value)) return value;
+			var _ensureContentWrapped = function(value) {
+				if (_blankTest(value)) return value;
 				var domTest = angular.element("<div>" + value + "</div>");
-				if(domTest.children().length === 0){
+				if (domTest.children().length === 0) {
 					value = "<" + attrs.taDefaultWrap + ">" + value + "</" + attrs.taDefaultWrap + ">";
-				}else{
+				} else {
 					var _children = domTest[0].childNodes;
 					var i;
 					var _foundBlockElement = false;
-					for(i = 0; i < _children.length; i++){
-						if(_foundBlockElement = _children[i].nodeName.toLowerCase().match(BLOCKELEMENTS)) break;
+					for (i = 0; i < _children.length; i++) {
+						if (_foundBlockElement = _children[i].nodeName.toLowerCase().match(BLOCKELEMENTS)) break;
 					}
-					if(!_foundBlockElement){
+					if (!_foundBlockElement) {
 						value = "<" + attrs.taDefaultWrap + ">" + value + "</" + attrs.taDefaultWrap + ">";
-					}else{
-						value = "";
-						for(i = 0; i < _children.length; i++){
-							if(!_children[i].nodeName.toLowerCase().match(BLOCKELEMENTS)){
-								var _subVal = (_children[i].outerHTML || _children[i].nodeValue);
-								/* istanbul ignore else: Doesn't seem to trigger on tests, is tested though */
-								if(_subVal.trim() !== '')
-									value += "<" + attrs.taDefaultWrap + ">" + _subVal + "</" + attrs.taDefaultWrap + ">";
-								else value += _subVal;
-							}else{
-								value += _children[i].outerHTML;
-							}
-						}
 					}
+//					else{
+//						value = "";
+//						for(i = 0; i < _children.length; i++){
+//							if(!_children[i].nodeName.toLowerCase().match(BLOCKELEMENTS)){
+//								var _subVal = (_children[i].outerHTML || _children[i].nodeValue);
+//								/* istanbul ignore else: Doesn't seem to trigger on tests, is tested though */
+//								if(_subVal.trim() !== '')
+//									value += "<" + attrs.taDefaultWrap + ">" + _subVal + "</" + attrs.taDefaultWrap + ">";
+//								else value += _subVal;
+//							}else{
+//								value += _children[i].outerHTML;
+//							}
+//						}
+//					}
 				}
 				return value;
 			};
@@ -389,18 +390,18 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 					};
 					ngModel.$formatters.unshift(function(htmlValue){
 						// tabulate the HTML so it looks nicer
-						var _children = angular.element('<div>' + htmlValue + '</div>')[0].childNodes;
-						if(_children.length > 0){
-							htmlValue = '';
-							for(var i = 0; i < _children.length; i++){
-								/* istanbul ignore next: browser catch */
-								if(!_children[i].outerHTML) continue;
-								if(htmlValue.length > 0) htmlValue += '\n';
-								if(_children[i].nodeName.toLowerCase() === 'ul' || _children[i].nodeName.toLowerCase() === 'ol')
-									htmlValue += '' + recursiveListFormat(_children[i], 0);
-								else htmlValue += '' + _children[i].outerHTML;
-							}
-						}
+//						var _children = angular.element('<div>' + htmlValue + '</div>')[0].childNodes;
+//						if(_children.length > 0){
+//							htmlValue = '';
+//							for(var i = 0; i < _children.length; i++){
+//								/* istanbul ignore next: browser catch */
+//								if(!_children[i].outerHTML) continue;
+//								if(htmlValue.length > 0) htmlValue += '\n';
+//								if(_children[i].nodeName.toLowerCase() === 'ul' || _children[i].nodeName.toLowerCase() === 'ol')
+//									htmlValue += '' + recursiveListFormat(_children[i], 0);
+//								else htmlValue += '' + _children[i].outerHTML;
+//							}
+//						}
 
 						return htmlValue;
 					});
@@ -713,11 +714,13 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 								_setInnerHTML(_defaultVal);
 								taSelection.setSelectionToElementStart(element.children()[0]);
 							}else if(val.substring(0, 1) !== '<' && attrs.taDefaultWrap !== ''){
+								/* we no longer do this, since there can be comments here and white space
 								var _savedSelection = $window.rangy.saveSelection();
 								val = _compileHtml();
 								val = "<" + attrs.taDefaultWrap + ">" + val + "</" + attrs.taDefaultWrap + ">";
 								_setInnerHTML(val);
 								$window.rangy.restoreSelection(_savedSelection);
+								*/
 							}
 							var triggerUndo = _lastKey !== event.keyCode && UNDO_TRIGGER_KEYS.test(event.keyCode);
 							if(_keyupTimeout) $timeout.cancel(_keyupTimeout);
