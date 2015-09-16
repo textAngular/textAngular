@@ -390,18 +390,18 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 					};
 					ngModel.$formatters.unshift(function(htmlValue){
 						// tabulate the HTML so it looks nicer
-//						var _children = angular.element('<div>' + htmlValue + '</div>')[0].childNodes;
-//						if(_children.length > 0){
-//							htmlValue = '';
-//							for(var i = 0; i < _children.length; i++){
-//								/* istanbul ignore next: browser catch */
-//								if(!_children[i].outerHTML) continue;
-//								if(htmlValue.length > 0) htmlValue += '\n';
-//								if(_children[i].nodeName.toLowerCase() === 'ul' || _children[i].nodeName.toLowerCase() === 'ol')
-//									htmlValue += '' + recursiveListFormat(_children[i], 0);
-//								else htmlValue += '' + _children[i].outerHTML;
-//							}
-//						}
+						var _children = angular.element('<div>' + htmlValue + '</div>')[0].childNodes;
+						if(_children.length > 0){
+							htmlValue = '';
+							for(var i = 0; i < _children.length; i++){
+								/* istanbul ignore next: browser catch */
+								if(!_children[i].outerHTML) continue;
+								if(htmlValue.length > 0) htmlValue += '\n';
+								if(_children[i].nodeName.toLowerCase() === 'ul' || _children[i].nodeName.toLowerCase() === 'ol')
+									htmlValue += '' + recursiveListFormat(_children[i], 0);
+								else htmlValue += '' + _children[i].outerHTML;
+							}
+						}
 
 						return htmlValue;
 					});
