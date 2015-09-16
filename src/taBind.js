@@ -183,21 +183,29 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 					if (!_foundBlockElement) {
 						value = "<" + attrs.taDefaultWrap + ">" + value + "</" + attrs.taDefaultWrap + ">";
 					}
-//					else{
-//						value = "";
-//						for(i = 0; i < _children.length; i++){
-//							if(!_children[i].nodeName.toLowerCase().match(BLOCKELEMENTS)){
-//								var _subVal = (_children[i].outerHTML || _children[i].nodeValue);
-//								/* istanbul ignore else: Doesn't seem to trigger on tests, is tested though */
-//								if(_subVal.trim() !== '')
-//									value += "<" + attrs.taDefaultWrap + ">" + _subVal + "</" + attrs.taDefaultWrap + ">";
-//								else value += _subVal;
-//							}else{
-//								value += _children[i].outerHTML;
-//							}
-//						}
-//					}
+					else{
+						value = "";
+						for(i = 0; i < _children.length; i++){
+							var node = _children[i];
+							var nodeName = node.nodeName.toLowerCase();
+							//console.log(nodeName);
+							if(nodeName === '#comment') {
+								value += '<!--' + node.nodeValue + '-->';
+							} else if(nodeName === '#text') {
+								value += node.textContent;
+							} else if(!nodeName.match(BLOCKELEMENTS)){
+								var _subVal = (node.outerHTML || node.nodeValue);
+								/* istanbul ignore else: Doesn't seem to trigger on tests, is tested though */
+								if(_subVal.trim() !== '')
+									value += "<" + attrs.taDefaultWrap + ">" + _subVal + "</" + attrs.taDefaultWrap + ">";
+								else value += _subVal;
+							} else {
+								value += node.outerHTML;
+							}
+						}
+					}
 				}
+				console.log(value);
 				return value;
 			};
 
@@ -375,16 +383,31 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 
 					var recursiveListFormat = function(listNode, tablevel){
 						var _html = '', _children = listNode.childNodes;
+						var forEach = function (array, callback, scope) {
+							for (var i= 0; i<array.length; i++) {
+								callback.call(scope, i, array[i]);
+							}
+						};
 						tablevel++;
 						_html += _repeat('\t', tablevel-1) + listNode.outerHTML.substring(0, listNode.outerHTML.indexOf('<li'));
-						for(var _i = 0; _i < _children.length; _i++){
+						forEach(_children, function (index, node) {
 							/* istanbul ignore next: browser catch */
-							if(!_children[_i].outerHTML) continue;
-							if(_children[_i].nodeName.toLowerCase() === 'ul' || _children[_i].nodeName.toLowerCase() === 'ol')
-								_html += '\n' + recursiveListFormat(_children[_i], tablevel);
+							var nodeName = node.nodeName.toLowerCase();
+							console.log(node, nodeName);
+							if (nodeName === '#comment') {
+								_html += '<!--' + node.nodeValue + '-->';
+								return;
+							}
+							if (nodeName === '#text') {
+								_html += node.textContent;
+								return;
+							}
+							if(!node.outerHTML) return;
+							if(nodeName === 'ul' || nodeName === 'ol')
+								_html += '\n' + recursiveListFormat(node, tablevel);
 							else
-								_html += '\n' + _repeat('\t', tablevel) + _children[_i].outerHTML;
-						}
+								_html += '\n' + _repeat('\t', tablevel) + node.outerHTML;
+						});
 						_html += '\n' + _repeat('\t', tablevel-1) + listNode.outerHTML.substring(listNode.outerHTML.lastIndexOf('<'));
 						return _html;
 					};
@@ -395,6 +418,16 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 							htmlValue = '';
 							for(var i = 0; i < _children.length; i++){
 								/* istanbul ignore next: browser catch */
+								var node = _children[i];
+								var nodeName = node.nodeName.toLowerCase();
+								if (nodeName === '#comment') {
+									htmlValue += '<!--' + node.nodeValue + '-->';
+									continue;
+								}
+								if (nodeName === '#text') {
+									htmlValue += node.textContent;
+									continue;
+								}
 								if(!_children[i].outerHTML) continue;
 								if(htmlValue.length > 0) htmlValue += '\n';
 								if(_children[i].nodeName.toLowerCase() === 'ul' || _children[i].nodeName.toLowerCase() === 'ol')
@@ -402,7 +435,6 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 								else htmlValue += '' + _children[i].outerHTML;
 							}
 						}
-
 						return htmlValue;
 					});
 				}else{
