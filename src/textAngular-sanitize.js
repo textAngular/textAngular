@@ -147,7 +147,6 @@ function $SanitizeProvider() {
       htmlParser(html, htmlSanitizeWriter(buf, function(uri, isImage) {
         return !/^unsafe/.test($$sanitizeUri(uri, isImage));
       }));
-      console.log(buf.join(''));
       return buf.join('');
     };
   }];
@@ -603,7 +602,7 @@ function htmlSanitizeWriter(buf, uriValidator) {
       out(com);
     },
     whitespace: function (ws) {
-      out(ws);
+      out(encodeEntities(ws));
     },
     end: function(tag) {
         tag = angular.lowercase(tag);

@@ -171,6 +171,7 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 			var _ensureContentWrapped = function(value) {
 				if (_blankTest(value)) return value;
 				var domTest = angular.element("<div>" + value + "</div>");
+				//console.log('domTest.children().length():', domTest.children().length);
 				if (domTest.children().length === 0) {
 					value = "<" + attrs.taDefaultWrap + ">" + value + "</" + attrs.taDefaultWrap + ">";
 				} else {
@@ -192,7 +193,16 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 							if(nodeName === '#comment') {
 								value += '<!--' + node.nodeValue + '-->';
 							} else if(nodeName === '#text') {
-								value += node.textContent;
+								// determine if this is all whitespace, if so, we will leave it as it is.
+								// otherwise, we will wrap it as it is
+								var text = node.textContent;
+								if (!text.trim()) {
+									// just whitespace
+									value += text;
+								} else {
+									// not pure white space so wrap in <p>...</p> or whatever attrs.taDefaultWrap is set to.
+									value += "<" + attrs.taDefaultWrap + ">" + text + "</" + attrs.taDefaultWrap + ">";
+								}
 							} else if(!nodeName.match(BLOCKELEMENTS)){
 								var _subVal = (node.outerHTML || node.nodeValue);
 								/* istanbul ignore else: Doesn't seem to trigger on tests, is tested though */
@@ -205,7 +215,7 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 						}
 					}
 				}
-				console.log(value);
+				//console.log(value);
 				return value;
 			};
 
@@ -393,7 +403,7 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 						forEach(_children, function (index, node) {
 							/* istanbul ignore next: browser catch */
 							var nodeName = node.nodeName.toLowerCase();
-							console.log(node, nodeName);
+							//console.log(nodeName);
 							if (nodeName === '#comment') {
 								_html += '<!--' + node.nodeValue + '-->';
 								return;
