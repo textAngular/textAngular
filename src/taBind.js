@@ -204,6 +204,7 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 									value += "<" + attrs.taDefaultWrap + ">" + text + "</" + attrs.taDefaultWrap + ">";
 								}
 							} else if(!nodeName.match(BLOCKELEMENTS)){
+								/* istanbul ignore  next: Doesn't seem to trigger on tests */
 								var _subVal = (node.outerHTML || node.nodeValue);
 								/* istanbul ignore else: Doesn't seem to trigger on tests, is tested though */
 								if(_subVal.trim() !== '')
@@ -416,6 +417,7 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 								_html += node.textContent;
 								return;
 							}
+							/* istanbul ignore next: not tested, and this was original code -- so not wanting to possibly cause an issue, leaving it... */
 							if(!node.outerHTML) {
 								// no html to add
 								return;
@@ -447,7 +449,9 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 						// first get a list of the nodes...
 						// we do this by using the element parser...
 						//
-						var _nodes=angular.element(htmlValue);
+						// doing this -- which is simpiler -- breaks our tests...
+						//var _nodes=angular.element(htmlValue);
+						var _nodes = angular.element('<div>' + htmlValue + '</div>')[0].childNodes;
 						if(_nodes.length > 0){
 							// do the reformatting of the layout...
 							htmlValue = '';
@@ -461,9 +465,10 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 									htmlValue += node.textContent;
 									return;
 								}
-								if(!node.outerHTML) {
+								/* istanbul ignore next: not tested, and this was original code -- so not wanting to possibly cause an issue, leaving it... */
+								if(!node.outerHTML)
+								{
 									// nothing to format!
-									//console.log(node);
 									return;
 								}
 								if(htmlValue.length > 0) {
@@ -612,7 +617,7 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 								// insert missing parent of li element
 								text = text.replace(/<li(\s.*)?>.*<\/li(\s.*)?>/i, '<ul>$&</ul>');
 							}
-														
+
 							// parse whitespace from plaintext input, starting with preceding spaces that get stripped on paste
 							text = text.replace(/^[ |\u00A0]+/gm, function (match) {
 								var result = '';
