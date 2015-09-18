@@ -391,19 +391,23 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 						return result;
 					};
 
+					// add a forEach function that will work on a NodeList, etc..
+					var forEach = function (array, callback, scope) {
+						for (var i= 0; i<array.length; i++) {
+							callback.call(scope, i, array[i]);
+						}
+					};
+
+					// handle <ul> or <ol> nodes
 					var recursiveListFormat = function(listNode, tablevel){
-						var _html = '', _children = listNode.childNodes;
-						var forEach = function (array, callback, scope) {
-							for (var i= 0; i<array.length; i++) {
-								callback.call(scope, i, array[i]);
-							}
-						};
+						var _html = '';
+						var _subnodes = listNode.childNodes;
 						tablevel++;
-						_html += _repeat('\t', tablevel-1) + listNode.outerHTML.substring(0, listNode.outerHTML.indexOf('<li'));
-						forEach(_children, function (index, node) {
+						// tab out and add the <ul> or <ol> html piece
+						_html += _repeat('\t', tablevel-1) + listNode.outerHTML.substring(0, 4);
+						forEach(_subnodes, function (index, node) {
 							/* istanbul ignore next: browser catch */
 							var nodeName = node.nodeName.toLowerCase();
-							//console.log(nodeName);
 							if (nodeName === '#comment') {
 								_html += '<!--' + node.nodeValue + '-->';
 								return;
@@ -412,38 +416,69 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 								_html += node.textContent;
 								return;
 							}
-							if(!node.outerHTML) return;
-							if(nodeName === 'ul' || nodeName === 'ol')
+							if(!node.outerHTML) {
+								// no html to add
+								return;
+							}
+							if(nodeName === 'ul' || nodeName === 'ol') {
 								_html += '\n' + recursiveListFormat(node, tablevel);
-							else
+							}
+							else {
+								// no reformatting within this subnode, so just do the tabing...
 								_html += '\n' + _repeat('\t', tablevel) + node.outerHTML;
+							}
 						});
+						// now add on the </ol> or </ul> piece
 						_html += '\n' + _repeat('\t', tablevel-1) + listNode.outerHTML.substring(listNode.outerHTML.lastIndexOf('<'));
 						return _html;
 					};
+					// handle formating of something like:
+					// <ol><!--First comment-->
+					//  <li>Test Line 1<!--comment test list 1--></li>
+					//    <ul><!--comment ul-->
+					//      <li>Nested Line 1</li>
+					//        <!--comment between nested lines--><li>Nested Line 2</li>
+					//    </ul>
+					//  <li>Test Line 3</li>
+					// </ol>
 					ngModel.$formatters.unshift(function(htmlValue){
 						// tabulate the HTML so it looks nicer
-						var _children = angular.element('<div>' + htmlValue + '</div>')[0].childNodes;
-						if(_children.length > 0){
+						//
+						// first get a list of the nodes...
+						// we do this by using the element parser...
+						//
+						var _nodes=angular.element(htmlValue);
+						if(_nodes.length > 0){
+							// do the reformatting of the layout...
 							htmlValue = '';
-							for(var i = 0; i < _children.length; i++){
-								/* istanbul ignore next: browser catch */
-								var node = _children[i];
+							forEach(_nodes, function (index, node) {
 								var nodeName = node.nodeName.toLowerCase();
 								if (nodeName === '#comment') {
 									htmlValue += '<!--' + node.nodeValue + '-->';
-									continue;
+									return;
 								}
 								if (nodeName === '#text') {
 									htmlValue += node.textContent;
-									continue;
+									return;
 								}
-								if(!_children[i].outerHTML) continue;
-								if(htmlValue.length > 0) htmlValue += '\n';
-								if(_children[i].nodeName.toLowerCase() === 'ul' || _children[i].nodeName.toLowerCase() === 'ol')
-									htmlValue += '' + recursiveListFormat(_children[i], 0);
-								else htmlValue += '' + _children[i].outerHTML;
-							}
+								if(!node.outerHTML) {
+									// nothing to format!
+									//console.log(node);
+									return;
+								}
+								if(htmlValue.length > 0) {
+									// we aready have some content, so drop to a new line
+									htmlValue += '\n';
+								}
+								if(nodeName === 'ul' || nodeName === 'ol') {
+									// okay a set of list stuff we want to reformat in a nested way
+									htmlValue += '' + recursiveListFormat(node, 0);
+								}
+								else {
+									// just use the original without any additional formating
+									htmlValue += '' + node.outerHTML;
+								}
+							});
 						}
 						return htmlValue;
 					});
