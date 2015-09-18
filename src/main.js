@@ -951,6 +951,7 @@ textAngular.directive('textAngularToolbar', [
 				if(attrs.taToolbarButtonClass)			scope.classes.toolbarButton = attrs.taToolbarButtonClass;
 				if(attrs.taToolbarActiveButtonClass)	scope.classes.toolbarButtonActive = attrs.taToolbarActiveButtonClass;
 				if(attrs.taFocussedClass)				scope.classes.focussed = attrs.taFocussedClass;
+				if(attrs.useAngularTranslate)				scope.useAngularTranslate = attrs.useAngularTranslate;
 
 				scope.disabled = true;
 				scope.focussed = false;
@@ -962,6 +963,16 @@ textAngular.directive('textAngularToolbar', [
 					if(scope.focussed) element.addClass(scope.classes.focussed);
 					else element.removeClass(scope.classes.focussed);
 				});
+				
+				var slugify = function (text)
+				{
+				  return text.toString().toLowerCase()
+				    .replace(/\s+/g, '-')           // Replace spaces with -
+				    .replace(/[^\w\-]+/g, '')       // Remove all non-word chars
+				    .replace(/\-\-+/g, '-')         // Replace multiple - with single -
+				    .replace(/^-+/, '')             // Trim - from start of text
+				    .replace(/-+$/, '');            // Trim - from end of text
+				}
 
 				var setupToolElement = function(toolDefinition, toolScope){
 					var toolElement;
@@ -982,7 +993,12 @@ textAngular.directive('textAngularToolbar', [
 					toolElement.attr('ng-class', 'displayActiveToolClass(active)');
 
 					if (toolDefinition && toolDefinition.tooltiptext) {
-						toolElement.attr('title', toolDefinition.tooltiptext);
+						if (scope.useAngularTranslate) {
+							// create a namespaced key for use with angular-translate
+							toolElement.attr('ng-attr-title', "{{'TEXT_ANGULAR." + slugify(toolDefinition.tooltiptext) +"'|translate}}");
+						} else {
+							toolElement.attr('title', toolDefinition.tooltiptext);
+						}
 					}
 					if(toolDefinition && !toolDefinition.display && !toolScope._display){
 						// first clear out the current contents if any
