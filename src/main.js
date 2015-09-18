@@ -2,65 +2,6 @@
 var dropFired = false;
 var textAngular = angular.module("textAngular", ['ngSanitize', 'textAngularSetup', 'textAngular.factories', 'textAngular.DOM', 'textAngular.validators', 'textAngular.taBind']); //This makes ngSanitize required
 
-// setup the global contstant functions for setting up the toolbar
-
-// all tool definitions
-var taTools = {};
-/*
-	A tool definition is an object with the following key/value parameters:
-		action: [function(deferred, restoreSelection)]
-				a function that is executed on clicking on the button - this will allways be executed using ng-click and will
-				overwrite any ng-click value in the display attribute.
-				The function is passed a deferred object ($q.defer()), if this is wanted to be used `return false;` from the action and
-				manually call `deferred.resolve();` elsewhere to notify the editor that the action has finished.
-				restoreSelection is only defined if the rangy library is included and it can be called as `restoreSelection()` to restore the users
-				selection in the WYSIWYG editor.
-		display: [string]?
-				Optional, an HTML element to be displayed as the button. The `scope` of the button is the tool definition object with some additional functions
-				If set this will cause buttontext and iconclass to be ignored
-		class: [string]?
-				Optional, if set will override the taOptions.classes.toolbarButton class.
-		buttontext: [string]?
-				if this is defined it will replace the contents of the element contained in the `display` element
-		iconclass: [string]?
-				if this is defined an icon (<i>) will be appended to the `display` element with this string as it's class
-		tooltiptext: [string]?
-				Optional, a plain text description of the action, used for the title attribute of the action button in the toolbar by default.
-		activestate: [function(commonElement)]?
-				this function is called on every caret movement, if it returns true then the class taOptions.classes.toolbarButtonActive
-				will be applied to the `display` element, else the class will be removed
-		disabled: [function()]?
-				if this function returns true then the tool will have the class taOptions.classes.disabled applied to it, else it will be removed
-	Other functions available on the scope are:
-		name: [string]
-				the name of the tool, this is the first parameter passed into taRegisterTool
-		isDisabled: [function()]
-				returns true if the tool is disabled, false if it isn't
-		displayActiveToolClass: [function(boolean)]
-				returns true if the tool is 'active' in the currently focussed toolbar
-		onElementSelect: [Object]
-				This object contains the following key/value pairs and is used to trigger the ta-element-select event
-				element: [String]
-					an element name, will only trigger the onElementSelect action if the tagName of the element matches this string
-				filter: [function(element)]?
-					an optional filter that returns a boolean, if true it will trigger the onElementSelect.
-				action: [function(event, element, editorScope)]
-					the action that should be executed if the onElementSelect function runs
-*/
-// name and toolDefinition to add into the tools available to be added on the toolbar
-function registerTextAngularTool(name, toolDefinition){
-	if(!name || name === '' || taTools.hasOwnProperty(name)) throw('textAngular Error: A unique name is required for a Tool Definition');
-	if(
-		(toolDefinition.display && (toolDefinition.display === '' || !validElementString(toolDefinition.display))) ||
-		(!toolDefinition.display && !toolDefinition.buttontext && !toolDefinition.iconclass)
-	)
-		throw('textAngular Error: Tool Definition for "' + name + '" does not have a valid display/iconclass/buttontext value');
-	taTools[name] = toolDefinition;
-}
-
-textAngular.constant('taRegisterTool', registerTextAngularTool);
-textAngular.value('taTools', taTools);
-
 textAngular.config([function(){
 	// clear taTools variable. Just catches testing and any other time that this config may run multiple times...
 	angular.forEach(taTools, function(value, key){ delete taTools[key];	});
