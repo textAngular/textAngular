@@ -75,15 +75,6 @@ if (!String.prototype.trim) {
 	};
 }
 
-// tests against the current jqLite/jquery implementation if this can be an element
-function validElementString(string){
-	try{
-		return angular.element(string).length !== 0;
-	}catch(any){
-		return false;
-	}
-}
-
 /*
 	Custom stylesheet for the placeholders rules.
 	Credit to: http://davidwalsh.name/add-rules-stylesheets
