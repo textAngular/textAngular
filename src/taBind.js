@@ -607,7 +607,10 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 									}
 								}else if(text.match(/^<span/)){
 									// in case of pasting only a span - chrome paste, remove them. THis is just some wierd formatting
-									text = text.replace(/<(|\/)span[^>]*?>/ig, '');
+									// if we remove the '<span class="Apple-converted-space"> </span>' here we destroy the spacing
+									// on paste from even ourselves!
+									//text = text.replace(/(<span class=\"Apple-converted-space\">.<\/span>)/ig, '&nbsp;');
+									//text = text.replace(/<(|\/)span[^>]*?>/ig, '');
 								}
 								// Webkit on Apple tags
 								text = text.replace(/<br class="Apple-interchange-newline"[^>]*?>/ig, '').replace(/<span class="Apple-converted-space">( |&nbsp;)<\/span>/ig, '&nbsp;');
