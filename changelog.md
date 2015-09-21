@@ -1,3 +1,20 @@
+<a name"1.4.6"></a>
+### 1.4.6 (2015-09-20)
+
+
+#### Bug Fixes
+
+* **textAngular:**
+  * Fix(textAngular): several bug fixes related to pasting from word. Closes #644, #617 ([f7d34a33](https://github.com/fraywing/textAngular/commit/f7d34a33658d7f336c2891cf9618ba34956c5bad))  
+  * Fix(textAngular): several bug fixes related to pasting from word. Closes #644, #617 ([f7d34a33](https://github.com/fraywing/textAngular/commit/f7d34a33658d7f336c2891cf9618ba34956c5bad))  
+  * Fix(npm): bad package for 1.4.5 is updated to current version. Closes #888
+
+#### Features
+
+* **textAngular:** textAngular-sanitize now respects and keeps most whitespace and html comments! ([aba8265](http://github.com/fraywing/textAngular/commit/aba826510f5356318673c622cfa55be512801581), closes [#846, #847]
+* **textAngularSetup:** textAngularSetup - fixed dependency issue with textAngularSetup to all use of constant taRegisterTool. Closes PR #866 (https://github.com/fraywing/textAngular/pull/866)
+
+
 <a name"1.4.5"></a>
 ### 1.4.5 (2015-09-15)
  * Fix(css): fixed css/js mistake in the 1.4.4 release!
@@ -105,9 +122,6 @@ The minimum required versions of AngularJS is 1.3 and Rangy is 1.3.
 * **taBinde.undomanager:** Fix a bug with redo/undo beyond the borders ([dd023c30](http://github.com/fraywing/textAngular/commit/dd023c30537cd79550de630f7d4360331eb02975), closes [#558](http://github.com/fraywing/textAngular/issues/558))
 
 
-#### Features
-
-* **bootstrap:** Bootstrap is no longer required in bower ([5e7459eb](http://github.com/fraywing/textAngular/commit/5e7459eb03bf66c62d05b8b42225c7b5e1e75da5), closes [#649](http://github.com/fraywing/textAngular/issues/649))
 * **taTools:** Added options for tools in taOptions ([7fb00a02](http://github.com/fraywing/textAngular/commit/7fb00a02993f8c02b09f8a24c3c267b6ba4f8fbd))
 
 
