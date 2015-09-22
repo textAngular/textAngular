@@ -243,6 +243,9 @@ textAngular.directive("textAngular", [
 							event.stopPropagation();
 							_body.off('mousemove', mousemove);
 							scope.showPopover(_el);
+							// at this point, we need to force the model to update! since the css has changed!
+							// this fixes bug: #862
+							scope.updateTaBindtaTextElement();
 						});
 						event.stopPropagation();
 						event.preventDefault();
