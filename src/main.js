@@ -242,10 +242,14 @@ textAngular.directive("textAngular", [
 							event.preventDefault();
 							event.stopPropagation();
 							_body.off('mousemove', mousemove);
-							scope.showPopover(_el);
 							// at this point, we need to force the model to update! since the css has changed!
-							// this fixes bug: #862
-							scope.updateTaBindtaTextElement();
+							// this fixes bug: #862 - we now hide the popover -- as this seems more consitent.
+							// there are still issues under firefox, the window does not repaint. -- not sure
+							// how best to resolve this, but clicking anywhere works.
+							scope.$apply(function (){
+								scope.hidePopover();
+								scope.updateTaBindtaTextElement();
+							}, 100);
 						});
 						event.stopPropagation();
 						event.preventDefault();
