@@ -1,8 +1,10 @@
-textAngular v1.4.6
+WAngular v1.0
+
 ===========
 
-[![Build Status](https://travis-ci.org/fraywing/textAngular.png?branch=master)](https://travis-ci.org/fraywing/textAngular) [![Coverage Status](https://coveralls.io/repos/fraywing/textAngular/badge.png)](https://coveralls.io/r/fraywing/textAngular)
+[![Build Status](https://travis-ci.org/jakegraves/WAngular.png?branch=master)](https://travis-ci.org/jakegraves/WAngular) [![Coverage Status](https://coveralls.io/repos/jakegraves/WAngular/badge.png)](https://coveralls.io/r/jakegraves/WAngular)
 
+This is a fork of textAngular 1.4.6. All information below is about that project, and will be reduced as this fork grows larger and I write my own documentation.
 
 Demo is available at: http://www.textangular.com (Or editable [Plunkr Demo](http://plnkr.co/edit/kKPfk0LCXWrMpZ1gkblb?p=preview))
 
