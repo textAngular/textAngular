@@ -17,3 +17,5 @@ logs
 results
 
 npm-debug.log
+WAngular.sln
+bin/Debug/ConsoleApplication.vshost.exe.manifest
