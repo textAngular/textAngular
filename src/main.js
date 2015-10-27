@@ -870,7 +870,7 @@ textAngular.service('textAngularManager', ['taToolExecuteAction', 'taTools', 'ta
 		sendKeyCommand: function(scope, event){
 			Object.keys(editors).forEach(function (key) {
 				/* istanbul ignore else: if nothing to do, do nothing */
-				if (scope._name == key) {
+				if (scope._name === key) {
 					if (editors[key].editorFunctions.sendKeyCommand(event)){
 						/* istanbul ignore else: don't run if already running */
 						if(!scope._bUpdateSelectedStyles){
