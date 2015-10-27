@@ -868,15 +868,17 @@ textAngular.service('textAngularManager', ['taToolExecuteAction', 'taTools', 'ta
 		},
 		// this is used by taBind to send a key command in response to a special key event
 		sendKeyCommand: function(scope, event){
-			angular.forEach(editors, function(_editor){
+			Object.keys(editors).forEach(function (key) {
 				/* istanbul ignore else: if nothing to do, do nothing */
-				if (_editor.editorFunctions.sendKeyCommand(event)){
-					/* istanbul ignore else: don't run if already running */
-					if(!scope._bUpdateSelectedStyles){
-						scope.updateSelectedStyles();
+				if (scope._name === key) {
+					if (editors[key].editorFunctions.sendKeyCommand(event)){
+						/* istanbul ignore else: don't run if already running */
+						if(!scope._bUpdateSelectedStyles){
+							scope.updateSelectedStyles();
+						}
+						event.preventDefault();
+						return false;
 					}
-					event.preventDefault();
-					return false;
 				}
 			});
 		}
