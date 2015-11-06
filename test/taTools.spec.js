@@ -533,105 +533,150 @@ describe('taTools test tool actions', function(){
 	});
 
 	describe('test link functions and button', function(){
-		beforeEach(module('textAngular'));
-		beforeEach(inject(function (_$compile_, _$rootScope_, $document, textAngularManager, _$window_) {
-			$window = _$window_;
-			$window.prompt = function(){ return ''; };
-			$rootScope = _$rootScope_;
-			element = _$compile_('<text-angular name="test"><p>Test Content</p></text-angular>')($rootScope);
-			$document.find('body').append(element);
-			$rootScope.$digest();
-			editorScope = textAngularManager.retrieveEditor('test').scope;
-			var sel = $window.rangy.getSelection();
-			var range = $window.rangy.createRangyRange();
-			range.selectNodeContents(jQuery('.ta-text p')[0]);
-			sel.setSingleRange(range);
-		}));
-		afterEach(function(){
-			element.remove();
-		});
+		describe('editor enabled', function(){
+			beforeEach(module('textAngular'));
+			beforeEach(inject(function (_$compile_, _$rootScope_, $document, textAngularManager, _$window_) {
+				$window = _$window_;
+				$window.prompt = function(){ return ''; };
+				$rootScope = _$rootScope_;
+				element = _$compile_('<text-angular name="test"><p>Test Content</p></text-angular>')($rootScope);
+				$document.find('body').append(element);
+				$rootScope.$digest();
+				editorScope = textAngularManager.retrieveEditor('test').scope;
+				var sel = $window.rangy.getSelection();
+				var range = $window.rangy.createRangyRange();
+				range.selectNodeContents(jQuery('.ta-text p')[0]);
+				sel.setSingleRange(range);
+			}));
+			afterEach(function(){
+				element.remove();
+			});
 
-		it('doesn\'t error', function(){
-			expect(function(){
-				findAndTriggerButton('insertLink');
-			}).not.toThrow();
-		});
+			it('doesn\'t error', function(){
+				expect(function(){
+					findAndTriggerButton('insertLink');
+				}).not.toThrow();
+			});
 
-		it('creates a link', function(){
-			$window.prompt = function(){ return 'testval'; };
-			findAndTriggerButton('insertLink');
-			expect(editorScope.displayElements.text.find('p').find('a').attr('href')).toBe('testval');
-		});
-
-		describe('interacts with the popover', function(){
-			beforeEach(function(){
+			it('creates a link', function(){
 				$window.prompt = function(){ return 'testval'; };
 				findAndTriggerButton('insertLink');
-			});
-
-			it('opens on click', function(){
-				editorScope.displayElements.text.find('p').find('a').triggerHandler('click');
-				editorScope.$parent.$digest();
-				expect(editorScope.displayElements.popover.hasClass('in')).toBe(true);
-			});
-
-			it('has correct content', function(){
-				editorScope.displayElements.text.find('p').find('a').triggerHandler('click');
-				var contents = editorScope.displayElements.popoverContainer.contents();
-				expect(contents.eq(0)[0].tagName.toLowerCase()).toBe('a');
-				expect(contents.eq(0).html()).toBe('testval');
-				expect(contents.eq(0).attr('href')).toBe('testval');
-			});
-
-			it('has functioning unlink button', function(){
-				editorScope.displayElements.text.find('p').find('a').triggerHandler('click');
-				editorScope.displayElements.popoverContainer.find('button').eq(1).triggerHandler('click');
-				$rootScope.$digest();
-				expect(editorScope.displayElements.text.find('p').find('a').length).toBe(0);
-			});
-
-			it('has functioning edit button', function(){
-				$window.prompt = function(){ return 'newval'; };
-				editorScope.displayElements.text.find('p').find('a').triggerHandler('click');
-				editorScope.displayElements.popoverContainer.find('button').eq(0).triggerHandler('click');
-				$rootScope.$digest();
-				expect(editorScope.displayElements.text.find('p').find('a').attr('href')).toBe('newval');
-			});
-
-			it('has functioning edit button when blank passed', function(){
-				$window.prompt = function(){ return ''; };
-				editorScope.displayElements.text.find('p').find('a').triggerHandler('click');
-				editorScope.displayElements.popoverContainer.find('button').eq(0).triggerHandler('click');
-				$rootScope.$digest();
 				expect(editorScope.displayElements.text.find('p').find('a').attr('href')).toBe('testval');
 			});
 
-			describe('has functioning target button', function(){
-				it('adds target', function(){
-					editorScope.displayElements.text.find('p').find('a').triggerHandler('click');
-					editorScope.displayElements.popoverContainer.find('button').eq(2).triggerHandler('click');
-					$rootScope.$digest();
-					expect(editorScope.displayElements.text.find('p').find('a').attr('target')).toBe('_blank');
+			describe('interacts with the popover', function(){
+				beforeEach(function(){
+					$window.prompt = function(){ return 'testval'; };
+					findAndTriggerButton('insertLink');
 				});
-				it('removes target', function(){
+
+				it('opens on click', function(){
 					editorScope.displayElements.text.find('p').find('a').triggerHandler('click');
-					editorScope.displayElements.popoverContainer.find('button').eq(2).triggerHandler('click');
-					$rootScope.$digest();
-					editorScope.displayElements.text.find('p').find('a').triggerHandler('click');
-					editorScope.displayElements.popoverContainer.find('button').eq(2).triggerHandler('click');
-					$rootScope.$digest();
-					expect(editorScope.displayElements.text.find('p').find('a').attr('target')).not.toBe('_blank');
+					editorScope.$parent.$digest();
+					expect(editorScope.displayElements.popover.hasClass('in')).toBe(true);
 				});
-				it('deactivates button with target!="_blank"', function(){
+
+				it('has correct content', function(){
 					editorScope.displayElements.text.find('p').find('a').triggerHandler('click');
-					expect(editorScope.displayElements.popoverContainer.find('button').eq(2).hasClass('active')).not.toBe(true);
+					var contents = editorScope.displayElements.popoverContainer.contents();
+					expect(contents.eq(0)[0].tagName.toLowerCase()).toBe('a');
+					expect(contents.eq(0).html()).toBe('testval');
+					expect(contents.eq(0).attr('href')).toBe('testval');
 				});
-				it('activates button with target="_blank"', function(){
+
+				it('has functioning unlink button', function(){
 					editorScope.displayElements.text.find('p').find('a').triggerHandler('click');
-					editorScope.displayElements.popoverContainer.find('button').eq(2).triggerHandler('click');
+					editorScope.displayElements.popoverContainer.find('button').eq(1).triggerHandler('click');
 					$rootScope.$digest();
+					expect(editorScope.displayElements.text.find('p').find('a').length).toBe(0);
+				});
+
+				it('has functioning edit button', function(){
+					$window.prompt = function(){ return 'newval'; };
 					editorScope.displayElements.text.find('p').find('a').triggerHandler('click');
-					expect(editorScope.displayElements.popoverContainer.find('button').eq(2).hasClass('active')).toBe(true);
+					editorScope.displayElements.popoverContainer.find('button').eq(0).triggerHandler('click');
+					$rootScope.$digest();
+					expect(editorScope.displayElements.text.find('p').find('a').attr('href')).toBe('newval');
+				});
+
+				it('has functioning edit button when blank passed', function(){
+					$window.prompt = function(){ return ''; };
+					editorScope.displayElements.text.find('p').find('a').triggerHandler('click');
+					editorScope.displayElements.popoverContainer.find('button').eq(0).triggerHandler('click');
+					$rootScope.$digest();
+					expect(editorScope.displayElements.text.find('p').find('a').attr('href')).toBe('testval');
+				});
+
+				describe('has functioning target button', function(){
+					it('adds target', function(){
+						editorScope.displayElements.text.find('p').find('a').triggerHandler('click');
+						editorScope.displayElements.popoverContainer.find('button').eq(2).triggerHandler('click');
+						$rootScope.$digest();
+						expect(editorScope.displayElements.text.find('p').find('a').attr('target')).toBe('_blank');
+					});
+					it('removes target', function(){
+						editorScope.displayElements.text.find('p').find('a').triggerHandler('click');
+						editorScope.displayElements.popoverContainer.find('button').eq(2).triggerHandler('click');
+						$rootScope.$digest();
+						editorScope.displayElements.text.find('p').find('a').triggerHandler('click');
+						editorScope.displayElements.popoverContainer.find('button').eq(2).triggerHandler('click');
+						$rootScope.$digest();
+						expect(editorScope.displayElements.text.find('p').find('a').attr('target')).not.toBe('_blank');
+					});
+					it('deactivates button with target!="_blank"', function(){
+						editorScope.displayElements.text.find('p').find('a').triggerHandler('click');
+						expect(editorScope.displayElements.popoverContainer.find('button').eq(2).hasClass('active')).not.toBe(true);
+					});
+					it('activates button with target="_blank"', function(){
+						editorScope.displayElements.text.find('p').find('a').triggerHandler('click');
+						editorScope.displayElements.popoverContainer.find('button').eq(2).triggerHandler('click');
+						$rootScope.$digest();
+						editorScope.displayElements.text.find('p').find('a').triggerHandler('click');
+						expect(editorScope.displayElements.popoverContainer.find('button').eq(2).hasClass('active')).toBe(true);
+					});
+				});
+			});
+		});
+
+		describe('editor disabled', function(){
+			beforeEach(module('textAngular'));
+			beforeEach(inject(function (_$compile_, _$rootScope_, $document, textAngularManager, _$window_) {
+				$window = _$window_;
+				$window.prompt = function(){ return ''; };
+				$rootScope = _$rootScope_;
+				element = _$compile_('<text-angular name="test" ta-disabled="true"><p><a href="testval">Test Content</a></p></text-angular>')($rootScope);
+				$document.find('body').append(element);
+				$rootScope.$digest();
+				editorScope = textAngularManager.retrieveEditor('test').scope;
+				var sel = $window.rangy.getSelection();
+				var range = $window.rangy.createRangyRange();
+				range.selectNodeContents(jQuery('.ta-text p')[0]);
+				sel.setSingleRange(range);
+			}));
+			afterEach(function(){
+				element.remove();
+			});
+
+			it('has a link', function(){
+				expect(editorScope.displayElements.text.find('p').find('a').attr('href')).toBe('testval');
+			});
+
+			describe('interacts with the popover', function(){
+				it('opens on click', function(){
+					editorScope.displayElements.text.find('p').find('a').triggerHandler('click');
+					editorScope.$parent.$digest();
+					expect(editorScope.displayElements.popover.hasClass('in')).toBe(true);
+				});
+				it('has correct content', function(){
+					editorScope.displayElements.text.find('p').find('a').triggerHandler('click');
+					var contents = editorScope.displayElements.popoverContainer.contents();
+					expect(contents.eq(0)[0].tagName.toLowerCase()).toBe('a');
+					expect(contents.eq(0).html()).toBe('testval');
+					expect(contents.eq(0).attr('href')).toBe('testval');
+				});
+				it('does not have unlink, edit or target button', function(){
+					editorScope.displayElements.text.find('p').find('a').triggerHandler('click');
+					expect(editorScope.displayElements.popoverContainer.find('button').length).toBe(0);
 				});
 			});
 		});
