@@ -59,7 +59,13 @@ describe('HTML', function() {
       htmlParser('<!--FOOBAR-->', handler);
       expect(comment).toEqual('FOOBAR');
     });
-
+    
+    it('should parse font-style italic', function(){
+      var html = '<span style="font-type:italic">';
+      htmlParser(html, handler);
+      expect(comment).toEqual(html);
+    });
+    
     it('should throw an exception for invalid comments', function() {
       var caught=false;
       try {

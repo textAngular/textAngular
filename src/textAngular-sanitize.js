@@ -553,6 +553,10 @@ function validStyles(styleAttr){
 					|| value === 'right'
 					|| value === 'none'
 				)
+      ||
+        key === 'font-size' && (
+					value.match(/[0-9\.]*(px|em|rem|%)/)
+				)
 			||
 				(key === 'width' || key === 'height') && (
 					value.match(/[0-9\.]*(px|em|rem|%)/)
