@@ -541,7 +541,7 @@ function validStyles(styleAttr){
         )
       || 
         key === 'font-weight' && (
-              value === 'bold'
+            value === 'bold'
         )
       ||
         key === 'font-style' && (
