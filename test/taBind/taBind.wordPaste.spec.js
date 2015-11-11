@@ -77,6 +77,21 @@ describe('taBind.wordPaste', function () {
 			$rootScope.$digest();
 			expect(pasted).toBe('<h2>Header 2</h2>');
 		}));
+		it('Header Element inside fragment without MsoNormal class but with MSWord document syntax', inject(function($timeout, taSelection){
+			element.triggerHandler('paste', {clipboardData: {types: ['text/html'], getData: function(){
+				return '<html xmlns:o="urn:schemas-microsoft-com:office:office">' +
+				'<head>' +
+				'<meta name=ProgId content=Word.Document>' +
+				'</head>' +
+				'<body>' +
+				'<div><!--StartFragment--><h1>Header 1<o:p></o:p></h1><!--EndFragment--></div>' +// jshint ignore:line
+				'</body>' +
+				'</html>';
+			}}});
+			$timeout.flush();
+			$rootScope.$digest();
+			expect(pasted).toBe('<h1>Header 1</h1>');
+		}));
 
 		// bold/italics
 		it('handle bold/italics/underline', inject(function($timeout, taSelection){

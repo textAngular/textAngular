@@ -495,7 +495,7 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 						/* istanbul ignore else: don't care if nothing pasted */
 						if(text && text.trim().length){
 							// test paste from word/microsoft product
-							if(text.match(/class=["']*Mso(Normal|List)/i)){
+							if(text.match(/class=["']*Mso(Normal|List)/i) || text.match(/content=["']*Word.Document/i)){
 								var textFragment = text.match(/<!--StartFragment-->([\s\S]*?)<!--EndFragment-->/i);
 								if(!textFragment) textFragment = text;
 								else textFragment = textFragment[1];
