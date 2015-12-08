@@ -415,7 +415,7 @@ describe('textAngularManager', function(){
 						var event = {shiftKey: false, which: 9, specialKey: 'TabKey',
 							preventDefault: function () {}};
 						var fakeEditorScope =  { updateSelectedStyles: function() {}};
-						textAngularManager.sendKeyCommand(fakeEditorScope, event);
+						textAngularManager.sendKeyCommand(angular.extend(editorScope.scope, fakeEditorScope), event);
 						$rootScope.$digest();
 						expect(element.find('.ta-toolbar button[name=specialkey]').attr('hit-this')).toBe('true');
 					});
