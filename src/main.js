@@ -49,7 +49,8 @@ textAngular.directive("textAngular", [
 				var _keydown, _keyup, _keypress, _mouseup, _focusin, _focusout,
 					_originalContents, _toolbars,
 					_serial = (attrs.serial) ? attrs.serial : Math.floor(Math.random() * 10000000000000000),
-					_taExecCommand, _resizeMouseDown, _updateSelectedStylesTimeout;
+					_taExecCommand, _resizeMouseDown, _updateSelectedStylesTimeout,
+					_codemirrorEditor, _hasCodemirror = angular.isDefined(attrs.codemirror);
 
 				scope._name = (attrs.name) ? attrs.name : 'textAngularEditor' + _serial;
 
@@ -114,7 +115,7 @@ textAngular.directive("textAngular", [
 					// we still need the hidden input even with a textarea as the textarea may have invalid/old input in it,
 					// wheras the input will ALLWAYS have the correct value.
 					forminput: angular.element("<input type='hidden' tabindex='-1' style='display: none;'>"),
-					html: angular.element("<textarea></textarea>"),
+					html: _hasCodemirror ? angular.element("<div></div>") : angular.element('<textarea></textarea>'),
 					text: angular.element("<div></div>"),
 					// other toolbased elements
 					scrollWindow: angular.element("<div class='ta-scroll-window'></div>"),
@@ -266,13 +267,24 @@ textAngular.directive("textAngular", [
 				// allow for insertion of custom directives on the textarea and div
 				scope.setup.htmlEditorSetup(scope.displayElements.html);
 				scope.setup.textEditorSetup(scope.displayElements.text);
-				scope.displayElements.html.attr({
-					'id': 'taHtmlElement' + _serial,
-					'ng-show': 'showHtml',
-					'ta-bind': 'ta-bind',
-					'ng-model': 'html',
-					'ng-model-options': element.attr('ng-model-options')
-				});
+				if(_hasCodemirror){
+					scope.displayElements.html.attr({
+						'id': 'taHtmlElement' + _serial,
+						'ng-show': 'showHtml',
+						'ng-model': 'html',
+						'ng-model-options': element.attr('ng-model-options'),
+						'ui-codemirror': '{onLoad: codemirrorLoaded}',
+						'ui-codemirror-opts': '$parent.' + element.attr('codemirror-opts')
+					});
+				}else{
+					scope.displayElements.html.attr({
+						'id': 'taHtmlElement' + _serial,
+						'ng-show': 'showHtml',
+						'ta-bind': 'ta-bind',
+						'ng-model': 'html',
+						'ng-model-options': element.attr('ng-model-options')
+					});
+				}
 				scope.displayElements.text.attr({
 					'id': 'taTextElement' + _serial,
 					'contentEditable': 'true',
@@ -328,6 +340,22 @@ textAngular.directive("textAngular", [
 					scope.displayElements.text.attr('ta-paste', '_pasteHandler($html)');
 				}
 
+				if(_hasCodemirror){
+						scope.codemirrorLoaded = function(_editor){
+							_codemirrorEditor = _editor;
+							_editor.on('focus', function(a, e){
+								$timeout(function(){
+									_focusin();
+								});
+							});
+							_editor.on('blur', function(a, e){
+								$timeout(function(){
+									_focusout();
+								});
+							});
+						};
+				}
+
 				// compile the scope with the text and html elements only - if we do this with the main element it causes a compile loop
 				$compile(scope.displayElements.scrollWindow)(scope);
 				$compile(scope.displayElements.html)(scope);
@@ -339,6 +367,10 @@ textAngular.directive("textAngular", [
 				element.addClass("ta-root");
 				scope.displayElements.scrollWindow.addClass("ta-text ta-editor " + scope.classes.textEditor);
 				scope.displayElements.html.addClass("ta-html ta-editor " + scope.classes.htmlEditor);
+
+				if(_hasCodemirror){
+					scope.displayElements.html.addClass("ta-codemirror");
+				}
 
 				// used in the toolbar actions
 				scope._actionRunning = false;
@@ -355,7 +387,22 @@ textAngular.directive("textAngular", [
 					scope._actionRunning = false;
 					if(_savedSelection){
 						if(scope.showHtml){
-							scope.displayElements.html[0].focus();
+							if(!_hasCodemirror){
+								// if codemirror is not found, call textarea focus event
+								scope.displayElements.html[0].focus();
+							}else{
+								$timeout(function(){
+									// update codemirror content
+									_codemirrorEditor.refresh();
+									_codemirrorEditor.focus();
+									_codemirrorEditor.execCommand('selectAll');
+									// beautify code if exists autoFormatRange command on codemirror
+									if(_codemirrorEditor.autoFormatRange){
+										_codemirrorEditor.autoFormatRange(_codemirrorEditor.getCursor(true), _codemirrorEditor.getCursor(false));
+										_codemirrorEditor.execCommand('selectAll');
+									}
+								});
+							}
 						}else{
 							scope.displayElements.text[0].focus();
 						}
@@ -374,10 +421,10 @@ textAngular.directive("textAngular", [
 					scope.focussed = true;
 					element.addClass(scope.classes.focussed);
 					_toolbars.focus();
-					element.triggerHandler('focus');
+					if(!_hasCodemirror){
+						element.triggerHandler('focus');
+					}
 				};
-				scope.displayElements.html.on('focus', _focusin);
-				scope.displayElements.text.on('focus', _focusin);
 				_focusout = function(e){
 					// if we are NOT runnig an action and have NOT focussed again on the text etc then fire the blur events
 					if(!scope._actionRunning && $document[0].activeElement !== scope.displayElements.html[0] && $document[0].activeElement !== scope.displayElements.text[0]){
@@ -386,16 +433,23 @@ textAngular.directive("textAngular", [
 						// to prevent multiple apply error defer to next seems to work.
 						$timeout(function(){
 							scope._bUpdateSelectedStyles = false;
-							element.triggerHandler('blur');
+							if(!_hasCodemirror){
+								element.triggerHandler('blur');
+							}
 							scope.focussed = false;
 						}, 0);
 					}
-					e.preventDefault();
+					if(!_hasCodemirror){
+						e.preventDefault();
+					}
 					return false;
 				};
-				scope.displayElements.html.on('blur', _focusout);
+				if(!_hasCodemirror){
+					scope.displayElements.html.on('focus', function(){ _focusin(true); });
+					scope.displayElements.html.on('blur', _focusout);
+				}
+				scope.displayElements.text.on('focus', _focusin);
 				scope.displayElements.text.on('blur', _focusout);
-
 				scope.displayElements.text.on('paste', function(event){
 					element.triggerHandler('paste', event);
 				});
@@ -596,7 +650,9 @@ textAngular.directive("textAngular", [
 						scope.updateSelectedStyles();
 					});
 				};
-				scope.displayElements.html.on('mouseup', _mouseup);
+				if(!_hasCodemirror){
+					scope.displayElements.html.on('mouseup', _mouseup);
+				}
 				scope.displayElements.text.on('mouseup', _mouseup);
 			}
 		};
