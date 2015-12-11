@@ -39,6 +39,10 @@
 	padding: 6px 12px;
 }
 
+.ta-editor.ta-codemirror{
+  padding: 0;
+}
+
 .ta-editor:focus {
 	user-select: text;
 }
