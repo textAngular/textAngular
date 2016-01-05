@@ -1,3 +1,20 @@
+<a name"1.4.7"></a>
+### 1.4.7 (2016-01-05)
+
+
+#### Bug Fixes
+* **taBind:**
+  * fix a bug where exiting a blockquote, ul or ol element would insert a div with inline styles after the element.  Closes #843 ([12a9798](https://github.com/fraywing/textAngular/commit/a0b79276d351d9223e6d3892daf2093f27588e58))
+  * several bug fixes related to pasting from word.  Closes #965 and #966 ([aa35c02](https://github.com/fraywing/textAngular/commit/aa35c021f9c7278e6752b0e426f41ca696441d1b))
+
+* **main:**
+  * fix a bug where resizing an image did not trigger a model change event.  Closes #862 ([6fd8a01](https://github.com/fraywing/textAngular/commit/d5a508e30996a9bd02426d836f6479be38662664))
+  * fix a bug where special key events fired mutliple times for an editor if multiple editors were on the page.  Closes #763 ([77efc23](https://github.com/fraywing/textAngular/commit/8f314f96b669bc18c9bff2a1c86ad51e8547a724))
+
+* **textAngular-sanitize:**
+  * fix a bug where textAngular's internal model was not properly updated when `styleWithCSS` was enabled for the contenteditable div.  Closes #854 ([d0687b6](https://github.com/fraywing/textAngular/commit/9fc7288b0b03923626d3dfcb2fc782537dc69efc))
+
+
 <a name"1.4.6"></a>
 ### 1.4.6 (2015-09-20)
 
@@ -5,8 +22,8 @@
 #### Bug Fixes
 
 * **textAngular:**
-  * Fix(textAngular): several bug fixes related to pasting from word. Closes #644, #617 ([f7d34a33](https://github.com/fraywing/textAngular/commit/f7d34a33658d7f336c2891cf9618ba34956c5bad))  
-  * Fix(textAngular): several bug fixes related to pasting from word. Closes #644, #617 ([f7d34a33](https://github.com/fraywing/textAngular/commit/f7d34a33658d7f336c2891cf9618ba34956c5bad))  
+  * Fix(textAngular): several bug fixes related to pasting from word. Closes #644, #617 ([f7d34a33](https://github.com/fraywing/textAngular/commit/f7d34a33658d7f336c2891cf9618ba34956c5bad))
+  * Fix(textAngular): several bug fixes related to pasting from word. Closes #644, #617 ([f7d34a33](https://github.com/fraywing/textAngular/commit/f7d34a33658d7f336c2891cf9618ba34956c5bad))
   * Fix(npm): bad package for 1.4.5 is updated to current version. Closes #888
 
 #### Features
@@ -84,7 +101,7 @@ If you were using a different sanitize provider instead of textAngular-sanitize 
 
 #### Features
 
-* **textAngular:** 
+* **textAngular:**
    * Added directives ta-resize-keep-aspect-ratio and ta-resize-maintain-aspect-ratio to control image-resize ([32697058](https://github.com/fraywing/textAngular/commit/32697058))
    * Added input to the safe element list ([945cfa00](https://github.com/fraywing/textAngular/commit/945cfa00))
 * **textAngularDemo:** Updated the demo to be in synch with this release ([93fd4048](https://github.com/fraywing/textAngular/commit/93fd4048))
@@ -545,7 +562,7 @@ The minimum required versions of AngularJS is 1.3 and Rangy is 1.3.
 
 2014-07-26 v1.2.2
 
-- FIX #190, #201, #206, #223, #224, 
+- FIX #190, #201, #206, #223, #224,
 - Merge #209, #204
 - Add option to disable sanitizer #233
 
@@ -649,7 +666,7 @@ The minimum required versions of AngularJS is 1.3 and Rangy is 1.3.
 - You can now change the model from the outside and have it affect the textAngular instance contents*
 - Cleaned up code*
 
-2013-10-10 v1.0.1 
+2013-10-10 v1.0.1
 
 - Added Tooltip Option, title has been renamed icon, and title is now the tooltip*
 - The minified version actually works now*
