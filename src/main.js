@@ -7,38 +7,11 @@ textAngular.config([function(){
 	angular.forEach(taTools, function(value, key){ delete taTools[key];	});
 }]);
 
-textAngular.run([function(){
-	/* istanbul ignore next: not sure how to test this */
-	// Require Rangy and rangy savedSelection module.
-	if (typeof define === 'function' && define.amd) {
-		// AMD. Register as an anonymous module.
-		define(function(require) {
-			window.rangy = require('rangy');
-			window.rangy.saveSelection = require('rangy/lib/rangy-selectionsaverestore');
-		});
-	} else if (typeof require ==='function' && typeof module !== 'undefined' && typeof exports === 'object') {
-		// Node/CommonJS style
-		window.rangy = require('rangy');
-		window.rangy.saveSelection = require('rangy/lib/rangy-selectionsaverestore');
-	} else {
-		// Ensure that rangy and rangy.saveSelection exists on the window (global scope).
-		// TODO: Refactor so that the global scope is no longer used.
-		if(!window.rangy){
-			throw("rangy-core.js and rangy-selectionsaverestore.js are required for textAngular to work correctly, rangy-core is not yet loaded.");
-		}else{
-			window.rangy.init();
-			if(!window.rangy.saveSelection){
-				throw("rangy-selectionsaverestore.js is required for textAngular to work correctly.");
-			}
-		}
-	}
-}]);
-
 textAngular.directive("textAngular", [
 	'$compile', '$timeout', 'taOptions', 'taSelection', 'taExecCommand',
-	'textAngularManager', '$window', '$document', '$animate', '$log', '$q', '$parse',
+	'textAngularManager', '$document', '$animate', '$log', '$q', '$parse',
 	function($compile, $timeout, taOptions, taSelection, taExecCommand,
-		textAngularManager, $window, $document, $animate, $log, $q, $parse){
+		textAngularManager, $document, $animate, $log, $q, $parse){
 		return {
 			require: '?ngModel',
 			scope: {},
@@ -350,9 +323,9 @@ textAngular.directive("textAngular", [
 				scope.startAction = function(){
 					scope._actionRunning = true;
 					// if rangy library is loaded return a function to reload the current selection
-					_savedSelection = $window.rangy.saveSelection();
+					_savedSelection = rangy.saveSelection();
 					return function(){
-						if(_savedSelection) $window.rangy.restoreSelection(_savedSelection);
+						if(_savedSelection) rangy.restoreSelection(_savedSelection);
 					};
 				};
 				scope.endAction = function(){
@@ -363,8 +336,8 @@ textAngular.directive("textAngular", [
 						}else{
 							scope.displayElements.text[0].focus();
 						}
-						// $window.rangy.restoreSelection(_savedSelection);
-						$window.rangy.removeMarkers(_savedSelection);
+						// rangy.restoreSelection(_savedSelection);
+						rangy.removeMarkers(_savedSelection);
 					}
 					_savedSelection = false;
 					scope.updateSelectedStyles();
