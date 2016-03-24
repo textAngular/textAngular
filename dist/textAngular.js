@@ -2053,12 +2053,12 @@ textAngular.run([function(){
 		// AMD. Register as an anonymous module.
 		define(function(require) {
 			window.rangy = require('rangy');
-			window.rangy.saveSelection = require('rangy/lib/rangy-selectionsaverestore');
+			window.rangy.saveSelection = require('rangy/rangy-selectionsaverestore');
 		});
 	} else if (typeof require ==='function' && typeof module !== 'undefined' && typeof exports === 'object') {
 		// Node/CommonJS style
 		window.rangy = require('rangy');
-		window.rangy.saveSelection = require('rangy/lib/rangy-selectionsaverestore');
+		window.rangy.saveSelection = require('rangy/rangy-selectionsaverestore');
 	} else {
 		// Ensure that rangy and rangy.saveSelection exists on the window (global scope).
 		// TODO: Refactor so that the global scope is no longer used.
