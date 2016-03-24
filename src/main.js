@@ -545,7 +545,10 @@ textAngular.directive("textAngular", [
 					/* istanbul ignore next: This check is to ensure multiple timeouts don't exist */
 					if(_updateSelectedStylesTimeout) $timeout.cancel(_updateSelectedStylesTimeout);
 					// test if the common element ISN'T the root ta-text node
-					if((_selection = taSelection.getSelectionElement()) !== undefined && _selection.parentNode !== scope.displayElements.text[0]){
+					try {
+						_selection = taSelection.getSelectionElement();
+					} catch(e) {}
+					if(_selection !== undefined && _selection.parentNode !== scope.displayElements.text[0]){
 						_toolbars.updateSelectedStyles(angular.element(_selection));
 					}else _toolbars.updateSelectedStyles();
 					// used to update the active state when a key is held down, ie the left arrow
