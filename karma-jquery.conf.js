@@ -12,6 +12,7 @@ module.exports = function (config) {
 		],
 		
 		files: [
+            'node_modules/phantomjs-polyfill/bind-polyfill.js',
 			'bower_components/jquery/jquery.min.js',
 			'bower_components/rangy/rangy-core.js',
 			'bower_components/rangy/rangy-selectionsaverestore.js',
