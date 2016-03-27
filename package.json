@@ -1,6 +1,6 @@
 {
   "name": "textangular",
-  "version": "1.4.6",
+  "version": "1.5.0",
   "description": "A radically powerful Text-Editor/Wysiwyg editor for Angular.js",
   "maintainers": [
     {
@@ -52,7 +52,8 @@
     "karma-jasmine": "~0.1.5",
     "karma-phantomjs-launcher": "~0.1.2",
     "karma-script-launcher": "~0.1.0",
-    "phantomjs": "^1.9.8"
+    "phantomjs": "^1.9.8",
+    "phantomjs-polyfill": "0.0.2"
   },
   "scripts": {
     "test": "bower install && grunt travis-test --verbose"
