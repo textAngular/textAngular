@@ -23,12 +23,14 @@ textAngular.run([function(){
 	} else {
 		// Ensure that rangy and rangy.saveSelection exists on the window (global scope).
 		// TODO: Refactor so that the global scope is no longer used.
-		if(!window.rangy){
-			throw("rangy-core.js and rangy-selectionsaverestore.js are required for textAngular to work correctly, rangy-core is not yet loaded.");
-		}else{
-			window.rangy.init();
-			if(!window.rangy.saveSelection){
-				throw("rangy-selectionsaverestore.js is required for textAngular to work correctly.");
+		window.onload = function() {
+			if(!window.rangy){
+				throw("rangy-core.js and rangy-selectionsaverestore.js are required for textAngular to work correctly, rangy-core is not yet loaded.");
+			}else{
+				window.rangy.init();
+				if(!window.rangy.saveSelection){
+					throw("rangy-selectionsaverestore.js is required for textAngular to work correctly.");
+				}
 			}
 		}
 	}
