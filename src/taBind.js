@@ -41,11 +41,11 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 	};
 }])
 .directive('taBind', [
-		'taSanitize', '$timeout', '$window', '$document', 'taFixChrome', 'taBrowserTag',
+		'taSanitize', '$timeout', '$document', 'taFixChrome', 'taBrowserTag',
 		'taSelection', 'taSelectableElements', 'taApplyCustomRenderers', 'taOptions',
 		'_taBlankTest', '$parse', 'taDOM', 'textAngularManager',
 		function(
-			taSanitize, $timeout, $window, $document, taFixChrome, taBrowserTag,
+			taSanitize, $timeout, $document, taFixChrome, taBrowserTag,
 			taSelection, taSelectableElements, taApplyCustomRenderers, taOptions,
 			_taBlankTest, $parse, taDOM, textAngularManager){
 	// Uses for this are textarea or input with ng-model and ta-bind='text'
@@ -691,13 +691,13 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 							e.preventDefault();
 							return false;
 						} else {// Everything else - empty editdiv and allow browser to paste content into it, then cleanup
-							var _savedSelection = $window.rangy.saveSelection(),
+							var _savedSelection = rangy.saveSelection(),
 								_tempDiv = angular.element('<div class="ta-hidden-input" contenteditable="true"></div>');
 							$document.find('body').append(_tempDiv);
 							_tempDiv[0].focus();
 							$timeout(function(){
 								// restore selection
-								$window.rangy.restoreSelection(_savedSelection);
+								rangy.restoreSelection(_savedSelection);
 								processpaste(_tempDiv[0].innerHTML);
 								element[0].focus();
 								_tempDiv.remove();
@@ -828,11 +828,11 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 								taSelection.setSelectionToElementStart(element.children()[0]);
 							}else if(val.substring(0, 1) !== '<' && attrs.taDefaultWrap !== ''){
 								/* we no longer do this, since there can be comments here and white space
-								var _savedSelection = $window.rangy.saveSelection();
+								var _savedSelection = rangy.saveSelection();
 								val = _compileHtml();
 								val = "<" + attrs.taDefaultWrap + ">" + val + "</" + attrs.taDefaultWrap + ">";
 								_setInnerHTML(val);
-								$window.rangy.restoreSelection(_savedSelection);
+								rangy.restoreSelection(_savedSelection);
 								*/
 							}
 							var triggerUndo = _lastKey !== event.keyCode && UNDO_TRIGGER_KEYS.test(event.keyCode);

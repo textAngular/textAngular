@@ -14,11 +14,12 @@ module.exports = function (grunt) {
 	grunt.loadNpmTasks('grunt-bump');
 	grunt.loadNpmTasks('grunt-git');
 	grunt.loadNpmTasks('grunt-shell');
+	grunt.loadNpmTasks('grunt-umd');
 
-	grunt.registerTask('compile', ['concat', 'copy:setupFiles', 'jshint', 'uglify']);
+	grunt.registerTask('compile', ['concat', 'umd', 'copy:setupFiles', 'jshint', 'uglify']);
 	grunt.registerTask('default', ['compile', 'test']);
 	grunt.registerTask('test', ['clean:coverage', 'jshint', 'karma', 'coverage']);
-	grunt.registerTask('travis-test', ['concat', 'copy:setupFiles', 'jshint', 'karma', 'coverage', 'coveralls']);
+	grunt.registerTask('travis-test', ['concat', 'umd', 'copy:setupFiles', 'jshint', 'karma', 'coverage', 'coveralls']);
 
 	grunt.registerTask('release', ['bump-only','compile', 'demo_pages', 'changelog','gitcommit','bump-commit', 'shell:publish']);
 	grunt.registerTask('release:patch', ['bump-only:patch','compile','changelog','gitcommit','bump-commit', 'shell:publish']);
@@ -131,28 +132,48 @@ module.exports = function (grunt) {
 			}
 		},
 		concat: {
-			options: {
-				banner: "/*\n@license textAngular\nAuthor : Austin Anderson\nLicense : 2013 MIT\nVersion <%- pkg.version %>\n\nSee README.md or https://github.com/fraywing/textAngular/wiki for requirements and use.\n*/\n\n/*\nCommonjs package manager support (eg componentjs).\n*/\n\n/* istanbul ignore next:  */\n'undefined'!=typeof module&&'undefined'!=typeof exports&&module.exports===exports&&(module.exports='textAngular');\n\n(function(){ // encapsulate all variables so they don't become global vars\n\"use strict\";",
-				footer: "})();"
-			},
-			dist: {
-                files:{
-                    'dist/textAngular.js': ['src/globals.js','src/factories.js','src/DOM.js','src/validators.js','src/taBind.js','src/main.js'],
+        dist: {
+            options: {
+                banner: "/*\n@license textAngular\nAuthor : Austin Anderson\nLicense : 2013 MIT\nVersion <%- pkg.version %>\n\nSee README.md or https://github.com/fraywing/textAngular/wiki for requirements and use.\n*/\n\n/*\nCommonjs package manager support (eg componentjs).\n*/\n\n\n\"use strict\";"
+            },
+            files:{
+                'dist/textAngular.js': ['src/globals.js','src/factories.js','src/DOM.js','src/validators.js','src/taBind.js','src/main.js'],
+            }
+        },
+        umd: {
+          files: {
+            'dist/textAngular.umd.js': ['dist/textAngularSetup.js', 'dist/textAngular.js']
+          }
+        }
+    },
+    umd: {
+        all: {
+            options: {
+                src: 'dist/textAngular.umd.js',
+		            dest: 'dist/textAngular.umd.js',
+                objectToExport: 'textAngular.name',
+                globalAlias: 'textAngular',
+                amdModuleId: 'textAngular',
+                deps: {
+                    'default': ['rangy'],
+                    cjs: ['rangy', {'rangy/lib/rangy-selectionsaverestore': ''}],
+                    amd: ['rangy', {'rangy/lib/rangy-selectionsaverestore': ''}]
                 }
-			},
-		},
+            }
+        }
+    },
 		uglify: {
 			options: {
 				mangle: true,
 				compress: {},
-				wrap: true,
+				wrap: false,
 				preserveComments: 'some'
 			},
 			my_target: {
 				files: {
 					'dist/textAngular-rangy.min.js': ['bower_components/rangy/rangy-core.js', 'bower_components/rangy/rangy-selectionsaverestore.js'],
 					'dist/textAngular-sanitize.min.js': ['src/textAngular-sanitize.js'],
-					'dist/textAngular.min.js': ['dist/textAngularSetup.js','dist/textAngular.js']
+					'dist/textAngular.min.js': ['dist/textAngular.umd.js']
 				}
 			}
 		},
