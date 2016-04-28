@@ -796,7 +796,7 @@ textAngular.service('textAngularManager', ['taToolExecuteAction', 'taTools', 'ta
 		},
 		// removes a tool from all toolbars and it's definition
 		removeTool: function(toolKey,removeDefinition){
-			if (removeDefinition != false){
+			if (removeDefinition !== false){
 				delete taTools[toolKey];
 			}
 			angular.forEach(toolbars, function(toolbarScope){

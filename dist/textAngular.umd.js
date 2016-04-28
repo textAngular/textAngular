@@ -853,7 +853,7 @@ angular.module('textAngularSetup', [])
 @license textAngular
 Author : Austin Anderson
 License : 2013 MIT
-Version 1.5.1
+Version 1.5.2-pre1
 
 See README.md or https://github.com/fraywing/textAngular/wiki for requirements and use.
 */
@@ -3681,8 +3681,10 @@ textAngular.service('textAngularManager', ['taToolExecuteAction', 'taTools', 'ta
 			else throw('textAngular Error: No Toolbar with name "' + toolbarKey + '" exists');
 		},
 		// removes a tool from all toolbars and it's definition
-		removeTool: function(toolKey){
-			delete taTools[toolKey];
+		removeTool: function(toolKey,removeDefinition){
+			if (removeDefinition !== false){
+				delete taTools[toolKey];
+			}
 			angular.forEach(toolbars, function(toolbarScope){
 				delete toolbarScope.tools[toolKey];
 				for(var i = 0; i < toolbarScope.toolbar.length; i++){
@@ -3706,14 +3708,18 @@ textAngular.service('textAngularManager', ['taToolExecuteAction', 'taTools', 'ta
 		},
 		// toolkey, toolDefinition are required. If group is not specified will pick the last group, if index isnt defined will append to group
 		addTool: function(toolKey, toolDefinition, group, index){
-			taRegisterTool(toolKey, toolDefinition);
+			if (!taTools.hasOwnProperty(toolKey)){
+				taRegisterTool(toolKey, toolDefinition);
+			}
 			angular.forEach(toolbars, function(toolbarScope){
 				toolbarScope.addTool(toolKey, toolDefinition, group, index);
 			});
 		},
 		// adds a Tool but only to one toolbar not all
 		addToolToToolbar: function(toolKey, toolDefinition, toolbarKey, group, index){
-			taRegisterTool(toolKey, toolDefinition);
+			if (!taTools.hasOwnProperty(toolKey)){
+				taRegisterTool(toolKey, toolDefinition);
+			}
 			toolbars[toolbarKey].addTool(toolKey, toolDefinition, group, index);
 		},
 		// this is used when externally the html of an editor has been changed and textAngular needs to be notified to update the model.
