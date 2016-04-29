@@ -1,6 +1,6 @@
 {
   "name": "textAngular-pjn",
-  "version": "1.5.2-pre1",
+  "version": "1.5.2-pre2",
   "main": [
     "./dist/textAngular.js",
     "./dist/textAngular-sanitize.js",
