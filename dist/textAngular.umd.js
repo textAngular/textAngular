@@ -193,95 +193,95 @@ angular.module('textAngularSetup', [])
 	//insertLink: "Please enter a URL to insert",
 	//insertVideo: "Please enter a youtube URL to embed",
 	html: {
-		tooltip: 'Toggle html / Rich Text'
+		tooltip: 'HTML / Texto Enriquecido'
 	},
 	// tooltip for heading - might be worth splitting
 	heading: {
-		tooltip: 'Heading '
+		tooltip: 'Encabezado '
 	},
 	p: {
-		tooltip: 'Paragraph'
+		tooltip: 'Párrafo'
 	},
 	pre: {
-		tooltip: 'Preformatted text'
+		tooltip: 'Texto preformateado'
 	},
 	ul: {
-		tooltip: 'Unordered List'
+		tooltip: 'Lista sin numeración'
 	},
 	ol: {
-		tooltip: 'Ordered List'
+		tooltip: 'Lista numerada'
 	},
 	quote: {
-		tooltip: 'Quote/unquote selection or paragraph'
+		tooltip: 'Citar selección o párrafo'
 	},
 	undo: {
-		tooltip: 'Undo'
+		tooltip: 'Deshacer'
 	},
 	redo: {
-		tooltip: 'Redo'
+		tooltip: 'Rehacer'
 	},
 	bold: {
-		tooltip: 'Bold'
+		tooltip: 'Negrita'
 	},
 	italic: {
-		tooltip: 'Italic'
+		tooltip: 'Itálica'
 	},
 	underline: {
-		tooltip: 'Underline'
+		tooltip: 'Subrayar'
 	},
 	strikeThrough:{
-		tooltip: 'Strikethrough'
+		tooltip: 'Tachar'
 	},
 	justifyLeft: {
-		tooltip: 'Align text left'
+		tooltip: 'Alinear a la izquierda'
 	},
 	justifyRight: {
-		tooltip: 'Align text right'
+		tooltip: 'Alinear a la derecha'
 	},
 	justifyFull: {
-		tooltip: 'Justify text'
+		tooltip: 'Justificado'
 	},
 	justifyCenter: {
-		tooltip: 'Center'
+		tooltip: 'Centrar'
 	},
 	indent: {
-		tooltip: 'Increase indent'
+		tooltip: 'Aumentar indentado'
 	},
 	outdent: {
-		tooltip: 'Decrease indent'
+		tooltip: 'Disminuír indentado'
 	},
 	clear: {
-		tooltip: 'Clear formatting'
+		tooltip: 'Limpiar formato'
 	},
 	insertImage: {
-		dialogPrompt: 'Please enter an image URL to insert',
-		tooltip: 'Insert image',
+		dialogPrompt: 'Por favor ingrese una URL de una imagen a insertar',
+		tooltip: 'Insertar imagen',
 		hotkey: 'the - possibly language dependent hotkey ... for some future implementation'
 	},
 	insertVideo: {
-		tooltip: 'Insert video',
-		dialogPrompt: 'Please enter a youtube URL to embed'
+		tooltip: 'Insertar video',
+		dialogPrompt: 'Por favor ingrese una URL de youtube para insertar'
 	},
 	insertLink: {
-		tooltip: 'Insert / edit link',
-		dialogPrompt: "Please enter a URL to insert"
+		tooltip: 'Insertar / editar vínculo',
+		dialogPrompt: "Por favor ingrese una URL para insertar"
 	},
 	editLink: {
 		reLinkButton: {
-			tooltip: "Relink"
+			tooltip: "Revincular"
 		},
 		unLinkButton: {
-			tooltip: "Unlink"
+			tooltip: "Desvincular"
 		},
 		targetToggle: {
-			buttontext: "Open in New Window"
+			buttontext: "Abrir en una nueva ventana"
 		}
 	},
 	wordcount: {
-		tooltip: 'Display words Count'
+		tooltip: 'Mostrar la cantidad de palabras'
 	},
 		charcount: {
-		tooltip: 'Display characters Count'
+		tooltip: 'Mostrar la cantidad de caracteres'
 	}
 })
 .factory('taToolFunctions', ['$window','taTranslations', function($window, taTranslations) {
@@ -804,7 +804,7 @@ angular.module('textAngularSetup', [])
 		}
 	});
 	taRegisterTool('wordcount', {
-		display: '<div id="toolbarWC" style="display:block; min-width:100px;">Words: <span ng-bind="wordcount"></span></div>',
+		display: '<div id="toolbarWC" style="display:block; min-width:100px;">Palabras: <span ng-bind="wordcount"></span></div>',
 		disabled: true,
 		wordcount: 0,
 		activeState: function(){ // this fires on keyup
@@ -831,7 +831,7 @@ angular.module('textAngularSetup', [])
 		}
 	});
 	taRegisterTool('charcount', {
-		display: '<div id="toolbarCC" style="display:block; min-width:120px;">Characters: <span ng-bind="charcount"></span></div>',
+		display: '<div id="toolbarCC" style="display:block; min-width:120px;">Caracteres: <span ng-bind="charcount"></span></div>',
 		disabled: true,
 		charcount: 0,
 		activeState: function(){ // this fires on keyup

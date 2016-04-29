@@ -18,3 +18,5 @@ results
 
 npm-debug.log
 console.bat
+.project
+.settings/**

@@ -257,24 +257,24 @@ describe('taTools test tool actions', function(){
 		}));
 
 		it('html button should have title attribute', function() {
-			expect(findButton('h1').attr('title')).toBe('Heading 1');
-			expect(findButton('h2').attr('title')).toBe('Heading 2');
-			expect(findButton('h3').attr('title')).toBe('Heading 3');
-			expect(findButton('h4').attr('title')).toBe('Heading 4');
-			expect(findButton('h5').attr('title')).toBe('Heading 5');
-			expect(findButton('h6').attr('title')).toBe('Heading 6');
+			expect(findButton('h1').attr('title')).toBe('Encabezado 1');
+			expect(findButton('h2').attr('title')).toBe('Encabezado 2');
+			expect(findButton('h3').attr('title')).toBe('Encabezado 3');
+			expect(findButton('h4').attr('title')).toBe('Encabezado 4');
+			expect(findButton('h5').attr('title')).toBe('Encabezado 5');
+			expect(findButton('h6').attr('title')).toBe('Encabezado 6');
 
-			expect(findButton('justifyLeft').attr('title')).toBe('Align text left');
-			expect(findButton('justifyCenter').attr('title')).toBe('Center');
-			expect(findButton('justifyRight').attr('title')).toBe('Align text right');
+			expect(findButton('justifyLeft').attr('title')).toBe('Alinear a la izquierda');
+			expect(findButton('justifyCenter').attr('title')).toBe('Centrar');
+			expect(findButton('justifyRight').attr('title')).toBe('Alinear a la derecha');
 
-			expect(findButton('indent').attr('title')).toBe('Increase indent');
-			expect(findButton('outdent').attr('title')).toBe('Decrease indent');
+			expect(findButton('indent').attr('title')).toBe('Aumentar indentado');
+			expect(findButton('outdent').attr('title')).toBe('Disminuír indentado');
 
-			expect(findButton('insertImage').attr('title')).toBe('Insert image');
-			expect(findButton('html').attr('title')).toBe('Toggle html / Rich Text');
-			expect(findButton('insertVideo').attr('title')).toBe('Insert video');
-			expect(findButton('insertLink').attr('title')).toBe('Insert / edit link');
+			expect(findButton('insertImage').attr('title')).toBe('Insertar imagen');
+			expect(findButton('html').attr('title')).toBe('HTML / Texto Enriquecido');
+			expect(findButton('insertVideo').attr('title')).toBe('Insertar video');
+			expect(findButton('insertLink').attr('title')).toBe('Insertar / editar vínculo');
 
 
 		});
