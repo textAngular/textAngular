@@ -804,7 +804,7 @@ angular.module('textAngularSetup', [])
 		}
 	});
 	taRegisterTool('wordcount', {
-		display: '<div id="toolbarWC" style="display:block; min-width:100px;">Palabras: <span ng-bind="wordcount"></span></div>',
+		display: '<button id="toolbarWC" style="display:block; min-width:100px;">Palabras: <span ng-bind="wordcount"></span></button>',
 		disabled: true,
 		wordcount: 0,
 		activeState: function(){ // this fires on keyup
@@ -831,7 +831,7 @@ angular.module('textAngularSetup', [])
 		}
 	});
 	taRegisterTool('charcount', {
-		display: '<div id="toolbarCC" style="display:block; min-width:120px;">Caracteres: <span ng-bind="charcount"></span></div>',
+		display: '<button id="toolbarCC" style="display:block; min-width:120px;">Caracteres: <span ng-bind="charcount"></span></button>',
 		disabled: true,
 		charcount: 0,
 		activeState: function(){ // this fires on keyup
@@ -853,7 +853,7 @@ angular.module('textAngularSetup', [])
 @license textAngular
 Author : Austin Anderson
 License : 2013 MIT
-Version 1.5.2-pre2
+Version BS4-1.5.2-pre2
 
 See README.md or https://github.com/fraywing/textAngular/wiki for requirements and use.
 */
