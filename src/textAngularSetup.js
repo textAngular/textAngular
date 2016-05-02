@@ -109,7 +109,7 @@ angular.module('textAngularSetup', [])
 		focussed: "focussed",
 		toolbar: "btn-toolbar",
 		toolbarGroup: "btn-group",
-		toolbarButton: "btn btn-secondary",
+		toolbarButton: "btn btn-default btn-secondary",
 		toolbarButtonActive: "active",
 		disabled: "disabled",
 		textEditor: 'form-control',
@@ -282,7 +282,7 @@ angular.module('textAngularSetup', [])
 			var container = editorScope.displayElements.popoverContainer;
 			container.empty();
 			var buttonGroup = angular.element('<div class="btn-group" style="padding-right: 6px;">');
-			var fullButton = angular.element('<button type="button" class="btn btn-secondary btn-sm btn-small" unselectable="on" tabindex="-1">100% </button>');
+			var fullButton = angular.element('<button type="button" class="btn btn-default btn-secondary btn-sm btn-small" unselectable="on" tabindex="-1">100% </button>');
 			fullButton.on('click', function(event){
 				event.preventDefault();
 				$element.css({
@@ -291,7 +291,7 @@ angular.module('textAngularSetup', [])
 				});
 				finishEdit();
 			});
-			var halfButton = angular.element('<button type="button" class="btn btn-secondary btn-sm btn-small" unselectable="on" tabindex="-1">50% </button>');
+			var halfButton = angular.element('<button type="button" class="btn btn-default btn-secondary btn-sm btn-small" unselectable="on" tabindex="-1">50% </button>');
 			halfButton.on('click', function(event){
 				event.preventDefault();
 				$element.css({
@@ -300,7 +300,7 @@ angular.module('textAngularSetup', [])
 				});
 				finishEdit();
 			});
-			var quartButton = angular.element('<button type="button" class="btn btn-secondary btn-sm btn-small" unselectable="on" tabindex="-1">25% </button>');
+			var quartButton = angular.element('<button type="button" class="btn btn-default btn-secondary btn-sm btn-small" unselectable="on" tabindex="-1">25% </button>');
 			quartButton.on('click', function(event){
 				event.preventDefault();
 				$element.css({
@@ -309,7 +309,7 @@ angular.module('textAngularSetup', [])
 				});
 				finishEdit();
 			});
-			var resetButton = angular.element('<button type="button" class="btn btn-secondary btn-sm btn-small" unselectable="on" tabindex="-1">Reset</button>');
+			var resetButton = angular.element('<button type="button" class="btn btn-default btn-secondary btn-sm btn-small" unselectable="on" tabindex="-1">Reset</button>');
 			resetButton.on('click', function(event){
 				event.preventDefault();
 				$element.css({
@@ -325,7 +325,7 @@ angular.module('textAngularSetup', [])
 			container.append(buttonGroup);
 
 			buttonGroup = angular.element('<div class="btn-group" style="padding-right: 6px;">');
-			var floatLeft = angular.element('<button type="button" class="btn btn-secondary btn-sm btn-small" unselectable="on" tabindex="-1"><i class="fa fa-align-left"></i></button>');
+			var floatLeft = angular.element('<button type="button" class="btn btn-default btn-secondary btn-sm btn-small" unselectable="on" tabindex="-1"><i class="fa fa-align-left"></i></button>');
 			floatLeft.on('click', function(event){
 				event.preventDefault();
 				// webkit
@@ -336,7 +336,7 @@ angular.module('textAngularSetup', [])
 				$element.css('styleFloat', 'left');
 				finishEdit();
 			});
-			var floatRight = angular.element('<button type="button" class="btn btn-secondary btn-sm btn-small" unselectable="on" tabindex="-1"><i class="fa fa-align-right"></i></button>');
+			var floatRight = angular.element('<button type="button" class="btn btn-default btn-secondary btn-sm btn-small" unselectable="on" tabindex="-1"><i class="fa fa-align-right"></i></button>');
 			floatRight.on('click', function(event){
 				event.preventDefault();
 				// webkit
@@ -347,7 +347,7 @@ angular.module('textAngularSetup', [])
 				$element.css('styleFloat', 'right');
 				finishEdit();
 			});
-			var floatNone = angular.element('<button type="button" class="btn btn-secondary btn-sm btn-small" unselectable="on" tabindex="-1"><i class="fa fa-align-justify"></i></button>');
+			var floatNone = angular.element('<button type="button" class="btn btn-default btn-secondary btn-sm btn-small" unselectable="on" tabindex="-1"><i class="fa fa-align-justify"></i></button>');
 			floatNone.on('click', function(event){
 				event.preventDefault();
 				// webkit
@@ -364,7 +364,7 @@ angular.module('textAngularSetup', [])
 			container.append(buttonGroup);
 
 			buttonGroup = angular.element('<div class="btn-group">');
-			var remove = angular.element('<button type="button" class="btn btn-secondary btn-sm btn-small" unselectable="on" tabindex="-1"><i class="fa fa-trash-o"></i></button>');
+			var remove = angular.element('<button type="button" class="btn btn-default btn-secondary btn-sm btn-small" unselectable="on" tabindex="-1"><i class="fa fa-trash-o"></i></button>');
 			remove.on('click', function(event){
 				event.preventDefault();
 				$element.remove();
@@ -395,7 +395,7 @@ angular.module('textAngularSetup', [])
 			});
 			container.append(link);
 			var buttonGroup = angular.element('<div class="btn-group pull-right">');
-			var reLinkButton = angular.element('<button type="button" class="btn btn-secondary btn-sm btn-small" tabindex="-1" unselectable="on" title="' + taTranslations.editLink.reLinkButton.tooltip + '"><i class="fa fa-edit icon-edit"></i></button>');
+			var reLinkButton = angular.element('<button type="button" class="btn btn-default btn-secondary btn-sm btn-small" tabindex="-1" unselectable="on" title="' + taTranslations.editLink.reLinkButton.tooltip + '"><i class="fa fa-edit icon-edit"></i></button>');
 			reLinkButton.on('click', function(event){
 				event.preventDefault();
 				var urlLink = $window.prompt(taTranslations.insertLink.dialogPrompt, $element.attr('href'));
@@ -406,7 +406,7 @@ angular.module('textAngularSetup', [])
 				editorScope.hidePopover();
 			});
 			buttonGroup.append(reLinkButton);
-			var unLinkButton = angular.element('<button type="button" class="btn btn-secondary btn-sm btn-small" tabindex="-1" unselectable="on" title="' + taTranslations.editLink.unLinkButton.tooltip + '"><i class="fa fa-unlink icon-unlink"></i></button>');
+			var unLinkButton = angular.element('<button type="button" class="btn btn-default btn-secondary btn-sm btn-small" tabindex="-1" unselectable="on" title="' + taTranslations.editLink.unLinkButton.tooltip + '"><i class="fa fa-unlink icon-unlink"></i></button>');
 			// directly before this click event is fired a digest is fired off whereby the reference to $element is orphaned off
 			unLinkButton.on('click', function(event){
 				event.preventDefault();
@@ -415,7 +415,7 @@ angular.module('textAngularSetup', [])
 				editorScope.hidePopover();
 			});
 			buttonGroup.append(unLinkButton);
-			var targetToggle = angular.element('<button type="button" class="btn btn-secondary btn-sm btn-small" tabindex="-1" unselectable="on">' + taTranslations.editLink.targetToggle.buttontext + '</button>');
+			var targetToggle = angular.element('<button type="button" class="btn btn-default btn-secondary btn-sm btn-small" tabindex="-1" unselectable="on">' + taTranslations.editLink.targetToggle.buttontext + '</button>');
 			if($element.attr('target') === '_blank'){
 				targetToggle.addClass('active');
 			}
