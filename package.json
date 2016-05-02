@@ -1,13 +1,13 @@
 {
-  "name": "textangular",
-  "version": "1.5.1",
-  "description": "A radically powerful Text-Editor/Wysiwyg editor for Angular.js",
+  "name": "textAngular-pjn",
+  "version": "BS4-1.5.2-pre2",
+  "description": "Editor de texto HTML",
   "maintainers": [
     {
-      "name": "Fraywing"
+      "name": "Andres Cirulo"
     },
     {
-      "name": "SimeonC"
+      "name": "Fernando Diaz"
     }
   ],
   "keywords": [
@@ -17,7 +17,7 @@
     "directive"
   ],
   "license": "MIT",
-  "homepage": "http://textangular.com",
+  "homepage": "",
   "main": "./dist/textAngular.umd.js",
   "dependencies": {
     "rangy": "^1.3.0"
@@ -60,6 +60,6 @@
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/fraywing/textAngular.git"
+    "url": "git://github.com/andrescirulo/textAngular.git"
   }
 }

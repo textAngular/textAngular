@@ -1,13 +1,13 @@
 {
-  "name": "textAngular",
-  "version": "1.5.1",
+  "name": "textAngular-pjn",
+  "version": "BS4-1.5.2-pre2",
   "main": [
     "./dist/textAngular.js",
     "./dist/textAngular-sanitize.js",
     "./dist/textAngularSetup.js",
     "./dist/textAngular.css"
   ],
-  "description": "A radically powerful Text-Editor/Wysiwyg editor for Angular.js",
+  "description": "Editor de texto HTML",
   "keywords": [
     "editor",
     "angular",
@@ -32,5 +32,5 @@
     "jquery": "1.9.x"
   },
   "license": "MIT",
-  "homepage": "https://github.com/fraywing/textAngular"
+  "homepage": "https://github.com/andrescirulo/textAngular"
 }

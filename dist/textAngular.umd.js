@@ -125,7 +125,7 @@ angular.module('textAngularSetup', [])
 		focussed: "focussed",
 		toolbar: "btn-toolbar",
 		toolbarGroup: "btn-group",
-		toolbarButton: "btn btn-default",
+		toolbarButton: "btn btn-default btn-secondary",
 		toolbarButtonActive: "active",
 		disabled: "disabled",
 		textEditor: 'form-control',
@@ -193,95 +193,95 @@ angular.module('textAngularSetup', [])
 	//insertLink: "Please enter a URL to insert",
 	//insertVideo: "Please enter a youtube URL to embed",
 	html: {
-		tooltip: 'Toggle html / Rich Text'
+		tooltip: 'HTML / Texto Enriquecido'
 	},
 	// tooltip for heading - might be worth splitting
 	heading: {
-		tooltip: 'Heading '
+		tooltip: 'Encabezado '
 	},
 	p: {
-		tooltip: 'Paragraph'
+		tooltip: 'Párrafo'
 	},
 	pre: {
-		tooltip: 'Preformatted text'
+		tooltip: 'Texto preformateado'
 	},
 	ul: {
-		tooltip: 'Unordered List'
+		tooltip: 'Lista sin numeración'
 	},
 	ol: {
-		tooltip: 'Ordered List'
+		tooltip: 'Lista numerada'
 	},
 	quote: {
-		tooltip: 'Quote/unquote selection or paragraph'
+		tooltip: 'Citar selección o párrafo'
 	},
 	undo: {
-		tooltip: 'Undo'
+		tooltip: 'Deshacer'
 	},
 	redo: {
-		tooltip: 'Redo'
+		tooltip: 'Rehacer'
 	},
 	bold: {
-		tooltip: 'Bold'
+		tooltip: 'Negrita'
 	},
 	italic: {
-		tooltip: 'Italic'
+		tooltip: 'Itálica'
 	},
 	underline: {
-		tooltip: 'Underline'
+		tooltip: 'Subrayar'
 	},
 	strikeThrough:{
-		tooltip: 'Strikethrough'
+		tooltip: 'Tachar'
 	},
 	justifyLeft: {
-		tooltip: 'Align text left'
+		tooltip: 'Alinear a la izquierda'
 	},
 	justifyRight: {
-		tooltip: 'Align text right'
+		tooltip: 'Alinear a la derecha'
 	},
 	justifyFull: {
-		tooltip: 'Justify text'
+		tooltip: 'Justificado'
 	},
 	justifyCenter: {
-		tooltip: 'Center'
+		tooltip: 'Centrar'
 	},
 	indent: {
-		tooltip: 'Increase indent'
+		tooltip: 'Aumentar indentado'
 	},
 	outdent: {
-		tooltip: 'Decrease indent'
+		tooltip: 'Disminuír indentado'
 	},
 	clear: {
-		tooltip: 'Clear formatting'
+		tooltip: 'Limpiar formato'
 	},
 	insertImage: {
-		dialogPrompt: 'Please enter an image URL to insert',
-		tooltip: 'Insert image',
+		dialogPrompt: 'Por favor ingrese una URL de una imagen a insertar',
+		tooltip: 'Insertar imagen',
 		hotkey: 'the - possibly language dependent hotkey ... for some future implementation'
 	},
 	insertVideo: {
-		tooltip: 'Insert video',
-		dialogPrompt: 'Please enter a youtube URL to embed'
+		tooltip: 'Insertar video',
+		dialogPrompt: 'Por favor ingrese una URL de youtube para insertar'
 	},
 	insertLink: {
-		tooltip: 'Insert / edit link',
-		dialogPrompt: "Please enter a URL to insert"
+		tooltip: 'Insertar / editar vínculo',
+		dialogPrompt: "Por favor ingrese una URL para insertar"
 	},
 	editLink: {
 		reLinkButton: {
-			tooltip: "Relink"
+			tooltip: "Revincular"
 		},
 		unLinkButton: {
-			tooltip: "Unlink"
+			tooltip: "Desvincular"
 		},
 		targetToggle: {
-			buttontext: "Open in New Window"
+			buttontext: "Abrir en una nueva ventana"
 		}
 	},
 	wordcount: {
-		tooltip: 'Display words Count'
+		tooltip: 'Mostrar la cantidad de palabras'
 	},
 		charcount: {
-		tooltip: 'Display characters Count'
+		tooltip: 'Mostrar la cantidad de caracteres'
 	}
 })
 .factory('taToolFunctions', ['$window','taTranslations', function($window, taTranslations) {
@@ -298,7 +298,7 @@ angular.module('textAngularSetup', [])
 			var container = editorScope.displayElements.popoverContainer;
 			container.empty();
 			var buttonGroup = angular.element('<div class="btn-group" style="padding-right: 6px;">');
-			var fullButton = angular.element('<button type="button" class="btn btn-default btn-sm btn-small" unselectable="on" tabindex="-1">100% </button>');
+			var fullButton = angular.element('<button type="button" class="btn btn-default btn-secondary btn-sm btn-small" unselectable="on" tabindex="-1">100% </button>');
 			fullButton.on('click', function(event){
 				event.preventDefault();
 				$element.css({
@@ -307,7 +307,7 @@ angular.module('textAngularSetup', [])
 				});
 				finishEdit();
 			});
-			var halfButton = angular.element('<button type="button" class="btn btn-default btn-sm btn-small" unselectable="on" tabindex="-1">50% </button>');
+			var halfButton = angular.element('<button type="button" class="btn btn-default btn-secondary btn-sm btn-small" unselectable="on" tabindex="-1">50% </button>');
 			halfButton.on('click', function(event){
 				event.preventDefault();
 				$element.css({
@@ -316,7 +316,7 @@ angular.module('textAngularSetup', [])
 				});
 				finishEdit();
 			});
-			var quartButton = angular.element('<button type="button" class="btn btn-default btn-sm btn-small" unselectable="on" tabindex="-1">25% </button>');
+			var quartButton = angular.element('<button type="button" class="btn btn-default btn-secondary btn-sm btn-small" unselectable="on" tabindex="-1">25% </button>');
 			quartButton.on('click', function(event){
 				event.preventDefault();
 				$element.css({
@@ -325,7 +325,7 @@ angular.module('textAngularSetup', [])
 				});
 				finishEdit();
 			});
-			var resetButton = angular.element('<button type="button" class="btn btn-default btn-sm btn-small" unselectable="on" tabindex="-1">Reset</button>');
+			var resetButton = angular.element('<button type="button" class="btn btn-default btn-secondary btn-sm btn-small" unselectable="on" tabindex="-1">Reset</button>');
 			resetButton.on('click', function(event){
 				event.preventDefault();
 				$element.css({
@@ -341,7 +341,7 @@ angular.module('textAngularSetup', [])
 			container.append(buttonGroup);
 
 			buttonGroup = angular.element('<div class="btn-group" style="padding-right: 6px;">');
-			var floatLeft = angular.element('<button type="button" class="btn btn-default btn-sm btn-small" unselectable="on" tabindex="-1"><i class="fa fa-align-left"></i></button>');
+			var floatLeft = angular.element('<button type="button" class="btn btn-default btn-secondary btn-sm btn-small" unselectable="on" tabindex="-1"><i class="fa fa-align-left"></i></button>');
 			floatLeft.on('click', function(event){
 				event.preventDefault();
 				// webkit
@@ -352,7 +352,7 @@ angular.module('textAngularSetup', [])
 				$element.css('styleFloat', 'left');
 				finishEdit();
 			});
-			var floatRight = angular.element('<button type="button" class="btn btn-default btn-sm btn-small" unselectable="on" tabindex="-1"><i class="fa fa-align-right"></i></button>');
+			var floatRight = angular.element('<button type="button" class="btn btn-default btn-secondary btn-sm btn-small" unselectable="on" tabindex="-1"><i class="fa fa-align-right"></i></button>');
 			floatRight.on('click', function(event){
 				event.preventDefault();
 				// webkit
@@ -363,7 +363,7 @@ angular.module('textAngularSetup', [])
 				$element.css('styleFloat', 'right');
 				finishEdit();
 			});
-			var floatNone = angular.element('<button type="button" class="btn btn-default btn-sm btn-small" unselectable="on" tabindex="-1"><i class="fa fa-align-justify"></i></button>');
+			var floatNone = angular.element('<button type="button" class="btn btn-default btn-secondary btn-sm btn-small" unselectable="on" tabindex="-1"><i class="fa fa-align-justify"></i></button>');
 			floatNone.on('click', function(event){
 				event.preventDefault();
 				// webkit
@@ -380,7 +380,7 @@ angular.module('textAngularSetup', [])
 			container.append(buttonGroup);
 
 			buttonGroup = angular.element('<div class="btn-group">');
-			var remove = angular.element('<button type="button" class="btn btn-default btn-sm btn-small" unselectable="on" tabindex="-1"><i class="fa fa-trash-o"></i></button>');
+			var remove = angular.element('<button type="button" class="btn btn-default btn-secondary btn-sm btn-small" unselectable="on" tabindex="-1"><i class="fa fa-trash-o"></i></button>');
 			remove.on('click', function(event){
 				event.preventDefault();
 				$element.remove();
@@ -411,7 +411,7 @@ angular.module('textAngularSetup', [])
 			});
 			container.append(link);
 			var buttonGroup = angular.element('<div class="btn-group pull-right">');
-			var reLinkButton = angular.element('<button type="button" class="btn btn-default btn-sm btn-small" tabindex="-1" unselectable="on" title="' + taTranslations.editLink.reLinkButton.tooltip + '"><i class="fa fa-edit icon-edit"></i></button>');
+			var reLinkButton = angular.element('<button type="button" class="btn btn-default btn-secondary btn-sm btn-small" tabindex="-1" unselectable="on" title="' + taTranslations.editLink.reLinkButton.tooltip + '"><i class="fa fa-edit icon-edit"></i></button>');
 			reLinkButton.on('click', function(event){
 				event.preventDefault();
 				var urlLink = $window.prompt(taTranslations.insertLink.dialogPrompt, $element.attr('href'));
@@ -422,7 +422,7 @@ angular.module('textAngularSetup', [])
 				editorScope.hidePopover();
 			});
 			buttonGroup.append(reLinkButton);
-			var unLinkButton = angular.element('<button type="button" class="btn btn-default btn-sm btn-small" tabindex="-1" unselectable="on" title="' + taTranslations.editLink.unLinkButton.tooltip + '"><i class="fa fa-unlink icon-unlink"></i></button>');
+			var unLinkButton = angular.element('<button type="button" class="btn btn-default btn-secondary btn-sm btn-small" tabindex="-1" unselectable="on" title="' + taTranslations.editLink.unLinkButton.tooltip + '"><i class="fa fa-unlink icon-unlink"></i></button>');
 			// directly before this click event is fired a digest is fired off whereby the reference to $element is orphaned off
 			unLinkButton.on('click', function(event){
 				event.preventDefault();
@@ -431,7 +431,7 @@ angular.module('textAngularSetup', [])
 				editorScope.hidePopover();
 			});
 			buttonGroup.append(unLinkButton);
-			var targetToggle = angular.element('<button type="button" class="btn btn-default btn-sm btn-small" tabindex="-1" unselectable="on">' + taTranslations.editLink.targetToggle.buttontext + '</button>');
+			var targetToggle = angular.element('<button type="button" class="btn btn-default btn-secondary btn-sm btn-small" tabindex="-1" unselectable="on">' + taTranslations.editLink.targetToggle.buttontext + '</button>');
 			if($element.attr('target') === '_blank'){
 				targetToggle.addClass('active');
 			}
@@ -804,7 +804,7 @@ angular.module('textAngularSetup', [])
 		}
 	});
 	taRegisterTool('wordcount', {
-		display: '<div id="toolbarWC" style="display:block; min-width:100px;">Words: <span ng-bind="wordcount"></span></div>',
+		display: '<button id="toolbarWC" style="display:block; min-width:100px;">Palabras: <span ng-bind="wordcount"></span></button>',
 		disabled: true,
 		wordcount: 0,
 		activeState: function(){ // this fires on keyup
@@ -831,7 +831,7 @@ angular.module('textAngularSetup', [])
 		}
 	});
 	taRegisterTool('charcount', {
-		display: '<div id="toolbarCC" style="display:block; min-width:120px;">Characters: <span ng-bind="charcount"></span></div>',
+		display: '<button id="toolbarCC" style="display:block; min-width:120px;">Caracteres: <span ng-bind="charcount"></span></button>',
 		disabled: true,
 		charcount: 0,
 		activeState: function(){ // this fires on keyup
@@ -853,7 +853,7 @@ angular.module('textAngularSetup', [])
 @license textAngular
 Author : Austin Anderson
 License : 2013 MIT
-Version 1.5.1
+Version BS4-1.5.2-pre2
 
 See README.md or https://github.com/fraywing/textAngular/wiki for requirements and use.
 */
@@ -3681,8 +3681,10 @@ textAngular.service('textAngularManager', ['taToolExecuteAction', 'taTools', 'ta
 			else throw('textAngular Error: No Toolbar with name "' + toolbarKey + '" exists');
 		},
 		// removes a tool from all toolbars and it's definition
-		removeTool: function(toolKey){
-			delete taTools[toolKey];
+		removeTool: function(toolKey,removeDefinition){
+			if (removeDefinition !== false){
+				delete taTools[toolKey];
+			}
 			angular.forEach(toolbars, function(toolbarScope){
 				delete toolbarScope.tools[toolKey];
 				for(var i = 0; i < toolbarScope.toolbar.length; i++){
@@ -3706,14 +3708,18 @@ textAngular.service('textAngularManager', ['taToolExecuteAction', 'taTools', 'ta
 		},
 		// toolkey, toolDefinition are required. If group is not specified will pick the last group, if index isnt defined will append to group
 		addTool: function(toolKey, toolDefinition, group, index){
-			taRegisterTool(toolKey, toolDefinition);
+			if (!taTools.hasOwnProperty(toolKey)){
+				taRegisterTool(toolKey, toolDefinition);
+			}
 			angular.forEach(toolbars, function(toolbarScope){
 				toolbarScope.addTool(toolKey, toolDefinition, group, index);
 			});
 		},
 		// adds a Tool but only to one toolbar not all
 		addToolToToolbar: function(toolKey, toolDefinition, toolbarKey, group, index){
-			taRegisterTool(toolKey, toolDefinition);
+			if (!taTools.hasOwnProperty(toolKey)){
+				taRegisterTool(toolKey, toolDefinition);
+			}
 			toolbars[toolbarKey].addTool(toolKey, toolDefinition, group, index);
 		},
 		// this is used when externally the html of an editor has been changed and textAngular needs to be notified to update the model.
