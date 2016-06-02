@@ -157,7 +157,7 @@ module.exports = function (grunt) {
                 deps: {
                     'default': ['rangy'],
                     cjs: ['rangy', {'rangy/lib/rangy-selectionsaverestore': ''}],
-                    amd: ['rangy', {'rangy/lib/rangy-selectionsaverestore': ''}]
+                    amd: ['rangy/rangy-core', {'rangy/rangy-selectionsaverestore': ''}]
                 }
             }
         }
