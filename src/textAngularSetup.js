@@ -394,39 +394,41 @@ angular.module('textAngularSetup', [])
 				'vertical-align': 'middle'
 			});
 			container.append(link);
-			var buttonGroup = angular.element('<div class="btn-group pull-right">');
-			var reLinkButton = angular.element('<button type="button" class="btn btn-default btn-sm btn-small" tabindex="-1" unselectable="on" title="' + taTranslations.editLink.reLinkButton.tooltip + '"><i class="fa fa-edit icon-edit"></i></button>');
-			reLinkButton.on('click', function(event){
-				event.preventDefault();
-				var urlLink = $window.prompt(taTranslations.insertLink.dialogPrompt, $element.attr('href'));
-				if(urlLink && urlLink !== '' && urlLink !== 'http://'){
-					$element.attr('href', urlLink);
+			if(!editorScope.disabled){
+				var buttonGroup = angular.element('<div class="btn-group pull-right">');
+				var reLinkButton = angular.element('<button type="button" class="btn btn-default btn-sm btn-small" tabindex="-1" unselectable="on" title="' + taTranslations.editLink.reLinkButton.tooltip + '"><i class="fa fa-edit icon-edit"></i></button>');
+				reLinkButton.on('click', function(event){
+					event.preventDefault();
+					var urlLink = $window.prompt(taTranslations.insertLink.dialogPrompt, $element.attr('href'));
+					if(urlLink && urlLink !== '' && urlLink !== 'http://'){
+						$element.attr('href', urlLink);
+						editorScope.updateTaBindtaTextElement();
+					}
+					editorScope.hidePopover();
+				});
+				buttonGroup.append(reLinkButton);
+				var unLinkButton = angular.element('<button type="button" class="btn btn-default btn-sm btn-small" tabindex="-1" unselectable="on" title="' + taTranslations.editLink.unLinkButton.tooltip + '"><i class="fa fa-unlink icon-unlink"></i></button>');
+				// directly before this click event is fired a digest is fired off whereby the reference to $element is orphaned off
+				unLinkButton.on('click', function(event){
+					event.preventDefault();
+					$element.replaceWith($element.contents());
 					editorScope.updateTaBindtaTextElement();
+					editorScope.hidePopover();
+				});
+				buttonGroup.append(unLinkButton);
+				var targetToggle = angular.element('<button type="button" class="btn btn-default btn-sm btn-small" tabindex="-1" unselectable="on">' + taTranslations.editLink.targetToggle.buttontext + '</button>');
+				if($element.attr('target') === '_blank'){
+					targetToggle.addClass('active');
 				}
-				editorScope.hidePopover();
-			});
-			buttonGroup.append(reLinkButton);
-			var unLinkButton = angular.element('<button type="button" class="btn btn-default btn-sm btn-small" tabindex="-1" unselectable="on" title="' + taTranslations.editLink.unLinkButton.tooltip + '"><i class="fa fa-unlink icon-unlink"></i></button>');
-			// directly before this click event is fired a digest is fired off whereby the reference to $element is orphaned off
-			unLinkButton.on('click', function(event){
-				event.preventDefault();
-				$element.replaceWith($element.contents());
-				editorScope.updateTaBindtaTextElement();
-				editorScope.hidePopover();
-			});
-			buttonGroup.append(unLinkButton);
-			var targetToggle = angular.element('<button type="button" class="btn btn-default btn-sm btn-small" tabindex="-1" unselectable="on">' + taTranslations.editLink.targetToggle.buttontext + '</button>');
-			if($element.attr('target') === '_blank'){
-				targetToggle.addClass('active');
+				targetToggle.on('click', function(event){
+					event.preventDefault();
+					$element.attr('target', ($element.attr('target') === '_blank') ? '' : '_blank');
+					targetToggle.toggleClass('active');
+					editorScope.updateTaBindtaTextElement();
+				});
+				buttonGroup.append(targetToggle);
+				container.append(buttonGroup);
 			}
-			targetToggle.on('click', function(event){
-				event.preventDefault();
-				$element.attr('target', ($element.attr('target') === '_blank') ? '' : '_blank');
-				targetToggle.toggleClass('active');
-				editorScope.updateTaBindtaTextElement();
-			});
-			buttonGroup.append(targetToggle);
-			container.append(buttonGroup);
 			editorScope.showPopover($element);
 		},
 		extractYoutubeVideoId: function(url) {
