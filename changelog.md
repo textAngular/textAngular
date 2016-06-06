@@ -1,3 +1,21 @@
+<a name"1.5.1"></a>
+### 1.5.1 (2016-04-25)
+
+
+<a name"1.5.0"></a>
+## 1.5.0 (2016-01-16)
+
+
+#### Bug Fixes
+
+* **main.js:**
+  * we now hide the popover at the end of the image resize. ([c182c96c](https://github.com/fraywing/textAngular/commit/c182c96c))
+  * we now hide the popover at the end of the image resize. ([d9cfcf15](https://github.com/fraywing/textAngular/commit/d9cfcf15))
+  * Fix for #862 where the model was not changing after image resize. ([d5a508e3](https://github.com/fraywing/textAngular/commit/d5a508e3))
+* **taBind.js:** Fix bug #843 -- improper closing of list elements ([a0b79276](https://github.com/fraywing/textAngular/commit/a0b79276))
+* **textAngular-santitize:** Fix for internal model ignores style attr #854 ([9fc7288b](https://github.com/fraywing/textAngular/commit/9fc7288b))
+
+
 <a name"1.4.6"></a>
 ### 1.4.6 (2015-09-20)
 
