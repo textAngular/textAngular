@@ -34,32 +34,6 @@ var _browserDetect = {
 // fix a webkit bug, see: https://gist.github.com/shimondoodkin/1081133
 // this is set true when a blur occurs as the blur of the ta-bind triggers before the click
 var globalContentEditableBlur = false;
-/* istanbul ignore next: Browser Un-Focus fix for webkit */
-if(_browserDetect.webkit) {
-	document.addEventListener("mousedown", function(_event){
-		var e = _event || window.event;
-		var curelement = e.target;
-		if(globalContentEditableBlur && curelement !== null){
-			var isEditable = false;
-			var tempEl = curelement;
-			while(tempEl !== null && tempEl.tagName.toLowerCase() !== 'html' && !isEditable){
-				isEditable = tempEl.contentEditable === 'true';
-				tempEl = tempEl.parentNode;
-			}
-			if(!isEditable){
-				document.getElementById('textAngular-editableFix-010203040506070809').setSelectionRange(0, 0); // set caret focus to an element that handles caret focus correctly.
-				curelement.focus(); // focus the wanted element.
-				if (curelement.select) {
-					curelement.select(); // use select to place cursor for input elements.
-				}
-			}
-		}
-		globalContentEditableBlur = false;
-	}, false); // add global click handler
-	angular.element(document).ready(function () {
-		angular.element(document.body).append(angular.element('<input id="textAngular-editableFix-010203040506070809" class="ta-hidden-input" aria-hidden="true" unselectable="on" tabIndex="-1">'));
-	});
-}
 
 // Gloabl to textAngular REGEXP vars for block and list elements.
 
