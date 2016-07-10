@@ -115,7 +115,7 @@ For Additional options see the [github Wiki](https://github.com/fraywing/textAng
 textAngular uses ```execCommand``` for the rich-text functionality.
 That being said, its still a fairly experimental browser feature-set, and may not behave the same in all browsers - see http://tifftiff.de/contenteditable/compliance_test.html for a full compliance list.
 It has been tested to work on Chrome, Safari, Opera, Firefox and Internet Explorer 8+.
-If you find something, please let me know - throw me a message, or submit a issue request!
+If you find something, please let me know - throw me a message, or submit an issue request!
 
 ### FAQ
 
