@@ -1052,12 +1052,6 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 					element.find(selector).on('click', selectorClickHandler);
 				});
 				element.on('drop', fileDropHandler);
-				element.on('blur', function(){
-					/* istanbul ignore next: webkit fix */
-					if(_browserDetect.webkit) { // detect webkit
-						globalContentEditableBlur = true;
-					}
-				});
 			}
 		}
 	};
