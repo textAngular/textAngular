@@ -175,6 +175,9 @@ angular.module('textAngular.DOM', ['textAngular.factories'])
 								}
 							}
 						}
+						_nodes = _nodes.filter(function(value, index, self) {
+							return self.indexOf(value) === index;
+						});
 						if(angular.element(_nodes[0]).hasClass('ta-bind')){
 							$target = angular.element(options);
 							$target[0].innerHTML = _nodes[0].innerHTML;
