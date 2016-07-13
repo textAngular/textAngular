@@ -738,7 +738,16 @@ angular.module('textAngularSetup', [])
 					// With this change, both FireFox and Chrome behave the same way!
 					taSelection.setSelectionAfterElement(taSelection.getSelectionElement());
 				}
-				return this.$editor().wrapSelection('insertImage', imageLink, true);
+				// In the past we used the simple statement:
+				//return this.$editor().wrapSelection('insertImage', imageLink, true);
+				//
+				// However on Firefox only, when the content is empty this is a problem
+				// See Issue #1201
+				// Investigation reveals that Firefox only inserts a <p> only!!!!
+				// So now we use insertHTML here and all is fine.
+				// NOTE: this is what 'insertImage' is supposed to do anyway!
+				var embed = '<img src="' + imageLink + '">';
+				return this.$editor().wrapSelection('insertHTML', embed, true);
 			}
 		},
 		onElementSelect: {
