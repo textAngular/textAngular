@@ -50,7 +50,7 @@ Install using commonjs (eg componentjs, Webpack, Browserify):
 ```
 angular.module('myModule', [require('angular-sanitize'), require('textAngular')]);
 ```
-Optionally, install textAngular-santize.min.js by requiring it BEFORE requring textAngular:
+Optionally, install textAngular-sanitize.min.js by requiring it BEFORE requring textAngular:
 ```
 require('textangular/dist/textAngular-sanitize.min');
 angular.module('myModule', [require('textAngular')]);
