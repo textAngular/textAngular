@@ -823,6 +823,12 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 								}
 							}
 							var val = _compileHtml();
+							/* istanbul ignore next: FF specific bug fix */
+							if (val==='<br>') {
+								// on Firefox this comes back sometimes as <br> which is strange, so we remove this here
+								//console.log('*************BAD****');
+								val='';
+							}
 							if(_defaultVal !== '' && val.trim() === ''){
 								_setInnerHTML(_defaultVal);
 								taSelection.setSelectionToElementStart(element.children()[0]);
