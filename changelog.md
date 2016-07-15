@@ -1,3 +1,22 @@
+<a name"1.5.2"></a>
+### 1.5.2 (2016-07-15)
+
+#### Bug Fixes
+
+* **textAngular:**
+  * Fix(textAngularSetup): Corrected bug #1201 due to an issue with Firefox. (https://github.com/fraywing/textAngular/commit/dab42a371f03a6912de9b6310db5911b52cd8362)
+  * docs(README): fix textAngular-santize.min.js typo (https://github.com/fraywing/textAngular/commit/12580ad5585611257c5a0888186fe24e57c4d862)
+  * docs(README): update links to cdnjs and jsdelivr (https://github.com/fraywing/textAngular/commit/0ef205254360790ed45ab225171cc448d4730515)
+  * Fix(DOM): merged fix from Hike-zzz: fixing issue #616 #1174 (https://github.com/fraywing/textAngular/commit/328cd69c06c5d13c2c7a9c4cfeb9406334295137)
+  * Fix(README): fix typos- pull request #1072 from pra85/patch-2 (https://github.com/fraywing/textAngular/commit/0f7f2e4ce9c4a12a5c20c8f930fc8cee38d9287b)
+  * Fix(taBind): fix for bug under Firefox when delete all content #1217 (https://github.com/fraywing/textAngular/commit/67e7ebe1003f439fa6a93c0f70cbb1818926522b)
+  * Fix(textAngularSetup): bug #1223 InsertImage tool failed on Firefox (https://github.com/fraywing/textAngular/commit/f5e9bd4c5de55979572075cf4934b50201eb7a3e)
+  * Fix(globals, taBind): browser previos fix no more needed (https://github.com/fraywing/textAngular/commit/8cd3e5a64a798adfda17fb1e9a3a91930f96e5e2)
+
+#### Features
+
+* **textAngular** Enhanced (factories): to do Better removal of style junk which Chome inserts. Also one bug fix in the old existing code (a missing /"). (https://github.com/fraywing/textAngular/commit/7d5d37cfa03cc75e012885920ea4939460020658)
+
 <a name"1.5.1"></a>
 ### 1.5.1 (2016-04-25)
 
