@@ -2,7 +2,7 @@
 @license textAngular
 Author : Austin Anderson
 License : 2013 MIT
-Version 1.5.2
+Version 1.5.2-patreon
 
 See README.md or https://github.com/fraywing/textAngular/wiki for requirements and use.
 */
@@ -415,6 +415,7 @@ angular.module('textAngular.factories', [])
 	};
 }]);
 
+
 angular.module('textAngular.DOM', ['textAngular.factories'])
 .factory('taExecCommand', ['taSelection', 'taBrowserTag', '$document', function(taSelection, taBrowserTag, $document){
 	var listToDefault = function(listElement, defaultWrap){
@@ -691,6 +692,12 @@ function($document, taDOM){
 			}
 			return selection;
 		},
+		makeSelection: function(element){
+			var range = rangy.createRange();
+			range.selectNodeContents(element);
+			var sel = rangy.getSelection();
+			sel.setSingleRange(range);
+		},
 		getOnlySelectedElements: function(){
 			var range = rangy.getSelection().getRangeAt(0);
 			var container = range.commonAncestorContainer;
@@ -706,39 +713,39 @@ function($document, taDOM){
 		},
 		setSelection: function(el, start, end){
 			var range = rangy.createRange();
-			
+
 			range.setStart(el, start);
 			range.setEnd(el, end);
-			
+
 			rangy.getSelection().setSingleRange(range);
 		},
 		setSelectionBeforeElement: function (el){
 			var range = rangy.createRange();
-			
+
 			range.selectNode(el);
 			range.collapse(true);
-			
+
 			rangy.getSelection().setSingleRange(range);
 		},
 		setSelectionAfterElement: function (el){
 			var range = rangy.createRange();
-			
+
 			range.selectNode(el);
 			range.collapse(false);
-			
+
 			rangy.getSelection().setSingleRange(range);
 		},
 		setSelectionToElementStart: function (el){
 			var range = rangy.createRange();
-			
+
 			range.selectNodeContents(el);
 			range.collapse(true);
-			
+
 			rangy.getSelection().setSingleRange(range);
 		},
 		setSelectionToElementEnd: function (el){
 			var range = rangy.createRange();
-			
+
 			range.selectNodeContents(el);
 			range.collapse(false);
 			if(el.childNodes && el.childNodes[el.childNodes.length - 1] && el.childNodes[el.childNodes.length - 1].nodeName === 'br'){
@@ -755,7 +762,7 @@ function($document, taDOM){
 			var frag = _document.createDocumentFragment();
 			var children = element[0].childNodes;
 			var isInline = true;
-			
+
 			if(children.length > 0){
 				// NOTE!! We need to do the following:
 				// check for blockelements - if they exist then we have to split the current element in half (and all others up to the closest block element) and insert all children in-between.
@@ -777,7 +784,7 @@ function($document, taDOM){
 				// paste text of some sort
 				lastNode = frag = _document.createTextNode(html);
 			}
-			
+
 			// Other Edge case - selected data spans multiple blocks.
 			if(isInline){
 				range.deleteContents();
@@ -802,7 +809,7 @@ function($document, taDOM){
 							secondParent = parent.cloneNode();
 							// split the nodes into two lists - before and after, splitting the node with the selection into 2 text nodes.
 							taDOM.splitNodes(parent.childNodes, parent, secondParent, range.startContainer, range.startOffset);
-							
+
 							// Escape out of the inline tags like b
 							while(!VALIDELEMENTS.test(parent.nodeName)){
 								angular.element(parent).after(secondParent);
@@ -817,12 +824,12 @@ function($document, taDOM){
 							secondParent = parent.cloneNode();
 							taDOM.splitNodes(parent.childNodes, parent, secondParent, undefined, undefined, range.startOffset);
 						}
-						
+
 						angular.element(parent).after(secondParent);
 						// put cursor to end of inserted content
 						range.setStartAfter(parent);
 						range.setEndAfter(parent);
-						
+
 						if(/^(|<br(|\/)>)$/i.test(parent.innerHTML.trim())){
 							range.setStartBefore(parent);
 							range.setEndBefore(parent);
@@ -848,7 +855,7 @@ function($document, taDOM){
 					range.deleteContents();
 				}
 			}
-			
+
 			range.insertNode(frag);
 			if(lastNode){
 				api.setSelectionToElementEnd(lastNode);
@@ -870,35 +877,35 @@ function($document, taDOM){
 			if(element.attr(attribute) !== undefined) resultingElements.push(element);
 			return resultingElements;
 		},
-		
+
 		transferChildNodes: function(source, target){
 			// clear out target
 			target.innerHTML = '';
 			while(source.childNodes.length > 0) target.appendChild(source.childNodes[0]);
 			return target;
 		},
-		
+
 		splitNodes: function(nodes, target1, target2, splitNode, subSplitIndex, splitIndex){
 			if(!splitNode && isNaN(splitIndex)) throw new Error('taDOM.splitNodes requires a splitNode or splitIndex');
 			var startNodes = document.createDocumentFragment();
 			var endNodes = document.createDocumentFragment();
 			var index = 0;
-			
+
 			while(nodes.length > 0 && (isNaN(splitIndex) || splitIndex !== index) && nodes[0] !== splitNode){
 				startNodes.appendChild(nodes[0]); // this removes from the nodes array (if proper childNodes object.
 				index++;
 			}
-			
+
 			if(!isNaN(subSplitIndex) && subSplitIndex >= 0 && nodes[0]){
 				startNodes.appendChild(document.createTextNode(nodes[0].nodeValue.substring(0, subSplitIndex)));
 				nodes[0].nodeValue = nodes[0].nodeValue.substring(subSplitIndex);
 			}
 			while(nodes.length > 0) endNodes.appendChild(nodes[0]);
-			
+
 			taDOM.transferChildNodes(startNodes, target1);
 			taDOM.transferChildNodes(endNodes, target2);
 		},
-		
+
 		transferNodeAttributes: function(source, target){
 			for(var i = 0; i < source.attributes.length; i++) target.setAttribute(source.attributes[i].name, source.attributes[i].value);
 			return target;
@@ -906,6 +913,7 @@ function($document, taDOM){
 	};
 	return taDOM;
 });
+
 angular.module('textAngular.validators', [])
 .directive('taMaxText', function(){
 	return {
@@ -1001,10 +1009,12 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 	};
 }])
 .directive('taBind', [
+		'PatreonRichText',
 		'taSanitize', '$timeout', '$document', 'taFixChrome', 'taBrowserTag',
 		'taSelection', 'taSelectableElements', 'taApplyCustomRenderers', 'taOptions',
 		'_taBlankTest', '$parse', 'taDOM', 'textAngularManager',
 		function(
+			PatreonRichText,
 			taSanitize, $timeout, $document, taFixChrome, taBrowserTag,
 			taSelection, taSelectableElements, taApplyCustomRenderers, taOptions,
 			_taBlankTest, $parse, taDOM, textAngularManager){
@@ -1252,6 +1262,20 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 						}, 1);
 					}
 				}
+			};
+
+			scope.updateViewValue = function(value){
+				ngModel.$setViewValue(value);
+				element.val(value);
+			};
+
+			scope.updateLinkHTML = function(newElement, originalElement){
+				var originalHTML = element.val();
+
+				var newHTML = originalHTML.replace(originalElement, newElement);
+
+				element.val(newHTML);
+				ngModel.$setViewValue(newHTML);
 			};
 
 			// in here we are undoing the converts used elsewhere to prevent the < > and & being displayed when they shouldn't in the code.
@@ -1756,6 +1780,11 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 					});
 					var _keyupTimeout;
 					element.on('keyup', scope.events.keyup = function(event, eventData){
+						function focussedCallback(val){
+							_focussed = val;
+						}
+						PatreonRichText.handleSelected(scope, focussedCallback);
+
 						/* istanbul ignore else: this is for catching the jqLite testing*/
 						if(eventData) angular.extend(event, eventData);
 						/* istanbul ignore next: FF specific bug fix */
@@ -1876,6 +1905,21 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 				}
 			};
 
+            function focussedCallback(val){
+                _focussed = val;
+            }
+            var handleSelectedOnMouseUp = function(event){
+                return $timeout(function(){
+                    PatreonRichText.handleSelected(scope, focussedCallback);
+                });
+            };
+
+            angular.element(document.body).on('mouseup', handleSelectedOnMouseUp);
+
+            scope.$on('$destroy', function(){
+                angular.element(document.body).off('mouseup', handleSelectedOnMouseUp);
+            });
+
 			//used for updating when inserting wrapped elements
 			var _reApplyOnSelectorHandlers = scope['reApplyOnSelectorHandlers' + (attrs.id || '')] = function(){
 				/* istanbul ignore else */
@@ -1886,6 +1930,14 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 							.on('click', selectorClickHandler);
 					});
 			};
+
+			function killSpans(element){
+				var spans = element.querySelectorAll("span");
+				angular.forEach(spans, function(span){
+					var textNode = document.createTextNode(span.textContent);
+					span.parentElement.replaceChild(textNode, span);
+				});
+			}
 
 			var _setInnerHTML = function(newval){
 				element[0].innerHTML = newval;
@@ -1901,6 +1953,10 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 				var val = ngModel.$viewValue || '';
 				// if the editor isn't focused it needs to be updated, otherwise it's receiving user input
 				if(!_skipRender){
+                    if ($document[0].activeElement.attributes.contenteditable) {
+                        killSpans($document[0].activeElement);
+                    }
+
 					/* istanbul ignore else: in other cases we don't care */
 					if(_isContentEditable && _focussed){
 						// update while focussed
@@ -2025,7 +2081,7 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 
 // this global var is used to prevent multiple fires of the drop event. Needs to be global to the textAngular file.
 var dropFired = false;
-var textAngular = angular.module("textAngular", ['ngSanitize', 'textAngularSetup', 'textAngular.factories', 'textAngular.DOM', 'textAngular.validators', 'textAngular.taBind']); //This makes ngSanitize required
+var textAngular = angular.module("textAngular", ['ngSanitize', 'PatreonRichText', 'textAngularSetup', 'textAngular.factories', 'textAngular.DOM', 'textAngular.validators', 'textAngular.taBind']); //This makes ngSanitize required
 
 textAngular.config([function(){
 	// clear taTools variable. Just catches testing and any other time that this config may run multiple times...
@@ -2033,9 +2089,10 @@ textAngular.config([function(){
 }]);
 
 textAngular.directive("textAngular", [
+	'PatreonRichText',
 	'$compile', '$timeout', 'taOptions', 'taSelection', 'taExecCommand',
 	'textAngularManager', '$document', '$animate', '$log', '$q', '$parse',
-	function($compile, $timeout, taOptions, taSelection, taExecCommand,
+	function(PatreonRichText, $compile, $timeout, taOptions, taSelection, taExecCommand,
 		textAngularManager, $document, $animate, $log, $q, $parse){
 		return {
 			require: '?ngModel',
@@ -2109,14 +2166,15 @@ textAngular.directive("textAngular", [
 
 				// Setup the HTML elements as variable references for use later
 				scope.displayElements = {
+                    html: angular.element(PatreonRichText.customTextAreaElement),
+                    popover: angular.element(PatreonRichText.customToolbarElement),
+
 					// we still need the hidden input even with a textarea as the textarea may have invalid/old input in it,
 					// wheras the input will ALLWAYS have the correct value.
 					forminput: angular.element("<input type='hidden' tabindex='-1' style='display: none;'>"),
-					html: angular.element("<textarea></textarea>"),
 					text: angular.element("<div></div>"),
 					// other toolbased elements
 					scrollWindow: angular.element("<div class='ta-scroll-window'></div>"),
-					popover: angular.element('<div class="popover fade bottom" style="max-width: none; width: 305px;"></div>'),
 					popoverArrow: angular.element('<div class="arrow"></div>'),
 					popoverContainer: angular.element('<div class="popover-content"></div>'),
 					resize: {
@@ -2140,17 +2198,18 @@ textAngular.directive("textAngular", [
 				scope.displayElements.popover.on('mousedown', function(e, eventData){
 					/* istanbul ignore else: this is for catching the jqLite testing*/
 					if(eventData) angular.extend(e, eventData);
-					// this prevents focusout from firing on the editor when clicking anything in the popover
-					e.preventDefault();
-					return false;
+					// this would prevent focusout from firing on the editor when clicking anything in the popover
+					// e.preventDefault();
+					// return false;
 				});
 
 				// define the popover show and hide functions
 				scope.showPopover = function(_el){
-					scope.displayElements.popover.css('display', 'block');
-					scope.reflowPopover(_el);
-					$animate.addClass(scope.displayElements.popover, 'in');
-					oneEvent($document.find('body'), 'click keyup', function(){scope.hidePopover();});
+                    PatreonRichText.showPopover(scope);
+					// scope.displayElements.popover.css('display', 'block');
+					// scope.reflowPopover(_el);
+					// $animate.addClass(scope.displayElements.popover, 'in');
+					// oneEvent($document.find('body'), 'click keyup', function(){scope.hidePopover();});
 				};
 				scope.reflowPopover = function(_el){
 					/* istanbul ignore if: catches only if near bottom of editor */
@@ -2167,110 +2226,25 @@ textAngular.directive("textAngular", [
 					scope.displayElements.popoverArrow.css('margin-left', (Math.min(_targetLeft, (Math.max(0, _targetLeft - _maxLeft))) - 11) + 'px');
 				};
 				scope.hidePopover = function(){
-					scope.displayElements.popover.css('display', '');
-					scope.displayElements.popoverContainer.attr('style', '');
-					scope.displayElements.popoverContainer.attr('class', 'popover-content');
-					scope.displayElements.popover.removeClass('in');
+                    PatreonRichText.hidePopover(scope);
+					// scope.displayElements.popover.css('display', '');
+					// scope.displayElements.popoverContainer.attr('style', '');
+					// scope.displayElements.popoverContainer.attr('class', 'popover-content');
+					// scope.displayElements.popover.removeClass('in');
 				};
 
-				// setup the resize overlay
-				scope.displayElements.resize.overlay.append(scope.displayElements.resize.background);
-				angular.forEach(scope.displayElements.resize.anchors, function(anchor){ scope.displayElements.resize.overlay.append(anchor);});
-				scope.displayElements.resize.overlay.append(scope.displayElements.resize.info);
-				scope.displayElements.scrollWindow.append(scope.displayElements.resize.overlay);
-
-				// define the show and hide events
-				scope.reflowResizeOverlay = function(_el){
-					_el = angular.element(_el)[0];
-					scope.displayElements.resize.overlay.css({
-						'display': 'block',
-						'left': _el.offsetLeft - 5 + 'px',
-						'top': _el.offsetTop - 5 + 'px',
-						'width': _el.offsetWidth + 10 + 'px',
-						'height': _el.offsetHeight + 10 + 'px'
-					});
-					scope.displayElements.resize.info.text(_el.offsetWidth + ' x ' + _el.offsetHeight);
+				var removingTooltipCallback = function(event){
+					PatreonRichText.scrollEventForRemovingTooltips(scope);
 				};
-				/* istanbul ignore next: pretty sure phantomjs won't test this */
-				scope.showResizeOverlay = function(_el){
-					var _body = $document.find('body');
-					_resizeMouseDown = function(event){
-						var startPosition = {
-							width: parseInt(_el.attr('width')),
-							height: parseInt(_el.attr('height')),
-							x: event.clientX,
-							y: event.clientY
-						};
-						if(startPosition.width === undefined || isNaN(startPosition.width)) startPosition.width = _el[0].offsetWidth;
-						if(startPosition.height === undefined || isNaN(startPosition.height)) startPosition.height = _el[0].offsetHeight;
-						scope.hidePopover();
-						var ratio = startPosition.height / startPosition.width;
-						var mousemove = function(event){
-							// calculate new size
-							var pos = {
-								x: Math.max(0, startPosition.width + (event.clientX - startPosition.x)),
-								y: Math.max(0, startPosition.height + (event.clientY - startPosition.y))
-							};
-
-							// DEFAULT: the aspect ratio is not locked unless the Shift key is pressed.
-							//
-							// attribute: ta-resize-force-aspect-ratio -- locks resize into maintaing the aspect ratio
-							var bForceAspectRatio = (attrs.taResizeForceAspectRatio !== undefined);
-							// attribute: ta-resize-maintain-aspect-ratio=true causes the space ratio to remain locked
-							// unless the Shift key is pressed
-							var bFlipKeyBinding = attrs.taResizeMaintainAspectRatio;
-							var bKeepRatio =  bForceAspectRatio || (bFlipKeyBinding && !event.shiftKey);
-							if(bKeepRatio) {
-								var newRatio = pos.y / pos.x;
-								pos.x = ratio > newRatio ? pos.x : pos.y / ratio;
-								pos.y = ratio > newRatio ? pos.x * ratio : pos.y;
-							}
-							var el = angular.element(_el);
-							function roundedMaxVal(val) {
-								return Math.round(Math.max(0, val));
-							}
-							el.css('height', roundedMaxVal(pos.y) + 'px');
-							el.css('width', roundedMaxVal(pos.x) + 'px');
-
-							// reflow the popover tooltip
-							scope.reflowResizeOverlay(_el);
-						};
-						_body.on('mousemove', mousemove);
-						oneEvent(_body, 'mouseup', function(event){
-							event.preventDefault();
-							event.stopPropagation();
-							_body.off('mousemove', mousemove);
-							// at this point, we need to force the model to update! since the css has changed!
-							// this fixes bug: #862 - we now hide the popover -- as this seems more consitent.
-							// there are still issues under firefox, the window does not repaint. -- not sure
-							// how best to resolve this, but clicking anywhere works.
-							scope.$apply(function (){
-								scope.hidePopover();
-								scope.updateTaBindtaTextElement();
-							}, 100);
-						});
-						event.stopPropagation();
-						event.preventDefault();
-					};
-
-					scope.displayElements.resize.anchors[3].off('mousedown');
-					scope.displayElements.resize.anchors[3].on('mousedown', _resizeMouseDown);
-
-					scope.reflowResizeOverlay(_el);
-					oneEvent(_body, 'click', function(){scope.hideResizeOverlay();});
-				};
-				/* istanbul ignore next: pretty sure phantomjs won't test this */
-				scope.hideResizeOverlay = function(){
-					scope.displayElements.resize.anchors[3].off('mousedown', _resizeMouseDown);
-					scope.displayElements.resize.overlay.css('display', '');
-				};
+				window.addEventListener('scroll', removingTooltipCallback);
+				scope.$on('$destroy', removingTooltipCallback);
 
 				// allow for insertion of custom directives on the textarea and div
 				scope.setup.htmlEditorSetup(scope.displayElements.html);
 				scope.setup.textEditorSetup(scope.displayElements.text);
 				scope.displayElements.html.attr({
 					'id': 'taHtmlElement' + _serial,
-					'ng-show': 'showHtml',
+					// 'ng-show': 'showHtml',
 					'ta-bind': 'ta-bind',
 					'ng-model': 'html',
 					'ng-model-options': element.attr('ng-model-options')
@@ -2880,8 +2854,8 @@ textAngular.service('textAngularManager', ['taToolExecuteAction', 'taTools', 'ta
 	};
 }]);
 textAngular.directive('textAngularToolbar', [
-	'$compile', 'textAngularManager', 'taOptions', 'taTools', 'taToolExecuteAction', '$window',
-	function($compile, textAngularManager, taOptions, taTools, taToolExecuteAction, $window){
+	'PatreonRichText','$compile', 'textAngularManager', 'taOptions', 'taTools', 'taToolExecuteAction', '$window',
+	function(PatreonRichText, $compile, textAngularManager, taOptions, taTools, taToolExecuteAction, $window){
 		return {
 			scope: {
 				name: '@' // a name IS required
@@ -2936,8 +2910,8 @@ textAngular.directive('textAngularToolbar', [
 						if(toolDefinition.buttontext) toolElement[0].innerHTML = toolDefinition.buttontext;
 						// add the icon to the front of the button if there is content
 						if(toolDefinition.iconclass){
-							var icon = angular.element('<i>'), content = toolElement[0].innerHTML;
-							icon.addClass(toolDefinition.iconclass);
+                            var icon = PatreonRichText.setUpIcon(toolDefinition.iconclass);
+                            var content = toolElement[0].innerHTML;
 							toolElement[0].innerHTML = '';
 							toolElement.append(icon);
 							if(content && content !== '') toolElement.append('&nbsp;' + content);
