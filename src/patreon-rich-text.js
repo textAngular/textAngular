@@ -1,5 +1,5 @@
 angular.module('PatreonRichText', [])
-	.factory('PatreonRichText', function($timeout, $document, $window) {
+	.factory('PatreonRichText', ['$timeout', '$document', '$window', function($timeout, $document, $window) {
 		'ngInject';
 
 		/*eslint-disable */
@@ -93,4 +93,4 @@ angular.module('PatreonRichText', [])
 		/*eslint-enable */
 
 		return PatreonRichText;
-	});
+	}]);
