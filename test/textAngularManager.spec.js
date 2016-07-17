@@ -46,6 +46,22 @@ describe('textAngularManager', function(){
 			}));
 		});
 
+		describe('unregister-cleanup', function(){
+			it('should not have any toolbarScopes left', inject(function(textAngularManager){
+				textAngularManager.registerEditor('testeditor', {}, ['test', 'test1']);
+				textAngularManager.registerToolbar({name: 'test'});
+				textAngularManager.registerToolbar({name: 'test1'});
+				expect(textAngularManager.getToolbarScopes().length).toBe(2);
+				textAngularManager.unregisterEditor('testeditor');
+				// note: unregisterEditor does nothing to the toolbarScopes
+				textAngularManager.unregisterToolbar('test');
+				// this will have removed one of the toolbarScopes
+				expect(textAngularManager.getToolbarScopes().length).toBe(1);
+				textAngularManager.unregisterToolbar('test1');
+				expect(textAngularManager.getToolbarScopes().length).toBe(0);
+			}));
+		});
+
 		describe('modification', function(){
 			var $rootScope, toolbar1, toolbar2, textAngularManager;
 			beforeEach(inject(function(_textAngularManager_){
