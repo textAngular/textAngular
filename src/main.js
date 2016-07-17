@@ -1,6 +1,6 @@
 // this global var is used to prevent multiple fires of the drop event. Needs to be global to the textAngular file.
 var dropFired = false;
-var textAngular = angular.module("textAngular", ['ngSanitize', 'textAngularSetup', 'textAngular.factories', 'textAngular.DOM', 'textAngular.validators', 'textAngular.taBind']); //This makes ngSanitize required
+var textAngular = angular.module("textAngular", ['ngSanitize', 'PatreonRichText', 'textAngularSetup', 'textAngular.factories', 'textAngular.DOM', 'textAngular.validators', 'textAngular.taBind']); //This makes ngSanitize required
 
 textAngular.config([function(){
 	// clear taTools variable. Just catches testing and any other time that this config may run multiple times...
@@ -8,9 +8,10 @@ textAngular.config([function(){
 }]);
 
 textAngular.directive("textAngular", [
+	'PatreonRichText',
 	'$compile', '$timeout', 'taOptions', 'taSelection', 'taExecCommand',
 	'textAngularManager', '$document', '$animate', '$log', '$q', '$parse',
-	function($compile, $timeout, taOptions, taSelection, taExecCommand,
+	function(PatreonRichText, $compile, $timeout, taOptions, taSelection, taExecCommand,
 		textAngularManager, $document, $animate, $log, $q, $parse){
 		return {
 			require: '?ngModel',
@@ -84,14 +85,15 @@ textAngular.directive("textAngular", [
 
 				// Setup the HTML elements as variable references for use later
 				scope.displayElements = {
+                    html: angular.element(PatreonRichText.customTextAreaElement),
+                    popover: angular.element(PatreonRichText.customToolbarElement),
+
 					// we still need the hidden input even with a textarea as the textarea may have invalid/old input in it,
 					// wheras the input will ALLWAYS have the correct value.
 					forminput: angular.element("<input type='hidden' tabindex='-1' style='display: none;'>"),
-					html: angular.element("<textarea></textarea>"),
 					text: angular.element("<div></div>"),
 					// other toolbased elements
 					scrollWindow: angular.element("<div class='ta-scroll-window'></div>"),
-					popover: angular.element('<div class="popover fade bottom" style="max-width: none; width: 305px;"></div>'),
 					popoverArrow: angular.element('<div class="arrow"></div>'),
 					popoverContainer: angular.element('<div class="popover-content"></div>'),
 					resize: {
@@ -115,17 +117,18 @@ textAngular.directive("textAngular", [
 				scope.displayElements.popover.on('mousedown', function(e, eventData){
 					/* istanbul ignore else: this is for catching the jqLite testing*/
 					if(eventData) angular.extend(e, eventData);
-					// this prevents focusout from firing on the editor when clicking anything in the popover
-					e.preventDefault();
-					return false;
+					// this would prevent focusout from firing on the editor when clicking anything in the popover
+					// e.preventDefault();
+					// return false;
 				});
 
 				// define the popover show and hide functions
 				scope.showPopover = function(_el){
-					scope.displayElements.popover.css('display', 'block');
-					scope.reflowPopover(_el);
-					$animate.addClass(scope.displayElements.popover, 'in');
-					oneEvent($document.find('body'), 'click keyup', function(){scope.hidePopover();});
+                    PatreonRichText.showPopover(scope);
+					// scope.displayElements.popover.css('display', 'block');
+					// scope.reflowPopover(_el);
+					// $animate.addClass(scope.displayElements.popover, 'in');
+					// oneEvent($document.find('body'), 'click keyup', function(){scope.hidePopover();});
 				};
 				scope.reflowPopover = function(_el){
 					/* istanbul ignore if: catches only if near bottom of editor */
@@ -142,110 +145,25 @@ textAngular.directive("textAngular", [
 					scope.displayElements.popoverArrow.css('margin-left', (Math.min(_targetLeft, (Math.max(0, _targetLeft - _maxLeft))) - 11) + 'px');
 				};
 				scope.hidePopover = function(){
-					scope.displayElements.popover.css('display', '');
-					scope.displayElements.popoverContainer.attr('style', '');
-					scope.displayElements.popoverContainer.attr('class', 'popover-content');
-					scope.displayElements.popover.removeClass('in');
+                    PatreonRichText.hidePopover(scope);
+					// scope.displayElements.popover.css('display', '');
+					// scope.displayElements.popoverContainer.attr('style', '');
+					// scope.displayElements.popoverContainer.attr('class', 'popover-content');
+					// scope.displayElements.popover.removeClass('in');
 				};
 
-				// setup the resize overlay
-				scope.displayElements.resize.overlay.append(scope.displayElements.resize.background);
-				angular.forEach(scope.displayElements.resize.anchors, function(anchor){ scope.displayElements.resize.overlay.append(anchor);});
-				scope.displayElements.resize.overlay.append(scope.displayElements.resize.info);
-				scope.displayElements.scrollWindow.append(scope.displayElements.resize.overlay);
-
-				// define the show and hide events
-				scope.reflowResizeOverlay = function(_el){
-					_el = angular.element(_el)[0];
-					scope.displayElements.resize.overlay.css({
-						'display': 'block',
-						'left': _el.offsetLeft - 5 + 'px',
-						'top': _el.offsetTop - 5 + 'px',
-						'width': _el.offsetWidth + 10 + 'px',
-						'height': _el.offsetHeight + 10 + 'px'
-					});
-					scope.displayElements.resize.info.text(_el.offsetWidth + ' x ' + _el.offsetHeight);
+				var removingTooltipCallback = function(event){
+					PatreonRichText.scrollEventForRemovingTooltips(scope);
 				};
-				/* istanbul ignore next: pretty sure phantomjs won't test this */
-				scope.showResizeOverlay = function(_el){
-					var _body = $document.find('body');
-					_resizeMouseDown = function(event){
-						var startPosition = {
-							width: parseInt(_el.attr('width')),
-							height: parseInt(_el.attr('height')),
-							x: event.clientX,
-							y: event.clientY
-						};
-						if(startPosition.width === undefined || isNaN(startPosition.width)) startPosition.width = _el[0].offsetWidth;
-						if(startPosition.height === undefined || isNaN(startPosition.height)) startPosition.height = _el[0].offsetHeight;
-						scope.hidePopover();
-						var ratio = startPosition.height / startPosition.width;
-						var mousemove = function(event){
-							// calculate new size
-							var pos = {
-								x: Math.max(0, startPosition.width + (event.clientX - startPosition.x)),
-								y: Math.max(0, startPosition.height + (event.clientY - startPosition.y))
-							};
-
-							// DEFAULT: the aspect ratio is not locked unless the Shift key is pressed.
-							//
-							// attribute: ta-resize-force-aspect-ratio -- locks resize into maintaing the aspect ratio
-							var bForceAspectRatio = (attrs.taResizeForceAspectRatio !== undefined);
-							// attribute: ta-resize-maintain-aspect-ratio=true causes the space ratio to remain locked
-							// unless the Shift key is pressed
-							var bFlipKeyBinding = attrs.taResizeMaintainAspectRatio;
-							var bKeepRatio =  bForceAspectRatio || (bFlipKeyBinding && !event.shiftKey);
-							if(bKeepRatio) {
-								var newRatio = pos.y / pos.x;
-								pos.x = ratio > newRatio ? pos.x : pos.y / ratio;
-								pos.y = ratio > newRatio ? pos.x * ratio : pos.y;
-							}
-							var el = angular.element(_el);
-							function roundedMaxVal(val) {
-								return Math.round(Math.max(0, val));
-							}
-							el.css('height', roundedMaxVal(pos.y) + 'px');
-							el.css('width', roundedMaxVal(pos.x) + 'px');
-
-							// reflow the popover tooltip
-							scope.reflowResizeOverlay(_el);
-						};
-						_body.on('mousemove', mousemove);
-						oneEvent(_body, 'mouseup', function(event){
-							event.preventDefault();
-							event.stopPropagation();
-							_body.off('mousemove', mousemove);
-							// at this point, we need to force the model to update! since the css has changed!
-							// this fixes bug: #862 - we now hide the popover -- as this seems more consitent.
-							// there are still issues under firefox, the window does not repaint. -- not sure
-							// how best to resolve this, but clicking anywhere works.
-							scope.$apply(function (){
-								scope.hidePopover();
-								scope.updateTaBindtaTextElement();
-							}, 100);
-						});
-						event.stopPropagation();
-						event.preventDefault();
-					};
-
-					scope.displayElements.resize.anchors[3].off('mousedown');
-					scope.displayElements.resize.anchors[3].on('mousedown', _resizeMouseDown);
-
-					scope.reflowResizeOverlay(_el);
-					oneEvent(_body, 'click', function(){scope.hideResizeOverlay();});
-				};
-				/* istanbul ignore next: pretty sure phantomjs won't test this */
-				scope.hideResizeOverlay = function(){
-					scope.displayElements.resize.anchors[3].off('mousedown', _resizeMouseDown);
-					scope.displayElements.resize.overlay.css('display', '');
-				};
+				window.addEventListener('scroll', removingTooltipCallback);
+				scope.$on('$destroy', removingTooltipCallback);
 
 				// allow for insertion of custom directives on the textarea and div
 				scope.setup.htmlEditorSetup(scope.displayElements.html);
 				scope.setup.textEditorSetup(scope.displayElements.text);
 				scope.displayElements.html.attr({
 					'id': 'taHtmlElement' + _serial,
-					'ng-show': 'showHtml',
+					// 'ng-show': 'showHtml',
 					'ta-bind': 'ta-bind',
 					'ng-model': 'html',
 					'ng-model-options': element.attr('ng-model-options')
@@ -855,8 +773,8 @@ textAngular.service('textAngularManager', ['taToolExecuteAction', 'taTools', 'ta
 	};
 }]);
 textAngular.directive('textAngularToolbar', [
-	'$compile', 'textAngularManager', 'taOptions', 'taTools', 'taToolExecuteAction', '$window',
-	function($compile, textAngularManager, taOptions, taTools, taToolExecuteAction, $window){
+	'PatreonRichText','$compile', 'textAngularManager', 'taOptions', 'taTools', 'taToolExecuteAction', '$window',
+	function(PatreonRichText, $compile, textAngularManager, taOptions, taTools, taToolExecuteAction, $window){
 		return {
 			scope: {
 				name: '@' // a name IS required
@@ -911,8 +829,8 @@ textAngular.directive('textAngularToolbar', [
 						if(toolDefinition.buttontext) toolElement[0].innerHTML = toolDefinition.buttontext;
 						// add the icon to the front of the button if there is content
 						if(toolDefinition.iconclass){
-							var icon = angular.element('<i>'), content = toolElement[0].innerHTML;
-							icon.addClass(toolDefinition.iconclass);
+                            var icon = PatreonRichText.setUpIcon(toolDefinition.iconclass);
+                            var content = toolElement[0].innerHTML;
 							toolElement[0].innerHTML = '';
 							toolElement.append(icon);
 							if(content && content !== '') toolElement.append('&nbsp;' + content);

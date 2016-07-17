@@ -41,10 +41,12 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 	};
 }])
 .directive('taBind', [
+		'PatreonRichText',
 		'taSanitize', '$timeout', '$document', 'taFixChrome', 'taBrowserTag',
 		'taSelection', 'taSelectableElements', 'taApplyCustomRenderers', 'taOptions',
 		'_taBlankTest', '$parse', 'taDOM', 'textAngularManager',
 		function(
+			PatreonRichText,
 			taSanitize, $timeout, $document, taFixChrome, taBrowserTag,
 			taSelection, taSelectableElements, taApplyCustomRenderers, taOptions,
 			_taBlankTest, $parse, taDOM, textAngularManager){
@@ -292,6 +294,20 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 						}, 1);
 					}
 				}
+			};
+
+			scope.updateViewValue = function(value){
+				ngModel.$setViewValue(value);
+				element.val(value);
+			};
+
+			scope.updateLinkHTML = function(newElement, originalElement){
+				var originalHTML = element.val();
+
+				var newHTML = originalHTML.replace(originalElement, newElement);
+
+				element.val(newHTML);
+				ngModel.$setViewValue(newHTML);
 			};
 
 			// in here we are undoing the converts used elsewhere to prevent the < > and & being displayed when they shouldn't in the code.
@@ -796,6 +812,11 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 					});
 					var _keyupTimeout;
 					element.on('keyup', scope.events.keyup = function(event, eventData){
+						function focussedCallback(val){
+							_focussed = val;
+						}
+						PatreonRichText.handleSelected(scope, focussedCallback);
+
 						/* istanbul ignore else: this is for catching the jqLite testing*/
 						if(eventData) angular.extend(event, eventData);
 						/* istanbul ignore next: FF specific bug fix */
@@ -916,6 +937,21 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 				}
 			};
 
+            function focussedCallback(val){
+                _focussed = val;
+            }
+            var handleSelectedOnMouseUp = function(event){
+                return $timeout(function(){
+                    PatreonRichText.handleSelected(scope, focussedCallback);
+                });
+            };
+
+            angular.element(document.body).on('mouseup', handleSelectedOnMouseUp);
+
+            scope.$on('$destroy', function(){
+                angular.element(document.body).off('mouseup', handleSelectedOnMouseUp);
+            });
+
 			//used for updating when inserting wrapped elements
 			var _reApplyOnSelectorHandlers = scope['reApplyOnSelectorHandlers' + (attrs.id || '')] = function(){
 				/* istanbul ignore else */
@@ -926,6 +962,30 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 							.on('click', selectorClickHandler);
 					});
 			};
+
+			function cleanCode(element){
+				var spans = element.querySelectorAll("span");
+				angular.forEach(spans, function(span){
+					var textNode = document.createTextNode(span.textContent);
+					span.parentElement.replaceChild(textNode, span);
+				});
+				var svgs = element.querySelectorAll("svg");
+				angular.forEach(svgs, function(svg){
+					svg.parentElement.removeChild(svg);
+				});
+				var paths = element.querySelectorAll("path");
+				angular.forEach(paths, function(path){
+					path.parentElement.removeChild(path);
+				});
+				var codes = element.querySelectorAll("code");
+				angular.forEach(codes, function(code){
+					var preNode = document.createElement("pre");
+					preNode.innerHTML = code.innerHTML;
+					preNode.style.display = "inline-block";
+					preNode.style.margin = "0px";
+					code.parentElement.replaceChild(preNode, code);
+				});
+			}
 
 			var _setInnerHTML = function(newval){
 				element[0].innerHTML = newval;
@@ -941,6 +1001,10 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 				var val = ngModel.$viewValue || '';
 				// if the editor isn't focused it needs to be updated, otherwise it's receiving user input
 				if(!_skipRender){
+                    if ($document[0].activeElement.attributes.contenteditable) {
+                        cleanCode($document[0].activeElement);
+                    }
+
 					/* istanbul ignore else: in other cases we don't care */
 					if(_isContentEditable && _focussed){
 						// update while focussed
