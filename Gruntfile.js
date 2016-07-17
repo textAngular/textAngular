@@ -137,7 +137,7 @@ module.exports = function (grunt) {
                 banner: "/*\n@license textAngular\nAuthor : Austin Anderson\nLicense : 2013 MIT\nVersion <%- pkg.version %>\n\nSee README.md or https://github.com/fraywing/textAngular/wiki for requirements and use.\n*/\n\n/*\nCommonjs package manager support (eg componentjs).\n*/\n\n\n\"use strict\";"
             },
             files:{
-                'dist/textAngular.js': ['src/globals.js','src/factories.js','src/patreon-rich-text.js','src/DOM.js','src/validators.js','src/taBind.js','src/main.js'],
+                'dist/textAngular.js': ['src/globals.js','src/factories.js','src/DOM.js','src/validators.js','src/taBind.js','src/main.js','src/patreon-rich-text.js'],
             }
         },
         umd: {

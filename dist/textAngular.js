@@ -2,7 +2,7 @@
 @license textAngular
 Author : Austin Anderson
 License : 2013 MIT
-Version 1.5.2-patreon-rc1
+Version 1.5.2-patreon-rc3
 
 See README.md or https://github.com/fraywing/textAngular/wiki for requirements and use.
 */
@@ -414,103 +414,6 @@ angular.module('textAngular.factories', [])
 		}
 	};
 }]);
-
-angular.module('PatreonRichText', [])
-	.factory('PatreonRichText', function($timeout, $document, $window) {
-		'ngInject';
-
-		/*eslint-disable */
-
-		function placeTooltipAtCoordinates(x, y, callback) {
-			var _offsetX = 24,
-			_offsetY = 60;
-
-			return $timeout(function(){
-				Array.prototype.forEach.call(
-					document.getElementsByClassName('ta-toolbar'),
-					function(node) {
-						node.style.left = String(x - _offsetX) + 'px';
-						node.style.top = String(y - _offsetY) + 'px';
-					}
-				);
-
-				if (callback) {
-					return callback();
-				}
-			});
-		}
-
-		function getTextRectangles(selection){
-			var range = selection.getRangeAt(0),
-			rectangles = null;
-
-			rectangles = range.getClientRects();
-
-			return rectangles;
-		}
-
-		var PatreonRichText = {};
-
-		PatreonRichText.customTextAreaElement = "<textarea class='post-creation-textarea' id='post-creation-textarea'></textarea>";
-
-		PatreonRichText.customToolbarElement = '<div class="ta-link-toolbar"></div>';
-
-		PatreonRichText.setUpIcon = function(iconClass){
-			return angular.element("<i data-patreon-icon='" + iconClass + "'>");
-		};
-
-		PatreonRichText.showPopover = function(scope){
-			scope.displayElements.popover.addClass('active');
-		};
-
-		PatreonRichText.hidePopover = function(scope){
-			scope.displayElements.popover.removeClass('active');
-		};
-
-		PatreonRichText.hideToolbarPopover = function(){
-			return placeTooltipAtCoordinates(-9999, -9999);
-		};
-
-		PatreonRichText.handleSelected = function(scope, focussedCallback){
-			var selection = $window.getSelection();
-			var currentlySelected = selection.type ? selection.type === "Range" : !selection.isCollapsed; // FF compatibility
-			var popoverIsActive = scope.displayElements.popover.hasClass('active');
-			var popoverInputIsActive = Array.prototype.some.call(
-				scope.displayElements.popover[0].querySelectorAll('.patreon-input'),
-				function(node) { return node === $document.activeElement; }
-			);
-			if (currentlySelected && !popoverIsActive) {
-				var rectangles = getTextRectangles($window.getSelection());
-				if (rectangles[0] && rectangles[0].left && rectangles[0].top) {
-					focussedCallback(true);
-
-					return placeTooltipAtCoordinates( rectangles[0].left, rectangles[0].top);
-				} else {
-					return this.hideToolbarPopover();
-				}
-			} else if (!currentlySelected && popoverIsActive && !popoverInputIsActive) {
-				return this.hideToolbarPopover();
-			} else {
-				return this.hideToolbarPopover();
-			}
-
-			return false;
-		};
-
-		PatreonRichText.handleSelectedOnMouseUp = function(){
-			$timeout(this.handleSelected);
-		};
-
-		PatreonRichText.scrollEventForRemovingTooltips = function(scope){
-			PatreonRichText.hideToolbarPopover(scope);
-
-			return $timeout(angular.noop);
-		};
-
-		/*eslint-enable */
-
-		return PatreonRichText;
-	});
 
 angular.module('textAngular.DOM', ['textAngular.factories'])
 .factory('taExecCommand', ['taSelection', 'taBrowserTag', '$document', function(taSelection, taBrowserTag, $document){
@@ -2027,11 +1930,27 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 					});
 			};
 
-			function killSpans(element){
+			function cleanCode(element){
 				var spans = element.querySelectorAll("span");
 				angular.forEach(spans, function(span){
 					var textNode = document.createTextNode(span.textContent);
 					span.parentElement.replaceChild(textNode, span);
+				});
+				var svgs = element.querySelectorAll("svg");
+				angular.forEach(svgs, function(svg){
+					svg.parentElement.removeChild(svg);
+				});
+				var paths = element.querySelectorAll("path");
+				angular.forEach(paths, function(path){
+					path.parentElement.removeChild(path);
+				});
+				var codes = element.querySelectorAll("code");
+				angular.forEach(codes, function(code){
+					var preNode = document.createElement("pre");
+					preNode.innerHTML = code.innerHTML;
+					preNode.style.display = "inline-block";
+					preNode.style.margin = "0px";
+					code.parentElement.replaceChild(preNode, code);
 				});
 			}
 
@@ -2050,7 +1969,7 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 				// if the editor isn't focused it needs to be updated, otherwise it's receiving user input
 				if(!_skipRender){
                     if ($document[0].activeElement.attributes.contenteditable) {
-                        killSpans($document[0].activeElement);
+                        cleanCode($document[0].activeElement);
                     }
 
 					/* istanbul ignore else: in other cases we don't care */
@@ -3127,3 +3046,100 @@ textAngular.directive('textAngularToolbar', [
 		};
 	}
 ]);
+
+angular.module('PatreonRichText', [])
+	.factory('PatreonRichText', function($timeout, $document, $window) {
+		'ngInject';
+
+		/*eslint-disable */
+
+		function placeTooltipAtCoordinates(x, y, callback) {
+			var _offsetX = 24,
+			_offsetY = 60;
+
+			return $timeout(function(){
+				Array.prototype.forEach.call(
+					document.getElementsByClassName('ta-toolbar'),
+					function(node) {
+						node.style.left = String(x - _offsetX) + 'px';
+						node.style.top = String(y - _offsetY) + 'px';
+					}
+				);
+
+				if (callback) {
+					return callback();
+				}
+			});
+		}
+
+		function getTextRectangles(selection){
+			var range = selection.getRangeAt(0),
+			rectangles = null;
+
+			rectangles = range.getClientRects();
+
+			return rectangles;
+		}
+
+		var PatreonRichText = {};
+
+		PatreonRichText.customTextAreaElement = "<textarea class='post-creation-textarea' id='post-creation-textarea'></textarea>";
+
+		PatreonRichText.customToolbarElement = '<div class="ta-link-toolbar"></div>';
+
+		PatreonRichText.setUpIcon = function(iconClass){
+			return angular.element("<i data-patreon-icon='" + iconClass + "'>");
+		};
+
+		PatreonRichText.showPopover = function(scope){
+			scope.displayElements.popover.addClass('active');
+		};
+
+		PatreonRichText.hidePopover = function(scope){
+			scope.displayElements.popover.removeClass('active');
+		};
+
+		PatreonRichText.hideToolbarPopover = function(){
+			return placeTooltipAtCoordinates(-9999, -9999);
+		};
+
+		PatreonRichText.handleSelected = function(scope, focussedCallback){
+			var selection = $window.getSelection();
+			var currentlySelected = selection.type ? selection.type === "Range" : !selection.isCollapsed; // FF compatibility
+			var popoverIsActive = scope.displayElements.popover.hasClass('active');
+			var popoverInputIsActive = Array.prototype.some.call(
+				scope.displayElements.popover[0].querySelectorAll('.patreon-input'),
+				function(node) { return node === $document.activeElement; }
+			);
+			if (currentlySelected && !popoverIsActive) {
+				var rectangles = getTextRectangles($window.getSelection());
+				if (rectangles[0] && rectangles[0].left && rectangles[0].top) {
+					focussedCallback(true);
+
+					return placeTooltipAtCoordinates( rectangles[0].left, rectangles[0].top);
+				} else {
+					return this.hideToolbarPopover();
+				}
+			} else if (!currentlySelected && popoverIsActive && !popoverInputIsActive) {
+				return this.hideToolbarPopover();
+			} else {
+				return this.hideToolbarPopover();
+			}
+
+			return false;
+		};
+
+		PatreonRichText.handleSelectedOnMouseUp = function(){
+			$timeout(this.handleSelected);
+		};
+
+		PatreonRichText.scrollEventForRemovingTooltips = function(scope){
+			PatreonRichText.hideToolbarPopover(scope);
+
+			return $timeout(angular.noop);
+		};
+
+		/*eslint-enable */
+
+		return PatreonRichText;
+	});

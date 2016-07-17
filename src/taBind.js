@@ -963,11 +963,27 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 					});
 			};
 
-			function killSpans(element){
+			function cleanCode(element){
 				var spans = element.querySelectorAll("span");
 				angular.forEach(spans, function(span){
 					var textNode = document.createTextNode(span.textContent);
 					span.parentElement.replaceChild(textNode, span);
+				});
+				var svgs = element.querySelectorAll("svg");
+				angular.forEach(svgs, function(svg){
+					svg.parentElement.removeChild(svg);
+				});
+				var paths = element.querySelectorAll("path");
+				angular.forEach(paths, function(path){
+					path.parentElement.removeChild(path);
+				});
+				var codes = element.querySelectorAll("code");
+				angular.forEach(codes, function(code){
+					var preNode = document.createElement("pre");
+					preNode.innerHTML = code.innerHTML;
+					preNode.style.display = "inline-block";
+					preNode.style.margin = "0px";
+					code.parentElement.replaceChild(preNode, code);
 				});
 			}
 
@@ -986,7 +1002,7 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 				// if the editor isn't focused it needs to be updated, otherwise it's receiving user input
 				if(!_skipRender){
                     if ($document[0].activeElement.attributes.contenteditable) {
-                        killSpans($document[0].activeElement);
+                        cleanCode($document[0].activeElement);
                     }
 
 					/* istanbul ignore else: in other cases we don't care */
