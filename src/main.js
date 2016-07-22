@@ -579,13 +579,44 @@ textAngular.directive("textAngular", [
 		};
 	}
 ]);
-textAngular.service('textAngularManager', ['taToolExecuteAction', 'taTools', 'taRegisterTool', function(taToolExecuteAction, taTools, taRegisterTool){
+textAngular.service('textAngularManager', ['taToolExecuteAction', 'taTools', 'taRegisterTool', '$interval', '$rootScope', function(taToolExecuteAction, taTools, taRegisterTool, $interval, $rootScope){
 	// this service is used to manage all textAngular editors and toolbars.
 	// All publicly published functions that modify/need to access the toolbar or editor scopes should be in here
 	// these contain references to all the editors and toolbars that have been initialised in this app
 	var toolbars = {}, editors = {};
 	// toolbarScopes is an ARRAY of toolbar scopes
 	var toolbarScopes = [];
+	// we touch the time any change occurs through register of an editor or tool so that we
+	// in the future will fire and event to trigger an updateSelection
+	var timeRecentModification = 0;
+	var updateStyles = function(selectedElement){
+		angular.forEach(editors, function(editor) {
+			editor.editorFunctions.updateSelectedStyles(selectedElement);
+		});
+	};
+	var triggerInterval = 50;
+	var triggerIntervalTimer;
+	var setupTriggerUpdateStyles = function() {
+		timeRecentModification = Date.now();
+		/* istanbul ignore next: setup a one time updateStyles() */
+		triggerIntervalTimer = $interval(function() {
+			updateStyles();
+			triggerIntervalTimer = undefined;
+		}, triggerInterval, 1, false); // only trigger once
+	};
+	/* istanbul ignore next: make sure clean up on destroy */
+	$rootScope.$on('destroy', function() {
+		if (triggerIntervalTimer) {
+			$interval.cancel(triggerIntervalTimer);
+			triggerIntervalTimer = undefined;
+		}
+	});
+	var touchModification = function() {
+		if (Math.abs(Date.now() - timeRecentModification) > triggerInterval) {
+			// we have already triggered the updateStyles a long time back... so setup it again...
+			setupTriggerUpdateStyles();
+		}
+	};
 	// when we focus into a toolbar, we need to set the TOOLBAR's $parent to be the toolbars it's linked to.
 	// We also need to set the tools to be updated to be the toolbars...
 	return {
@@ -639,6 +670,7 @@ textAngular.service('textAngularManager', ['taToolExecuteAction', 'taTools', 'ta
 							angular.forEach(toolbarScope.tools, function(toolScope){
 								if(toolScope.activeState){
 									toolbarScope._parent = scope;
+									// selectedElement may be undefined if nothing selected
 									toolScope.active = toolScope.activeState(selectedElement);
 								}
 							});
@@ -721,6 +753,7 @@ textAngular.service('textAngularManager', ['taToolExecuteAction', 'taTools', 'ta
 					}
 				}
 			};
+			touchModification();
 			return editors[name].editorFunctions;
 		},
 		// retrieve editor by name, largely used by testing suites only
@@ -729,6 +762,7 @@ textAngular.service('textAngularManager', ['taToolExecuteAction', 'taTools', 'ta
 		},
 		unregisterEditor: function(name){
 			delete editors[name];
+			touchModification();
 		},
 		// registers a toolbar such that it can be linked to editors
 		registerToolbar: function(scope){
@@ -739,6 +773,7 @@ textAngular.service('textAngularManager', ['taToolExecuteAction', 'taTools', 'ta
 			angular.forEach(editors, function(_editor){
 				_editor._registerToolbarScope(scope);
 			});
+			touchModification();
 		},
 		// retrieve toolbar by name, largely used by testing suites only
 		retrieveToolbar: function(name){
@@ -762,6 +797,7 @@ textAngular.service('textAngularManager', ['taToolExecuteAction', 'taTools', 'ta
 				}
 			}
 			toolbarScopes = tmp;
+			touchModification();
 		},
 		// functions for updating the toolbar buttons display
 		updateToolsDisplay: function(newTaTools){
@@ -777,6 +813,7 @@ textAngular.service('textAngularManager', ['taToolExecuteAction', 'taTools', 'ta
 			angular.forEach(taTools, function(_newTool, key){
 				_this.resetToolDisplay(key);
 			});
+			touchModification();
 		},
 		// update a tool on all toolbars
 		updateToolDisplay: function(toolKey, _newTool){
@@ -784,6 +821,7 @@ textAngular.service('textAngularManager', ['taToolExecuteAction', 'taTools', 'ta
 			angular.forEach(toolbars, function(toolbarScope, toolbarKey){
 				_this.updateToolbarToolDisplay(toolbarKey, toolKey, _newTool);
 			});
+			touchModification();
 		},
 		// resets a tool to the default/starting state on all toolbars
 		resetToolDisplay: function(toolKey){
@@ -791,6 +829,7 @@ textAngular.service('textAngularManager', ['taToolExecuteAction', 'taTools', 'ta
 			angular.forEach(toolbars, function(toolbarScope, toolbarKey){
 				_this.resetToolbarToolDisplay(toolbarKey, toolKey);
 			});
+			touchModification();
 		},
 		// update a tool on a specific toolbar
 		updateToolbarToolDisplay: function(toolbarKey, toolKey, _newTool){
@@ -825,6 +864,7 @@ textAngular.service('textAngularManager', ['taToolExecuteAction', 'taTools', 'ta
 					}
 				}
 			});
+			touchModification();
 		},
 		// toolkey, toolDefinition are required. If group is not specified will pick the last group, if index isnt defined will append to group
 		addTool: function(toolKey, toolDefinition, group, index){
@@ -832,11 +872,13 @@ textAngular.service('textAngularManager', ['taToolExecuteAction', 'taTools', 'ta
 			angular.forEach(toolbars, function(toolbarScope){
 				toolbarScope.addTool(toolKey, toolDefinition, group, index);
 			});
+			touchModification();
 		},
 		// adds a Tool but only to one toolbar not all
 		addToolToToolbar: function(toolKey, toolDefinition, toolbarKey, group, index){
 			taRegisterTool(toolKey, toolDefinition);
 			toolbars[toolbarKey].addTool(toolKey, toolDefinition, group, index);
+			touchModification();
 		},
 		// this is used when externally the html of an editor has been changed and textAngular needs to be notified to update the model.
 		// this will call a $digest if not already happening
@@ -846,6 +888,7 @@ textAngular.service('textAngularManager', ['taToolExecuteAction', 'taTools', 'ta
 				/* istanbul ignore else: phase catch */
 				if(!editors[name].scope.$$phase) editors[name].scope.$digest();
 			}else throw('textAngular Error: No Editor with name "' + name + '" exists');
+			touchModification();
 		},
 		// this is used by taBind to send a key command in response to a special key event
 		sendKeyCommand: function(scope, event){
@@ -860,6 +903,13 @@ textAngular.service('textAngularManager', ['taToolExecuteAction', 'taTools', 'ta
 				return false;
 			}
 		},
+		//
+		// When a toolbar and tools are created, it isn't until there is a key event or mouse event
+		// that the updateSelectedStyles() is called behind the scenes.
+		// This function forces an update through the existing editors to help the application make sure
+		// the inital state is correct.
+		//
+		updateStyles: updateStyles,
 		// for testing
 		getToolbarScopes: function () { return toolbarScopes; }
 	};

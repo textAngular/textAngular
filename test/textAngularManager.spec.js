@@ -383,6 +383,7 @@ describe('textAngularManager', function(){
 					$rootScope.$digest();
 					editorScope = textAngularManager.retrieveEditor('test');
 				}));
+
 				describe('updateSelectedStyles', function(){
 					describe('should activate buttons correctly', function(){
 						it('without rangyrange passed through', function(){
@@ -392,6 +393,21 @@ describe('textAngularManager', function(){
 						});
 						it('with rangyrange passed through', function(){
 							editorScope.editorFunctions.updateSelectedStyles({});
+							$rootScope.$digest();
+							expect(element.find('.ta-toolbar button.active').length).toBe(1);
+						});
+					});
+				});
+
+				describe('updateSelectedStyles through textAngularMananger', function(){
+					describe('should activate buttons correctly', function(){
+						it('without rangyrange passed through', function(){
+							textAngularManager.updateStyles();
+							$rootScope.$digest();
+							expect(element.find('.ta-toolbar button.active').length).toBe(1);
+						});
+						it('with rangyrange passed through', function(){
+							textAngularManager.updateStyles({});
 							$rootScope.$digest();
 							expect(element.find('.ta-toolbar button.active').length).toBe(1);
 						});
