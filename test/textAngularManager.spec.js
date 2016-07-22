@@ -46,6 +46,22 @@ describe('textAngularManager', function(){
 			}));
 		});
 
+		describe('unregister-cleanup', function(){
+			it('should not have any toolbarScopes left', inject(function(textAngularManager){
+				textAngularManager.registerEditor('testeditor', {}, ['test', 'test1']);
+				textAngularManager.registerToolbar({name: 'test'});
+				textAngularManager.registerToolbar({name: 'test1'});
+				expect(textAngularManager.getToolbarScopes().length).toBe(2);
+				textAngularManager.unregisterEditor('testeditor');
+				// note: unregisterEditor does nothing to the toolbarScopes
+				textAngularManager.unregisterToolbar('test');
+				// this will have removed one of the toolbarScopes
+				expect(textAngularManager.getToolbarScopes().length).toBe(1);
+				textAngularManager.unregisterToolbar('test1');
+				expect(textAngularManager.getToolbarScopes().length).toBe(0);
+			}));
+		});
+
 		describe('modification', function(){
 			var $rootScope, toolbar1, toolbar2, textAngularManager;
 			beforeEach(inject(function(_textAngularManager_){
@@ -367,6 +383,7 @@ describe('textAngularManager', function(){
 					$rootScope.$digest();
 					editorScope = textAngularManager.retrieveEditor('test');
 				}));
+
 				describe('updateSelectedStyles', function(){
 					describe('should activate buttons correctly', function(){
 						it('without rangyrange passed through', function(){
@@ -376,6 +393,21 @@ describe('textAngularManager', function(){
 						});
 						it('with rangyrange passed through', function(){
 							editorScope.editorFunctions.updateSelectedStyles({});
+							$rootScope.$digest();
+							expect(element.find('.ta-toolbar button.active').length).toBe(1);
+						});
+					});
+				});
+
+				describe('updateSelectedStyles through textAngularMananger', function(){
+					describe('should activate buttons correctly', function(){
+						it('without rangyrange passed through', function(){
+							textAngularManager.updateStyles();
+							$rootScope.$digest();
+							expect(element.find('.ta-toolbar button.active').length).toBe(1);
+						});
+						it('with rangyrange passed through', function(){
+							textAngularManager.updateStyles({});
 							$rootScope.$digest();
 							expect(element.find('.ta-toolbar button.active').length).toBe(1);
 						});
