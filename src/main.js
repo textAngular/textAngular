@@ -602,7 +602,7 @@ textAngular.service('textAngularManager', ['taToolExecuteAction', 'taTools', 'ta
 		triggerIntervalTimer = $interval(function() {
 			updateStyles();
 			triggerIntervalTimer = undefined;
-		}, triggerInterval, 1, false); // only trigger once
+		}, triggerInterval, 1); // only trigger once
 	};
 	/* istanbul ignore next: make sure clean up on destroy */
 	$rootScope.$on('destroy', function() {
