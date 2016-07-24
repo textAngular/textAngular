@@ -1001,6 +1001,10 @@ textAngular.directive('textAngularToolbar', [
 						return scope._parent;
 					},
 					isDisabled: function(){
+						// view selection button is always enabled since it doesn not depend on a selction!
+						if (this.name === 'html' && scope._parent.startAction) {
+							return false;
+						}
 						// to set your own disabled logic set a function or boolean on the tool called 'disabled'
 						return ( // this bracket is important as without it it just returns the first bracket and ignores the rest
 							// when the button's disabled function/value evaluates to true
