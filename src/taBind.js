@@ -492,7 +492,7 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 					var _processingPaste = false;
 					/* istanbul ignore next: phantom js cannot test this for some reason */
 					var processpaste = function(text) {
-                        var _isOneNote = text.match(/content=["']*OneNote.File/i);
+                       var _isOneNote = text!==undefined? text.match(/content=["']*OneNote.File/i): false;
 						/* istanbul ignore else: don't care if nothing pasted */
                         //console.log(text);
 						if(text && text.trim().length){
