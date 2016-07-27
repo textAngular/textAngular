@@ -258,7 +258,10 @@ textAngular.directive("textAngular", [
 					'ng-model-options': element.attr('ng-model-options')
 				});
 				scope.displayElements.scrollWindow.attr({'ng-hide': 'showHtml'});
-				if(attrs.taDefaultWrap) scope.displayElements.text.attr('ta-default-wrap', attrs.taDefaultWrap);
+				if(attrs.taDefaultWrap) {
+					// taDefaultWrap is only applied to the text and the not the html view
+					scope.displayElements.text.attr('ta-default-wrap', attrs.taDefaultWrap);
+				}
 
 				if(attrs.taUnsafeSanitizer){
 					scope.displayElements.text.attr('ta-unsafe-sanitizer', attrs.taUnsafeSanitizer);
@@ -394,6 +397,20 @@ textAngular.directive("textAngular", [
 					//Show the HTML view
 					if(scope.showHtml){
 						//defer until the element is visible
+						// if there is nothing html like in the scope.displayElements.html.val() then
+						// we set it to the ngModel.$viewValue
+						console.log(ngModel.$viewValue);
+						// this is a hack really as this will cause the html to match the $viewValue which is
+						// a bit weird
+						if (/^[^<>]+$/i.test(scope.displayElements.html[0].value)) {
+							// no tags in the html...
+							if (ngModel) {
+								scope.displayElements.html.val(ngModel.$viewValue);
+								// other way to go is to create what we expect based on the
+							} else {
+								scope.displayElements.html.val(scope.html);
+							}
+						}
 						$timeout(function(){
 							$animate.enabled(true, scope.displayElements.html);
 							$animate.enabled(true, scope.displayElements.text);
