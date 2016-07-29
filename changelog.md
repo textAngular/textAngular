@@ -1,3 +1,19 @@
+<a name"1.5.3"></a>
+### 1.5.3 (2016-07-29)
+
+#### Bug Fixes
+
+* **textAngular:**
+  * Fix(textAngularManager): Corrected bug #1231 Leaking memory scopes (https://github.com/fraywing/textAngular/commit/a0024a24a3ca0c40a3cd0ffed0edbc475f2a91ff)
+  * Feat(textAngularManager): Added a function updateStyles() to force all the updateSelectedStyles() to be updated.  
+                              This also now automatically sets up the initialization for tools in most cases. (https://github.com/fraywing/textAngular/commit/d373fe10e770bf521641975cbc6a4f480d0a1f9e)
+  * Fix(main): Very small tweak in setupTriggerUpdateStyles() to accept the default $interval call that invokes a 
+               $apply which will be more robust. (https://github.com/fraywing/textAngular/commit/0d860d0a97c440b868639bfb3ea9f3f943658da6)
+  * Enhancement(main): Show switch HTML button all the time. Originally from ershwetabansal (https://github.com/fraywing/textAngular/commit/db1f5a0bb50019c56ff8863c8a42fdbef2ce53ab)                                           
+  * Fix(textAngularSetup): We now block javascript for 'insertLink', 'insertVideo', and 'insertImage' issue: #1189 (https://github.com/fraywing/textAngular/commit/37e3f7acdb7099d825480b45cb55da7c756a0ae7)
+  * Fix(taBind): corrected issue around Model becomes empty after edit Issue: #1230 (https://github.com/fraywing/textAngular/commit/17b4497ec3bd3939571724e4c9aad145d51e776c)                           
+
+
 <a name"1.5.2"></a>
 ### 1.5.2 (2016-07-15)
 
