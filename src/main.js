@@ -258,7 +258,10 @@ textAngular.directive("textAngular", [
 					'ng-model-options': element.attr('ng-model-options')
 				});
 				scope.displayElements.scrollWindow.attr({'ng-hide': 'showHtml'});
-				if(attrs.taDefaultWrap) scope.displayElements.text.attr('ta-default-wrap', attrs.taDefaultWrap);
+				if(attrs.taDefaultWrap) {
+					// taDefaultWrap is only applied to the text and the not the html view
+					scope.displayElements.text.attr('ta-default-wrap', attrs.taDefaultWrap);
+				}
 
 				if(attrs.taUnsafeSanitizer){
 					scope.displayElements.text.attr('ta-unsafe-sanitizer', attrs.taUnsafeSanitizer);
