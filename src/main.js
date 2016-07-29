@@ -397,20 +397,6 @@ textAngular.directive("textAngular", [
 					//Show the HTML view
 					if(scope.showHtml){
 						//defer until the element is visible
-						// if there is nothing html like in the scope.displayElements.html.val() then
-						// we set it to the ngModel.$viewValue
-						console.log(ngModel.$viewValue);
-						// this is a hack really as this will cause the html to match the $viewValue which is
-						// a bit weird
-						if (/^[^<>]+$/i.test(scope.displayElements.html[0].value)) {
-							// no tags in the html...
-							if (ngModel) {
-								scope.displayElements.html.val(ngModel.$viewValue);
-								// other way to go is to create what we expect based on the
-							} else {
-								scope.displayElements.html.val(scope.html);
-							}
-						}
 						$timeout(function(){
 							$animate.enabled(true, scope.displayElements.html);
 							$animate.enabled(true, scope.displayElements.text);
