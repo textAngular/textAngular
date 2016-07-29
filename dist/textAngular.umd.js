@@ -739,6 +739,13 @@ angular.module('textAngularSetup', [])
 		}
 	});
 
+	/* istanbul ignore next: if it's javascript don't worry - though probably should show some kind of error message */
+	var blockJavascript = function (link) {
+		if (link.toLowerCase().indexOf('javascript')!==-1) {
+			return true;
+		}
+		return false;
+	};
 
 	taRegisterTool('insertImage', {
 		iconclass: 'fa fa-picture-o',
@@ -748,22 +755,25 @@ angular.module('textAngularSetup', [])
 			imageLink = $window.prompt(taTranslations.insertImage.dialogPrompt, 'http://');
 			if(imageLink && imageLink !== '' && imageLink !== 'http://'){
 				/* istanbul ignore next: don't know how to test this... since it needs a dialogPrompt */
-				if (taSelection.getSelectionElement().tagName.toLowerCase() === 'a') {
-					// due to differences in implementation between FireFox and Chrome, we must move the
-					// insertion point past the <a> element, otherwise FireFox inserts inside the <a>
-					// With this change, both FireFox and Chrome behave the same way!
-					taSelection.setSelectionAfterElement(taSelection.getSelectionElement());
+				// block javascript here
+				if (!blockJavascript(imageLink)) {
+					if (taSelection.getSelectionElement().tagName.toLowerCase() === 'a') {
+						// due to differences in implementation between FireFox and Chrome, we must move the
+						// insertion point past the <a> element, otherwise FireFox inserts inside the <a>
+						// With this change, both FireFox and Chrome behave the same way!
+						taSelection.setSelectionAfterElement(taSelection.getSelectionElement());
+					}
+					// In the past we used the simple statement:
+					//return this.$editor().wrapSelection('insertImage', imageLink, true);
+					//
+					// However on Firefox only, when the content is empty this is a problem
+					// See Issue #1201
+					// Investigation reveals that Firefox only inserts a <p> only!!!!
+					// So now we use insertHTML here and all is fine.
+					// NOTE: this is what 'insertImage' is supposed to do anyway!
+					var embed = '<img src="' + imageLink + '">';
+					return this.$editor().wrapSelection('insertHTML', embed, true);
 				}
-				// In the past we used the simple statement:
-				//return this.$editor().wrapSelection('insertImage', imageLink, true);
-				//
-				// However on Firefox only, when the content is empty this is a problem
-				// See Issue #1201
-				// Investigation reveals that Firefox only inserts a <p> only!!!!
-				// So now we use insertHTML here and all is fine.
-				// NOTE: this is what 'insertImage' is supposed to do anyway!
-				var embed = '<img src="' + imageLink + '">';
-				return this.$editor().wrapSelection('insertHTML', embed, true);
 			}
 		},
 		onElementSelect: {
@@ -777,27 +787,32 @@ angular.module('textAngularSetup', [])
 		action: function(){
 			var urlPrompt;
 			urlPrompt = $window.prompt(taTranslations.insertVideo.dialogPrompt, 'https://');
-			if (urlPrompt && urlPrompt !== '' && urlPrompt !== 'https://') {
+			// block javascript here
+			/* istanbul ignore else: if it's javascript don't worry - though probably should show some kind of error message */
+			if (!blockJavascript(urlPrompt)) {
 
-				videoId = taToolFunctions.extractYoutubeVideoId(urlPrompt);
+				if (urlPrompt && urlPrompt !== '' && urlPrompt !== 'https://') {
 
-				/* istanbul ignore else: if it's invalid don't worry - though probably should show some kind of error message */
-				if(videoId){
-					// create the embed link
-					var urlLink = "https://www.youtube.com/embed/" + videoId;
-					// create the HTML
-					// for all options see: http://stackoverflow.com/questions/2068344/how-do-i-get-a-youtube-video-thumbnail-from-the-youtube-api
-					// maxresdefault.jpg seems to be undefined on some.
-					var embed = '<img class="ta-insert-video" src="https://img.youtube.com/vi/' + videoId + '/hqdefault.jpg" ta-insert-video="' + urlLink + '" contenteditable="false" allowfullscreen="true" frameborder="0" />';
-					/* istanbul ignore next: don't know how to test this... since it needs a dialogPrompt */
-					if (taSelection.getSelectionElement().tagName.toLowerCase() === 'a') {
-						// due to differences in implementation between FireFox and Chrome, we must move the
-						// insertion point past the <a> element, otherwise FireFox inserts inside the <a>
-						// With this change, both FireFox and Chrome behave the same way!
-						taSelection.setSelectionAfterElement(taSelection.getSelectionElement());
+					videoId = taToolFunctions.extractYoutubeVideoId(urlPrompt);
+
+					/* istanbul ignore else: if it's invalid don't worry - though probably should show some kind of error message */
+					if (videoId) {
+						// create the embed link
+						var urlLink = "https://www.youtube.com/embed/" + videoId;
+						// create the HTML
+						// for all options see: http://stackoverflow.com/questions/2068344/how-do-i-get-a-youtube-video-thumbnail-from-the-youtube-api
+						// maxresdefault.jpg seems to be undefined on some.
+						var embed = '<img class="ta-insert-video" src="https://img.youtube.com/vi/' + videoId + '/hqdefault.jpg" ta-insert-video="' + urlLink + '" contenteditable="false" allowfullscreen="true" frameborder="0" />';
+						/* istanbul ignore next: don't know how to test this... since it needs a dialogPrompt */
+						if (taSelection.getSelectionElement().tagName.toLowerCase() === 'a') {
+							// due to differences in implementation between FireFox and Chrome, we must move the
+							// insertion point past the <a> element, otherwise FireFox inserts inside the <a>
+							// With this change, both FireFox and Chrome behave the same way!
+							taSelection.setSelectionAfterElement(taSelection.getSelectionElement());
+						}
+						// insert
+						return this.$editor().wrapSelection('insertHTML', embed, true);
 					}
-					// insert
-					return this.$editor().wrapSelection('insertHTML', embed, true);
 				}
 			}
 		},
@@ -814,7 +829,11 @@ angular.module('textAngularSetup', [])
 			var urlLink;
 			urlLink = $window.prompt(taTranslations.insertLink.dialogPrompt, 'http://');
 			if(urlLink && urlLink !== '' && urlLink !== 'http://'){
-				return this.$editor().wrapSelection('createLink', urlLink, true);
+				// block javascript here
+				/* istanbul ignore else: if it's javascript don't worry - though probably should show some kind of error message */
+				if (!blockJavascript(urlLink)) {
+					return this.$editor().wrapSelection('createLink', urlLink, true);
+				}
 			}
 		},
 		activeState: function(commonElement){
@@ -876,7 +895,7 @@ angular.module('textAngularSetup', [])
 @license textAngular
 Author : Austin Anderson
 License : 2013 MIT
-Version 1.5.2
+Version 1.5.3
 
 See README.md or https://github.com/fraywing/textAngular/wiki for requirements and use.
 */
@@ -1834,7 +1853,7 @@ angular.module('textAngular.validators', [])
 });
 angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'])
 .service('_taBlankTest', [function(){
-	var INLINETAGS_NONBLANK = /<(a|abbr|acronym|bdi|bdo|big|cite|code|del|dfn|img|ins|kbd|label|map|mark|q|ruby|rp|rt|s|samp|time|tt|var)[^>]*(>|$)/i;
+	var INLINETAGS_NONBLANK = /<(a|abbr|acronym|bdi|bdo|big|cite|code|del|dfn|img|ins|kbd|label|map|mark|q|ruby|rp|rt|s|samp|time|tt|var|table)[^>]*(>|$)/i;
 	return function(_defaultTest){
 		return function(_blankVal){
 			if(!_blankVal) return true;
@@ -2023,7 +2042,7 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 						for(i = 0; i < _children.length; i++){
 							var node = _children[i];
 							var nodeName = node.nodeName.toLowerCase();
-							//console.log(nodeName);
+							//console.log('node#:', i, 'name:', nodeName);
 							if(nodeName === '#comment') {
 								value += '<!--' + node.nodeValue + '-->';
 							} else if(nodeName === '#text') {
@@ -2047,6 +2066,7 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 							} else {
 								value += node.outerHTML;
 							}
+							//console.log(value);
 						}
 					}
 				}
@@ -2326,7 +2346,7 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 					var _processingPaste = false;
 					/* istanbul ignore next: phantom js cannot test this for some reason */
 					var processpaste = function(text) {
-                        var _isOneNote = text.match(/content=["']*OneNote.File/i);
+                       var _isOneNote = text!==undefined? text.match(/content=["']*OneNote.File/i): false;
 						/* istanbul ignore else: don't care if nothing pasted */
                         //console.log(text);
 						if(text && text.trim().length){
@@ -3157,7 +3177,10 @@ textAngular.directive("textAngular", [
 					'ng-model-options': element.attr('ng-model-options')
 				});
 				scope.displayElements.scrollWindow.attr({'ng-hide': 'showHtml'});
-				if(attrs.taDefaultWrap) scope.displayElements.text.attr('ta-default-wrap', attrs.taDefaultWrap);
+				if(attrs.taDefaultWrap) {
+					// taDefaultWrap is only applied to the text and the not the html view
+					scope.displayElements.text.attr('ta-default-wrap', attrs.taDefaultWrap);
+				}
 
 				if(attrs.taUnsafeSanitizer){
 					scope.displayElements.text.attr('ta-unsafe-sanitizer', attrs.taUnsafeSanitizer);
@@ -3478,11 +3501,44 @@ textAngular.directive("textAngular", [
 		};
 	}
 ]);
-textAngular.service('textAngularManager', ['taToolExecuteAction', 'taTools', 'taRegisterTool', function(taToolExecuteAction, taTools, taRegisterTool){
+textAngular.service('textAngularManager', ['taToolExecuteAction', 'taTools', 'taRegisterTool', '$interval', '$rootScope', function(taToolExecuteAction, taTools, taRegisterTool, $interval, $rootScope){
 	// this service is used to manage all textAngular editors and toolbars.
 	// All publicly published functions that modify/need to access the toolbar or editor scopes should be in here
 	// these contain references to all the editors and toolbars that have been initialised in this app
 	var toolbars = {}, editors = {};
+	// toolbarScopes is an ARRAY of toolbar scopes
+	var toolbarScopes = [];
+	// we touch the time any change occurs through register of an editor or tool so that we
+	// in the future will fire and event to trigger an updateSelection
+	var timeRecentModification = 0;
+	var updateStyles = function(selectedElement){
+		angular.forEach(editors, function(editor) {
+			editor.editorFunctions.updateSelectedStyles(selectedElement);
+		});
+	};
+	var triggerInterval = 50;
+	var triggerIntervalTimer;
+	var setupTriggerUpdateStyles = function() {
+		timeRecentModification = Date.now();
+		/* istanbul ignore next: setup a one time updateStyles() */
+		triggerIntervalTimer = $interval(function() {
+			updateStyles();
+			triggerIntervalTimer = undefined;
+		}, triggerInterval, 1); // only trigger once
+	};
+	/* istanbul ignore next: make sure clean up on destroy */
+	$rootScope.$on('destroy', function() {
+		if (triggerIntervalTimer) {
+			$interval.cancel(triggerIntervalTimer);
+			triggerIntervalTimer = undefined;
+		}
+	});
+	var touchModification = function() {
+		if (Math.abs(Date.now() - timeRecentModification) > triggerInterval) {
+			// we have already triggered the updateStyles a long time back... so setup it again...
+			setupTriggerUpdateStyles();
+		}
+	};
 	// when we focus into a toolbar, we need to set the TOOLBAR's $parent to be the toolbars it's linked to.
 	// We also need to set the tools to be updated to be the toolbars...
 	return {
@@ -3492,32 +3548,30 @@ textAngular.service('textAngularManager', ['taToolExecuteAction', 'taTools', 'ta
 			if(!name || name === '') throw('textAngular Error: An editor requires a name');
 			if(!scope) throw('textAngular Error: An editor requires a scope');
 			if(editors[name]) throw('textAngular Error: An Editor with name "' + name + '" already exists');
-			// _toolbars is an ARRAY of toolbar scopes
-			var _toolbars = [];
 			angular.forEach(targetToolbars, function(_name){
-				if(toolbars[_name]) _toolbars.push(toolbars[_name]);
+				if(toolbars[_name]) toolbarScopes.push(toolbars[_name]);
 				// if it doesn't exist it may not have been compiled yet and it will be added later
 			});
 			editors[name] = {
 				scope: scope,
 				toolbars: targetToolbars,
-				_registerToolbar: function(toolbarScope){
+				_registerToolbarScope: function(toolbarScope){
 					// add to the list late
-					if(this.toolbars.indexOf(toolbarScope.name) >= 0) _toolbars.push(toolbarScope);
+					if(this.toolbars.indexOf(toolbarScope.name) >= 0) toolbarScopes.push(toolbarScope);
 				},
 				// this is a suite of functions the editor should use to update all it's linked toolbars
 				editorFunctions: {
 					disable: function(){
 						// disable all linked toolbars
-						angular.forEach(_toolbars, function(toolbarScope){ toolbarScope.disabled = true; });
+						angular.forEach(toolbarScopes, function(toolbarScope){ toolbarScope.disabled = true; });
 					},
 					enable: function(){
 						// enable all linked toolbars
-						angular.forEach(_toolbars, function(toolbarScope){ toolbarScope.disabled = false; });
+						angular.forEach(toolbarScopes, function(toolbarScope){ toolbarScope.disabled = false; });
 					},
 					focus: function(){
 						// this should be called when the editor is focussed
-						angular.forEach(_toolbars, function(toolbarScope){
+						angular.forEach(toolbarScopes, function(toolbarScope){
 							toolbarScope._parent = scope;
 							toolbarScope.disabled = false;
 							toolbarScope.focussed = true;
@@ -3526,7 +3580,7 @@ textAngular.service('textAngularManager', ['taToolExecuteAction', 'taTools', 'ta
 					},
 					unfocus: function(){
 						// this should be called when the editor becomes unfocussed
-						angular.forEach(_toolbars, function(toolbarScope){
+						angular.forEach(toolbarScopes, function(toolbarScope){
 							toolbarScope.disabled = true;
 							toolbarScope.focussed = false;
 						});
@@ -3534,10 +3588,11 @@ textAngular.service('textAngularManager', ['taToolExecuteAction', 'taTools', 'ta
 					},
 					updateSelectedStyles: function(selectedElement){
 						// update the active state of all buttons on liked toolbars
-						angular.forEach(_toolbars, function(toolbarScope){
+						angular.forEach(toolbarScopes, function(toolbarScope){
 							angular.forEach(toolbarScope.tools, function(toolScope){
 								if(toolScope.activeState){
 									toolbarScope._parent = scope;
+									// selectedElement may be undefined if nothing selected
 									toolScope.active = toolScope.activeState(selectedElement);
 								}
 							});
@@ -3548,9 +3603,9 @@ textAngular.service('textAngularManager', ['taToolExecuteAction', 'taTools', 'ta
 						var result = false;
 						if(event.ctrlKey || event.metaKey || event.specialKey) angular.forEach(taTools, function(tool, name){
 							if(tool.commandKeyCode && (tool.commandKeyCode === event.which || tool.commandKeyCode === event.specialKey)){
-								for(var _t = 0; _t < _toolbars.length; _t++){
-									if(_toolbars[_t].tools[name] !== undefined){
-										taToolExecuteAction.call(_toolbars[_t].tools[name], scope);
+								for(var _t = 0; _t < toolbarScopes.length; _t++){
+									if(toolbarScopes[_t].tools[name] !== undefined){
+										taToolExecuteAction.call(toolbarScopes[_t].tools[name], scope);
 										result = true;
 										break;
 									}
@@ -3606,9 +3661,9 @@ textAngular.service('textAngularManager', ['taToolExecuteAction', 'taTools', 'ta
 							for(var _i = 0; _i < workerTools.length; _i++){
 								var tool = workerTools[_i].tool;
 								var name = workerTools[_i].name;
-								for(var _t = 0; _t < _toolbars.length; _t++){
-									if(_toolbars[_t].tools[name] !== undefined){
-										tool.onElementSelect.action.call(_toolbars[_t].tools[name], event, element, scope);
+								for(var _t = 0; _t < toolbarScopes.length; _t++){
+									if(toolbarScopes[_t].tools[name] !== undefined){
+										tool.onElementSelect.action.call(toolbarScopes[_t].tools[name], event, element, scope);
 										result = true;
 										break;
 									}
@@ -3620,6 +3675,7 @@ textAngular.service('textAngularManager', ['taToolExecuteAction', 'taTools', 'ta
 					}
 				}
 			};
+			touchModification();
 			return editors[name].editorFunctions;
 		},
 		// retrieve editor by name, largely used by testing suites only
@@ -3628,6 +3684,7 @@ textAngular.service('textAngularManager', ['taToolExecuteAction', 'taTools', 'ta
 		},
 		unregisterEditor: function(name){
 			delete editors[name];
+			touchModification();
 		},
 		// registers a toolbar such that it can be linked to editors
 		registerToolbar: function(scope){
@@ -3636,8 +3693,9 @@ textAngular.service('textAngularManager', ['taToolExecuteAction', 'taTools', 'ta
 			if(toolbars[scope.name]) throw('textAngular Error: A toolbar with name "' + scope.name + '" already exists');
 			toolbars[scope.name] = scope;
 			angular.forEach(editors, function(_editor){
-				_editor._registerToolbar(scope);
+				_editor._registerToolbarScope(scope);
 			});
+			touchModification();
 		},
 		// retrieve toolbar by name, largely used by testing suites only
 		retrieveToolbar: function(name){
@@ -3653,6 +3711,15 @@ textAngular.service('textAngularManager', ['taToolExecuteAction', 'taTools', 'ta
 		},
 		unregisterToolbar: function(name){
 			delete toolbars[name];
+			// we remove the scope from the toolbarScopes so that we no longer have a memory leak.
+			var tmp = [];
+			for (var index in toolbarScopes) {
+				if (toolbarScopes[index].name !== name) {
+					tmp.push(toolbarScopes[index]);
+				}
+			}
+			toolbarScopes = tmp;
+			touchModification();
 		},
 		// functions for updating the toolbar buttons display
 		updateToolsDisplay: function(newTaTools){
@@ -3668,6 +3735,7 @@ textAngular.service('textAngularManager', ['taToolExecuteAction', 'taTools', 'ta
 			angular.forEach(taTools, function(_newTool, key){
 				_this.resetToolDisplay(key);
 			});
+			touchModification();
 		},
 		// update a tool on all toolbars
 		updateToolDisplay: function(toolKey, _newTool){
@@ -3675,6 +3743,7 @@ textAngular.service('textAngularManager', ['taToolExecuteAction', 'taTools', 'ta
 			angular.forEach(toolbars, function(toolbarScope, toolbarKey){
 				_this.updateToolbarToolDisplay(toolbarKey, toolKey, _newTool);
 			});
+			touchModification();
 		},
 		// resets a tool to the default/starting state on all toolbars
 		resetToolDisplay: function(toolKey){
@@ -3682,6 +3751,7 @@ textAngular.service('textAngularManager', ['taToolExecuteAction', 'taTools', 'ta
 			angular.forEach(toolbars, function(toolbarScope, toolbarKey){
 				_this.resetToolbarToolDisplay(toolbarKey, toolKey);
 			});
+			touchModification();
 		},
 		// update a tool on a specific toolbar
 		updateToolbarToolDisplay: function(toolbarKey, toolKey, _newTool){
@@ -3716,6 +3786,7 @@ textAngular.service('textAngularManager', ['taToolExecuteAction', 'taTools', 'ta
 					}
 				}
 			});
+			touchModification();
 		},
 		// toolkey, toolDefinition are required. If group is not specified will pick the last group, if index isnt defined will append to group
 		addTool: function(toolKey, toolDefinition, group, index){
@@ -3723,11 +3794,13 @@ textAngular.service('textAngularManager', ['taToolExecuteAction', 'taTools', 'ta
 			angular.forEach(toolbars, function(toolbarScope){
 				toolbarScope.addTool(toolKey, toolDefinition, group, index);
 			});
+			touchModification();
 		},
 		// adds a Tool but only to one toolbar not all
 		addToolToToolbar: function(toolKey, toolDefinition, toolbarKey, group, index){
 			taRegisterTool(toolKey, toolDefinition);
 			toolbars[toolbarKey].addTool(toolKey, toolDefinition, group, index);
+			touchModification();
 		},
 		// this is used when externally the html of an editor has been changed and textAngular needs to be notified to update the model.
 		// this will call a $digest if not already happening
@@ -3737,6 +3810,7 @@ textAngular.service('textAngularManager', ['taToolExecuteAction', 'taTools', 'ta
 				/* istanbul ignore else: phase catch */
 				if(!editors[name].scope.$$phase) editors[name].scope.$digest();
 			}else throw('textAngular Error: No Editor with name "' + name + '" exists');
+			touchModification();
 		},
 		// this is used by taBind to send a key command in response to a special key event
 		sendKeyCommand: function(scope, event){
@@ -3750,7 +3824,16 @@ textAngular.service('textAngularManager', ['taToolExecuteAction', 'taTools', 'ta
 				event.preventDefault();
 				return false;
 			}
-		}
+		},
+		//
+		// When a toolbar and tools are created, it isn't until there is a key event or mouse event
+		// that the updateSelectedStyles() is called behind the scenes.
+		// This function forces an update through the existing editors to help the application make sure
+		// the inital state is correct.
+		//
+		updateStyles: updateStyles,
+		// for testing
+		getToolbarScopes: function () { return toolbarScopes; }
 	};
 }]);
 textAngular.directive('textAngularToolbar', [
@@ -3840,6 +3923,10 @@ textAngular.directive('textAngularToolbar', [
 						return scope._parent;
 					},
 					isDisabled: function(){
+						// view selection button is always enabled since it doesn not depend on a selction!
+						if (this.name === 'html' && scope._parent.startAction) {
+							return false;
+						}
 						// to set your own disabled logic set a function or boolean on the tool called 'disabled'
 						return ( // this bracket is important as without it it just returns the first bracket and ignores the rest
 							// when the button's disabled function/value evaluates to true
