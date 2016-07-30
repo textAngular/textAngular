@@ -395,6 +395,16 @@ textAngular.directive("textAngular", [
 					$animate.enabled(false, scope.displayElements.html);
 					$animate.enabled(false, scope.displayElements.text);
 					//Show the HTML view
+					/* var _model;
+					if (attrs.ngModell) {
+						_model = ngModel.$viewValue;
+					} else {
+						_model = scope.html;
+					}
+					var _html = scope.displayElements.html[0].value;
+					console.log('model', _model);
+					console.log('html', _html);
+					*/
 					if(scope.showHtml){
 						//defer until the element is visible
 						$timeout(function(){
