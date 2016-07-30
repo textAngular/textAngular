@@ -403,17 +403,10 @@ textAngular.directive("textAngular", [
 						_model = scope.html;
 					}
 					var _html = scope.displayElements.html[0].value;
-					// find first non-tag match - ie start of string or after tag that is not whitespace
-					var _firstMatchModel = /(^[^<]|>)[^<]/i.exec(_model);
-					var _firstMatchHtml = /(^[^<]|>)[^<]/i.exec(_html);
-					if (_firstMatchHtml && _firstMatchModel) {
-						if ((_firstMatchHtml.index !== _firstMatchModel.index)) {
-							// the model and the html do not agree
-							// they can get out of sync and when they do, we correct that here...
-							//console.log('model', _firstMatchModel, _model);
-							//console.log('html', _firstMatchHtml, _html);
-							scope.displayElements.html.val(_model);
-						}
+					if (getDomFromHtml(_html).childElementCount !== getDomFromHtml(_model).childElementCount) {
+						// the model and the html do not agree
+						// they can get out of sync and when they do, we correct that here...
+						scope.displayElements.html.val(_model);
 					}
 					if(scope.showHtml){
 						//defer until the element is visible

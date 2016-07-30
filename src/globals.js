@@ -57,6 +57,14 @@ function stripHtmlToText(html)
 	res = res.replace(/\n/, "");
 	return res.trim();
 }
+// get html
+function getDomFromHtml(html)
+{
+	var tmp = document.createElement("DIV");
+	tmp.innerHTML = html;
+	return tmp;
+}
+
 
 // Global to textAngular REGEXP vars for block and list elements.
 
