@@ -56,6 +56,17 @@ describe('textAngular', function(){
 				expect(jQuery('input[type=hidden][name=test]', element).length).toBe(1);
 			});
 		});
+		describe('Gets the proper stripped text', function () {
+			it('measure time', function () {
+				var t0 = performance.now();
+				var stripped = stripHtmlToText('<div class="AppContainer" style="width: 1280px;color: rgb(0, 0, 0);"><div id="c_base" class="c_base"><div id="c_content" class="c_main"><div id="pageContent"><div id="pageInbox" class="v-Page"><div id="inboxControl0f"><div class="containsYSizerBar" style="height: 849px;width: 1280px;"><div class="ContentRight WithRightRail FullView"><div class="ContentRightInner t_mbgc t_qtc t_urtc" style="color: rgb(68, 68, 68);background-color: rgb(255, 255, 255);"><div id="inboxControl0fv-ReadMessageContainer" class="v-ReadMessageContainer slideOnResize"><div class="c-ReadMessage" style="height: 818.03125px;width: 895px;"><div class="rmMessages ClearBoth" id="ReadMessageScrollableSection"><div id="readMessagePartControl1604f" class="c-ReadMessagePart ReadMsgContainer HasLayout ClearBoth HideShadows FullPart NoHistory Read RmIc"><div class="c-ReadMessagePartBody"><div class="readMsgBody"><div id="bodyreadMessagePartBodyControl1609f" class="ExternalClass MsgBodyContainer"><p><u><b>Lorem ipsum</b></u></p><p><b>Lorem ipsum</b></p></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div>');
+				var t1 = performance.now();
+				var duration = (t1 - t0).toFixed(4);
+				//console.log('Took', (t1 - t0).toFixed(4), 'milliseconds to do something!');
+				expect(duration < 0.001);
+				expect(stripped).toBe('Lorem ipsumLorem ipsum');
+			});
+		});
 	});
 
 	describe('Add classes via attributes', function(){
