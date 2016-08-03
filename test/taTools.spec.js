@@ -406,7 +406,7 @@ describe('taTools test tool actions', function(){
 			$window = _$window_;
 			$window.prompt = function(){ return ''; };
 			$rootScope = _$rootScope_;
-			$rootScope.htmlcontent = '<p class="test-class" style="text-align: left;">Test Content <b>that</b> <u>should</u> be cleared</p><h1>Test Other Tags</h1><ul><li>Test <b>1</b></li><li>Test 2</li></ul>';
+			$rootScope.htmlcontent = '<div class="test-class"><p class="test-class" style="text-align: left;">Test Content <b>that</b> <u>should</u> be cleared</p><h1>Test Other Tags</h1><ul><li>Test <b>1</b></li><li>Test 2</li></ul></div>';
 			element = _$compile_('<text-angular name="testclearbutton" ng-model="htmlcontent"></text-angular>')($rootScope);
 			$document.find('body').append(element);
 			$rootScope.$digest();
@@ -428,10 +428,16 @@ describe('taTools test tool actions', function(){
 		});
 
 		it('clears out all formatting', function(){
+			var sel = $window.rangy.getSelection();
+			var range = $window.rangy.createRangyRange();
+			range.selectNode(jQuery('div.test-class')[0]);
+			sel.setSingleRange(range);
+			sel.refresh();
+			//console.log(sel);
 			findAndTriggerButton('clear');
 			//expect($rootScope.htmlcontent).toBe('<p>Test Content that should be cleared</p><p>Test Other Tags</p><p>Test 1</p><p>Test 2</p>');
 			// bug in phantom JS
-			expect($rootScope.htmlcontent).toBe('<p>Test Content that should be cleared</p><h1>Test Other Tags</h1><p>Test 1</p><p>Test 2</p>');
+			expect($rootScope.htmlcontent).toBe('<div><p>Test Content that should be cleared</p><h1>Test Other Tags</h1><p>Test 1</p><p>Test 2</p></div>');
 		});
 
 		it('doesn\'t remove partially selected list elements, but clears them of formatting', function(){
@@ -442,7 +448,7 @@ describe('taTools test tool actions', function(){
 			sel.setSingleRange(range);
 			sel.refresh();
 			findAndTriggerButton('clear');
-			expect($rootScope.htmlcontent).toBe('<p class="test-class" style="text-align: left;">Test Content <b>that</b> <u>should</u> be cleared</p><h1>Test Other Tags</h1><ul><li>Test 1</li><li>Test 2</li></ul>');
+			expect($rootScope.htmlcontent).toBe('<div class="test-class"><p class="test-class" style="text-align: left;">Test Content <b>that</b> <u>should</u> be cleared</p><h1>Test Other Tags</h1><ul><li>Test 1</li><li>Test 2</li></ul></div>');
 		});
 
 		it('doesn\'t clear wholly selected list elements, but clears them of formatting', function(){
@@ -452,7 +458,7 @@ describe('taTools test tool actions', function(){
 			sel.setSingleRange(range);
 			sel.refresh();
 			findAndTriggerButton('clear');
-			expect($rootScope.htmlcontent).toBe('<p class="test-class" style="text-align: left;">Test Content <b>that</b> <u>should</u> be cleared</p><h1>Test Other Tags</h1><ul><li>Test 1</li><li>Test 2</li></ul>');
+			expect($rootScope.htmlcontent).toBe('<div class="test-class"><p class="test-class" style="text-align: left;">Test Content <b>that</b> <u>should</u> be cleared</p><h1>Test Other Tags</h1><ul><li>Test 1</li><li>Test 2</li></ul></div>');
 		});
 
 		it('doesn\'t clear singly selected list elements, but clears them of formatting', function(){
@@ -463,7 +469,7 @@ describe('taTools test tool actions', function(){
 			sel.setSingleRange(range);
 			sel.refresh();
 			findAndTriggerButton('clear');
-			expect($rootScope.htmlcontent).toBe('<p class="test-class" style="text-align: left;">Test Content <b>that</b> <u>should</u> be cleared</p><h1>Test Other Tags</h1><ul><li>Test 1</li><li>Test 2</li></ul>');
+			expect($rootScope.htmlcontent).toBe('<div class="test-class"><p class="test-class" style="text-align: left;">Test Content <b>that</b> <u>should</u> be cleared</p><h1>Test Other Tags</h1><ul><li>Test 1</li><li>Test 2</li></ul></div>');
 		});
 
 		it('doesn\'t clear singly selected list elements, but clears them of formatting', function(){
@@ -474,7 +480,7 @@ describe('taTools test tool actions', function(){
 			sel.setSingleRange(range);
 			sel.refresh();
 			findAndTriggerButton('clear');
-			expect($rootScope.htmlcontent).toBe('<p class="test-class" style="text-align: left;">Test Content <b>that</b> <u>should</u> be cleared</p><h1>Test Other Tags</h1><ul><li>Test 1</li><li>Test 2</li></ul>');
+			expect($rootScope.htmlcontent).toBe('<div class="test-class"><p class="test-class" style="text-align: left;">Test Content <b>that</b> <u>should</u> be cleared</p><h1>Test Other Tags</h1><ul><li>Test 1</li><li>Test 2</li></ul></div>');
 		});
 
 		describe('collapsed selection in list escapse list element', function(){

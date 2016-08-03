@@ -220,7 +220,9 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 				return value;
 			};
 
-			if(attrs.taPaste) _pasteHandler = $parse(attrs.taPaste);
+			if(attrs.taPaste) {
+				_pasteHandler = $parse(attrs.taPaste);
+			}
 
 			element.addClass('ta-bind');
 
@@ -296,8 +298,12 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 
 			// in here we are undoing the converts used elsewhere to prevent the < > and & being displayed when they shouldn't in the code.
 			var _compileHtml = function(){
-				if(_isContentEditable) return element[0].innerHTML;
-				if(_isInputFriendly) return element.val();
+				if(_isContentEditable) {
+					return element[0].innerHTML;
+				}
+				if(_isInputFriendly) {
+					return element.val();
+				}
 				throw ('textAngular Error: attempting to update non-editable taBind');
 			};
 
@@ -823,23 +829,9 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 								}
 							}
 							var val = _compileHtml();
-							/* istanbul ignore next: FF specific bug fix */
-							if (val==='<br>') {
-								// on Firefox this comes back sometimes as <br> which is strange, so we remove this here
-								//console.log('*************BAD****');
-								val='';
-							}
 							if(_defaultVal !== '' && val.trim() === ''){
 								_setInnerHTML(_defaultVal);
 								taSelection.setSelectionToElementStart(element.children()[0]);
-							}else if(val.substring(0, 1) !== '<' && attrs.taDefaultWrap !== ''){
-								/* we no longer do this, since there can be comments here and white space
-								var _savedSelection = rangy.saveSelection();
-								val = _compileHtml();
-								val = "<" + attrs.taDefaultWrap + ">" + val + "</" + attrs.taDefaultWrap + ">";
-								_setInnerHTML(val);
-								rangy.restoreSelection(_savedSelection);
-								*/
 							}
 							var triggerUndo = _lastKey !== event.keyCode && UNDO_TRIGGER_KEYS.test(event.keyCode);
 							if(_keyupTimeout) $timeout.cancel(_keyupTimeout);
@@ -876,6 +868,19 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 					element.on('focus', scope.events.focus = function(){
 						_focussed = true;
 						element.removeClass('placeholder-text');
+						/* istanbul ignore next: this is only triggered under Firefox and rare! */
+						try {
+							var _cont = taSelection.getSelectionElement();
+							// in Firefox, there is an issue that the selection is initially set to the
+							// whole container! And when that happens the first character is inserted before
+							// the <p><br></p> which is bad
+							// So we detect the whole container selected and then reset the selection to the
+							// <p>
+							if (_cont.tagName.toLowerCase() === 'div' && _cont.id === scope.displayElements.text.attr('id')) {
+								// opps we are actually selecting the whole container!
+								taSelection.setSelectionToElementStart(_cont.firstChild);
+							}
+						}catch(e){}
 						_reApplyOnSelectorHandlers();
 					});
 
