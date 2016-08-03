@@ -535,18 +535,27 @@ function validStyles(styleAttr){
 					|| value === 'justify'
 				)
 			||
-                key === 'text-decoration' && (
-                    value === 'underline'
-                    || value === 'line-through'
-                )
-            || key === 'font-weight' && (
-                    value === 'bold'
-                )
-            ||
+        key === 'text-decoration' && (
+            value === 'underline'
+            || value === 'line-through'
+        )
+      || 
+        key === 'font-weight' && (
+            value === 'bold'
+        )
+      ||
+        key === 'font-style' && (
+          value === 'italic'
+        )
+      ||
 				key === 'float' && (
 					value === 'left'
 					|| value === 'right'
 					|| value === 'none'
+				)
+      ||
+        key === 'font-size' && (
+					value.match(/[0-9\.]*(px|em|rem|%)/)
 				)
 			||
 				(key === 'width' || key === 'height') && (
