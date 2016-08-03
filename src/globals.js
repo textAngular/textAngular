@@ -54,7 +54,6 @@ function stripHtmlToText(html)
 	var tmp = document.createElement("DIV");
 	tmp.innerHTML = html;
 	var res = tmp.textContent || tmp.innerText || "";
-	res = res.replace(/\n/, "");
 	return res.trim();
 }
 // get html

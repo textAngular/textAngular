@@ -397,7 +397,7 @@ textAngular.directive("textAngular", [
 					//Show the HTML view
 					var _model;
 					/* istanbul ignore next: ngModel exists check */
-					if (attrs.ngModell) {
+					if (ngModel) {
 						_model = ngModel.$viewValue;
 					} else {
 						_model = scope.html;
