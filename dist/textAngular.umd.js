@@ -727,7 +727,10 @@ angular.module('textAngularSetup', [])
 			var $editor = this.$editor();
 			var recursiveRemoveClass = function(node){
 				node = angular.element(node);
-				if(node[0] !== $editor.displayElements.text[0]) node.removeAttr('class');
+				/* istanbul ignore next: this is not triggered in tests any longer since we now never select the whole displayELement */
+				if(node[0] !== $editor.displayElements.text[0]) {
+					node.removeAttr('class');
+				}
 				angular.forEach(node.children(), recursiveRemoveClass);
 			};
 			angular.forEach(possibleNodes, recursiveRemoveClass);
@@ -895,7 +898,7 @@ angular.module('textAngularSetup', [])
 @license textAngular
 Author : Austin Anderson
 License : 2013 MIT
-Version 1.5.3
+Version 1.5.4
 
 See README.md or https://github.com/fraywing/textAngular/wiki for requirements and use.
 */
@@ -938,7 +941,43 @@ var _browserDetect = {
 	webkit: /AppleWebKit\/([\d.]+)/i.test(navigator.userAgent)
 };
 
-// Gloabl to textAngular REGEXP vars for block and list elements.
+// Global to textAngular to measure performance where needed
+var performance = performance || {};
+performance.now = (function() {
+	return performance.now       ||
+		performance.mozNow    ||
+		performance.msNow     ||
+		performance.oNow      ||
+		performance.webkitNow ||
+		function() { return new Date().getTime(); };
+})();
+// usage is:
+// var t0 = performance.now();
+// doSomething();
+// var t1 = performance.now();
+// console.log('Took', (t1 - t0).toFixed(4), 'milliseconds to do something!');
+//
+
+// turn html into pure text that shows visiblity
+function stripHtmlToText(html)
+{
+	var tmp = document.createElement("DIV");
+	tmp.innerHTML = html;
+	var res = tmp.textContent || tmp.innerText || '';
+	res.replace('\u200B', ''); // zero width space
+	res = res.trim();
+	return res;
+}
+// get html
+function getDomFromHtml(html)
+{
+	var tmp = document.createElement("DIV");
+	tmp.innerHTML = html;
+	return tmp;
+}
+
+
+// Global to textAngular REGEXP vars for block and list elements.
 
 var BLOCKELEMENTS = /^(address|article|aside|audio|blockquote|canvas|dd|div|dl|fieldset|figcaption|figure|footer|form|h1|h2|h3|h4|h5|h6|header|hgroup|hr|noscript|ol|output|p|pre|section|table|tfoot|ul|video)$/i;
 var LISTELEMENTS = /^(ul|li|ol)$/i;
@@ -1349,6 +1388,18 @@ angular.module('textAngular.DOM', ['textAngular.factories'])
 			var defaultWrapper = angular.element('<' + taDefaultWrap + '>');
 			try{
 				selectedElement = taSelection.getSelectionElement();
+				/* istanbul ignore next */
+				if (selectedElement.tagName.toLowerCase() === 'div' && /taTextElement.+/.test(selectedElement.id)) {
+					// opps we are actually selecting the whole container!
+					taSelection.setSelectionToElementStart(selectedElement.childNodes[1]);
+					selectedElement = taSelection.getSelectionElement();
+					var __h = selectedElement.innerHTML;
+					if (/<br>/i.test(__h)) {
+						// Firefox adds <br>'s and so we remove the <br>
+						__h = __h.replace('<br>', '&#8203;');  // no space-space
+					}
+					selectedElement.innerHTML = __h;
+				}
 			}catch(e){}
 			var $selected = angular.element(selectedElement);
 			if(selectedElement !== undefined){
@@ -1485,12 +1536,22 @@ angular.module('textAngular.DOM', ['textAngular.factories'])
 								}
 							}
 						}
+						// remove any duplicates from the array of _nodes!
 						_nodes = _nodes.filter(function(value, index, self) {
 							return self.indexOf(value) === index;
 						});
+						var _h;
 						if(angular.element(_nodes[0]).hasClass('ta-bind')){
 							$target = angular.element(options);
-							$target[0].innerHTML = _nodes[0].innerHTML;
+							//console.log('has ta-bind -- root!');
+							_h = _nodes[0].innerHTML;
+							/* istanbul ignore next: this is hack for Firefox where it adds <br> */
+							if (/<span class="rangySelectionBoundary".+><br>/i.test(_h)) {
+								// if it is a <span rangySelectionBoundary></span> and a <br> all by itself
+								// this is an artifact of Firefox and so we remove the <br>
+								_h = _h.replace('<br>', '&#8203;');  // no space-space
+							}
+							$target[0].innerHTML = _h;
 							_nodes[0].innerHTML = $target[0].outerHTML;
 						}else if(optionsTagName === 'blockquote'){
 							// blockquotes wrap other block elements
@@ -1510,7 +1571,14 @@ angular.module('textAngular.DOM', ['textAngular.factories'])
 							// regular block elements replace other block elements
 							for(i = 0; i < _nodes.length; i++){
 								$target = angular.element(options);
-								$target[0].innerHTML = _nodes[i].innerHTML;
+								_h = _nodes[i].innerHTML;
+								/* istanbul ignore next: this is hack for Firefox where it adds <br> */
+								if (/<span class="rangySelectionBoundary".+><br>/i.test(_h)) {
+									// if it is a <span rangySelectionBoundary></span> and a <br> all by itself
+									// this is an artifact of Firefox and so we remove the <br>
+									_h = _h.replace('<br>', '&#8203;'); // no space-space
+								}
+								$target[0].innerHTML = _h;
 								_nodes[i].parentNode.insertBefore($target[0],_nodes[i]);
 								_nodes[i].parentNode.removeChild(_nodes[i]);
 							}
@@ -1587,6 +1655,9 @@ function($document, taDOM){
 		getOnlySelectedElements: function(){
 			var range = rangy.getSelection().getRangeAt(0);
 			var container = range.commonAncestorContainer;
+			// Node.TEXT_NODE === 3
+			// Node.ELEMENT_NODE === 1
+			// Node.COMMENT_NODE === 8
 			// Check if the container is a text node and return its parent if so
 			container = container.nodeType === 3 ? container.parentNode : container;
 			return range.getNodes([1], function(node){
@@ -1853,29 +1924,28 @@ angular.module('textAngular.validators', [])
 });
 angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'])
 .service('_taBlankTest', [function(){
-	var INLINETAGS_NONBLANK = /<(a|abbr|acronym|bdi|bdo|big|cite|code|del|dfn|img|ins|kbd|label|map|mark|q|ruby|rp|rt|s|samp|time|tt|var|table)[^>]*(>|$)/i;
 	return function(_defaultTest){
 		return function(_blankVal){
+			// we radically restructure this code.
+			// what was here before was incredibly fragile.
+			// What we do now is to check that the html is non-blank visually
+			// which we check by looking at html->text
 			if(!_blankVal) return true;
 			// find first non-tag match - ie start of string or after tag that is not whitespace
-			var _firstMatch = /(^[^<]|>)[^<]/i.exec(_blankVal);
-			var _firstTagIndex;
-			if(!_firstMatch){
-				// find the end of the first tag removing all the
-				// Don't do a global replace as that would be waaayy too long, just replace the first 4 occurences should be enough
-				_blankVal = _blankVal.toString().replace(/="[^"]*"/i, '').replace(/="[^"]*"/i, '').replace(/="[^"]*"/i, '').replace(/="[^"]*"/i, '');
-				_firstTagIndex = _blankVal.indexOf('>');
-			}else{
-				_firstTagIndex = _firstMatch.index;
+			// var t0 = performance.now();
+			// Takes a small fraction of a mSec to do this...
+			var _text_ = stripHtmlToText(_blankVal);
+			// var t1 = performance.now();
+			// console.log('Took', (t1 - t0).toFixed(4), 'milliseconds to generate:');
+			if (_text_=== '') {
+				// img generates a visible item so it is not blank!
+				if (/<img[^>]+>/.test(_blankVal)) {
+					return false;
+				}
+				return true;
+			} else {
+				return false;
 			}
-			_blankVal = _blankVal.trim().substring(_firstTagIndex, _firstTagIndex + 100);
-			// check for no tags entry
-			if(/^[^<>]+$/i.test(_blankVal)) return false;
-			// this regex is to match any number of whitespace only between two tags
-			if (_blankVal.length === 0 || _blankVal === _defaultTest || /^>(\s|&nbsp;)*<\/[^>]+>$/ig.test(_blankVal)) return true;
-			// this regex tests if there is a tag followed by some optional whitespace and some text after that
-			else if (/>\s*[^\s<]/i.test(_blankVal) || INLINETAGS_NONBLANK.test(_blankVal)) return false;
-			else return true;
 		};
 	};
 }])
@@ -2074,7 +2144,9 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 				return value;
 			};
 
-			if(attrs.taPaste) _pasteHandler = $parse(attrs.taPaste);
+			if(attrs.taPaste) {
+				_pasteHandler = $parse(attrs.taPaste);
+			}
 
 			element.addClass('ta-bind');
 
@@ -2150,8 +2222,12 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 
 			// in here we are undoing the converts used elsewhere to prevent the < > and & being displayed when they shouldn't in the code.
 			var _compileHtml = function(){
-				if(_isContentEditable) return element[0].innerHTML;
-				if(_isInputFriendly) return element.val();
+				if(_isContentEditable) {
+					return element[0].innerHTML;
+				}
+				if(_isInputFriendly) {
+					return element.val();
+				}
 				throw ('textAngular Error: attempting to update non-editable taBind');
 			};
 
@@ -2677,23 +2753,9 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 								}
 							}
 							var val = _compileHtml();
-							/* istanbul ignore next: FF specific bug fix */
-							if (val==='<br>') {
-								// on Firefox this comes back sometimes as <br> which is strange, so we remove this here
-								//console.log('*************BAD****');
-								val='';
-							}
 							if(_defaultVal !== '' && val.trim() === ''){
 								_setInnerHTML(_defaultVal);
 								taSelection.setSelectionToElementStart(element.children()[0]);
-							}else if(val.substring(0, 1) !== '<' && attrs.taDefaultWrap !== ''){
-								/* we no longer do this, since there can be comments here and white space
-								var _savedSelection = rangy.saveSelection();
-								val = _compileHtml();
-								val = "<" + attrs.taDefaultWrap + ">" + val + "</" + attrs.taDefaultWrap + ">";
-								_setInnerHTML(val);
-								rangy.restoreSelection(_savedSelection);
-								*/
 							}
 							var triggerUndo = _lastKey !== event.keyCode && UNDO_TRIGGER_KEYS.test(event.keyCode);
 							if(_keyupTimeout) $timeout.cancel(_keyupTimeout);
@@ -3314,6 +3376,19 @@ textAngular.directive("textAngular", [
 					$animate.enabled(false, scope.displayElements.html);
 					$animate.enabled(false, scope.displayElements.text);
 					//Show the HTML view
+					var _model;
+					/* istanbul ignore next: ngModel exists check */
+					if (ngModel) {
+						_model = ngModel.$viewValue;
+					} else {
+						_model = scope.html;
+					}
+					var _html = scope.displayElements.html[0].value;
+					if (getDomFromHtml(_html).childElementCount !== getDomFromHtml(_model).childElementCount) {
+						// the model and the html do not agree
+						// they can get out of sync and when they do, we correct that here...
+						scope.displayElements.html.val(_model);
+					}
 					if(scope.showHtml){
 						//defer until the element is visible
 						$timeout(function(){
