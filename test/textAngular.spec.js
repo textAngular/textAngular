@@ -65,6 +65,8 @@ describe('textAngular', function(){
 				//console.log('Took', (t1 - t0).toFixed(4), 'milliseconds to do something!');
 				expect(duration < 0.001);
 				expect(stripped).toBe('Lorem ipsumLorem ipsum');
+				stripped = stripHtmlToText(' \n &#8203;&#8203; &#8203; ');
+				expect(stripped).toBe('');
 			});
 		});
 	});

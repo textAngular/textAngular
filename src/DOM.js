@@ -39,6 +39,18 @@ angular.module('textAngular.DOM', ['textAngular.factories'])
 			var defaultWrapper = angular.element('<' + taDefaultWrap + '>');
 			try{
 				selectedElement = taSelection.getSelectionElement();
+				/* istanbul ignore next */
+				if (selectedElement.tagName.toLowerCase() === 'div' && /taTextElement.+/.test(selectedElement.id)) {
+					// opps we are actually selecting the whole container!
+					taSelection.setSelectionToElementStart(selectedElement.childNodes[1]);
+					selectedElement = taSelection.getSelectionElement();
+					var __h = selectedElement.innerHTML;
+					if (/<br>/i.test(__h)) {
+						// Firefox adds <br>'s and so we remove the <br>
+						__h = __h.replace('<br>', '&#8203;');  // no space-space
+					}
+					selectedElement.innerHTML = __h;
+				}
 			}catch(e){}
 			var $selected = angular.element(selectedElement);
 			if(selectedElement !== undefined){
@@ -175,12 +187,22 @@ angular.module('textAngular.DOM', ['textAngular.factories'])
 								}
 							}
 						}
+						// remove any duplicates from the array of _nodes!
 						_nodes = _nodes.filter(function(value, index, self) {
 							return self.indexOf(value) === index;
 						});
+						var _h;
 						if(angular.element(_nodes[0]).hasClass('ta-bind')){
 							$target = angular.element(options);
-							$target[0].innerHTML = _nodes[0].innerHTML;
+							//console.log('has ta-bind -- root!');
+							_h = _nodes[0].innerHTML;
+							/* istanbul ignore next: this is hack for Firefox where it adds <br> */
+							if (/<span class="rangySelectionBoundary".+><br>/i.test(_h)) {
+								// if it is a <span rangySelectionBoundary></span> and a <br> all by itself
+								// this is an artifact of Firefox and so we remove the <br>
+								_h = _h.replace('<br>', '&#8203;');  // no space-space
+							}
+							$target[0].innerHTML = _h;
 							_nodes[0].innerHTML = $target[0].outerHTML;
 						}else if(optionsTagName === 'blockquote'){
 							// blockquotes wrap other block elements
@@ -200,7 +222,14 @@ angular.module('textAngular.DOM', ['textAngular.factories'])
 							// regular block elements replace other block elements
 							for(i = 0; i < _nodes.length; i++){
 								$target = angular.element(options);
-								$target[0].innerHTML = _nodes[i].innerHTML;
+								_h = _nodes[i].innerHTML;
+								/* istanbul ignore next: this is hack for Firefox where it adds <br> */
+								if (/<span class="rangySelectionBoundary".+><br>/i.test(_h)) {
+									// if it is a <span rangySelectionBoundary></span> and a <br> all by itself
+									// this is an artifact of Firefox and so we remove the <br>
+									_h = _h.replace('<br>', '&#8203;'); // no space-space
+								}
+								$target[0].innerHTML = _h;
 								_nodes[i].parentNode.insertBefore($target[0],_nodes[i]);
 								_nodes[i].parentNode.removeChild(_nodes[i]);
 							}
@@ -277,6 +306,9 @@ function($document, taDOM){
 		getOnlySelectedElements: function(){
 			var range = rangy.getSelection().getRangeAt(0);
 			var container = range.commonAncestorContainer;
+			// Node.TEXT_NODE === 3
+			// Node.ELEMENT_NODE === 1
+			// Node.COMMENT_NODE === 8
 			// Check if the container is a text node and return its parent if so
 			container = container.nodeType === 3 ? container.parentNode : container;
 			return range.getNodes([1], function(node){
