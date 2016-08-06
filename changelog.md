@@ -1,3 +1,43 @@
+<a name"1.5.4"></a>
+### 1.5.4 (2016-08-06)
+
+* **textAnglar:**
+  * Fix(DOM, globals, textAngular.spec): Corrected bugs around Firefox weirdness  (https://github.com/fraywing/textAngular/commit/32aad73a258696ae06d2ee6cc901bd571d7793fb)
+         - DOM: major fix to handle Firefox weirdness around <br> insertions
+                We now insert zero width spaces in place of <br> that is
+                a '&#8203' character.
+                This corrects taExecCommand() to function properly on Firefox.
+         - globals: stripHtmlToText() now handles zero width spaces
+         - textAngular.spec: added test for zero width spaces
+  *  Enhancement(added Support for font-style = italic and font-size = [size em/px/%] in sanitize function validStyles,  (https://github.com/fraywing/textAngular/commit/dde3d7f621c7d4403577853374223abe5c9d15db)
+                 Merge pull request #964 from rdkleine/master
+  *  Fix(main, taBind, textAngularSetup, globals, taTools.spec): Immproved the issues 
+          with html and model getting out of sync (https://github.com/fraywing/textAngular/commit/5453c6b8fd2d72c6bdfb1dd83cb9fc0ed6df0a88)
+          Also corrected issue under Firefox where the initial selection was before all the content
+          - globals: improved stripHtmlToText() slightly
+          - main: fixed a mistyped if in switchView()
+          - taBind: small formatting changes for clarity
+                    improved element.on('keyup') code
+                    element.on('focus') now detets an bad selection condition under Firefox and fixes this
+          - textAngularSetup: added a coverage comment in recursiveRemoveClass() that is now needed
+            because of changes to taTools.spec
+          - taTools.spec: Changed the test set 'test clear button' so that now the whole
+                          htmlcontent is now never selected.  This was an issue beacuse when
+                          all the htmlcontent was selected this triggered the element.on('focus') fix
+                          for Firefox and broke the tests here.  All the tests now run properly.
+                          The biggest change was to now wrap the test content in a <div class='test-class'></div>
+                          which caused the expected values to change.
+  *  Fix(main, globals): Corrected issue with clobering the html from the model too easily. (https://github.com/fraywing/textAngular/commit/b1206a892bc104cb63a74633395d00c0d6ee39ed)
+                          Added getDomFromHtml() and corrected when this is used.
+  *  Fix(main): Corrected issues with html and model getting out of synch! (https://github.com/fraywing/textAngular/commit/91fe5bfb7fd17d345f2cdaace9c3f891a6ce2fbc)
+  *  Fix(taBind, textAngular.spec): Major change to _taBlankTest() that now uses the DOM to check the visibility of the html
+                     This removes the MANY headaches of the old code... that that very fragile.
+         - added a new tool to measure performace where needed
+         - added a global stripHtmlToText() function
+         - added a new test to verify the performance tool and new stripHtmlToText() function
+         (https://github.com/fraywing/textAngular/commit/31cf9c4d307a02aa9f078daceea9bd38a7d70c3a)
+                               
+                               
 <a name"1.5.3"></a>
 ### 1.5.3 (2016-07-29)
 

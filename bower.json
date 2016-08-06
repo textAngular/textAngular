@@ -1,6 +1,6 @@
 {
   "name": "textAngular",
-  "version": "1.5.3",
+  "version": "1.5.4",
   "main": [
     "./dist/textAngular.js",
     "./dist/textAngular-sanitize.js",
