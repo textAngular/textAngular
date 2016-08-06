@@ -53,8 +53,10 @@ function stripHtmlToText(html)
 {
 	var tmp = document.createElement("DIV");
 	tmp.innerHTML = html;
-	var res = tmp.textContent || tmp.innerText || "";
-	return res.trim();
+	var res = tmp.textContent || tmp.innerText || '';
+	res.replace('\u200B', ''); // zero width space
+	res = res.trim();
+	return res;
 }
 // get html
 function getDomFromHtml(html)

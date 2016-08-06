@@ -868,19 +868,6 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 					element.on('focus', scope.events.focus = function(){
 						_focussed = true;
 						element.removeClass('placeholder-text');
-						/* istanbul ignore next: this is only triggered under Firefox and rare! */
-						try {
-							var _cont = taSelection.getSelectionElement();
-							// in Firefox, there is an issue that the selection is initially set to the
-							// whole container! And when that happens the first character is inserted before
-							// the <p><br></p> which is bad
-							// So we detect the whole container selected and then reset the selection to the
-							// <p>
-							if (_cont.tagName.toLowerCase() === 'div' && _cont.id === scope.displayElements.text.attr('id')) {
-								// opps we are actually selecting the whole container!
-								taSelection.setSelectionToElementStart(_cont.firstChild);
-							}
-						}catch(e){}
 						_reApplyOnSelectorHandlers();
 					});
 
