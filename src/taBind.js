@@ -1,28 +1,26 @@
 angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'])
 .service('_taBlankTest', [function(){
-	return function(_defaultTest){
-		return function(_blankVal){
-			// we radically restructure this code.
-			// what was here before was incredibly fragile.
-			// What we do now is to check that the html is non-blank visually
-			// which we check by looking at html->text
-			if(!_blankVal) return true;
-			// find first non-tag match - ie start of string or after tag that is not whitespace
-			// var t0 = performance.now();
-			// Takes a small fraction of a mSec to do this...
-			var _text_ = stripHtmlToText(_blankVal);
-			// var t1 = performance.now();
-			// console.log('Took', (t1 - t0).toFixed(4), 'milliseconds to generate:');
-			if (_text_=== '') {
-				// img generates a visible item so it is not blank!
-				if (/<img[^>]+>/.test(_blankVal)) {
-					return false;
-				}
-				return true;
-			} else {
+	return function(_blankVal){
+		// we radically restructure this code.
+		// what was here before was incredibly fragile.
+		// What we do now is to check that the html is non-blank visually
+		// which we check by looking at html->text
+		if(!_blankVal) return true;
+		// find first non-tag match - ie start of string or after tag that is not whitespace
+		// var t0 = performance.now();
+		// Takes a small fraction of a mSec to do this...
+		var _text_ = stripHtmlToText(_blankVal);
+		// var t1 = performance.now();
+		// console.log('Took', (t1 - t0).toFixed(4), 'milliseconds to generate:');
+		if (_text_=== '') {
+			// img generates a visible item so it is not blank!
+			if (/<img[^>]+>/.test(_blankVal)) {
 				return false;
 			}
-		};
+			return true;
+		} else {
+			return false;
+		}
 	};
 }])
 .directive('taButton', [function(){
@@ -81,7 +79,7 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 
 			// defaults to the paragraph element, but we need the line-break or it doesn't allow you to type into the empty element
 			// non IE is '<p><br/></p>', ie is '<p></p>' as for once IE gets it correct...
-			var _defaultVal, _defaultTest;
+			var _defaultVal;
 
 			var _CTRL_KEY = 0x0001;
 			var _META_KEY = 0x0002;
@@ -148,27 +146,19 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 			/* istanbul ignore next: ie specific test */
 			if(attrs.taDefaultWrap === ''){
 				_defaultVal = '';
-				_defaultTest = (_browserDetect.ie === undefined)? '<div><br></div>' : (_browserDetect.ie >= 11)? '<p><br></p>' : (_browserDetect.ie <= 8)? '<P>&nbsp;</P>' : '<p>&nbsp;</p>';
 			}else{
 				_defaultVal = (_browserDetect.ie === undefined || _browserDetect.ie >= 11)?
 					'<' + attrs.taDefaultWrap + '><br></' + attrs.taDefaultWrap + '>' :
 					(_browserDetect.ie <= 8)?
 						'<' + attrs.taDefaultWrap.toUpperCase() + '></' + attrs.taDefaultWrap.toUpperCase() + '>' :
 						'<' + attrs.taDefaultWrap + '></' + attrs.taDefaultWrap + '>';
-				_defaultTest = (_browserDetect.ie === undefined || _browserDetect.ie >= 11)?
-					'<' + attrs.taDefaultWrap + '><br></' + attrs.taDefaultWrap + '>' :
-					(_browserDetect.ie <= 8)?
-						'<' + attrs.taDefaultWrap.toUpperCase() + '>&nbsp;</' + attrs.taDefaultWrap.toUpperCase() + '>' :
-						'<' + attrs.taDefaultWrap + '>&nbsp;</' + attrs.taDefaultWrap + '>';
 			}
 
 			/* istanbul ignore else */
 			if(!ngModelOptions.$options) ngModelOptions.$options = {}; // ng-model-options support
 
-			var _blankTest = _taBlankTest(_defaultTest);
-
 			var _ensureContentWrapped = function(value) {
-				if (_blankTest(value)) return value;
+				if (_taBlankTest(value)) return value;
 				var domTest = angular.element("<div>" + value + "</div>");
 				//console.log('domTest.children().length():', domTest.children().length);
 				if (domTest.children().length === 0) {
@@ -311,7 +301,7 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 				_skipRender = skipRender || false;
 				if(typeof triggerUndo === "undefined" || triggerUndo === null) triggerUndo = true && _isContentEditable; // if not contentEditable then the native undo/redo is fine
 				if(typeof _val === "undefined" || _val === null) _val = _compileHtml();
-				if(_blankTest(_val)){
+				if(_taBlankTest(_val)){
 					// this avoids us from tripping the ng-pristine flag if we click in and out with out typing
 					if(ngModel.$viewValue !== '') ngModel.$setViewValue('');
 					if(triggerUndo && ngModel.$undoManager.current() !== '') ngModel.$undoManager.push('');
@@ -338,7 +328,7 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 
 			// trigger the validation calls
 			if(element.attr('required')) ngModel.$validators.required = function(modelValue, viewValue) {
-				return !_blankTest(modelValue || viewValue);
+				return !_taBlankTest(modelValue || viewValue);
 			};
 			// parsers trigger from the above keyup function or any other time that the viewValue is updated and parses it for storage in the ngModel
 			ngModel.$parsers.push(_sanitize);

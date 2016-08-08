@@ -39,17 +39,23 @@ angular.module('textAngular.DOM', ['textAngular.factories'])
 			var defaultWrapper = angular.element('<' + taDefaultWrap + '>');
 			try{
 				selectedElement = taSelection.getSelectionElement();
+				console.log('selectedElement', selectedElement);
 				/* istanbul ignore next */
 				if (selectedElement.tagName.toLowerCase() === 'div' && /taTextElement.+/.test(selectedElement.id)) {
 					// opps we are actually selecting the whole container!
-					taSelection.setSelectionToElementStart(selectedElement.childNodes[1]);
-					selectedElement = taSelection.getSelectionElement();
 					var __h = selectedElement.innerHTML;
 					if (/<br>/i.test(__h)) {
 						// Firefox adds <br>'s and so we remove the <br>
 						__h = __h.replace('<br>', '&#8203;');  // no space-space
 					}
-					selectedElement.innerHTML = __h;
+					console.log('inner', __h);
+					console.log(selectedElement.childNodes);
+					var _innerNode = '<' + taDefaultWrap + '>' + __h + '</' + taDefaultWrap + '>';
+					selectedElement.innerHTML = _innerNode;
+					console.log(selectedElement.childNodes);
+					taSelection.setSelectionToElementEnd(selectedElement.childNodes[0]);
+					selectedElement = taSelection.getSelectionElement();
+					console.log(selectedElement.innerHTML);
 				}
 			}catch(e){}
 			var $selected = angular.element(selectedElement);
