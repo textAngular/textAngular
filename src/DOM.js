@@ -1,5 +1,5 @@
 angular.module('textAngular.DOM', ['textAngular.factories'])
-.factory('taExecCommand', ['taSelection', 'taBrowserTag', '$document', 'textAngularManager', function(taSelection, taBrowserTag, $document, textAngularManager){
+.factory('taExecCommand', ['taSelection', 'taBrowserTag', '$document', function(taSelection, taBrowserTag, $document){
 	var listToDefault = function(listElement, defaultWrap){
 		var $target, i;
 		// if all selected then we should remove the list
