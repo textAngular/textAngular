@@ -259,7 +259,7 @@ textAngular.directive("textAngular", [
 				});
 				scope.displayElements.scrollWindow.attr({'ng-hide': 'showHtml'});
 				if(attrs.taDefaultWrap) {
-					// taDefaultWrap is only applied to the text and the not the html view
+					// taDefaultWrap is only applied to the text and not the html view
 					scope.displayElements.text.attr('ta-default-wrap', attrs.taDefaultWrap);
 				}
 
@@ -328,6 +328,7 @@ textAngular.directive("textAngular", [
 					// if rangy library is loaded return a function to reload the current selection
 					_savedSelection = rangy.saveSelection();
 					return function(){
+						//console.log('restore to:', _savedSelection);
 						if(_savedSelection) rangy.restoreSelection(_savedSelection);
 					};
 				};
@@ -395,8 +396,9 @@ textAngular.directive("textAngular", [
 					$animate.enabled(false, scope.displayElements.html);
 					$animate.enabled(false, scope.displayElements.text);
 					//Show the HTML view
-					var _model;
 					/* istanbul ignore next: ngModel exists check */
+/*
+					var _model;
 					if (ngModel) {
 						_model = ngModel.$viewValue;
 					} else {
@@ -408,6 +410,7 @@ textAngular.directive("textAngular", [
 						// they can get out of sync and when they do, we correct that here...
 						scope.displayElements.html.val(_model);
 					}
+*/
 					if(scope.showHtml){
 						//defer until the element is visible
 						$timeout(function(){

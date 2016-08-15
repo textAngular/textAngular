@@ -28,7 +28,8 @@ var _browserDetect = {
 
 		return v > 4 ? v : undef;
 	}()),
-	webkit: /AppleWebKit\/([\d.]+)/i.test(navigator.userAgent)
+	webkit: /AppleWebKit\/([\d.]+)/i.test(navigator.userAgent),
+	isFirefox: navigator.userAgent.toLowerCase().indexOf('firefox') > -1
 };
 
 // Global to textAngular to measure performance where needed

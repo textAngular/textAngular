@@ -79,7 +79,7 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 
 			// defaults to the paragraph element, but we need the line-break or it doesn't allow you to type into the empty element
 			// non IE is '<p><br/></p>', ie is '<p></p>' as for once IE gets it correct...
-			var _defaultVal;
+			var _defaultVal, _defaultTest;
 
 			var _CTRL_KEY = 0x0001;
 			var _META_KEY = 0x0002;
@@ -146,12 +146,18 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 			/* istanbul ignore next: ie specific test */
 			if(attrs.taDefaultWrap === ''){
 				_defaultVal = '';
+				_defaultTest = (_browserDetect.ie === undefined)? '<div><br></div>' : (_browserDetect.ie >= 11)? '<p><br></p>' : (_browserDetect.ie <= 8)? '<P>&nbsp;</P>' : '<p>&nbsp;</p>';
 			}else{
 				_defaultVal = (_browserDetect.ie === undefined || _browserDetect.ie >= 11)?
 					'<' + attrs.taDefaultWrap + '><br></' + attrs.taDefaultWrap + '>' :
 					(_browserDetect.ie <= 8)?
 						'<' + attrs.taDefaultWrap.toUpperCase() + '></' + attrs.taDefaultWrap.toUpperCase() + '>' :
 						'<' + attrs.taDefaultWrap + '></' + attrs.taDefaultWrap + '>';
+				_defaultTest = (_browserDetect.ie === undefined || _browserDetect.ie >= 11)?
+					'<' + attrs.taDefaultWrap + '><br></' + attrs.taDefaultWrap + '>' :
+					(_browserDetect.ie <= 8)?
+						'<' + attrs.taDefaultWrap.toUpperCase() + '>&nbsp;</' + attrs.taDefaultWrap.toUpperCase() + '>' :
+						'<' + attrs.taDefaultWrap + '>&nbsp;</' + attrs.taDefaultWrap + '>';
 			}
 
 			/* istanbul ignore else */
@@ -161,7 +167,11 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 				if (_taBlankTest(value)) return value;
 				var domTest = angular.element("<div>" + value + "</div>");
 				//console.log('domTest.children().length():', domTest.children().length);
+				//console.log('_ensureContentWrapped', domTest.children());
+				//console.log(value, attrs.taDefaultWrap);
 				if (domTest.children().length === 0) {
+					// if we have a <br> and the attrs.taDefaultWrap is a <p> we need to remove the <br>
+					//value = value.replace(/<br>/i, '');
 					value = "<" + attrs.taDefaultWrap + ">" + value + "</" + attrs.taDefaultWrap + ">";
 				} else {
 					var _children = domTest[0].childNodes;
@@ -811,7 +821,11 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 										selection = selection.parentNode;
 									}
 
-									if(selection.tagName.toLowerCase() !== attrs.taDefaultWrap && selection.tagName.toLowerCase() !== 'li' && (selection.innerHTML.trim() === '' || selection.innerHTML.trim() === '<br>')){
+									if(selection.tagName.toLowerCase() !==
+										attrs.taDefaultWrap &&
+										selection.tagName.toLowerCase() !== 'li' &&
+										(selection.innerHTML.trim() === '' || selection.innerHTML.trim() === '<br>')
+									) {
 										var _new = angular.element(_defaultVal);
 										angular.element(selection).replaceWith(_new);
 										taSelection.setSelectionToElementStart(_new[0]);
@@ -819,9 +833,17 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 								}
 							}
 							var val = _compileHtml();
-							if(_defaultVal !== '' && val.trim() === ''){
+							if(_defaultVal !== '' && (val.trim() === '' || val.trim() === '<br>')){
 								_setInnerHTML(_defaultVal);
 								taSelection.setSelectionToElementStart(element.children()[0]);
+							}else if(val.substring(0, 1) !== '<' && attrs.taDefaultWrap !== ''){
+								/* we no longer do this, since there can be comments here and white space
+								var _savedSelection = rangy.saveSelection();
+								val = _compileHtml();
+								val = "<" + attrs.taDefaultWrap + ">" + val + "</" + attrs.taDefaultWrap + ">";
+								_setInnerHTML(val);
+								rangy.restoreSelection(_savedSelection);
+								*/
 							}
 							var triggerUndo = _lastKey !== event.keyCode && UNDO_TRIGGER_KEYS.test(event.keyCode);
 							if(_keyupTimeout) $timeout.cancel(_keyupTimeout);

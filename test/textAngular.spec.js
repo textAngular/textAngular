@@ -69,6 +69,12 @@ describe('textAngular', function(){
 				expect(stripped).toBe('');
 			});
 		});
+		describe('Gets the proper DOM', function () {
+			it('from Html', function () {
+				var dom = getDomFromHtml('<div><p></p></div>');
+				expect(dom.innerHTML).toBe('<div><p></p></div>');
+			});
+		});
 	});
 
 	describe('Add classes via attributes', function(){
