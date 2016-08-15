@@ -6,13 +6,13 @@ describe('taBind._taBlankTest', function () {
 	}));
 	var testString = function(result){ return function(_str){
 		it(_str, inject(function (_taBlankTest) {
-			expect(_taBlankTest('<p><br></p>')(_str)).toBe(result);
+			expect(_taBlankTest(_str)).toBe(result);
 		}));
 	};};
 	
 	describe('should return true for', function () {
 		it('undefined', inject(function (_taBlankTest) {
-			expect(_taBlankTest('<p><br></p>')()).toBe(true);
+			expect(_taBlankTest()).toBe(true);
 		}));
 		angular.forEach(['<p></p>','<p><br></p>','', '<pre><br/></pre>'], testString(true));
 	});
