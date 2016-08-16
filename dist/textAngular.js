@@ -2,7 +2,7 @@
 @license textAngular
 Author : Austin Anderson
 License : 2013 MIT
-Version 1.5.4
+Version 1.5.5
 
 See README.md or https://github.com/fraywing/textAngular/wiki for requirements and use.
 */
@@ -42,7 +42,8 @@ var _browserDetect = {
 
 		return v > 4 ? v : undef;
 	}()),
-	webkit: /AppleWebKit\/([\d.]+)/i.test(navigator.userAgent)
+	webkit: /AppleWebKit\/([\d.]+)/i.test(navigator.userAgent),
+	isFirefox: navigator.userAgent.toLowerCase().indexOf('firefox') > -1
 };
 
 // Global to textAngular to measure performance where needed
@@ -486,25 +487,108 @@ angular.module('textAngular.DOM', ['textAngular.factories'])
 		selectLi($target.find('li')[0]);
 	};
 	return function(taDefaultWrap, topNode){
+		// NOTE: here we are dealing with the html directly from the browser and not the html the user sees.
+		// IF you want to modify the html the user sees, do it when the user does a switchView
 		taDefaultWrap = taBrowserTag(taDefaultWrap);
 		return function(command, showUI, options, defaultTagAttributes){
-			var i, $target, html, _nodes, next, optionsTagName, selectedElement;
+			var i, $target, html, _nodes, next, optionsTagName, selectedElement, ourSelection;
 			var defaultWrapper = angular.element('<' + taDefaultWrap + '>');
 			try{
+				if (taSelection.getSelection) {
+					ourSelection = taSelection.getSelection();
+				}
 				selectedElement = taSelection.getSelectionElement();
+				//console.log('selectedElement', selectedElement);
+				// special checks and fixes when we are selecting the whole container
+				var __h, _innerNode;
 				/* istanbul ignore next */
-				if (selectedElement.tagName.toLowerCase() === 'div' && /taTextElement.+/.test(selectedElement.id)) {
+				if (selectedElement.tagName.toLowerCase() === 'div' &&
+					/taTextElement.+/.test(selectedElement.id) &&
+					ourSelection && ourSelection.start &&
+					ourSelection.start.offset === 1 &&
+					ourSelection.end.offset === 1) {
 					// opps we are actually selecting the whole container!
-					taSelection.setSelectionToElementStart(selectedElement.childNodes[1]);
-					selectedElement = taSelection.getSelectionElement();
-					var __h = selectedElement.innerHTML;
+					//console.log('selecting whole container!');
+					__h = selectedElement.innerHTML;
 					if (/<br>/i.test(__h)) {
 						// Firefox adds <br>'s and so we remove the <br>
-						__h = __h.replace('<br>', '&#8203;');  // no space-space
+						__h = __h.replace(/<br>/i, '&#8203;');  // no space-space
+					}
+					if (/<br\/>/i.test(__h)) {
+						// Firefox adds <br/>'s and so we remove the <br/>
+						__h = __h.replace(/<br\/>/i, '&#8203;');  // no space-space
+					}
+					// remove stacked up <span>'s
+					if (/<span>(<span>)+/i.test(__h)) {
+						__h = __.replace(/<span>(<span>)+/i, '<span>');
+					}
+					// remove stacked up </span>'s
+					if (/<\/span>(<\/span>)+/i.test(__h)) {
+						__h = __.replace(/<\/span>(<\/span>)+/i, '<\/span>');
+					}
+					if (/<span><\/span>/i.test(__h)) {
+						// if we end up with a <span></span> here we remove it...
+						__h = __h.replace(/<span><\/span>/i, '');
+					}
+					//console.log('inner whole container', selectedElement.childNodes);
+					_innerNode = '<div>' + __h + '</div>';
+					selectedElement.innerHTML = _innerNode;
+					//console.log('childNodes:', selectedElement.childNodes);
+					taSelection.setSelectionToElementEnd(selectedElement.childNodes[0]);
+					selectedElement = taSelection.getSelectionElement();
+				} else if (selectedElement.tagName.toLowerCase() === 'span' &&
+					ourSelection && ourSelection.start &&
+					ourSelection.start.offset === 1 &&
+					ourSelection.end.offset === 1) {
+					// just a span -- this is a problem...
+					//console.log('selecting span!');
+					__h = selectedElement.innerHTML;
+					if (/<br>/i.test(__h)) {
+						// Firefox adds <br>'s and so we remove the <br>
+						__h = __h.replace(/<br>/i, '&#8203;');  // no space-space
+					}
+					if (/<br\/>/i.test(__h)) {
+						// Firefox adds <br/>'s and so we remove the <br/>
+						__h = __h.replace(/<br\/>/i, '&#8203;');  // no space-space
+					}
+					// remove stacked up <span>'s
+					if (/<span>(<span>)+/i.test(__h)) {
+						__h = __.replace(/<span>(<span>)+/i, '<span>');
+					}
+					// remove stacked up </span>'s
+					if (/<\/span>(<\/span>)+/i.test(__h)) {
+						__h = __.replace(/<\/span>(<\/span>)+/i, '<\/span>');
+					}
+					if (/<span><\/span>/i.test(__h)) {
+						// if we end up with a <span></span> here we remove it...
+						__h = __h.replace(/<span><\/span>/i, '');
+					}
+					//console.log('inner span', selectedElement.childNodes);
+					// we wrap this in a <div> because otherwise the browser get confused when we attempt to select the whole node
+					// and the focus is not set correctly no matter what we do
+					_innerNode = '<div>' + __h + '</div>';
+					selectedElement.innerHTML = _innerNode;
+					taSelection.setSelectionToElementEnd(selectedElement.childNodes[0]);
+					selectedElement = taSelection.getSelectionElement();
+					//console.log(selectedElement.innerHTML);
+				} else if (selectedElement.tagName.toLowerCase() === 'p' &&
+					ourSelection && ourSelection.start &&
+					ourSelection.start.offset === 1 &&
+					ourSelection.end.offset === 1) {
+					//console.log('p special');
+					// we need to remove the </br> that firefox adds!
+					__h = selectedElement.innerHTML;
+					if (/<br>/i.test(__h)) {
+						// Firefox adds <br>'s and so we remove the <br>
+						__h = __h.replace(/<br>/i, '&#8203;');  // no space-space
 					}
 					selectedElement.innerHTML = __h;
 				}
-			}catch(e){}
+			}catch(e){
+				/* istanbul ignore next */
+				// we ignore errors from testing...
+				if (e.codeName !== 'INDEX_SIZE_ERR') console.error(e);
+			}
 			var $selected = angular.element(selectedElement);
 			if(selectedElement !== undefined){
 				var tagName = selectedElement.tagName.toLowerCase();
@@ -611,7 +695,8 @@ angular.module('textAngular.DOM', ['textAngular.factories'])
 							$target.remove();
 							$target = defaultWrapper;
 						}
-					}else if($target.parent()[0].tagName.toLowerCase() === optionsTagName && !$target.parent().hasClass('ta-bind')){
+					}else if($target.parent()[0].tagName.toLowerCase() === optionsTagName &&
+						!$target.parent().hasClass('ta-bind')){
 						//unwrap logic for parent
 						var blockElement = $target.parent();
 						var contents = blockElement.contents();
@@ -631,7 +716,11 @@ angular.module('textAngular.DOM', ['textAngular.factories'])
 					}else{
 						// default wrap behaviour
 						_nodes = taSelection.getOnlySelectedElements();
-						if(_nodes.length === 0) _nodes = [$target[0]];
+						//console.log('default wrap behavior', _nodes);
+						if(_nodes.length === 0) {
+							// no nodes at all....
+							_nodes = [$target[0]];
+						}
 						// find the parent block element if any of the nodes are inline or text
 						for(i = 0; i < _nodes.length; i++){
 							if(_nodes[i].nodeType === 3 || !_nodes[i].tagName.match(BLOCKELEMENTS)){
@@ -644,18 +733,9 @@ angular.module('textAngular.DOM', ['textAngular.factories'])
 						_nodes = _nodes.filter(function(value, index, self) {
 							return self.indexOf(value) === index;
 						});
-						var _h;
 						if(angular.element(_nodes[0]).hasClass('ta-bind')){
 							$target = angular.element(options);
-							//console.log('has ta-bind -- root!');
-							_h = _nodes[0].innerHTML;
-							/* istanbul ignore next: this is hack for Firefox where it adds <br> */
-							if (/<span class="rangySelectionBoundary".+><br>/i.test(_h)) {
-								// if it is a <span rangySelectionBoundary></span> and a <br> all by itself
-								// this is an artifact of Firefox and so we remove the <br>
-								_h = _h.replace('<br>', '&#8203;');  // no space-space
-							}
-							$target[0].innerHTML = _h;
+							$target[0].innerHTML = _nodes[0].innerHTML;
 							_nodes[0].innerHTML = $target[0].outerHTML;
 						}else if(optionsTagName === 'blockquote'){
 							// blockquotes wrap other block elements
@@ -675,20 +755,18 @@ angular.module('textAngular.DOM', ['textAngular.factories'])
 							// regular block elements replace other block elements
 							for(i = 0; i < _nodes.length; i++){
 								$target = angular.element(options);
-								_h = _nodes[i].innerHTML;
-								/* istanbul ignore next: this is hack for Firefox where it adds <br> */
-								if (/<span class="rangySelectionBoundary".+><br>/i.test(_h)) {
-									// if it is a <span rangySelectionBoundary></span> and a <br> all by itself
-									// this is an artifact of Firefox and so we remove the <br>
-									_h = _h.replace('<br>', '&#8203;'); // no space-space
-								}
-								$target[0].innerHTML = _h;
+								$target[0].innerHTML = _nodes[i].innerHTML;
 								_nodes[i].parentNode.insertBefore($target[0],_nodes[i]);
 								_nodes[i].parentNode.removeChild(_nodes[i]);
 							}
 						}
 					}
 					taSelection.setSelectionToElementEnd($target[0]);
+					// looses focus when we have the whole container selected and no text!
+					// refocus on the shown display element, this fixes a bug when using firefox
+					$target[0].focus();
+					//console.log($document[0].activeElement.childNodes);
+					//$document[0].activeElement.childNodes[0].focus();
 					return;
 				}else if(command.toLowerCase() === 'createlink'){
 					var tagBegin = '<a href="' + options + '" target="' +
@@ -711,7 +789,11 @@ angular.module('textAngular.DOM', ['textAngular.factories'])
 			}
 			try{
 				$document[0].execCommand(command, showUI, options);
-			}catch(e){}
+			}catch(e){
+				/* istanbul ignore next */
+				// we ignore errors from testing...
+				if (e.codeName !== 'INDEX_SIZE_ERR') console.error(e);
+			}
 		};
 	};
 }]).service('taSelection', ['$document', 'taDOM',
@@ -806,7 +888,7 @@ function($document, taDOM){
 		},
 		setSelectionToElementEnd: function (el){
 			var range = rangy.createRange();
-			
+
 			range.selectNodeContents(el);
 			range.collapse(false);
 			if(el.childNodes && el.childNodes[el.childNodes.length - 1] && el.childNodes[el.childNodes.length - 1].nodeName === 'br'){
@@ -888,6 +970,7 @@ function($document, taDOM){
 						
 						angular.element(parent).after(secondParent);
 						// put cursor to end of inserted content
+						//console.log('setStartAfter', parent);
 						range.setStartAfter(parent);
 						range.setEndAfter(parent);
 						
@@ -1028,29 +1111,27 @@ angular.module('textAngular.validators', [])
 });
 angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'])
 .service('_taBlankTest', [function(){
-	return function(_defaultTest){
-		return function(_blankVal){
-			// we radically restructure this code.
-			// what was here before was incredibly fragile.
-			// What we do now is to check that the html is non-blank visually
-			// which we check by looking at html->text
-			if(!_blankVal) return true;
-			// find first non-tag match - ie start of string or after tag that is not whitespace
-			// var t0 = performance.now();
-			// Takes a small fraction of a mSec to do this...
-			var _text_ = stripHtmlToText(_blankVal);
-			// var t1 = performance.now();
-			// console.log('Took', (t1 - t0).toFixed(4), 'milliseconds to generate:');
-			if (_text_=== '') {
-				// img generates a visible item so it is not blank!
-				if (/<img[^>]+>/.test(_blankVal)) {
-					return false;
-				}
-				return true;
-			} else {
+	return function(_blankVal){
+		// we radically restructure this code.
+		// what was here before was incredibly fragile.
+		// What we do now is to check that the html is non-blank visually
+		// which we check by looking at html->text
+		if(!_blankVal) return true;
+		// find first non-tag match - ie start of string or after tag that is not whitespace
+		// var t0 = performance.now();
+		// Takes a small fraction of a mSec to do this...
+		var _text_ = stripHtmlToText(_blankVal);
+		// var t1 = performance.now();
+		// console.log('Took', (t1 - t0).toFixed(4), 'milliseconds to generate:');
+		if (_text_=== '') {
+			// img generates a visible item so it is not blank!
+			if (/<img[^>]+>/.test(_blankVal)) {
 				return false;
 			}
-		};
+			return true;
+		} else {
+			return false;
+		}
 	};
 }])
 .directive('taButton', [function(){
@@ -1193,13 +1274,15 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 			/* istanbul ignore else */
 			if(!ngModelOptions.$options) ngModelOptions.$options = {}; // ng-model-options support
 
-			var _blankTest = _taBlankTest(_defaultTest);
-
 			var _ensureContentWrapped = function(value) {
-				if (_blankTest(value)) return value;
+				if (_taBlankTest(value)) return value;
 				var domTest = angular.element("<div>" + value + "</div>");
 				//console.log('domTest.children().length():', domTest.children().length);
+				//console.log('_ensureContentWrapped', domTest.children());
+				//console.log(value, attrs.taDefaultWrap);
 				if (domTest.children().length === 0) {
+					// if we have a <br> and the attrs.taDefaultWrap is a <p> we need to remove the <br>
+					//value = value.replace(/<br>/i, '');
 					value = "<" + attrs.taDefaultWrap + ">" + value + "</" + attrs.taDefaultWrap + ">";
 				} else {
 					var _children = domTest[0].childNodes;
@@ -1339,7 +1422,7 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 				_skipRender = skipRender || false;
 				if(typeof triggerUndo === "undefined" || triggerUndo === null) triggerUndo = true && _isContentEditable; // if not contentEditable then the native undo/redo is fine
 				if(typeof _val === "undefined" || _val === null) _val = _compileHtml();
-				if(_blankTest(_val)){
+				if(_taBlankTest(_val)){
 					// this avoids us from tripping the ng-pristine flag if we click in and out with out typing
 					if(ngModel.$viewValue !== '') ngModel.$setViewValue('');
 					if(triggerUndo && ngModel.$undoManager.current() !== '') ngModel.$undoManager.push('');
@@ -1366,7 +1449,7 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 
 			// trigger the validation calls
 			if(element.attr('required')) ngModel.$validators.required = function(modelValue, viewValue) {
-				return !_blankTest(modelValue || viewValue);
+				return !_taBlankTest(modelValue || viewValue);
 			};
 			// parsers trigger from the above keyup function or any other time that the viewValue is updated and parses it for storage in the ngModel
 			ngModel.$parsers.push(_sanitize);
@@ -1849,7 +1932,11 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 										selection = selection.parentNode;
 									}
 
-									if(selection.tagName.toLowerCase() !== attrs.taDefaultWrap && selection.tagName.toLowerCase() !== 'li' && (selection.innerHTML.trim() === '' || selection.innerHTML.trim() === '<br>')){
+									if(selection.tagName.toLowerCase() !==
+										attrs.taDefaultWrap &&
+										selection.tagName.toLowerCase() !== 'li' &&
+										(selection.innerHTML.trim() === '' || selection.innerHTML.trim() === '<br>')
+									) {
 										var _new = angular.element(_defaultVal);
 										angular.element(selection).replaceWith(_new);
 										taSelection.setSelectionToElementStart(_new[0]);
@@ -1857,9 +1944,17 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 								}
 							}
 							var val = _compileHtml();
-							if(_defaultVal !== '' && val.trim() === ''){
+							if(_defaultVal !== '' && (val.trim() === '' || val.trim() === '<br>')){
 								_setInnerHTML(_defaultVal);
 								taSelection.setSelectionToElementStart(element.children()[0]);
+							}else if(val.substring(0, 1) !== '<' && attrs.taDefaultWrap !== ''){
+								/* we no longer do this, since there can be comments here and white space
+								var _savedSelection = rangy.saveSelection();
+								val = _compileHtml();
+								val = "<" + attrs.taDefaultWrap + ">" + val + "</" + attrs.taDefaultWrap + ">";
+								_setInnerHTML(val);
+								rangy.restoreSelection(_savedSelection);
+								*/
 							}
 							var triggerUndo = _lastKey !== event.keyCode && UNDO_TRIGGER_KEYS.test(event.keyCode);
 							if(_keyupTimeout) $timeout.cancel(_keyupTimeout);
@@ -2344,7 +2439,7 @@ textAngular.directive("textAngular", [
 				});
 				scope.displayElements.scrollWindow.attr({'ng-hide': 'showHtml'});
 				if(attrs.taDefaultWrap) {
-					// taDefaultWrap is only applied to the text and the not the html view
+					// taDefaultWrap is only applied to the text and not the html view
 					scope.displayElements.text.attr('ta-default-wrap', attrs.taDefaultWrap);
 				}
 
@@ -2413,6 +2508,7 @@ textAngular.directive("textAngular", [
 					// if rangy library is loaded return a function to reload the current selection
 					_savedSelection = rangy.saveSelection();
 					return function(){
+						//console.log('restore to:', _savedSelection);
 						if(_savedSelection) rangy.restoreSelection(_savedSelection);
 					};
 				};
@@ -2480,8 +2576,9 @@ textAngular.directive("textAngular", [
 					$animate.enabled(false, scope.displayElements.html);
 					$animate.enabled(false, scope.displayElements.text);
 					//Show the HTML view
-					var _model;
 					/* istanbul ignore next: ngModel exists check */
+/*
+					var _model;
 					if (ngModel) {
 						_model = ngModel.$viewValue;
 					} else {
@@ -2493,6 +2590,7 @@ textAngular.directive("textAngular", [
 						// they can get out of sync and when they do, we correct that here...
 						scope.displayElements.html.val(_model);
 					}
+*/
 					if(scope.showHtml){
 						//defer until the element is visible
 						$timeout(function(){
