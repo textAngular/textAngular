@@ -2,6 +2,12 @@ describe('textAngularManager', function(){
 	'use strict';
 	beforeEach(module('textAngular'));
 
+	describe('getVersion', function(){
+		it('should return a valid version in the correct format!', inject(function(textAngularManager){
+			expect(/v\d+.\d+.\d+/i.test(textAngularManager.getVersion())).toBe(true);
+		}));
+	});
+
 	describe('toolbar', function(){
 		describe('registration', function(){
 			it('should require a scope object', inject(function(textAngularManager){

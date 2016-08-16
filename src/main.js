@@ -929,6 +929,8 @@ textAngular.service('textAngularManager', ['taToolExecuteAction', 'taTools', 'ta
 		// the inital state is correct.
 		//
 		updateStyles: updateStyles,
+		// return the current version of textAngular in use to the user
+		getVersion: function () { return textAngularVersion; },
 		// for testing
 		getToolbarScopes: function () { return toolbarScopes; }
 	};
