@@ -1,3 +1,11 @@
+<a name"1.5.5"></a>
+### 1.5.5 (2016-08-15)
+
+* **textAnglar:**
+  * Fix(DOM, globals, main, taBind, textAngular.spec): Resoved the issues around the improvements from v1.5.4
+       The bulk of the changes can be seen here: https://github.com/fraywing/textAngular/commit/c39f20d9cf2372f94b579d018b0cb9bb553e33ef
+       
+       
 <a name"1.5.4"></a>
 ### 1.5.4 (2016-08-06)
 
