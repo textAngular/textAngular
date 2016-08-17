@@ -21,11 +21,21 @@ module.exports = function (grunt) {
 	grunt.registerTask('test', ['clean:coverage', 'jshint', 'karma', 'coverage']);
 	grunt.registerTask('travis-test', ['concat', 'umd', 'copy:setupFiles', 'jshint', 'karma', 'coverage', 'coveralls']);
 
-	grunt.registerTask('release', ['bump-only','compile', 'demo_pages', 'changelog','gitcommit','bump-commit', 'shell:publish']);
-	grunt.registerTask('release:patch', ['bump-only:patch','compile','changelog','gitcommit','bump-commit', 'shell:publish']);
-	grunt.registerTask('release:minor', ['bump-only:minor','compile','changelog','gitcommit','bump-commit', 'shell:publish']);
-	grunt.registerTask('release:major', ['bump-only:major','compile','changelog','gitcommit','bump-commit', 'shell:publish']);
-	grunt.registerTask('release:prerelease', ['bump-only:prerelease','compile','changelog','gitcommit','bump-commit', 'shell:publish']);
+	grunt.registerTask('release', ['bump-only', 'setVersion', 'compile', 'demo_pages', 'changelog','gitcommit','bump-commit', 'shell:publish']);
+	grunt.registerTask('release:patch', ['bump-only:patch','setVersion','compile','changelog','gitcommit','bump-commit', 'shell:publish']);
+	grunt.registerTask('release:minor', ['bump-only:minor','setVersion','compile','changelog','gitcommit','bump-commit', 'shell:publish']);
+	grunt.registerTask('release:major', ['bump-only:major','setVersion','compile','changelog','gitcommit','bump-commit', 'shell:publish']);
+	grunt.registerTask('release:prerelease', ['bump-only:prerelease','setVersion','compile','changelog','gitcommit','bump-commit', 'shell:publish']);
+
+	grunt.registerTask('setVersion', function () {
+		var pkgJson = require('./package.json');
+		var version = pkgJson.version;
+		//grunt.log.writeln('textAngular version:'+version);
+		var contents = grunt.file.read('./src/globals.js');
+		contents = contents.replace(/textAngularVersion = 'v\d+.\d+.\d+'/i, "textAngularVersion = 'v"+version+"'");
+		grunt.file.write('./src/globals.js', contents);
+		console.log('Updated src/globals.js to textAngular version: v'+version);
+	});
 
 	var testConfig = function (configFile, customOptions) {
 		var options = { configFile: configFile, keepalive: true };
