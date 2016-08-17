@@ -929,6 +929,8 @@ textAngular.service('textAngularManager', ['taToolExecuteAction', 'taTools', 'ta
 		// the inital state is correct.
 		//
 		updateStyles: updateStyles,
+		// return the current version of textAngular in use to the user
+		getVersion: function () { return textAngularVersion; },
 		// for testing
 		getToolbarScopes: function () { return toolbarScopes; }
 	};
@@ -1111,6 +1113,17 @@ textAngular.directive('textAngularToolbar', [
 				scope.$on('$destroy', function(){
 					textAngularManager.unregisterToolbar(scope.name);
 				});
+			}
+		};
+	}
+]);
+textAngular.directive('textAngularVersion', ['textAngularManager',
+	function(textAngularManager) {
+		var version = textAngularManager.getVersion();
+		return {
+			restrict: "EA",
+			link: function (scope, element, attrs) {
+				element.html(version);
 			}
 		};
 	}

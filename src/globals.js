@@ -1,3 +1,6 @@
+// NOTE: textAngularVersion must match the Gruntfile.js 'setVersion' task.... and have format v/d+./d+./d+
+var textAngularVersion = 'v1.5.5';   // This is automatically updated during the build process to the current release!
+
 
 // IE version detection - http://stackoverflow.com/questions/4169160/javascript-ie-detection-why-not-use-simple-conditional-comments
 // We need this as IE sometimes plays funny tricks with the contenteditable.

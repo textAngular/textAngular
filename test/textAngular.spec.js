@@ -1280,4 +1280,19 @@ describe('textAngular', function(){
 			expect($rootScope.html).toBe('<p><b>Changed Content</b></p>');
 		}));
 	});
+
+	describe('textAngularVersion directive', function(){
+		beforeEach(inject(function(_textAngularManager_){
+			textAngularManager = _textAngularManager_;
+		}));
+		it('functions', inject(function($window, _$rootScope_, $compile, $document, $timeout){
+			$rootScope = _$rootScope_;
+			var version = textAngularManager.getVersion();
+			element = $compile('<div text-angular-version></div>')($rootScope);
+			$rootScope.$digest();
+			var html = element[0].outerHTML;
+			expect(html).toBe('<div text-angular-version="" class="ng-scope">'+version+'</div>');
+		}));
+	});
+
 });
