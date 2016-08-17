@@ -30,6 +30,7 @@
         <br>
         <div class="container">
             <a href="http://github.com/fraywing/textAngular"> <img src="http://textangular.com/images/textAngularLogo.png" style="max-width:500%;" class="lighter"></a>
+            <span text-angular-version style="font-size:20px; position:relative; top:26px;">
         </div>
         <br>
         <div class="container border-around text-center lighter">
@@ -46,9 +47,9 @@
         </div>
         <br>
         <div class="container text-right">
-            <span class="well btn-md"><b>//cdnjs.cloudflare.com/ajax/libs/textAngular/<%= version %>/textAngular.min.js</b></span>&nbsp;&nbsp;&nbsp;
-            <a href="https://github.com/fraywing/textAngular/archive/v<%= version %>.zip" class="btn btn-danger btn-lg">
-                <div><i class="icon-arrow-down"> </i><span>Download v<%= version %></span></div>
+            <span class="well btn-md"><b>//cdnjs.cloudflare.com/ajax/libs/textAngular/{{versionNumber}}/textAngular.min.js</b></span>&nbsp;&nbsp;&nbsp;
+            <a href="https://github.com/fraywing/textAngular/archive/{{version}}.zip" class="btn btn-danger btn-lg">
+                <div><i class="icon-arrow-down"> </i><span>Download {{version}}</span></div>
             </a>
         </div>
         <br>
@@ -66,9 +67,12 @@
     </div>
     <script type="text/javascript">
     angular.module("textAngularDemo", ['textAngular'])
-    .controller("demoController", function demoController($scope) {
+    .controller("demoController", ['$scope', 'textAngularManager', function demoController($scope, textAngularManager) {
+      $scope.version = textAngularManager.getVersion();
+      $scope.versionNumber = $scope.version.substring(1);
+        console.log($scope.versionNumber);
       $scope.htmlContent = '<h2>Try me!</h2><p>textAngular is a super cool WYSIWYG Text Editor directive for AngularJS</p><p><b>Features:</b></p><ol><li>Automatic Seamless Two-Way-Binding</li><li style="color: blue;">Super Easy <b>Theming</b> Options</li><li>Simple Editor Instance Creation</li><li>Safely Parses Html for Custom Toolbar Icons</li><li>Doesn&apos;t Use an iFrame</li><li>Works with Firefox, Chrome, and IE9+</li></ol><p><b>Code at GitHub:</b> <a href="https://github.com/fraywing/textAngular">Here</a> </p>';
-    });
+    }]);
     </script>
 </body>
 
