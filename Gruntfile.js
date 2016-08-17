@@ -22,10 +22,10 @@ module.exports = function (grunt) {
 	grunt.registerTask('travis-test', ['concat', 'umd', 'copy:setupFiles', 'jshint', 'karma', 'coverage', 'coveralls']);
 
 	grunt.registerTask('release', ['bump-only', 'setVersion', 'compile', 'demo_pages', 'changelog','gitcommit','bump-commit', 'shell:publish']);
-	grunt.registerTask('release:patch', ['bump-only:patch','setVersion','compile','changelog','gitcommit','bump-commit', 'shell:publish']);
-	grunt.registerTask('release:minor', ['bump-only:minor','setVersion','compile','changelog','gitcommit','bump-commit', 'shell:publish']);
-	grunt.registerTask('release:major', ['bump-only:major','setVersion','compile','changelog','gitcommit','bump-commit', 'shell:publish']);
-	grunt.registerTask('release:prerelease', ['bump-only:prerelease','setVersion','compile','changelog','gitcommit','bump-commit', 'shell:publish']);
+	grunt.registerTask('release:patch', ['bump-only:patch','setVersion','compile','demo_pages','changelog','gitcommit','bump-commit', 'shell:publish']);
+	grunt.registerTask('release:minor', ['bump-only:minor','setVersion','compile','demo_pages','changelog','gitcommit','bump-commit', 'shell:publish']);
+	grunt.registerTask('release:major', ['bump-only:major','setVersion','compile','demo_pages','changelog','gitcommit','bump-commit', 'shell:publish']);
+	grunt.registerTask('release:prerelease', ['bump-only:prerelease','setVersion','demo_pages','compile','changelog','gitcommit','bump-commit', 'shell:publish']);
 
 	grunt.registerTask('setVersion', function () {
 		var pkgJson = require('./package.json');
