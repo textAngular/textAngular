@@ -1,3 +1,6 @@
+// NOTE: textAngularVersion must match the Gruntfile.js 'setVersion' task.... and have format v/d+./d+./d+
+var textAngularVersion = 'v1.5.6-0';   // This is automatically updated during the build process to the current release!
+
 
 // IE version detection - http://stackoverflow.com/questions/4169160/javascript-ie-detection-why-not-use-simple-conditional-comments
 // We need this as IE sometimes plays funny tricks with the contenteditable.
@@ -28,40 +31,47 @@ var _browserDetect = {
 
 		return v > 4 ? v : undef;
 	}()),
-	webkit: /AppleWebKit\/([\d.]+)/i.test(navigator.userAgent)
+	webkit: /AppleWebKit\/([\d.]+)/i.test(navigator.userAgent),
+	isFirefox: navigator.userAgent.toLowerCase().indexOf('firefox') > -1
 };
 
-// fix a webkit bug, see: https://gist.github.com/shimondoodkin/1081133
-// this is set true when a blur occurs as the blur of the ta-bind triggers before the click
-var globalContentEditableBlur = false;
-/* istanbul ignore next: Browser Un-Focus fix for webkit */
-if(_browserDetect.webkit) {
-	document.addEventListener("mousedown", function(_event){
-		var e = _event || window.event;
-		var curelement = e.target;
-		if(globalContentEditableBlur && curelement !== null){
-			var isEditable = false;
-			var tempEl = curelement;
-			while(tempEl !== null && tempEl.tagName.toLowerCase() !== 'html' && !isEditable){
-				isEditable = tempEl.contentEditable === 'true';
-				tempEl = tempEl.parentNode;
-			}
-			if(!isEditable){
-				document.getElementById('textAngular-editableFix-010203040506070809').setSelectionRange(0, 0); // set caret focus to an element that handles caret focus correctly.
-				curelement.focus(); // focus the wanted element.
-				if (curelement.select) {
-					curelement.select(); // use select to place cursor for input elements.
-				}
-			}
-		}
-		globalContentEditableBlur = false;
-	}, false); // add global click handler
-	angular.element(document).ready(function () {
-		angular.element(document.body).append(angular.element('<input id="textAngular-editableFix-010203040506070809" class="ta-hidden-input" aria-hidden="true" unselectable="on" tabIndex="-1">'));
-	});
+// Global to textAngular to measure performance where needed
+var performance = performance || {};
+performance.now = (function() {
+	return performance.now       ||
+		performance.mozNow    ||
+		performance.msNow     ||
+		performance.oNow      ||
+		performance.webkitNow ||
+		function() { return new Date().getTime(); };
+})();
+// usage is:
+// var t0 = performance.now();
+// doSomething();
+// var t1 = performance.now();
+// console.log('Took', (t1 - t0).toFixed(4), 'milliseconds to do something!');
+//
+
+// turn html into pure text that shows visiblity
+function stripHtmlToText(html)
+{
+	var tmp = document.createElement("DIV");
+	tmp.innerHTML = html;
+	var res = tmp.textContent || tmp.innerText || '';
+	res.replace('\u200B', ''); // zero width space
+	res = res.trim();
+	return res;
+}
+// get html
+function getDomFromHtml(html)
+{
+	var tmp = document.createElement("DIV");
+	tmp.innerHTML = html;
+	return tmp;
 }
 
-// Gloabl to textAngular REGEXP vars for block and list elements.
+
+// Global to textAngular REGEXP vars for block and list elements.
 
 var BLOCKELEMENTS = /^(address|article|aside|audio|blockquote|canvas|dd|div|dl|fieldset|figcaption|figure|footer|form|h1|h2|h3|h4|h5|h6|header|hgroup|hr|noscript|ol|output|p|pre|section|table|tfoot|ul|video)$/i;
 var LISTELEMENTS = /^(ul|li|ol)$/i;
