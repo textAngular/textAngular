@@ -1,3 +1,15 @@
+<a name"1.5.6-0"></a>
+### 1.5.6-0 (2016-08-17)
+
+* **textAngular:**
+  * Enhancement(demo, static-demo, textAngular.com) Added version display to demo code 
+           (https://github.com/fraywing/textAngular/commit/3c3ce76c3805d67e49c980c5bf1da15f52a24781)
+  * Enhancement(main, globals, Gruntfile, textAngularManger.spec, textAngular.spec): 
+       Added a new directive text-angular-version and a new function to textAngularManger:getVersion()
+       I have wanted to add this for a long time to make it easier to display the version of textAngular being used.
+           (https://github.com/fraywing/textAngular/commit/1ffa6f7263ce844a4e300226616a9d2282143f56)
+       This also modifies the build process to automatically put the version into globals.js     
+
 <a name"1.5.5"></a>
 ### 1.5.5 (2016-08-15)
 
