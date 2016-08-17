@@ -1120,11 +1120,9 @@ textAngular.directive('textAngularToolbar', [
 textAngular.directive('textAngularVersion', ['textAngularManager',
 	function(textAngularManager) {
 		var version = textAngularManager.getVersion();
-		console.log(version);
 		return {
 			restrict: "EA",
 			link: function (scope, element, attrs) {
-				console.log(element);
 				element.html(version);
 			}
 		};
