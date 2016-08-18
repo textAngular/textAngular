@@ -101,7 +101,7 @@ angular.module('textAngularSetup', [])
 	keyMappings : [],
 	toolbar: [
 		['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'pre', 'quote'],
-		['bold', 'italics', 'underline', 'strikeThrough', 'ul', 'ol', 'redo', 'undo', 'clear'],
+		['bold', 'italics', 'underline', 'strikeThrough', 'superscript', 'ul', 'ol', 'redo', 'undo', 'clear'],
 		['justifyLeft','justifyCenter','justifyRight','justifyFull','indent','outdent'],
 		['html', 'insertImage', 'insertLink', 'insertVideo', 'wordcount', 'charcount']
 	],
@@ -206,6 +206,9 @@ angular.module('textAngularSetup', [])
 	},
 	bold: {
 		tooltip: 'Bold'
+	},
+	superscript: {
+		tooltip: 'Superscript'
 	},
 	italic: {
 		tooltip: 'Italic'
@@ -536,6 +539,16 @@ angular.module('textAngularSetup', [])
 		},
 		commandKeyCode: 98
 	});
+	taRegisterTool('superscript', {
+		iconclass: 'fa fa-superscript',
+		tooltiptext: taTranslations.superscript.tooltip,
+		action: function(){
+			return this.$editor().wrapSelection("superscript", null);
+		},
+		activeState: function(){
+			return this.$editor().queryCommandState('superscript');
+		}
+	});
 	taRegisterTool('justifyLeft', {
 		iconclass: 'fa fa-align-left',
 		tooltiptext: taTranslations.justifyLeft.tooltip,
@@ -711,7 +724,10 @@ angular.module('textAngularSetup', [])
 			var $editor = this.$editor();
 			var recursiveRemoveClass = function(node){
 				node = angular.element(node);
-				if(node[0] !== $editor.displayElements.text[0]) node.removeAttr('class');
+				/* istanbul ignore next: this is not triggered in tests any longer since we now never select the whole displayELement */
+				if(node[0] !== $editor.displayElements.text[0]) {
+					node.removeAttr('class');
+				}
 				angular.forEach(node.children(), recursiveRemoveClass);
 			};
 			angular.forEach(possibleNodes, recursiveRemoveClass);

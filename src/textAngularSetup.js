@@ -101,7 +101,7 @@ angular.module('textAngularSetup', [])
 	keyMappings : [],
 	toolbar: [
 		['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'pre', 'quote'],
-		['bold', 'italics', 'underline', 'strikeThrough', 'ul', 'ol', 'redo', 'undo', 'clear'],
+		['bold', 'italics', 'underline', 'strikeThrough', 'superscript', 'ul', 'ol', 'redo', 'undo', 'clear'],
 		['justifyLeft','justifyCenter','justifyRight','justifyFull','indent','outdent'],
 		['html', 'insertImage', 'insertLink', 'insertVideo', 'wordcount', 'charcount']
 	],
@@ -206,6 +206,9 @@ angular.module('textAngularSetup', [])
 	},
 	bold: {
 		tooltip: 'Bold'
+	},
+	superscript: {
+		tooltip: 'Superscript'
 	},
 	italic: {
 		tooltip: 'Italic'
@@ -535,6 +538,16 @@ angular.module('textAngularSetup', [])
 			return this.$editor().queryCommandState('bold');
 		},
 		commandKeyCode: 98
+	});
+	taRegisterTool('superscript', {
+		iconclass: 'fa fa-superscript',
+		tooltiptext: taTranslations.superscript.tooltip,
+		action: function(){
+			return this.$editor().wrapSelection("superscript", null);
+		},
+		activeState: function(){
+			return this.$editor().queryCommandState('superscript');
+		}
 	});
 	taRegisterTool('justifyLeft', {
 		iconclass: 'fa fa-align-left',
