@@ -47,10 +47,10 @@ angular.module('textAngular.factories', [])
 			finalHtml += html.substring(lastIndex, match.index) + appleSpaceVal;
 			lastIndex = match.index + match[0].length;
 		}
-		finalHtml += html.substring(lastIndex);
 		/* istanbul ignore next: apple-contereted-space span has matched */
 		if (lastIndex) {
 			// modified....
+			finalHtml += html.substring(lastIndex);
 			html=finalHtml;
 			finalHtml='';
 			lastIndex=0;
