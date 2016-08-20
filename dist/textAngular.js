@@ -240,6 +240,7 @@ angular.module('textAngular.factories', [])
 		/* istanbul ignore next: apple-contereted-space span has matched */
 		if (lastIndex) {
 			// modified....
+			finalHtml += html.substring(lastIndex);
 			html=finalHtml;
 			finalHtml='';
 			lastIndex=0;
@@ -2752,6 +2753,25 @@ textAngular.directive("textAngular", [
 				scope.displayElements.text.on('keyup', _keyup);
 				// stop updating on key up and update the display/model
 				_keypress = function(event, eventData){
+					// bug fix for Firefox.  If we are selecting a <a> already, any characters will
+					// be added within the <a> which is bad!
+					var _selection = taSelection.getSelection();
+					/* istanbul ignore next: don't see how to test this... */
+					if (taSelection.getSelectionElement().tagName.toLowerCase() === 'a') {
+						// check and see if we are at the edge of the <a>
+						if (_selection.start.element.nodeType === 3 &&
+							_selection.start.element.textContent.length === _selection.end.offset) {
+							// we are at the end of the <a>!!!
+							// so move the selection to after the <a>!!
+							taSelection.setSelectionAfterElement(taSelection.getSelectionElement());
+						}
+						if (_selection.start.element.nodeType === 3 &&
+							_selection.start.offset === 0) {
+							// we are at the start of the <a>!!!
+							// so move the selection before the <a>!!
+							taSelection.setSelectionBeforeElement(taSelection.getSelectionElement());
+						}
+					}
 					/* istanbul ignore else: this is for catching the jqLite testing*/
 					if(eventData) angular.extend(event, eventData);
 					scope.$apply(function(){

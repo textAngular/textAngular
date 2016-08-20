@@ -50,6 +50,7 @@ angular.module('textAngular.factories', [])
 		/* istanbul ignore next: apple-contereted-space span has matched */
 		if (lastIndex) {
 			// modified....
+			finalHtml += html.substring(lastIndex);
 			html=finalHtml;
 			finalHtml='';
 			lastIndex=0;
