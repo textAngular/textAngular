@@ -27,5 +27,10 @@ describe('taFixChrome', function(){
 		it('should remove a matching span with its following br', function(){
 			expect(taFixChrome('<div><span style="font-family: inherit; line-height: 1.428571429;">Test Content</span><br/></div>')).toBe('<div>Test Content</div>');
 		});
+
+		it('should correctly keep final part of string after "Apple-converted-space"', function(){
+			expect(taFixChrome('<p class="p1">I can see this part of the text<span class="Apple-converted-space">&nbsp; </span>but not this part</p>')).toBe('<p class="p1">I can see this part of the text  but not this part</p>');
+		});
+
 	});
 });
