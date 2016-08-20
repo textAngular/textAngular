@@ -41,6 +41,8 @@ textAngular.directive("textAngular", [
 				angular.extend(scope, angular.copy(taOptions), {
 					// wraps the selection in the provided tag / execCommand function. Should only be called in WYSIWYG mode.
 					wrapSelection: function(command, opt, isSelectableElementTool){
+						// we restore the saved selection that was saved when focus was lost
+						textAngularManager.restoreFocusSelection(scope._name, scope);
 						if(command.toLowerCase() === "undo"){
 							scope['$undoTaBindtaTextElement' + _serial]();
 						}else if(command.toLowerCase() === "redo"){
@@ -360,6 +362,16 @@ textAngular.directive("textAngular", [
 				scope.displayElements.html.on('focus', _focusin);
 				scope.displayElements.text.on('focus', _focusin);
 				_focusout = function(e){
+					try {
+						var _s = rangy.getSelection();
+						/* istanbul ignore next: this only active when loose focus */
+						if (_s) {
+							// we save the selection when we loose focus so that if do a wrapSelection, the
+							// apropriate selection in the editor is restored before action.
+							var _savedFocusRange = rangy.saveRange(_s.getRangeAt(0));
+							textAngularManager.saveFocusSelection(scope._name, _savedFocusRange);
+						}
+					} catch(error) { }
 					// if we are NOT runnig an action and have NOT focussed again on the text etc then fire the blur events
 					if(!scope._actionRunning && $document[0].activeElement !== scope.displayElements.html[0] && $document[0].activeElement !== scope.displayElements.text[0]){
 						element.removeClass(scope.classes.focussed);
@@ -951,7 +963,23 @@ textAngular.service('textAngularManager', ['taToolExecuteAction', 'taTools', 'ta
 		// return the current version of textAngular in use to the user
 		getVersion: function () { return textAngularVersion; },
 		// for testing
-		getToolbarScopes: function () { return toolbarScopes; }
+		getToolbarScopes: function () { return toolbarScopes; },
+		// save the selection ('range') for the given editor
+		saveFocusSelection: function (name, range) {
+			editors[name].savedFocusRange = range;
+		},
+		// restore the saved selection from when the focus was lost
+		restoreFocusSelection: function(name, scope) {
+			// we only do this if NOT focussed and saved...
+			/* istanbul ignore next: not sure how to test this */
+			if (editors[name].savedFocusRange && !scope.focussed) {
+				try {
+					var _r = rangy.restoreRange(editors[name].savedFocusRange);
+					var _sel = rangy.getSelection();
+					_sel.addRange(_r);
+				} catch(e) {}
+			}
+		}
 	};
 }]);
 textAngular.directive('textAngularToolbar', [
