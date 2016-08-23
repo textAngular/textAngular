@@ -58,12 +58,13 @@ describe('textAngularManager', function(){
 				textAngularManager.registerToolbar({name: 'test'});
 				textAngularManager.registerToolbar({name: 'test1'});
 				expect(textAngularManager.getToolbarScopes().length).toBe(2);
-				textAngularManager.unregisterEditor('testeditor');
-				// note: unregisterEditor does nothing to the toolbarScopes
+				// note: unregisterToolbar does nothing to the toolbarScopes
 				textAngularManager.unregisterToolbar('test');
-				// this will have removed one of the toolbarScopes
-				expect(textAngularManager.getToolbarScopes().length).toBe(1);
+				expect(textAngularManager.getToolbarScopes().length).toBe(2);
 				textAngularManager.unregisterToolbar('test1');
+				expect(textAngularManager.getToolbarScopes().length).toBe(2);
+				textAngularManager.unregisterEditor('testeditor');
+				// this will have deleted the toolbarScopes held in the editor
 				expect(textAngularManager.getToolbarScopes().length).toBe(0);
 			}));
 		});
@@ -226,8 +227,14 @@ describe('textAngularManager', function(){
 		describe('interacting', function(){
 			var $rootScope, textAngularManager, editorFuncs, testbar1, testbar2, testbar3;
 			var editorScope = {};
-			beforeEach(inject(function(_textAngularManager_){
+			var $log;
+			beforeEach(inject(function(_textAngularManager_, _$log_){
 				textAngularManager = _textAngularManager_;
+				$log = _$log_;
+			}));
+			afterEach(inject(function(){
+				// turn on to display log messages when needed
+				//console.log($log.debug.logs);
 			}));
 
 			describe('active state', function(){
