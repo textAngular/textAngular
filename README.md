@@ -90,7 +90,7 @@ Download the code from [https://github.com/fraywing/textAngular/releases/latest]
 
 ### Usage
 
-1. Include (`rangy-core.js` and `rangy-saveselection.js`) or `textAngular-rangy.min.js` in your project using script tags
+1. Include (`rangy-core.js` and `rangy-selectionsaverestore.js`) or `textAngular-rangy.min.js` in your project using script tags
 2. Include `textAngular-sanitize.js` or `textAngular-sanitize.min.js` in your project using script tags
 3. Include (`textAngularSetup.js` and `textAngular.js`) or `textAngular.min.js` (textAngularSetup.js is included inside textAngular.min.js)
 4. Add a dependency to `textAngular` in your app module, for example: ```angular.module('myModule', ['textAngular'])```.
