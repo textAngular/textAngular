@@ -1,3 +1,28 @@
+<a name"1.5.6"></a>
+### 1.5.6 (2016-08-23)
+
+
+#### Bug Fixes
+
+* **textAngular:**
+  * Fix(main, textAngularManager.spec): Corrected issues with toolbar being active all all editors with same toolbar.
+     Now toolbarScopes are tied to each editor which is cleaner and makes more sense.
+      AND the toolbarScopes are deleted when the editor is deleted which is better and
+      no longer tied to the toolbar.
+      We also added some code to enable $log messages in the karma testing when necessary
+      See the textAngularManager.spec.js file for details looking at 'var $log', beforeEach() and afterEach()
+     (https://github.com/fraywing/textAngular/commit/daec3e8769f187be3e9f9f5a3c4ac33241f3e492) 
+  * Fix(taFixChrome.spec): added a test to verify the fix form #1281 (https://github.com/fraywing/textAngular/commit/cd45b29a9fddeffaab5bae267572a59b04bd0370)
+  * Fix(main): We now respect he selection and enhanced wrapSelection (https://github.com/fraywing/textAngular/commit/13379176e7b732bf8b83aee9fe0fa5104dcf3473)
+  * FIx(Gruntfile): Added the missing task demo_pages to all release paths
+  * Chore(README): Update to new pluker link
+      
+* **factories:**
+  * Only append remainder if the Apple-converted-space has matched ([e086974c](https://github.com/fraywing/textAngular/commit/e086974c))
+  * Add remainder of html string to finalHtml ([950ed2d8](https://github.com/fraywing/textAngular/commit/950ed2d8))
+
+
+
 <a name"1.5.6-0"></a>
 ### 1.5.6-0 (2016-08-17)
 

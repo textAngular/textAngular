@@ -1,6 +1,6 @@
 {
   "name": "textangular",
-  "version": "1.5.6-0",
+  "version": "1.5.6",
   "description": "A radically powerful Text-Editor/Wysiwyg editor for Angular.js",
   "maintainers": [
     {
