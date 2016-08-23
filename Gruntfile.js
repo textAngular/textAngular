@@ -32,7 +32,7 @@ module.exports = function (grunt) {
 		var version = pkgJson.version;
 		//grunt.log.writeln('textAngular version:'+version);
 		var contents = grunt.file.read('./src/globals.js');
-		contents = contents.replace(/textAngularVersion = 'v\d+.\d+.\d+'/i, "textAngularVersion = 'v"+version+"'");
+		contents = contents.replace(/textAngularVersion = 'v\d+.\d+.\d+(-\d)?'/i, "textAngularVersion = 'v"+version+"'");
 		grunt.file.write('./src/globals.js', contents);
 		console.log('Updated src/globals.js to textAngular version: v'+version);
 	});
