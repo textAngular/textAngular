@@ -11,12 +11,12 @@ Demo is available at: http://www.textangular.com (Or editable [Plunkr Demo](http
 To upgrade from version 1.2.2 or earlier you need to follow these steps:
 
 1. The styling for textAngular is now in the `dist/textAngular.css` file, you will need to include this or a copy of it with your own modifications.
-2. The rangy library is now required, you will need both the `rangy-core` and `rangy-saveselection` modules, alternatively you can include the compressed version (`textAngular-rangy.min.js`) in the dist folder
+2. The rangy library is now required, you will need both the `rangy-core` and `rangy-selectionsaverestore` modules, alternatively you can include the compressed version (`textAngular-rangy.min.js`) in the dist folder
 
 ## Requirements
 
 1. `AngularJS` ≥ `1.3.x`
-2. `Rangy` ≥ `1.3.x`, Both rangy-core and rangy-saveselection are required. (There is a minified combination of these two included in the dist folder)
+2. `Rangy` ≥ `1.3.x`, Both rangy-core and rangy-selectionsaverestore are required. (There is a minified combination of these two included in the dist folder)
 3. `Font-Awesome` ≥ `4.x` for the default icons on the toolbar
 1. `Bootstrap` ≥ `3.x` for the default styles (Can use `bootstrap-css-only`, you must add this to your bower or include this manually)
 5. NOTE: please check the requirements for earlier releases, if these are an issue.
@@ -90,7 +90,7 @@ Download the code from [https://github.com/fraywing/textAngular/releases/latest]
 
 ### Usage
 
-1. Include (`rangy-core.js` and `rangy-saveselection.js`) or `textAngular-rangy.min.js` in your project using script tags
+1. Include (`rangy-core.js` and `rangy-selectionsaverestore.js`) or `textAngular-rangy.min.js` in your project using script tags
 2. Include `textAngular-sanitize.js` or `textAngular-sanitize.min.js` in your project using script tags
 3. Include (`textAngularSetup.js` and `textAngular.js`) or `textAngular.min.js` (textAngularSetup.js is included inside textAngular.min.js)
 4. Add a dependency to `textAngular` in your app module, for example: ```angular.module('myModule', ['textAngular'])```.
