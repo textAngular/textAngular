@@ -660,9 +660,12 @@ angular.module('textAngularSetup', [])
 		iconclass: 'fa fa-ban',
 		tooltiptext: taTranslations.clear.tooltip,
 		action: function(deferred, restoreSelection){
-			var i;
+			var i, selectedElements, prevElement, elementsSeen;
 			this.$editor().wrapSelection("removeFormat", null);
 			var possibleNodes = angular.element(taSelection.getSelectionElement());
+			// possibleNodes[0] === taSelection.getSelectedElement()
+			console.log('************ clear:', possibleNodes[0]);
+			selectedElements = taSelection.getOnlySelectedElements();
 			// remove lists
 			var removeListElements = function(list){
 				list = angular.element(list);
@@ -675,8 +678,72 @@ angular.module('textAngularSetup', [])
 				});
 				list.remove();
 			};
+
 			angular.forEach(possibleNodes.find("ul"), removeListElements);
 			angular.forEach(possibleNodes.find("ol"), removeListElements);
+
+/******************
+ *  we don't use this code - since the previous way CLEAR is expected to work does not clear partially selected <li>
+
+			var removeListElement = function(listE){
+				console.log(listE);
+				var _list = listE.parentNode.childNodes;
+				console.log('_list', _list);
+				var _preLis = [], _postLis = [], _found = false;
+				for (i = 0; i < _list.length; i++) {
+					if (_list[i] === listE) {
+						_found = true;
+					} else if (!_found) _preLis.push(_list[i]);
+					else _postLis.push(_list[i]);
+				}
+				var _parent = angular.element(listE.parentNode);
+				var newElem = angular.element('<p></p>');
+				newElem.html(angular.element(listE).html());
+				if (_preLis.length === 0 || _postLis.length === 0) {
+					if (_postLis.length === 0) _parent.after(newElem);
+					else _parent[0].parentNode.insertBefore(newElem[0], _parent[0]);
+
+					if (_preLis.length === 0 && _postLis.length === 0) _parent.remove();
+					else angular.element(listE).remove();
+				} else {
+					var _firstList = angular.element('<' + _parent[0].tagName + '></' + _parent[0].tagName + '>');
+					var _secondList = angular.element('<' + _parent[0].tagName + '></' + _parent[0].tagName + '>');
+					for (i = 0; i < _preLis.length; i++) _firstList.append(angular.element(_preLis[i]));
+					for (i = 0; i < _postLis.length; i++) _secondList.append(angular.element(_postLis[i]));
+					_parent.after(_secondList);
+					_parent.after(newElem);
+					_parent.after(_firstList);
+					_parent.remove();
+				}
+				taSelection.setSelectionToElementEnd(newElem[0]);
+
+			};
+
+			elementsSeen = [];
+			if (selectedElements.length !==0) console.log(selectedElements);
+			angular.forEach(selectedElements, function (element) {
+				if (elementsSeen.indexOf(element) !== -1 || elementsSeen.indexOf(element.parentElement) !== -1) {
+					return;
+				}
+				elementsSeen.push(element);
+				if (element.nodeName.toLowerCase() === 'li') {
+					console.log('removeListElement', element);
+					removeListElement(element);
+				}
+				else if (element.parentElement && element.parentElement.nodeName.toLowerCase() === 'li') {
+					console.log('removeListElement', element.parentElement);
+					elementsSeen.push(element.parentElement);
+					removeListElement(element.parentElement);
+				}
+			});
+
+ ***********************/
+
+			var showElements = function (element) {
+				console.log('possibleNodes.find(...).element:', element);
+			};
+			//angular.forEach(possibleNodes.find("li"), showElements);
+
 			if(possibleNodes[0].tagName.toLowerCase() === 'li'){
 				var _list = possibleNodes[0].parentNode.childNodes;
 				var _preLis = [], _postLis = [], _found = false;
@@ -722,6 +789,7 @@ angular.module('textAngularSetup', [])
 			if(possibleNodes[0].tagName.toLowerCase() !== 'li' &&
 				possibleNodes[0].tagName.toLowerCase() !== 'ol' &&
 				possibleNodes[0].tagName.toLowerCase() !== 'ul') this.$editor().wrapSelection("formatBlock", "default");
+			console.log('after:', possibleNodes[0]);
 			restoreSelection();
 		}
 	});
@@ -814,7 +882,12 @@ angular.module('textAngularSetup', [])
 		iconclass: 'fa fa-link',
 		action: function(){
 			var urlLink;
-			urlLink = $window.prompt(taTranslations.insertLink.dialogPrompt, 'http://');
+			// if this link has already been set, we need to just edit the existing link
+			if (taSelection.getSelectionElement().tagName.toLowerCase() === 'a') {
+				urlLink = $window.prompt(taTranslations.insertLink.dialogPrompt, taSelection.getSelectionElement().href);
+			} else {
+				urlLink = $window.prompt(taTranslations.insertLink.dialogPrompt, 'http://');
+			}
 			if(urlLink && urlLink !== '' && urlLink !== 'http://'){
 				// block javascript here
 				/* istanbul ignore else: if it's javascript don't worry - though probably should show some kind of error message */

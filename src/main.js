@@ -42,7 +42,8 @@ textAngular.directive("textAngular", [
 					// wraps the selection in the provided tag / execCommand function. Should only be called in WYSIWYG mode.
 					wrapSelection: function(command, opt, isSelectableElementTool){
 						// we restore the saved selection that was saved when focus was lost
-						textAngularManager.restoreFocusSelection(scope._name, scope);
+						/* NOT FUNCTIONAL YET */
+						/* textAngularManager.restoreFocusSelection(scope._name, scope); */
 						if(command.toLowerCase() === "undo"){
 							scope['$undoTaBindtaTextElement' + _serial]();
 						}else if(command.toLowerCase() === "redo"){
@@ -382,18 +383,25 @@ textAngular.directive("textAngular", [
 
 				// note that focusout > focusin is called everytime we click a button - except bad support: http://www.quirksmode.org/dom/events/blurfocus.html
 				// cascades to displayElements.text and displayElements.html automatically.
-				_focusin = function(){
+				_focusin = function(e){
 					scope.focussed = true;
 					element.addClass(scope.classes.focussed);
+/*******  NOT FUNCTIONAL YET
+					if (e.target.id === 'taTextElement' + _serial) {
+						console.log('_focusin taTextElement');
+						// we only do this if NOT focussed
+						textAngularManager.restoreFocusSelection(scope._name);
+					}
+*******/
 					_editorFunctions.focus();
 					element.triggerHandler('focus');
 				};
 				scope.displayElements.html.on('focus', _focusin);
 				scope.displayElements.text.on('focus', _focusin);
 				_focusout = function(e){
+					/****************** NOT FUNCTIONAL YET
 					try {
 						var _s = rangy.getSelection();
-						/* istanbul ignore next: this only active when loose focus */
 						if (_s) {
 							// we save the selection when we loose focus so that if do a wrapSelection, the
 							// apropriate selection in the editor is restored before action.
@@ -401,8 +409,12 @@ textAngular.directive("textAngular", [
 							textAngularManager.saveFocusSelection(scope._name, _savedFocusRange);
 						}
 					} catch(error) { }
+					*****************/
 					// if we are NOT runnig an action and have NOT focussed again on the text etc then fire the blur events
-					if(!scope._actionRunning && $document[0].activeElement !== scope.displayElements.html[0] && $document[0].activeElement !== scope.displayElements.text[0]){
+					if(!scope._actionRunning &&
+						$document[0].activeElement !== scope.displayElements.html[0] &&
+						$document[0].activeElement !== scope.displayElements.text[0])
+					{
 						element.removeClass(scope.classes.focussed);
 						_editorFunctions.unfocus();
 						// to prevent multiple apply error defer to next seems to work.
@@ -438,7 +450,8 @@ textAngular.directive("textAngular", [
 					$animate.enabled(false, scope.displayElements.text);
 					//Show the HTML view
 					/* istanbul ignore next: ngModel exists check */
-/*
+/* THIS is not the correct thing to do, here....
+   The ngModel is correct, but it is not formatted as the user as done it...
 					var _model;
 					if (ngModel) {
 						_model = ngModel.$viewValue;
@@ -614,21 +627,23 @@ textAngular.directive("textAngular", [
 				_keypress = function(event, eventData){
 					// bug fix for Firefox.  If we are selecting a <a> already, any characters will
 					// be added within the <a> which is bad!
-					var _selection = taSelection.getSelection();
-					/* istanbul ignore next: don't see how to test this... */
-					if (taSelection.getSelectionElement().tagName.toLowerCase() === 'a') {
-						// check and see if we are at the edge of the <a>
-						if (_selection.start.element.nodeType === 3 &&
-							_selection.start.element.textContent.length === _selection.end.offset) {
-							// we are at the end of the <a>!!!
-							// so move the selection to after the <a>!!
-							taSelection.setSelectionAfterElement(taSelection.getSelectionElement());
-						}
-						if (_selection.start.element.nodeType === 3 &&
-							_selection.start.offset === 0) {
-							// we are at the start of the <a>!!!
-							// so move the selection before the <a>!!
-							taSelection.setSelectionBeforeElement(taSelection.getSelectionElement());
+					if (taSelection.getSelection) {
+						var _selection = taSelection.getSelection();
+						/* istanbul ignore next: don't see how to test this... */
+						if (taSelection.getSelectionElement().nodeName.toLowerCase() === 'a') {
+							// check and see if we are at the edge of the <a>
+							if (_selection.start.element.nodeType === 3 &&
+								_selection.start.element.textContent.length === _selection.end.offset) {
+								// we are at the end of the <a>!!!
+								// so move the selection to after the <a>!!
+								taSelection.setSelectionAfterElement(taSelection.getSelectionElement());
+							}
+							if (_selection.start.element.nodeType === 3 &&
+								_selection.start.offset === 0) {
+								// we are at the start of the <a>!!!
+								// so move the selection before the <a>!!
+								taSelection.setSelectionBeforeElement(taSelection.getSelectionElement());
+							}
 						}
 					}
 					/* istanbul ignore else: this is for catching the jqLite testing*/

@@ -516,11 +516,14 @@ describe('taTools test tool actions', function(){
 				var sel = $window.rangy.getSelection();
 				var range = $window.rangy.createRangyRange();
 				range.selectNode(jQuery('.ta-text ul li:last-child')[0]);
+				console.log('XXXXXXXXXXXXXXXXXXXXXXXX jQuery()', jQuery('.ta-text ul li:last-child')[0]);
 				range.collapse(true);
 				sel.setSingleRange(range);
 				sel.refresh();
+				console.log('before:', sel.inspect(), $rootScope.htmlcontent);
 				findAndTriggerButton('clear');
 				expect($rootScope.htmlcontent).toBe('<ul><li>Test <b>1</b></li></ul><p>Test 2</p>');
+				// was '<p>Test <b>1</b></p><ul><li>Test 2</li></ul>' instead
 			});
 
 			it('as middle in list', function(){
@@ -532,6 +535,7 @@ describe('taTools test tool actions', function(){
 				range.collapse(true);
 				sel.setSingleRange(range);
 				sel.refresh();
+				console.log('before:', sel.inspect(), $rootScope.htmlcontent);
 				findAndTriggerButton('clear');
 				expect($rootScope.htmlcontent).toBe('<ul><li>Test <b>1</b></li></ul><p>Test 2</p><ul><li>Test 3</li></ul>');
 			});

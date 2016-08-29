@@ -262,6 +262,57 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 				}
 			};
 
+			// in here we are undoing the converts used elsewhere to prevent the < > and & being displayed when they shouldn't in the code.
+			var _compileHtml = function(){
+				if(_isContentEditable) {
+					return element[0].innerHTML;
+				}
+				if(_isInputFriendly) {
+					return element.val();
+				}
+				throw ('textAngular Error: attempting to update non-editable taBind');
+			};
+
+			var selectorClickHandler = function(event){
+				// emit the element-select event, pass the element
+				scope.$emit('ta-element-select', this);
+				event.preventDefault();
+				return false;
+			};
+
+			//used for updating when inserting wrapped elements
+			var _reApplyOnSelectorHandlers = scope['reApplyOnSelectorHandlers' + (attrs.id || '')] = function(){
+				/* istanbul ignore else */
+				if(!_isReadonly) angular.forEach(taSelectableElements, function(selector){
+					// check we don't apply the handler twice
+					element.find(selector)
+						.off('click', selectorClickHandler)
+						.on('click', selectorClickHandler);
+				});
+			};
+
+			var _setViewValue = function(_val, triggerUndo, skipRender){
+				_skipRender = skipRender || false;
+				if(typeof triggerUndo === "undefined" || triggerUndo === null) triggerUndo = true && _isContentEditable; // if not contentEditable then the native undo/redo is fine
+				if(typeof _val === "undefined" || _val === null) _val = _compileHtml();
+				if(_taBlankTest(_val)){
+					// this avoids us from tripping the ng-pristine flag if we click in and out with out typing
+					if(ngModel.$viewValue !== '') ngModel.$setViewValue('');
+					if(triggerUndo && ngModel.$undoManager.current() !== '') ngModel.$undoManager.push('');
+				}else{
+					_reApplyOnSelectorHandlers();
+					if(ngModel.$viewValue !== _val){
+						ngModel.$setViewValue(_val);
+						if(triggerUndo) ngModel.$undoManager.push(_val);
+					}
+				}
+				ngModel.$render();
+			};
+
+			var _setInnerHTML = function(newval){
+				element[0].innerHTML = newval;
+			};
+
 			var _redoUndoTimeout;
 			var _undo = scope['$undoTaBind' + (attrs.id || '')] = function(){
 				/* istanbul ignore else: can't really test it due to all changes being ignored as well in readonly */
@@ -294,35 +345,6 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 						}, 1);
 					}
 				}
-			};
-
-			// in here we are undoing the converts used elsewhere to prevent the < > and & being displayed when they shouldn't in the code.
-			var _compileHtml = function(){
-				if(_isContentEditable) {
-					return element[0].innerHTML;
-				}
-				if(_isInputFriendly) {
-					return element.val();
-				}
-				throw ('textAngular Error: attempting to update non-editable taBind');
-			};
-
-			var _setViewValue = function(_val, triggerUndo, skipRender){
-				_skipRender = skipRender || false;
-				if(typeof triggerUndo === "undefined" || triggerUndo === null) triggerUndo = true && _isContentEditable; // if not contentEditable then the native undo/redo is fine
-				if(typeof _val === "undefined" || _val === null) _val = _compileHtml();
-				if(_taBlankTest(_val)){
-					// this avoids us from tripping the ng-pristine flag if we click in and out with out typing
-					if(ngModel.$viewValue !== '') ngModel.$setViewValue('');
-					if(triggerUndo && ngModel.$undoManager.current() !== '') ngModel.$undoManager.push('');
-				}else{
-					_reApplyOnSelectorHandlers();
-					if(ngModel.$viewValue !== _val){
-						ngModel.$setViewValue(_val);
-						if(triggerUndo) ngModel.$undoManager.push(_val);
-					}
-				}
-				ngModel.$render();
 			};
 
 			//used for updating when inserting wrapped elements
@@ -897,12 +919,6 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 				}
 			}
 
-			var selectorClickHandler = function(event){
-				// emit the element-select event, pass the element
-				scope.$emit('ta-element-select', this);
-				event.preventDefault();
-				return false;
-			};
 			var fileDropHandler = function(event, eventData){
 				/* istanbul ignore else: this is for catching the jqLite testing*/
 				if(eventData) angular.extend(event, eventData);
@@ -920,20 +936,6 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 				}
 			};
 
-			//used for updating when inserting wrapped elements
-			var _reApplyOnSelectorHandlers = scope['reApplyOnSelectorHandlers' + (attrs.id || '')] = function(){
-				/* istanbul ignore else */
-				if(!_isReadonly) angular.forEach(taSelectableElements, function(selector){
-						// check we don't apply the handler twice
-						element.find(selector)
-							.off('click', selectorClickHandler)
-							.on('click', selectorClickHandler);
-					});
-			};
-
-			var _setInnerHTML = function(newval){
-				element[0].innerHTML = newval;
-			};
 			var _renderTimeout;
 			var _renderInProgress = false;
 			// changes to the model variable from outside the html/text inputs
