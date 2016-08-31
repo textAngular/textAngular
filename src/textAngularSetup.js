@@ -436,7 +436,8 @@ angular.module('textAngularSetup', [])
 		}
 	};
 }])
-.run(['taRegisterTool', '$window', 'taTranslations', 'taSelection', 'taToolFunctions', '$sanitize', 'taOptions', function(taRegisterTool, $window, taTranslations, taSelection, taToolFunctions, $sanitize, taOptions){
+.run(['taRegisterTool', '$window', 'taTranslations', 'taSelection', 'taToolFunctions', '$sanitize', 'taOptions', '$log',
+	function(taRegisterTool, $window, taTranslations, taSelection, taToolFunctions, $sanitize, taOptions, $log){
 	// test for the version of $sanitize that is in use
 	// You can disable this check by setting taOptions.textAngularSanitize == false
 	var gv = {}; $sanitize('', gv);
@@ -660,12 +661,12 @@ angular.module('textAngularSetup', [])
 		iconclass: 'fa fa-ban',
 		tooltiptext: taTranslations.clear.tooltip,
 		action: function(deferred, restoreSelection){
-			var i, selectedElements, prevElement, elementsSeen;
+			var i, selectedElements, elementsSeen;
+
 			this.$editor().wrapSelection("removeFormat", null);
 			var possibleNodes = angular.element(taSelection.getSelectionElement());
-			// possibleNodes[0] === taSelection.getSelectedElement()
-			console.log('************ clear:', possibleNodes[0]);
-			selectedElements = taSelection.getOnlySelectedElements();
+			selectedElements = taSelection.getAllSelectedElements();
+			//$log.log('selectedElements:', selectedElements);
 			// remove lists
 			var removeListElements = function(list){
 				list = angular.element(list);
@@ -679,13 +680,42 @@ angular.module('textAngularSetup', [])
 				list.remove();
 			};
 
+			angular.forEach(selectedElements, function(element) {
+				if (element.nodeName.toLowerCase() === 'ul' ||
+					element.nodeName.toLowerCase() === 'ol') {
+					//console.log('removeListElements', element);
+					removeListElements(element);
+				}
+			});
+
 			angular.forEach(possibleNodes.find("ul"), removeListElements);
 			angular.forEach(possibleNodes.find("ol"), removeListElements);
 
-/******************
- *  we don't use this code - since the previous way CLEAR is expected to work does not clear partially selected <li>
+			// clear out all class attributes. These do not seem to be cleared via removeFormat
+			var $editor = this.$editor();
+			var recursiveRemoveClass = function(node){
+				node = angular.element(node);
+				/* istanbul ignore next: this is not triggered in tests any longer since we now never select the whole displayELement */
+				if(node[0] !== $editor.displayElements.text[0]) {
+					node.removeAttr('class');
+				}
+				angular.forEach(node.children(), recursiveRemoveClass);
+			};
+			angular.forEach(possibleNodes, recursiveRemoveClass);
+			// check if in list. If not in list then use formatBlock option
+			if(possibleNodes[0] && possibleNodes[0].tagName.toLowerCase() !== 'li' &&
+				possibleNodes[0].tagName.toLowerCase() !== 'ol' &&
+				possibleNodes[0].tagName.toLowerCase() !== 'ul') {
+				this.$editor().wrapSelection("formatBlock", "default");
+			}
+			restoreSelection();
+		}
+	});
 
-			var removeListElement = function(listE){
+	/****************************
+	 //  we don't use this code - since the previous way CLEAR is expected to work does not clear partially selected <li>
+
+	 var removeListElement = function(listE){
 				console.log(listE);
 				var _list = listE.parentNode.childNodes;
 				console.log('_list', _list);
@@ -716,12 +746,11 @@ angular.module('textAngularSetup', [])
 					_parent.remove();
 				}
 				taSelection.setSelectionToElementEnd(newElem[0]);
-
 			};
 
-			elementsSeen = [];
-			if (selectedElements.length !==0) console.log(selectedElements);
-			angular.forEach(selectedElements, function (element) {
+	 elementsSeen = [];
+	 if (selectedElements.length !==0) console.log(selectedElements);
+	 angular.forEach(selectedElements, function (element) {
 				if (elementsSeen.indexOf(element) !== -1 || elementsSeen.indexOf(element.parentElement) !== -1) {
 					return;
 				}
@@ -736,15 +765,10 @@ angular.module('textAngularSetup', [])
 					removeListElement(element.parentElement);
 				}
 			});
+	 **********************/
 
- ***********************/
-
-			var showElements = function (element) {
-				console.log('possibleNodes.find(...).element:', element);
-			};
-			//angular.forEach(possibleNodes.find("li"), showElements);
-
-			if(possibleNodes[0].tagName.toLowerCase() === 'li'){
+	/**********************
+	 if(possibleNodes[0].tagName.toLowerCase() === 'li'){
 				var _list = possibleNodes[0].parentNode.childNodes;
 				var _preLis = [], _postLis = [], _found = false;
 				for(i = 0; i < _list.length; i++){
@@ -774,25 +798,8 @@ angular.module('textAngularSetup', [])
 				}
 				taSelection.setSelectionToElementEnd(newElem[0]);
 			}
-			// clear out all class attributes. These do not seem to be cleared via removeFormat
-			var $editor = this.$editor();
-			var recursiveRemoveClass = function(node){
-				node = angular.element(node);
-				/* istanbul ignore next: this is not triggered in tests any longer since we now never select the whole displayELement */
-				if(node[0] !== $editor.displayElements.text[0]) {
-					node.removeAttr('class');
-				}
-				angular.forEach(node.children(), recursiveRemoveClass);
-			};
-			angular.forEach(possibleNodes, recursiveRemoveClass);
-			// check if in list. If not in list then use formatBlock option
-			if(possibleNodes[0].tagName.toLowerCase() !== 'li' &&
-				possibleNodes[0].tagName.toLowerCase() !== 'ol' &&
-				possibleNodes[0].tagName.toLowerCase() !== 'ul') this.$editor().wrapSelection("formatBlock", "default");
-			console.log('after:', possibleNodes[0]);
-			restoreSelection();
-		}
-	});
+	 *******************/
+
 
 	/* istanbul ignore next: if it's javascript don't worry - though probably should show some kind of error message */
 	var blockJavascript = function (link) {
@@ -883,6 +890,7 @@ angular.module('textAngularSetup', [])
 		action: function(){
 			var urlLink;
 			// if this link has already been set, we need to just edit the existing link
+			/* istanbul ignore if: we do not test this */
 			if (taSelection.getSelectionElement().tagName.toLowerCase() === 'a') {
 				urlLink = $window.prompt(taTranslations.insertLink.dialogPrompt, taSelection.getSelectionElement().href);
 			} else {

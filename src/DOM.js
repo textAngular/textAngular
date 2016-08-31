@@ -32,6 +32,19 @@ angular.module('textAngular.DOM', ['textAngular.factories'])
 		listElement.remove();
 		selectLi($target.find('li')[0]);
 	};
+	var turnBlockIntoBlocks = function(element, options) {
+		for(var i = 0; i<element.childNodes.length; i++) {
+			var _n = element.childNodes[i];
+			/* istanbul ignore next - more complex testing*/
+			if (_n.tagName && _n.tagName.match(BLOCKELEMENTS)) {
+				turnBlockIntoBlocks(_n, options);
+			}
+		}
+		var $target = angular.element(options);
+		$target[0].innerHTML = element.innerHTML;
+		element.parentNode.insertBefore($target[0], element);
+		element.parentNode.removeChild(element);
+	};
 	return function(taDefaultWrap, topNode){
 		// NOTE: here we are dealing with the html directly from the browser and not the html the user sees.
 		// IF you want to modify the html the user sees, do it when the user does a switchView
@@ -141,11 +154,7 @@ angular.module('textAngular.DOM', ['textAngular.factories'])
                         selectedElement.innerHTML = __h;
                     }
                 }
-            }catch(e){
-				/* istanbul ignore next */
-				// we ignore errors from testing...
-				if (e.codeName !== 'INDEX_SIZE_ERR') console.error(e);
-			}
+            }catch(e){}
 			var $selected = angular.element(selectedElement);
 			if(selectedElement !== undefined && selectedElement.tagName !== undefined){
 				var tagName = selectedElement.tagName.toLowerCase();
@@ -230,8 +239,12 @@ angular.module('textAngular.DOM', ['textAngular.factories'])
 						optionsTagName = taDefaultWrap;
 						options = '<' + taDefaultWrap + '>';
 					}
-					if(tagName === 'li') $target = $selected.parent();
-					else $target = $selected;
+					if(tagName === 'li') {
+						$target = $selected.parent();
+					}
+					else {
+						$target = $selected;
+					}
 					// find the first blockElement
 					while(!$target[0].tagName || !$target[0].tagName.match(BLOCKELEMENTS) && !$target.parent().attr('contenteditable')){
 						$target = $target.parent();
@@ -277,7 +290,6 @@ angular.module('textAngular.DOM', ['textAngular.factories'])
 					}else{
 						// default wrap behaviour
 						_nodes = taSelection.getOnlySelectedElements();
-						//console.log('default wrap behavior', _nodes);
 						if(_nodes.length === 0) {
 							// no nodes at all....
 							_nodes = [$target[0]];
@@ -294,6 +306,12 @@ angular.module('textAngular.DOM', ['textAngular.factories'])
 						_nodes = _nodes.filter(function(value, index, self) {
 							return self.indexOf(value) === index;
 						});
+						// remove all whole taTextElement if it is here... unless it is the only element!
+						if (_nodes.length>1) {
+							_nodes = _nodes.filter(function (value, index, self) {
+								return !(value.nodeName.toLowerCase() === 'div' && /^taTextElement/.test(value.id));
+							});
+						}
 						if(angular.element(_nodes[0]).hasClass('ta-bind')){
 							$target = angular.element(options);
 							$target[0].innerHTML = _nodes[0].innerHTML;
@@ -315,10 +333,7 @@ angular.module('textAngular.DOM', ['textAngular.factories'])
 						else {
 							// regular block elements replace other block elements
 							for(i = 0; i < _nodes.length; i++){
-								$target = angular.element(options);
-								$target[0].innerHTML = _nodes[i].innerHTML;
-								_nodes[i].parentNode.insertBefore($target[0],_nodes[i]);
-								_nodes[i].parentNode.removeChild(_nodes[i]);
+								turnBlockIntoBlocks(_nodes[i], options);
 							}
 						}
 					}
@@ -328,6 +343,7 @@ angular.module('textAngular.DOM', ['textAngular.factories'])
 					$target[0].focus();
 					return;
 				}else if(command.toLowerCase() === 'createlink'){
+					/* istanbul ignore next: firefox specific fix */
 					if (taSelection.getSelectionElement().tagName.toLowerCase() === 'a') {
 						// already a link!!! we are just replacing it...
 						taSelection.getSelectionElement().href = options;
@@ -353,16 +369,12 @@ angular.module('textAngular.DOM', ['textAngular.factories'])
 			}
 			try{
 				$document[0].execCommand(command, showUI, options);
-			}catch(e){
-				/* istanbul ignore next */
-				// we ignore errors from testing...
-				if (e.codeName !== 'INDEX_SIZE_ERR') console.error(e);
-			}
+			}catch(e){}
 		};
 	};
-}]).service('taSelection', ['$document', 'taDOM',
+}]).service('taSelection', ['$document', 'taDOM', '$log',
 /* istanbul ignore next: all browser specifics and PhantomJS dosen't seem to support half of it */
-function($document, taDOM){
+function($document, taDOM, $log){
 	// need to dereference the document else the calls don't work correctly
 	var _document = $document[0];
 	var brException = function (element, offset) {
@@ -481,6 +493,38 @@ function($document, taDOM){
 			return range.getNodes([1], function(node){
 				return node.parentNode === container;
 			});
+		},
+		// this includes the container element if all children are selected
+		getAllSelectedElements: function(){
+			var range = rangy.getSelection().getRangeAt(0);
+			var container = range.commonAncestorContainer;
+			// Node.TEXT_NODE === 3
+			// Node.ELEMENT_NODE === 1
+			// Node.COMMENT_NODE === 8
+			// Check if the container is a text node and return its parent if so
+			container = container.nodeType === 3 ? container.parentNode : container;
+			// get the nodes in the range that are ELEMENT_NODE and are children of the container
+			// in this range...
+			var selectedNodes = range.getNodes([1], function(node){
+				return node.parentNode === container;
+			});
+			var innerHtml = container.innerHTML;
+			// remove the junk that rangy has put down
+			innerHtml = innerHtml.replace(/<span id=.selectionBoundary[^>]+>\ufeff?<\/span>/ig, '');
+			//console.log(innerHtml);
+			//console.log(range.toHtml());
+			//console.log(innerHtml === range.toHtml());
+ 			if (innerHtml === range.toHtml() &&
+				// not the whole taTextElement
+				(!(container.nodeName.toLowerCase() === 'div' &&  /^taTextElement/.test(container.id)))
+			) {
+				var arr = [];
+				for(var i = selectedNodes.length; i--; arr.unshift(selectedNodes[i]));
+				selectedNodes = arr;
+				selectedNodes.push(container);
+				//$log.debug(selectedNodes);
+			}
+			return selectedNodes;
 		},
 		// Some basic selection functions
 		getSelectionElement: function () {

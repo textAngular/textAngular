@@ -627,9 +627,9 @@ textAngular.directive("textAngular", [
 				_keypress = function(event, eventData){
 					// bug fix for Firefox.  If we are selecting a <a> already, any characters will
 					// be added within the <a> which is bad!
+					/* istanbul ignore next: don't see how to test this... */
 					if (taSelection.getSelection) {
 						var _selection = taSelection.getSelection();
-						/* istanbul ignore next: don't see how to test this... */
 						if (taSelection.getSelectionElement().nodeName.toLowerCase() === 'a') {
 							// check and see if we are at the edge of the <a>
 							if (_selection.start.element.nodeType === 3 &&
@@ -1022,7 +1022,8 @@ textAngular.service('textAngularManager', ['taToolExecuteAction', 'taTools', 'ta
 				tmp = tmp.concat(_editor.toolbarScopes);
 			});
 			return tmp;
-		},
+		}
+/********************** not functional yet
 		// save the selection ('range') for the given editor
 		saveFocusSelection: function (name, range) {
 			editors[name].savedFocusRange = range;
@@ -1030,7 +1031,6 @@ textAngular.service('textAngularManager', ['taToolExecuteAction', 'taTools', 'ta
 		// restore the saved selection from when the focus was lost
 		restoreFocusSelection: function(name, scope) {
 			// we only do this if NOT focussed and saved...
-			/* istanbul ignore next: not sure how to test this */
 			if (editors[name].savedFocusRange && !scope.focussed) {
 				try {
 					var _r = rangy.restoreRange(editors[name].savedFocusRange);
@@ -1039,6 +1039,7 @@ textAngular.service('textAngularManager', ['taToolExecuteAction', 'taTools', 'ta
 				} catch(e) {}
 			}
 		}
+*************/
 	};
 }]);
 textAngular.directive('textAngularToolbar', [
