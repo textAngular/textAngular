@@ -32,6 +32,19 @@ angular.module('textAngular.DOM', ['textAngular.factories'])
 		listElement.remove();
 		selectLi($target.find('li')[0]);
 	};
+	var turnBlockIntoBlocks = function(element, options) {
+		for(var i = 0; i<element.childNodes.length; i++) {
+			var _n = element.childNodes[i];
+			/* istanbul ignore next - more complex testing*/
+			if (_n.tagName && _n.tagName.match(BLOCKELEMENTS)) {
+				turnBlockIntoBlocks(_n, options);
+			}
+		}
+		var $target = angular.element(options);
+		$target[0].innerHTML = element.innerHTML;
+		element.parentNode.insertBefore($target[0], element);
+		element.parentNode.removeChild(element);
+	};
 	return function(taDefaultWrap, topNode){
 		// NOTE: here we are dealing with the html directly from the browser and not the html the user sees.
 		// IF you want to modify the html the user sees, do it when the user does a switchView
@@ -44,99 +57,106 @@ angular.module('textAngular.DOM', ['textAngular.factories'])
 					ourSelection = taSelection.getSelection();
 				}
 				selectedElement = taSelection.getSelectionElement();
-				//console.log('selectedElement', selectedElement);
 				// special checks and fixes when we are selecting the whole container
 				var __h, _innerNode;
 				/* istanbul ignore next */
-				if (selectedElement.tagName.toLowerCase() === 'div' &&
-					/taTextElement.+/.test(selectedElement.id) &&
-					ourSelection && ourSelection.start &&
-					ourSelection.start.offset === 1 &&
-					ourSelection.end.offset === 1) {
-					// opps we are actually selecting the whole container!
-					//console.log('selecting whole container!');
-					__h = selectedElement.innerHTML;
-					if (/<br>/i.test(__h)) {
-						// Firefox adds <br>'s and so we remove the <br>
-						__h = __h.replace(/<br>/i, '&#8203;');  // no space-space
-					}
-					if (/<br\/>/i.test(__h)) {
-						// Firefox adds <br/>'s and so we remove the <br/>
-						__h = __h.replace(/<br\/>/i, '&#8203;');  // no space-space
-					}
-					// remove stacked up <span>'s
-					if (/<span>(<span>)+/i.test(__h)) {
-						__h = __.replace(/<span>(<span>)+/i, '<span>');
-					}
-					// remove stacked up </span>'s
-					if (/<\/span>(<\/span>)+/i.test(__h)) {
-						__h = __.replace(/<\/span>(<\/span>)+/i, '<\/span>');
-					}
-					if (/<span><\/span>/i.test(__h)) {
-						// if we end up with a <span></span> here we remove it...
-						__h = __h.replace(/<span><\/span>/i, '');
-					}
-					//console.log('inner whole container', selectedElement.childNodes);
-					_innerNode = '<div>' + __h + '</div>';
-					selectedElement.innerHTML = _innerNode;
-					//console.log('childNodes:', selectedElement.childNodes);
-					taSelection.setSelectionToElementEnd(selectedElement.childNodes[0]);
-					selectedElement = taSelection.getSelectionElement();
-				} else if (selectedElement.tagName.toLowerCase() === 'span' &&
-					ourSelection && ourSelection.start &&
-					ourSelection.start.offset === 1 &&
-					ourSelection.end.offset === 1) {
-					// just a span -- this is a problem...
-					//console.log('selecting span!');
-					__h = selectedElement.innerHTML;
-					if (/<br>/i.test(__h)) {
-						// Firefox adds <br>'s and so we remove the <br>
-						__h = __h.replace(/<br>/i, '&#8203;');  // no space-space
-					}
-					if (/<br\/>/i.test(__h)) {
-						// Firefox adds <br/>'s and so we remove the <br/>
-						__h = __h.replace(/<br\/>/i, '&#8203;');  // no space-space
-					}
-					// remove stacked up <span>'s
-					if (/<span>(<span>)+/i.test(__h)) {
-						__h = __.replace(/<span>(<span>)+/i, '<span>');
-					}
-					// remove stacked up </span>'s
-					if (/<\/span>(<\/span>)+/i.test(__h)) {
-						__h = __.replace(/<\/span>(<\/span>)+/i, '<\/span>');
-					}
-					if (/<span><\/span>/i.test(__h)) {
-						// if we end up with a <span></span> here we remove it...
-						__h = __h.replace(/<span><\/span>/i, '');
-					}
-					//console.log('inner span', selectedElement.childNodes);
-					// we wrap this in a <div> because otherwise the browser get confused when we attempt to select the whole node
-					// and the focus is not set correctly no matter what we do
-					_innerNode = '<div>' + __h + '</div>';
-					selectedElement.innerHTML = _innerNode;
-					taSelection.setSelectionToElementEnd(selectedElement.childNodes[0]);
-					selectedElement = taSelection.getSelectionElement();
-					//console.log(selectedElement.innerHTML);
-				} else if (selectedElement.tagName.toLowerCase() === 'p' &&
-					ourSelection && ourSelection.start &&
-					ourSelection.start.offset === 1 &&
-					ourSelection.end.offset === 1) {
-					//console.log('p special');
-					// we need to remove the </br> that firefox adds!
-					__h = selectedElement.innerHTML;
-					if (/<br>/i.test(__h)) {
-						// Firefox adds <br>'s and so we remove the <br>
-						__h = __h.replace(/<br>/i, '&#8203;');  // no space-space
-					}
-					selectedElement.innerHTML = __h;
-				}
-			}catch(e){
-				/* istanbul ignore next */
-				// we ignore errors from testing...
-				if (e.codeName !== 'INDEX_SIZE_ERR') console.error(e);
-			}
+                if (selectedElement.tagName !== undefined) {
+                    if (selectedElement.tagName.toLowerCase() === 'div' &&
+                        /taTextElement.+/.test(selectedElement.id) &&
+                        ourSelection && ourSelection.start &&
+                        ourSelection.start.offset === 1 &&
+                        ourSelection.end.offset === 1) {
+                        // opps we are actually selecting the whole container!
+                        //console.log('selecting whole container!');
+                        __h = selectedElement.innerHTML;
+                        if (/<br>/i.test(__h)) {
+                            // Firefox adds <br>'s and so we remove the <br>
+                            __h = __h.replace(/<br>/i, '&#8203;');  // no space-space
+                        }
+                        if (/<br\/>/i.test(__h)) {
+                            // Firefox adds <br/>'s and so we remove the <br/>
+                            __h = __h.replace(/<br\/>/i, '&#8203;');  // no space-space
+                        }
+                        // remove stacked up <span>'s
+                        if (/<span>(<span>)+/i.test(__h)) {
+                            __h = __.replace(/<span>(<span>)+/i, '<span>');
+                        }
+                        // remove stacked up </span>'s
+                        if (/<\/span>(<\/span>)+/i.test(__h)) {
+                            __h = __.replace(/<\/span>(<\/span>)+/i, '<\/span>');
+                        }
+                        if (/<span><\/span>/i.test(__h)) {
+                            // if we end up with a <span></span> here we remove it...
+                            __h = __h.replace(/<span><\/span>/i, '');
+                        }
+                        //console.log('inner whole container', selectedElement.childNodes);
+                        _innerNode = '<div>' + __h + '</div>';
+                        selectedElement.innerHTML = _innerNode;
+                        //console.log('childNodes:', selectedElement.childNodes);
+                        taSelection.setSelectionToElementEnd(selectedElement.childNodes[0]);
+                        selectedElement = taSelection.getSelectionElement();
+                    } else if (selectedElement.tagName.toLowerCase() === 'span' &&
+                        ourSelection && ourSelection.start &&
+                        ourSelection.start.offset === 1 &&
+                        ourSelection.end.offset === 1) {
+                        // just a span -- this is a problem...
+                        //console.log('selecting span!');
+                        __h = selectedElement.innerHTML;
+                        if (/<br>/i.test(__h)) {
+                            // Firefox adds <br>'s and so we remove the <br>
+                            __h = __h.replace(/<br>/i, '&#8203;');  // no space-space
+                        }
+                        if (/<br\/>/i.test(__h)) {
+                            // Firefox adds <br/>'s and so we remove the <br/>
+                            __h = __h.replace(/<br\/>/i, '&#8203;');  // no space-space
+                        }
+                        // remove stacked up <span>'s
+                        if (/<span>(<span>)+/i.test(__h)) {
+                            __h = __.replace(/<span>(<span>)+/i, '<span>');
+                        }
+                        // remove stacked up </span>'s
+                        if (/<\/span>(<\/span>)+/i.test(__h)) {
+                            __h = __.replace(/<\/span>(<\/span>)+/i, '<\/span>');
+                        }
+                        if (/<span><\/span>/i.test(__h)) {
+                            // if we end up with a <span></span> here we remove it...
+                            __h = __h.replace(/<span><\/span>/i, '');
+                        }
+                        //console.log('inner span', selectedElement.childNodes);
+                        // we wrap this in a <div> because otherwise the browser get confused when we attempt to select the whole node
+                        // and the focus is not set correctly no matter what we do
+                        _innerNode = '<div>' + __h + '</div>';
+                        selectedElement.innerHTML = _innerNode;
+                        taSelection.setSelectionToElementEnd(selectedElement.childNodes[0]);
+                        selectedElement = taSelection.getSelectionElement();
+                        //console.log(selectedElement.innerHTML);
+                    } else if (selectedElement.tagName.toLowerCase() === 'p' &&
+                        ourSelection && ourSelection.start &&
+                        ourSelection.start.offset === 1 &&
+                        ourSelection.end.offset === 1) {
+                        //console.log('p special');
+                        // we need to remove the </br> that firefox adds!
+                        __h = selectedElement.innerHTML;
+                        if (/<br>/i.test(__h)) {
+                            // Firefox adds <br>'s and so we remove the <br>
+                            __h = __h.replace(/<br>/i, '&#8203;');  // no space-space
+                        }
+                        selectedElement.innerHTML = __h;
+                    } else if (selectedElement.tagName.toLowerCase() === 'li' &&
+                        ourSelection && ourSelection.start &&
+                        ourSelection.start.offset === ourSelection.end.offset) {
+                        // we need to remove the </br> that firefox adds!
+                        __h = selectedElement.innerHTML;
+                        if (/<br>/i.test(__h)) {
+                            // Firefox adds <br>'s and so we remove the <br>
+                            __h = __h.replace(/<br>/i, '');  // nothing
+                        }
+                        selectedElement.innerHTML = __h;
+                    }
+                }
+            }catch(e){}
 			var $selected = angular.element(selectedElement);
-			if(selectedElement !== undefined){
+			if(selectedElement !== undefined && selectedElement.tagName !== undefined){
 				var tagName = selectedElement.tagName.toLowerCase();
 				if(command.toLowerCase() === 'insertorderedlist' || command.toLowerCase() === 'insertunorderedlist'){
 					var selfTag = taBrowserTag((command.toLowerCase() === 'insertorderedlist')? 'ol' : 'ul');
@@ -144,10 +164,14 @@ angular.module('textAngular.DOM', ['textAngular.factories'])
 						// if all selected then we should remove the list
 						// grab all li elements and convert to taDefaultWrap tags
 						return listToDefault($selected, taDefaultWrap);
-					}else if(tagName === 'li' && $selected.parent()[0].tagName.toLowerCase() === selfTag && $selected.parent().children().length === 1){
+					}else if(tagName === 'li' &&
+                        $selected.parent()[0].tagName.toLowerCase() === selfTag &&
+                        $selected.parent().children().length === 1){
 						// catch for the previous statement if only one li exists
 						return listToDefault($selected.parent(), taDefaultWrap);
-					}else if(tagName === 'li' && $selected.parent()[0].tagName.toLowerCase() !== selfTag && $selected.parent().children().length === 1){
+					}else if(tagName === 'li' &&
+                        $selected.parent()[0].tagName.toLowerCase() !== selfTag &&
+                        $selected.parent().children().length === 1){
 						// catch for the previous statement if only one li exists
 						return listToList($selected.parent(), selfTag);
 					}else if(tagName.match(BLOCKELEMENTS) && !$selected.hasClass('ta-bind')){
@@ -215,8 +239,12 @@ angular.module('textAngular.DOM', ['textAngular.factories'])
 						optionsTagName = taDefaultWrap;
 						options = '<' + taDefaultWrap + '>';
 					}
-					if(tagName === 'li') $target = $selected.parent();
-					else $target = $selected;
+					if(tagName === 'li') {
+						$target = $selected.parent();
+					}
+					else {
+						$target = $selected;
+					}
 					// find the first blockElement
 					while(!$target[0].tagName || !$target[0].tagName.match(BLOCKELEMENTS) && !$target.parent().attr('contenteditable')){
 						$target = $target.parent();
@@ -262,7 +290,6 @@ angular.module('textAngular.DOM', ['textAngular.factories'])
 					}else{
 						// default wrap behaviour
 						_nodes = taSelection.getOnlySelectedElements();
-						//console.log('default wrap behavior', _nodes);
 						if(_nodes.length === 0) {
 							// no nodes at all....
 							_nodes = [$target[0]];
@@ -279,6 +306,12 @@ angular.module('textAngular.DOM', ['textAngular.factories'])
 						_nodes = _nodes.filter(function(value, index, self) {
 							return self.indexOf(value) === index;
 						});
+						// remove all whole taTextElement if it is here... unless it is the only element!
+						if (_nodes.length>1) {
+							_nodes = _nodes.filter(function (value, index, self) {
+								return !(value.nodeName.toLowerCase() === 'div' && /^taTextElement/.test(value.id));
+							});
+						}
 						if(angular.element(_nodes[0]).hasClass('ta-bind')){
 							$target = angular.element(options);
 							$target[0].innerHTML = _nodes[0].innerHTML;
@@ -300,10 +333,7 @@ angular.module('textAngular.DOM', ['textAngular.factories'])
 						else {
 							// regular block elements replace other block elements
 							for(i = 0; i < _nodes.length; i++){
-								$target = angular.element(options);
-								$target[0].innerHTML = _nodes[i].innerHTML;
-								_nodes[i].parentNode.insertBefore($target[0],_nodes[i]);
-								_nodes[i].parentNode.removeChild(_nodes[i]);
+								turnBlockIntoBlocks(_nodes[i], options);
 							}
 						}
 					}
@@ -311,10 +341,14 @@ angular.module('textAngular.DOM', ['textAngular.factories'])
 					// looses focus when we have the whole container selected and no text!
 					// refocus on the shown display element, this fixes a bug when using firefox
 					$target[0].focus();
-					//console.log($document[0].activeElement.childNodes);
-					//$document[0].activeElement.childNodes[0].focus();
 					return;
 				}else if(command.toLowerCase() === 'createlink'){
+					/* istanbul ignore next: firefox specific fix */
+					if (taSelection.getSelectionElement().tagName.toLowerCase() === 'a') {
+						// already a link!!! we are just replacing it...
+						taSelection.getSelectionElement().href = options;
+						return;
+					}
 					var tagBegin = '<a href="' + options + '" target="' +
 							(defaultTagAttributes.a.target ? defaultTagAttributes.a.target : '') +
 							'">',
@@ -335,16 +369,12 @@ angular.module('textAngular.DOM', ['textAngular.factories'])
 			}
 			try{
 				$document[0].execCommand(command, showUI, options);
-			}catch(e){
-				/* istanbul ignore next */
-				// we ignore errors from testing...
-				if (e.codeName !== 'INDEX_SIZE_ERR') console.error(e);
-			}
+			}catch(e){}
 		};
 	};
-}]).service('taSelection', ['$document', 'taDOM',
+}]).service('taSelection', ['$document', 'taDOM', '$log',
 /* istanbul ignore next: all browser specifics and PhantomJS dosen't seem to support half of it */
-function($document, taDOM){
+function($document, taDOM, $log){
 	// need to dereference the document else the calls don't work correctly
 	var _document = $document[0];
 	var brException = function (element, offset) {
@@ -369,21 +399,87 @@ function($document, taDOM){
 		getSelection: function(){
 			var range = rangy.getSelection().getRangeAt(0);
 			var container = range.commonAncestorContainer;
-			var selection = {
+            var selection = {
 				start: brException(range.startContainer, range.startOffset),
 				end: brException(range.endContainer, range.endOffset),
 				collapsed: range.collapsed
 			};
+            // This has problems under Firefox.
+            // On Firefox with
+            // <p>Try me !</p>
+            // <ul>
+            // <li>line 1</li>
+            // <li>line 2</li>
+            // </ul>
+            // <p>line 3</p>
+            // <ul>
+            // <li>line 4</li>
+            // <li>line 5</li>
+            // </ul>
+            // <p>Hello textAngular</p>
+            // WITH the cursor after the 3 on line 3, it gets the commonAncestorContainer as:
+            // <TextNode textContent='line 3'>
+            // AND Chrome gets the commonAncestorContainer as:
+            // <p>line 3</p>
+            //
 			// Check if the container is a text node and return its parent if so
-			container = container.nodeType === 3 ? container.parentNode : container;
-			if (container.parentNode === selection.start.element ||
-				container.parentNode === selection.end.element) {
-				selection.container = container.parentNode;
+            // unless this is the whole taTextElement.  If so we return the textNode
+			if (container.nodeType === 3) {
+                if (container.parentNode.nodeName.toLowerCase() === 'div' &&
+                    /^taTextElement/.test(container.parentNode.id)) {
+                    // textNode where the parent is the whole <div>!!!
+					//console.log('textNode ***************** container:', container);
+                } else {
+                    container = container.parentNode;
+                }
+            }
+			if (container.nodeName.toLowerCase() === 'div' &&
+				/^taTextElement/.test(container.id)) {
+				//console.log('*********taTextElement************');
+				//for (var i=0; i<container.childNodes.length; i++) {
+				//	console.log(i, container.childNodes[i]);
+				//}
+				//console.log('getSelection start: end:', selection.start.offset, selection.end.offset);
+				//console.log('commonAncestorContainer:', container);
+				// fix this to be the <textNode>
+				selection.end.element = selection.start.element = selection.container = container.childNodes[selection.start.offset];
+				selection.start.offset = selection.end.offset = 0;
+				selection.collapsed=true;
 			} else {
-				selection.container = container;
+				if (container.parentNode === selection.start.element ||
+					container.parentNode === selection.end.element) {
+					selection.container = container.parentNode;
+				} else {
+					selection.container = container;
+				}
 			}
+			//console.log('***selection container:', selection.container);
 			return selection;
 		},
+/* NOT FUNCTIONAL YET
+        // under Firefox, we may have a selection that needs to be normalized
+        isSelectionContainerWhole_taTextElement: function (){
+            var range = rangy.getSelection().getRangeAt(0);
+            var container = range.commonAncestorContainer;
+            if (container.nodeName.toLowerCase() === 'div' &&
+                /^taTextElement/.test(container.id)) {
+                // container is the whole taTextElement
+                return true;
+            }
+            return false;
+        },
+		setNormalizedSelection: function (){
+			var range = rangy.getSelection().getRangeAt(0);
+			var container = range.commonAncestorContainer;
+			console.log(range);
+			console.log(container.childNodes);
+			if (range.collapsed) {
+				// we know what to do...
+				console.log(container.childNodes[range.startOffset]);
+				api.setSelectionToElementStart(container.childNodes[range.startOffset]);
+			}
+		},
+*/
 		getOnlySelectedElements: function(){
 			var range = rangy.getSelection().getRangeAt(0);
 			var container = range.commonAncestorContainer;
@@ -392,9 +488,43 @@ function($document, taDOM){
 			// Node.COMMENT_NODE === 8
 			// Check if the container is a text node and return its parent if so
 			container = container.nodeType === 3 ? container.parentNode : container;
+			// get the nodes in the range that are ELEMENT_NODE and are children of the container
+			// in this range...
 			return range.getNodes([1], function(node){
 				return node.parentNode === container;
 			});
+		},
+		// this includes the container element if all children are selected
+		getAllSelectedElements: function(){
+			var range = rangy.getSelection().getRangeAt(0);
+			var container = range.commonAncestorContainer;
+			// Node.TEXT_NODE === 3
+			// Node.ELEMENT_NODE === 1
+			// Node.COMMENT_NODE === 8
+			// Check if the container is a text node and return its parent if so
+			container = container.nodeType === 3 ? container.parentNode : container;
+			// get the nodes in the range that are ELEMENT_NODE and are children of the container
+			// in this range...
+			var selectedNodes = range.getNodes([1], function(node){
+				return node.parentNode === container;
+			});
+			var innerHtml = container.innerHTML;
+			// remove the junk that rangy has put down
+			innerHtml = innerHtml.replace(/<span id=.selectionBoundary[^>]+>\ufeff?<\/span>/ig, '');
+			//console.log(innerHtml);
+			//console.log(range.toHtml());
+			//console.log(innerHtml === range.toHtml());
+ 			if (innerHtml === range.toHtml() &&
+				// not the whole taTextElement
+				(!(container.nodeName.toLowerCase() === 'div' &&  /^taTextElement/.test(container.id)))
+			) {
+				var arr = [];
+				for(var i = selectedNodes.length; i--; arr.unshift(selectedNodes[i]));
+				selectedNodes = arr;
+				selectedNodes.push(container);
+				//$log.debug(selectedNodes);
+			}
+			return selectedNodes;
 		},
 		// Some basic selection functions
 		getSelectionElement: function () {
