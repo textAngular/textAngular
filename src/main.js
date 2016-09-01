@@ -42,7 +42,8 @@ textAngular.directive("textAngular", [
 					// wraps the selection in the provided tag / execCommand function. Should only be called in WYSIWYG mode.
 					wrapSelection: function(command, opt, isSelectableElementTool){
 						// we restore the saved selection that was saved when focus was lost
-						textAngularManager.restoreFocusSelection(scope._name, scope);
+						/* NOT FUNCTIONAL YET */
+						/* textAngularManager.restoreFocusSelection(scope._name, scope); */
 						if(command.toLowerCase() === "undo"){
 							scope['$undoTaBindtaTextElement' + _serial]();
 						}else if(command.toLowerCase() === "redo"){
@@ -326,11 +327,41 @@ textAngular.directive("textAngular", [
 				scope._actionRunning = false;
 				var _savedSelection = false;
 				scope.startAction = function(){
+					var _beforeStateBold = false;
+					var _beforeStateItalic = false;
+					var _beforeStateUnderline = false;
+					var _beforeStateStrikethough = false;
 					scope._actionRunning = true;
+					_beforeStateBold = $document[0].queryCommandState('bold');
+					_beforeStateItalic = $document[0].queryCommandState('italic');
+					_beforeStateUnderline = $document[0].queryCommandState('underline');
+					_beforeStateStrikethough = $document[0].queryCommandState('strikeThrough');
 					// if rangy library is loaded return a function to reload the current selection
 					_savedSelection = rangy.saveSelection();
+					// rangy.saveSelection() clear the state of bold, italic, underline, strikethrough
+					// so we reset them here....!!!
+					// this fixes bugs #423, #1129, #1105, #693 which are actually rangy bugs!
+					/* istanbul ignore next: this only active when have bold set and it SHOULD not be necessary anyway... */
+					if (_beforeStateBold && !$document[0].queryCommandState('bold')) {
+						$document[0].execCommand('bold', false, null);
+					}
+					/* istanbul ignore next: this only active when have italic set and it SHOULD not be necessary anyway... */
+					if (_beforeStateItalic && !$document[0].queryCommandState('italic')) {
+						$document[0].execCommand('italic', false, null);
+					}
+					/* istanbul ignore next: this only active when have underline set and it SHOULD not be necessary anyway... */
+					if (_beforeStateUnderline && !$document[0].queryCommandState('underline')) {
+						$document[0].execCommand('underline', false, null);
+					}
+					/* istanbul ignore next: this only active when have strikeThrough set and it SHOULD not be necessary anyway... */
+					if (_beforeStateStrikethough && !$document[0].queryCommandState('strikeThrough')) {
+						$document[0].execCommand('strikeThrough', false, null);
+					}
+					//console.log('B', _beforeStateBold, 'I', _beforeStateItalic, '_', _beforeStateUnderline, 'S', _beforeStateStrikethough);
 					return function(){
 						if(_savedSelection) rangy.restoreSelection(_savedSelection);
+						// perhaps if we restore the selections here, we would do better overall???
+						// BUT what we do above does well in 90% of the cases...
 					};
 				};
 				scope.endAction = function(){
@@ -352,18 +383,25 @@ textAngular.directive("textAngular", [
 
 				// note that focusout > focusin is called everytime we click a button - except bad support: http://www.quirksmode.org/dom/events/blurfocus.html
 				// cascades to displayElements.text and displayElements.html automatically.
-				_focusin = function(){
+				_focusin = function(e){
 					scope.focussed = true;
 					element.addClass(scope.classes.focussed);
+/*******  NOT FUNCTIONAL YET
+					if (e.target.id === 'taTextElement' + _serial) {
+						console.log('_focusin taTextElement');
+						// we only do this if NOT focussed
+						textAngularManager.restoreFocusSelection(scope._name);
+					}
+*******/
 					_editorFunctions.focus();
 					element.triggerHandler('focus');
 				};
 				scope.displayElements.html.on('focus', _focusin);
 				scope.displayElements.text.on('focus', _focusin);
 				_focusout = function(e){
+					/****************** NOT FUNCTIONAL YET
 					try {
 						var _s = rangy.getSelection();
-						/* istanbul ignore next: this only active when loose focus */
 						if (_s) {
 							// we save the selection when we loose focus so that if do a wrapSelection, the
 							// apropriate selection in the editor is restored before action.
@@ -371,8 +409,12 @@ textAngular.directive("textAngular", [
 							textAngularManager.saveFocusSelection(scope._name, _savedFocusRange);
 						}
 					} catch(error) { }
+					*****************/
 					// if we are NOT runnig an action and have NOT focussed again on the text etc then fire the blur events
-					if(!scope._actionRunning && $document[0].activeElement !== scope.displayElements.html[0] && $document[0].activeElement !== scope.displayElements.text[0]){
+					if(!scope._actionRunning &&
+						$document[0].activeElement !== scope.displayElements.html[0] &&
+						$document[0].activeElement !== scope.displayElements.text[0])
+					{
 						element.removeClass(scope.classes.focussed);
 						_editorFunctions.unfocus();
 						// to prevent multiple apply error defer to next seems to work.
@@ -408,7 +450,8 @@ textAngular.directive("textAngular", [
 					$animate.enabled(false, scope.displayElements.text);
 					//Show the HTML view
 					/* istanbul ignore next: ngModel exists check */
-/*
+/* THIS is not the correct thing to do, here....
+   The ngModel is correct, but it is not formatted as the user as done it...
 					var _model;
 					if (ngModel) {
 						_model = ngModel.$viewValue;
@@ -584,21 +627,23 @@ textAngular.directive("textAngular", [
 				_keypress = function(event, eventData){
 					// bug fix for Firefox.  If we are selecting a <a> already, any characters will
 					// be added within the <a> which is bad!
-					var _selection = taSelection.getSelection();
 					/* istanbul ignore next: don't see how to test this... */
-					if (taSelection.getSelectionElement().tagName.toLowerCase() === 'a') {
-						// check and see if we are at the edge of the <a>
-						if (_selection.start.element.nodeType === 3 &&
-							_selection.start.element.textContent.length === _selection.end.offset) {
-							// we are at the end of the <a>!!!
-							// so move the selection to after the <a>!!
-							taSelection.setSelectionAfterElement(taSelection.getSelectionElement());
-						}
-						if (_selection.start.element.nodeType === 3 &&
-							_selection.start.offset === 0) {
-							// we are at the start of the <a>!!!
-							// so move the selection before the <a>!!
-							taSelection.setSelectionBeforeElement(taSelection.getSelectionElement());
+					if (taSelection.getSelection) {
+						var _selection = taSelection.getSelection();
+						if (taSelection.getSelectionElement().nodeName.toLowerCase() === 'a') {
+							// check and see if we are at the edge of the <a>
+							if (_selection.start.element.nodeType === 3 &&
+								_selection.start.element.textContent.length === _selection.end.offset) {
+								// we are at the end of the <a>!!!
+								// so move the selection to after the <a>!!
+								taSelection.setSelectionAfterElement(taSelection.getSelectionElement());
+							}
+							if (_selection.start.element.nodeType === 3 &&
+								_selection.start.offset === 0) {
+								// we are at the start of the <a>!!!
+								// so move the selection before the <a>!!
+								taSelection.setSelectionBeforeElement(taSelection.getSelectionElement());
+							}
 						}
 					}
 					/* istanbul ignore else: this is for catching the jqLite testing*/
@@ -977,7 +1022,8 @@ textAngular.service('textAngularManager', ['taToolExecuteAction', 'taTools', 'ta
 				tmp = tmp.concat(_editor.toolbarScopes);
 			});
 			return tmp;
-		},
+		}
+/********************** not functional yet
 		// save the selection ('range') for the given editor
 		saveFocusSelection: function (name, range) {
 			editors[name].savedFocusRange = range;
@@ -985,7 +1031,6 @@ textAngular.service('textAngularManager', ['taToolExecuteAction', 'taTools', 'ta
 		// restore the saved selection from when the focus was lost
 		restoreFocusSelection: function(name, scope) {
 			// we only do this if NOT focussed and saved...
-			/* istanbul ignore next: not sure how to test this */
 			if (editors[name].savedFocusRange && !scope.focussed) {
 				try {
 					var _r = rangy.restoreRange(editors[name].savedFocusRange);
@@ -994,6 +1039,7 @@ textAngular.service('textAngularManager', ['taToolExecuteAction', 'taTools', 'ta
 				} catch(e) {}
 			}
 		}
+*************/
 	};
 }]);
 textAngular.directive('textAngularToolbar', [
