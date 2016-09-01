@@ -21,12 +21,12 @@ module.exports = function (grunt) {
 	grunt.registerTask('test', ['clean:coverage', 'jshint', 'karma', 'coverage']);
 	grunt.registerTask('travis-test', ['concat', 'umd', 'copy:setupFiles', 'jshint', 'karma', 'coverage', 'coveralls']);
 
-	grunt.registerTask('release', ['bump-only', 'setVersion', 'compile', 'demo_pages', 'changelog','gitcommit','bump-commit', 'shell:publish']);
-	grunt.registerTask('release:patch', ['bump-only:patch','setVersion','compile','demo_pages','changelog','gitcommit','bump-commit', 'shell:publish']);
-	grunt.registerTask('release:minor', ['bump-only:minor','setVersion','compile','demo_pages','changelog','gitcommit','bump-commit', 'shell:publish']);
-	grunt.registerTask('release:major', ['bump-only:major','setVersion','compile','demo_pages','changelog','gitcommit','bump-commit', 'shell:publish']);
-	grunt.registerTask('release:prerelease', ['bump-only:prerelease','setVersion','demo_pages','compile','changelog','gitcommit','bump-commit', 'shell:publish']);
-
+	grunt.registerTask('release', ['bump-only', 'setVersion', 'compile', 'demo_pages', 'conventionalChangelog', 'shell:changelog', 'gitcommit','bump-commit', 'shell:publish']);
+	grunt.registerTask('release:patch', ['bump-only:patch','setVersion','compile','demo_pages','conventionalChangelog','shell:changelog','gitcommit','bump-commit', 'shell:publish']);
+	grunt.registerTask('release:minor', ['bump-only:minor','setVersion','compile','demo_pages','conventionalChangelog','shell:changelog','gitcommit','bump-commit', 'shell:publish']);
+	grunt.registerTask('release:major', ['bump-only:major','setVersion','compile','demo_pages','conventionalChangelog','shell:changelog','gitcommit','bump-commit', 'shell:publish']);
+	grunt.registerTask('release:prerelease', ['bump-only:prerelease','setVersion','demo_pages','compile','conventionalChangelog','shell:changelog','gitcommit','bump-commit', 'shell:publish']);
+	
 	grunt.registerTask('setVersion', function () {
 		var pkgJson = require('./package.json');
 		var version = pkgJson.version;
@@ -65,7 +65,38 @@ module.exports = function (grunt) {
 	// Project configuration.
 	grunt.initConfig({
 		pkg: grunt.file.readJSON('package.json'),
-		changelog: {options: {dest: 'changelog.md'}},
+		// grunt-spawn
+		spawn_changelog: {
+				command: 'pico',
+				pattern: 'changelog.md',
+				commandArgs: ['{0}'],
+				opts: {
+					stdio: 'inherit'
+				}
+			},
+		conventionalChangelog: {
+			options: {
+				changelogOpts: {
+					// conventional-changelog options go here
+					preset: 'angular'
+				},
+				context: {
+					// context goes here
+				},
+				gitRawCommitsOpts: {
+					// git-raw-commits options go here
+				},
+				parserOpts: {
+					// conventional-commits-parser options go here
+				},
+				writerOpts: {
+					// conventional-changelog-writer options go here
+				}
+			},
+			release: {
+				src: 'changelog.md'
+			},
+		},
 		bump: {
 			options: {
 				files: ['package.json','bower.json'],
@@ -87,6 +118,14 @@ module.exports = function (grunt) {
 		shell: {
 			publish: {
 				command: "npm publish"
+			}
+		},
+		shell: {
+			changelog: {
+				options: {
+					stdinRawMode: true
+				},
+				command: 'pico changelog.md',
 			}
 		},
 		clean: {
