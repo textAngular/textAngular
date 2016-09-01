@@ -39,7 +39,7 @@
     "grunt-contrib-jshint": "^1.0.0",
     "grunt-contrib-uglify": "^2.0.0",
     "grunt-contrib-watch": "^1.0.0",
-    "grunt-conventional-changelog": "^1.2.2",
+    "grunt-conventional-changelog": "^6.1.0",
     "grunt-git": "^1.0.0",
     "grunt-istanbul-coverage": "0.0.5",
     "grunt-karma": "^0.6.2",
