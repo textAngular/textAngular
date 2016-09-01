@@ -1,3 +1,20 @@
+<a name"1.5.8"></a>
+### 1.5.8 (2016-08-31)
+
+
+#### Bug Fixes
+
+* **textAngular:**
+   * Fixed several issues around Italic, Bold, Strikethrough, Underline state in the  ([7823937b](https://github.com/fraywing/textAngular/commit/7823937b))
+   * fix(DOM, textAngularSetup): Functionality under Firefox is now much improved. 
+   * Build Enhancement: updated many of the development packages.  There is more work to do, but some improvement.
+   * Fix(main): removed the saveFocusSelection() and restoreFocusSelection()
+      which to do function properly and create problems!
+
+#### Features
+   * Enhancment: - 'insertLink' now allows editing of existing link
+
+
 <a name"1.5.7"></a>
 ### 1.5.7 (2016-08-23)
 
