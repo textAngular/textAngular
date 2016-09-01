@@ -420,7 +420,7 @@ describe('taTools test tool actions', function(){
 			sel.refresh();
 		}));
 		afterEach(function(){
-			console.log($log.debug.logs);
+			//console.log($log.debug.logs);
 			element.remove();
 		});
 

@@ -514,7 +514,7 @@ function($document, taDOM, $log){
 			//console.log(innerHtml);
 			//console.log(range.toHtml());
 			//console.log(innerHtml === range.toHtml());
- 			if (innerHtml === range.toHtml() &&
+			if (innerHtml === range.toHtml() &&
 				// not the whole taTextElement
 				(!(container.nodeName.toLowerCase() === 'div' &&  /^taTextElement/.test(container.id)))
 			) {

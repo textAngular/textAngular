@@ -712,6 +712,7 @@ angular.module('textAngularSetup', [])
 		}
 	});
 
+		/* jshint -W099 */
 	/****************************
 	 //  we don't use this code - since the previous way CLEAR is expected to work does not clear partially selected <li>
 
