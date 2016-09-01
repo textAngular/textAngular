@@ -554,6 +554,79 @@ describe('taTools test tool actions', function(){
 
 	});
 
+	describe('test clear button clears nested <ul> lists', function() {
+		beforeEach(module('textAngular'));
+		var $log;
+		beforeEach(inject(function (_$compile_, _$rootScope_, $document, textAngularManager, _$window_, _$log_) {
+			$log = _$log_;
+			$window = _$window_;
+			$window.prompt = function () {
+				return '';
+			};
+			$rootScope = _$rootScope_;
+			$rootScope.htmlcontent = '' +
+//jshint multistr: true
+'<div class="test-class">\
+<ul>\
+	<li>DB</li>\
+	<ul>\
+		<li>Determine how much work this is when there are a 1000 users - like Joel</li>\
+		<li>Create N user copies for testing!</li>\
+	</ul>\
+</ul>\
+<ul>\
+	<li>UI</li>\
+	<ul>\
+		<li>Drag and Drop of tasks to a task?</li>\
+		<li>tasks within a task (todo lists)-- associated tasks?</li>\
+		<li>Show version of textAngular when showing version.</li>\
+	</ul>\
+</ul></div>';
+			element = _$compile_('<text-angular name="testclearbutton" ng-model="htmlcontent"></text-angular>')($rootScope);
+			$document.find('body').append(element);
+			$rootScope.$digest();
+			editorScope = textAngularManager.retrieveEditor('testclearbutton').scope;
+			var sel = $window.rangy.getSelection();
+			var range = $window.rangy.createRangyRange();
+			range.selectNodeContents(jQuery('.ta-text > .ta-bind', element)[0]);
+			sel.setSingleRange(range);
+			sel.refresh();
+		}));
+		afterEach(function () {
+			//console.log($log.debug.logs);
+			element.remove();
+		});
+
+		it('doesn\'t error', function () {
+			expect(function () {
+				findAndTriggerButton('clear');
+			}).not.toThrow();
+		});
+
+		it('clears out all formatting', function () {
+			var sel = $window.rangy.getSelection();
+			var range = $window.rangy.createRangyRange();
+			range.selectNode(jQuery('div.test-class')[0]);
+			sel.setSingleRange(range);
+			sel.refresh();
+			//console.log(sel);
+			findAndTriggerButton('clear');
+			//expect($rootScope.htmlcontent).toBe('<p>Test Content that should be cleared</p><p>Test Other Tags</p><p>Test 1</p><p>Test 2</p>');
+			// bug in phantom JS
+			expect($rootScope.htmlcontent).toBe(
+//jshint multistr: true
+'<div>\
+<p>DB</p>\
+<p>Determine how much work this is when there are a 1000 users - like Joel</p>\
+<p>Create N user copies for testing!</p>\
+<p>UI</p>\
+<p>Drag and Drop of tasks to a task?</p>\
+<p>tasks within a task (todo lists)-- associated tasks?</p>\
+<p>Show version of textAngular when showing version.</p>\
+</div>');
+		});
+	});
+
 	describe('test link functions and button', function(){
 		beforeEach(module('textAngular'));
 		beforeEach(inject(function (_$compile_, _$rootScope_, $document, textAngularManager, _$window_) {

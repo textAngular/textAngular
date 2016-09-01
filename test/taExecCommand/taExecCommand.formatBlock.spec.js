@@ -221,5 +221,41 @@ describe('taExecCommand', function(){
 				});
 			});
 		});
+
+		describe('more complex wrap', function () {
+			it('should match', inject(function ($compile, $rootScope) {
+				setupElement(
+'<div class="ta-bind">\
+<p><ins id="aswift_0_expand" style="height: 90px;width: 728px;background-color: transparent;"></ins></p>\
+<p><ins id="aswift_0_anchor" style="height: 90px;width: 728px;background-color: transparent;"></ins></p>\
+<p><span style="float: none;"></span></p><table border="" cellspacing="4" cellpadding="14">\
+<tbody>\
+<tr>\
+<td width="48%">\
+<center>\
+<h1>A Simple Sample Web Page</h1>\
+<img src="http://sheldonbrown.com/images/scb_eagle_contact.jpeg">\
+<h4>By Sheldon Brown</h4>\
+<h2>Demonstrating a few HTML features</h2>\
+</center>\
+</td>\
+</tr>\
+</tbody>\
+</table>\
+<p><img class="ta-insert-video" ta-insert-video="http://www.youtube.com/embed/2maA1-mvicY" src="" allowfullscreen="true" width="300" frameborder="0" height="250"/></p></div>');
+				taSelection.element = $element[0];
+				taExecCommand()('formatBlock', false, '<P>');
+				expect($element.html()).toBe(
+'<p><ins id="aswift_0_expand" style="height: 90px;width: 728px;background-color: transparent;"></ins></p>' +
+'<p><ins id="aswift_0_anchor" style="height: 90px;width: 728px;background-color: transparent;"></ins></p>' +
+'<p><span style="float: none;"></span></p>' +
+'<p><center><h1>A Simple Sample Web Page</h1><img src="http://sheldonbrown.com/images/scb_eagle_contact.jpeg">' +
+'<h4>By Sheldon Brown</h4><h2>Demonstrating a few HTML features</h2></center></p>' +
+'<p>' +
+'<img class="ta-insert-video" ta-insert-video="http://www.youtube.com/embed/2maA1-mvicY" src="" allowfullscreen="true" width="300" frameborder="0" height="250"></p>');
+			}));
+
+		});
+
 	});
 });

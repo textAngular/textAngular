@@ -40,10 +40,16 @@ angular.module('textAngular.DOM', ['textAngular.factories'])
 				turnBlockIntoBlocks(_n, options);
 			}
 		}
+		/* istanbul ignore next - very rare condition that we do not test*/
+		if (element.parentNode === null) {
+			// nothing left to do..
+			return element;
+		}
 		var $target = angular.element(options);
 		$target[0].innerHTML = element.innerHTML;
 		element.parentNode.insertBefore($target[0], element);
 		element.parentNode.removeChild(element);
+		return $target;
 	};
 	return function(taDefaultWrap, topNode){
 		// NOTE: here we are dealing with the html directly from the browser and not the html the user sees.
@@ -333,7 +339,10 @@ angular.module('textAngular.DOM', ['textAngular.factories'])
 						else {
 							// regular block elements replace other block elements
 							for(i = 0; i < _nodes.length; i++){
-								turnBlockIntoBlocks(_nodes[i], options);
+								var newBlock = turnBlockIntoBlocks(_nodes[i], options);
+								if (_nodes[i] === $target[0]) {
+									$target = angular.element(newBlock);
+								}
 							}
 						}
 					}
