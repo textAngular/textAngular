@@ -192,7 +192,8 @@ describe('taExecCommand', function(){
 			$element = angular.element('<p>');
 			taSelection.element = $element[0];
 			var mock = {id:"mock", getRangeAt: function () {return {canSurroundContents: function () {return false;}};}};
-			spyOn(rangy, "getSelection").andReturn(mock);
+			// syntax change Jasmine 1.x -> 2.x ==> andReturn -> and.returnValue
+			spyOn(rangy, "getSelection").and.returnValue(mock);
 			taExecCommand()('createLink', false, 'http://test.com', {"a":{"target":""}});
 			expect($element.html()).toBe('');
 		}));
