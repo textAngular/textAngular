@@ -118,9 +118,7 @@ module.exports = function (grunt) {
 		shell: {
 			publish: {
 				command: "npm publish"
-			}
-		},
-		shell: {
+			},
 			changelog: {
 				options: {
 					stdinRawMode: true
@@ -129,25 +127,25 @@ module.exports = function (grunt) {
 			}
 		},
 		clean: {
-            coverage: ["coverage"],
-            dist: ["dist"],
-        },
+			coverage: ["coverage"],
+			dist: ["dist"],
+		},
 		coverage: {
 			options: {
-                thresholds: {
-                    'statements': 100,
-                    'branches': 100,
-                    'lines': 100,
-                    'functions': 100
-                },
+				thresholds: {
+					'statements': 100,
+					'branches': 100,
+					'lines': 100,
+					'functions': 100
+				},
 			dir: 'coverage'
 			}
 		},
 		coveralls: {
 			options: {
 				debug: true,
-				coverage_dir: 'coverage',
-				force: true
+				coverageDir: 'coverage',
+				force: true,
 			}
 		},
 		karma: {
@@ -181,36 +179,36 @@ module.exports = function (grunt) {
 			}
 		},
 		concat: {
-        dist: {
-            options: {
-                banner: "/*\n@license textAngular\nAuthor : Austin Anderson\nLicense : 2013 MIT\nVersion <%- pkg.version %>\n\nSee README.md or https://github.com/fraywing/textAngular/wiki for requirements and use.\n*/\n\n/*\nCommonjs package manager support (eg componentjs).\n*/\n\n\n\"use strict\";"
-            },
-            files:{
-                'dist/textAngular.js': ['src/globals.js','src/factories.js','src/DOM.js','src/validators.js','src/taBind.js','src/main.js'],
-            }
-        },
-        umd: {
-          files: {
-            'dist/textAngular.umd.js': ['dist/textAngularSetup.js', 'dist/textAngular.js']
-          }
-        }
-    },
-    umd: {
-        all: {
-            options: {
-                src: 'dist/textAngular.umd.js',
-		            dest: 'dist/textAngular.umd.js',
-                objectToExport: 'textAngular.name',
-                globalAlias: 'textAngular',
-                amdModuleId: 'textAngular',
-                deps: {
-                    'default': ['rangy'],
-                    cjs: ['rangy', {'rangy/lib/rangy-selectionsaverestore': ''}],
-                    amd: ['rangy', {'rangy/lib/rangy-selectionsaverestore': ''}]
-                }
-            }
-        }
-    },
+			dist: {
+				options: {
+					banner: "/*\n@license textAngular\nAuthor : Austin Anderson\nLicense : 2013 MIT\nVersion <%- pkg.version %>\n\nSee README.md or https://github.com/fraywing/textAngular/wiki for requirements and use.\n*/\n\n/*\nCommonjs package manager support (eg componentjs).\n*/\n\n\n\"use strict\";"
+				},
+				files:{
+					'dist/textAngular.js': ['src/globals.js','src/factories.js','src/DOM.js','src/validators.js','src/taBind.js','src/main.js'],
+				}
+			},
+			umd: {
+			  files: {
+				'dist/textAngular.umd.js': ['dist/textAngularSetup.js', 'dist/textAngular.js']
+			  }
+			}
+		},
+		umd: {
+			all: {
+				options: {
+					src: 'dist/textAngular.umd.js',
+						dest: 'dist/textAngular.umd.js',
+					objectToExport: 'textAngular.name',
+					globalAlias: 'textAngular',
+					amdModuleId: 'textAngular',
+					deps: {
+						'default': ['rangy'],
+						cjs: ['rangy', {'rangy/lib/rangy-selectionsaverestore': ''}],
+						amd: ['rangy', {'rangy/lib/rangy-selectionsaverestore': ''}]
+					}
+				}
+			}
+		},
 		uglify: {
 			options: {
 				mangle: true,
@@ -226,13 +224,13 @@ module.exports = function (grunt) {
 				}
 			}
 		},
-        demo_pages: {
-            main: {
-                cwd: 'src/demo/',
-                src: '*.html',
-                dest: 'demo/'
-            }
-        },
+		demo_pages: {
+			main: {
+				cwd: 'src/demo/',
+				src: '*.html',
+				dest: 'demo/'
+			}
+		},
 		watch: {
 			files: "src/*.js",
 			tasks: "compile"

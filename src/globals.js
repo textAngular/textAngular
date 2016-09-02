@@ -36,7 +36,9 @@ var _browserDetect = {
 };
 
 // Global to textAngular to measure performance where needed
+/* istanbul ignore next: untestable browser check */
 var performance = performance || {};
+/* istanbul ignore next: untestable browser check */
 performance.now = (function() {
 	return performance.now       ||
 		performance.mozNow    ||

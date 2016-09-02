@@ -207,7 +207,8 @@ describe('taBind', function () {
 			describe('on ignoring keys press', function() {
 				it('should ignore blocked keys events', inject(function($rootScope, $compile, $window, $document, taSelection) {
 					var BLOCKED_KEYS = [19,20,27,33,34,35,36,37,38,39,40,45,46,112,113,114,115,116,117,118,119,120,121,122,123,144,145],
-						eventSpy = spyOn(taSelection, 'setSelectionToElementStart').andCallThrough(),
+						// syntax change Jasmine 1.x -> 2.x ==> andCallThrough -> and.callThrough
+						eventSpy = spyOn(taSelection, 'setSelectionToElementStart').and.callThrough(),
 						event;
 					$rootScope.html = '<p><br></p>';
 					element = $compile('<div ta-bind ta-default-wrap="b" contenteditable="contenteditable" ng-model="html"></div>')($rootScope);

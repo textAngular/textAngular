@@ -44,7 +44,8 @@ describe('taDOM', function(){
 		it('requires splitNode or splitIndex', function(){
 			expect(function(){
 				taDom.splitNodes();
-			}).toThrow('taDOM.splitNodes requires a splitNode or splitIndex');
+			// syntax change Jasmine 1.x -> 2.x ==> toThrow -> toThrowError
+			}).toThrowError('taDOM.splitNodes requires a splitNode or splitIndex');
 		});
 		it('should split all nodes at index', function(){
 			_testEl = angular.element('<p><b>TestNode</b><u>Test 2</u></p>');

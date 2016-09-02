@@ -347,12 +347,14 @@ describe('HTML', function() {
       });
 
       it('should drop non valid uri attributes', function() {
-        uriValidator.andReturn(false);
+        // syntax change Jasmine 1.x -> 2.x ==> andReturn -> and.returnValue
+        uriValidator.and.returnValue(false);
         writer.start('a', {href:'someUrl'}, false);
         expect(html).toEqual('<a>');
 
         html = '';
-        uriValidator.andReturn(true);
+        // syntax change Jasmine 1.x -> 2.x ==> andReturn -> and.returnValue
+        uriValidator.and.returnValue(true);
         writer.start('a', {href:'someUrl'}, false);
         expect(html).toEqual('<a href="someUrl">');
       });
@@ -361,6 +363,10 @@ describe('HTML', function() {
 
   describe('uri checking', function() {
     beforeEach(function() {
+      // syntax change Jasmine 1.x -> 2.x
+      // this.addMatchers is now jasmine.addMatchers
+      // and other changes see: http://jasmine.github.io/2.0/upgrading.html
+/* WAS:
       this.addMatchers({
         toBeValidUrl: function() {
           var sanitize;
@@ -378,6 +384,32 @@ describe('HTML', function() {
           var input = '<img src="'+this.actual+'"/>';
           return sanitize(input) === input;
         }
+*/
+      jasmine.addMatchers({
+        toBeValidUrl: function(util, customEqualityTesters) {
+          var sanitize;
+          inject(function($sanitize) {
+            sanitize = $sanitize;
+          });
+          return {
+            compare: function (actual, expected) {
+              var input = '<a href="' + actual + '"></a>';
+              var passed = sanitize(input) === input;
+              return {
+                pass: passed,
+                message: 'Expected ' + actual + (passed ? '' : ' not') + ' to equal ' + expected
+              };
+            }
+          }
+        },
+        toBeValidImageSrc: function() {
+          var sanitize;
+          inject(function($sanitize) {
+            sanitize = $sanitize;
+          });
+          var input = '<img src="' + actual + '"/>';
+          return sanitize(input) === input;
+        }
       });
     });
 
@@ -387,12 +419,14 @@ describe('HTML', function() {
         $provide.value('$$sanitizeUri', $$sanitizeUri);
       });
       inject(function() {
-        $$sanitizeUri.andReturn('someUri');
+        // syntax change Jasmine 1.x -> 2.x ==> andReturn -> and.returnValue
+        $$sanitizeUri.and.returnValue('someUri');
 
         expectHTML('<a href="someUri"></a>').toEqual('<a href="someUri"></a>');
         expect($$sanitizeUri).toHaveBeenCalledWith('someUri', false);
 
-        $$sanitizeUri.andReturn('unsafe:someUri');
+        // syntax change Jasmine 1.x -> 2.x ==> andReturn -> and.returnValue
+        $$sanitizeUri.and.returnValue('unsafe:someUri');
         expectHTML('<a href="someUri"></a>').toEqual('<a></a>');
       });
     });
@@ -403,12 +437,14 @@ describe('HTML', function() {
         $provide.value('$$sanitizeUri', $$sanitizeUri);
       });
       inject(function() {
-        $$sanitizeUri.andReturn('someUri');
+        // syntax change Jasmine 1.x -> 2.x ==> andReturn -> and.returnValue
+        $$sanitizeUri.and.returnValue('someUri');
 
         expectHTML('<img src="someUri"/>').toEqual('<img src="someUri"/>');
         expect($$sanitizeUri).toHaveBeenCalledWith('someUri', true);
 
-        $$sanitizeUri.andReturn('unsafe:someUri');
+        // syntax change Jasmine 1.x -> 2.x ==> andReturn -> and.returnValue
+        $$sanitizeUri.and.returnValue('unsafe:someUri');
         expectHTML('<img src="someUri"/>').toEqual('<img/>');
       });
     });

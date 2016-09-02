@@ -259,7 +259,8 @@ describe('textAngularManager', function(){
 					it('should set the active editor to the editor', function(){
 						expect(testbar1._parent).toBe(editorScope);
 						expect(testbar2._parent).toBe(editorScope);
-						expect(testbar3._parent).toNotBe(editorScope);
+						// syntax change Jasmine 1.x -> 2.x ==> toNotBe -> not.toBe
+						expect(testbar3._parent).not.toBe(editorScope);
 					});
 				});
 				describe('unfocus', function(){
