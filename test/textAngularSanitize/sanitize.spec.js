@@ -407,8 +407,16 @@ describe('HTML', function() {
           inject(function($sanitize) {
             sanitize = $sanitize;
           });
-          var input = '<img src="' + actual + '"/>';
-          return sanitize(input) === input;
+          return {
+            compare: function (actual, expected) {
+              var input = '<img src="' + actual + '"/>';
+              var passed = sanitize(input) === input;
+              return {
+                pass: passed,
+                message: 'Expected ' + actual + (passed ? '' : ' not') + ' to equal ' + expected
+              };
+            }
+          }
         }
       });
     });

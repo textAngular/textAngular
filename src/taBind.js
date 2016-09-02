@@ -951,7 +951,7 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 					if(_isContentEditable && _focussed){
 						// update while focussed
 						element.removeClass('placeholder-text');
-						/* istanbul ignore next: don't know how to test this */
+ 						/* istanbul ignore next: don't know how to test this */
 						if(_renderTimeout) $timeout.cancel(_renderTimeout);
 						_renderTimeout = $timeout(function(){
 							/* istanbul ignore if: Can't be bothered testing this... */
