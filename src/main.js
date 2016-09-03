@@ -395,6 +395,19 @@ textAngular.directive("textAngular", [
 *******/
 					_editorFunctions.focus();
 					element.triggerHandler('focus');
+					// we call editorScope.updateSelectedStyles() here because we want the toolbar to be focussed
+					// as soon as we have focus.  Otherwise this only happens on mousedown or keydown etc...
+					/* istanbul ignore else: don't run if already running */
+					if(scope.updateSelectedStyles && !scope._bUpdateSelectedStyles){
+						// we don't set editorScope._bUpdateSelectedStyles here, because we do not want the
+						// updateSelectedStyles() to run twice which it will do after 200 msec if we have
+						// set editorScope._bUpdateSelectedStyles
+						//
+						// WOW, normally I would do a scope.$apply here, but this causes ERRORs when doing tests!
+						$timeout(function () {
+							scope.updateSelectedStyles();
+						}, 0);
+					}
 				};
 				scope.displayElements.html.on('focus', _focusin);
 				scope.displayElements.text.on('focus', _focusin);
