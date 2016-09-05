@@ -1,3 +1,31 @@
+<a name="1.5.9"></a>
+## [1.5.9](https://github.com/fraywing/textAngular/compare/v1.5.8...v1.5.9) (2016-09-05)
+
+
+### Bug Fixes
+
+* **factories.js:** removed the extra <span id="selectionBoundary..." class="rangySelectionBoundary">></span> and ([76a31e2](https://github.com/fraywing/textAngular/commit/76a31e2))
+* **main:** We now properly update the toolbar when we tab into the editor. ([d930538](https://github.com/fraywing/textAngular/commit/d930538))
+* **DOM, textAngularSetup, taExecCommand.formatBlock.spec, taTools.spec)
+ - removed a rare element.parentNode === null condition
+ - fixed a rare bug during 'CLEAR' formatic where we could see a rangy error
+   'The given range isn't in document'
+ - enhanced the 'CLEAR' format function to properly handle nested <ul> statements
+
+#### Features
+  * Enhancment: - the build proces is improved and we are now uptodate with the
+                packages in use.  Only grunt-istanbul-coverage is behind because
+                it currently breaks the  build.
+              - Updated the grunt-conventional-changelog to the current package.
+                and added an editing step for the changelog.md as part of the
+                build process.
+
+#### Breaking Changes (BUILD ONLY)
+  * Because of the update of the packages used in the build process, you must
+    do a 'npm install' before you can build.
+
+
+
 <a name"1.5.8"></a>
 ### 1.5.8 (2016-08-31)
 
