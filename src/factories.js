@@ -202,6 +202,11 @@ angular.module('textAngular.factories', [])
 		return finalHtml + html.substring(lastIndex);
 	}
 
+	// use precompiled regexp for speed
+	var rsb1 = new RegExp(/<span id="selectionBoundary_\d+_\d+" class="rangySelectionBoundary">[^<>]+?<\/span>/ig);
+	var rsb2 = new RegExp(/<span class="rangySelectionBoundary" id="selectionBoundary_\d+_\d+">[^<>]+?<\/span>/ig);
+	var rsb3 = new RegExp(/<span id="selectionBoundary_\d+_\d+" class="rangySelectionBoundary">[^<>]+?<\/span>/ig);
+
 	return function taSanitize(unsafe, oldsafe, ignore){
 		// unsafe html should NEVER built into a DOM object via angular.element. This allows XSS to be inserted and run.
 		if ( !ignore ) {
@@ -215,6 +220,16 @@ angular.module('textAngular.factories', [])
 		// any exceptions (lets say, color for example) should be made here but with great care
 		// setup unsafe element for modification
 		unsafe = transformLegacyAttributes(unsafe);
+
+		// we had an issue in the past, where we dumped a whole bunch of <span>'s into the content...
+		// so we remove them here
+		// IN A FUTURE release this can be removed after all have updated through release 1.5.9
+		if (unsafe) {
+			unsafe = unsafe.replace(rsb1, '');
+			unsafe = unsafe.replace(rsb2, '');
+			unsafe = unsafe.replace(rsb1, '');
+			unsafe = unsafe.replace(rsb3, '');
+		}
 
 		var safe;
 		try {
