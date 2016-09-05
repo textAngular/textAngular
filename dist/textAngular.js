@@ -2,7 +2,7 @@
 @license textAngular
 Author : Austin Anderson
 License : 2013 MIT
-Version 1.5.8
+Version 1.5.9
 
 See README.md or https://github.com/fraywing/textAngular/wiki for requirements and use.
 */
@@ -13,7 +13,7 @@ Commonjs package manager support (eg componentjs).
 
 
 "use strict";// NOTE: textAngularVersion must match the Gruntfile.js 'setVersion' task.... and have format v/d+./d+./d+
-var textAngularVersion = 'v1.5.8';   // This is automatically updated during the build process to the current release!
+var textAngularVersion = 'v1.5.9';   // This is automatically updated during the build process to the current release!
 
 
 // IE version detection - http://stackoverflow.com/questions/4169160/javascript-ie-detection-why-not-use-simple-conditional-comments
@@ -50,7 +50,9 @@ var _browserDetect = {
 };
 
 // Global to textAngular to measure performance where needed
+/* istanbul ignore next: untestable browser check */
 var performance = performance || {};
+/* istanbul ignore next: untestable browser check */
 performance.now = (function() {
 	return performance.now       ||
 		performance.mozNow    ||
@@ -392,6 +394,11 @@ angular.module('textAngular.factories', [])
 		return finalHtml + html.substring(lastIndex);
 	}
 
+	// use precompiled regexp for speed
+	var rsb1 = new RegExp(/<span id="selectionBoundary_\d+_\d+" class="rangySelectionBoundary">[^<>]+?<\/span>/ig);
+	var rsb2 = new RegExp(/<span class="rangySelectionBoundary" id="selectionBoundary_\d+_\d+">[^<>]+?<\/span>/ig);
+	var rsb3 = new RegExp(/<span id="selectionBoundary_\d+_\d+" class="rangySelectionBoundary">[^<>]+?<\/span>/ig);
+
 	return function taSanitize(unsafe, oldsafe, ignore){
 		// unsafe html should NEVER built into a DOM object via angular.element. This allows XSS to be inserted and run.
 		if ( !ignore ) {
@@ -405,6 +412,16 @@ angular.module('textAngular.factories', [])
 		// any exceptions (lets say, color for example) should be made here but with great care
 		// setup unsafe element for modification
 		unsafe = transformLegacyAttributes(unsafe);
+
+		// we had an issue in the past, where we dumped a whole bunch of <span>'s into the content...
+		// so we remove them here
+		// IN A FUTURE release this can be removed after all have updated through release 1.5.9
+		if (unsafe) {
+			unsafe = unsafe.replace(rsb1, '');
+			unsafe = unsafe.replace(rsb2, '');
+			unsafe = unsafe.replace(rsb1, '');
+			unsafe = unsafe.replace(rsb3, '');
+		}
 
 		var safe;
 		try {
@@ -498,10 +515,16 @@ angular.module('textAngular.DOM', ['textAngular.factories'])
 				turnBlockIntoBlocks(_n, options);
 			}
 		}
+		/* istanbul ignore next - very rare condition that we do not test*/
+		if (element.parentNode === null) {
+			// nothing left to do..
+			return element;
+		}
 		var $target = angular.element(options);
 		$target[0].innerHTML = element.innerHTML;
 		element.parentNode.insertBefore($target[0], element);
 		element.parentNode.removeChild(element);
+		return $target;
 	};
 	return function(taDefaultWrap, topNode){
 		// NOTE: here we are dealing with the html directly from the browser and not the html the user sees.
@@ -614,216 +637,218 @@ angular.module('textAngular.DOM', ['textAngular.factories'])
                 }
             }catch(e){}
 			var $selected = angular.element(selectedElement);
-			if(selectedElement !== undefined && selectedElement.tagName !== undefined){
-				var tagName = selectedElement.tagName.toLowerCase();
-				if(command.toLowerCase() === 'insertorderedlist' || command.toLowerCase() === 'insertunorderedlist'){
-					var selfTag = taBrowserTag((command.toLowerCase() === 'insertorderedlist')? 'ol' : 'ul');
-					if(tagName === selfTag){
-						// if all selected then we should remove the list
-						// grab all li elements and convert to taDefaultWrap tags
-						return listToDefault($selected, taDefaultWrap);
-					}else if(tagName === 'li' &&
-                        $selected.parent()[0].tagName.toLowerCase() === selfTag &&
-                        $selected.parent().children().length === 1){
-						// catch for the previous statement if only one li exists
-						return listToDefault($selected.parent(), taDefaultWrap);
-					}else if(tagName === 'li' &&
-                        $selected.parent()[0].tagName.toLowerCase() !== selfTag &&
-                        $selected.parent().children().length === 1){
-						// catch for the previous statement if only one li exists
-						return listToList($selected.parent(), selfTag);
-					}else if(tagName.match(BLOCKELEMENTS) && !$selected.hasClass('ta-bind')){
-						// if it's one of those block elements we have to change the contents
-						// if it's a ol/ul we are changing from one to the other
-						if(tagName === 'ol' || tagName === 'ul'){
-							return listToList($selected, selfTag);
-						}else{
-							var childBlockElements = false;
-							angular.forEach($selected.children(), function(elem){
-								if(elem.tagName.match(BLOCKELEMENTS)) {
-									childBlockElements = true;
-								}
-							});
-							if(childBlockElements){
-								return childElementsToList($selected.children(), $selected, selfTag);
-							}else{
-								return childElementsToList([angular.element('<div>' + selectedElement.innerHTML + '</div>')[0]], $selected, selfTag);
-							}
-						}
-					}else if(tagName.match(BLOCKELEMENTS)){
-						// if we get here then all the contents of the ta-bind are selected
-						_nodes = taSelection.getOnlySelectedElements();
-						if(_nodes.length === 0){
-							// here is if there is only text in ta-bind ie <div ta-bind>test content</div>
-							$target = angular.element('<' + selfTag + '><li>' + selectedElement.innerHTML + '</li></' + selfTag + '>');
-							$selected.html('');
-							$selected.append($target);
-						}else if(_nodes.length === 1 && (_nodes[0].tagName.toLowerCase() === 'ol' || _nodes[0].tagName.toLowerCase() === 'ul')){
-							if(_nodes[0].tagName.toLowerCase() === selfTag){
-								// remove
-								return listToDefault(angular.element(_nodes[0]), taDefaultWrap);
-							}else{
-								return listToList(angular.element(_nodes[0]), selfTag);
-							}
-						}else{
-							html = '';
-							var $nodes = [];
-							for(i = 0; i < _nodes.length; i++){
-								/* istanbul ignore else: catch for real-world can't make it occur in testing */
-								if(_nodes[i].nodeType !== 3){
-									var $n = angular.element(_nodes[i]);
-									/* istanbul ignore if: browser check only, phantomjs doesn't return children nodes but chrome at least does */
-									if(_nodes[i].tagName.toLowerCase() === 'li') continue;
-									else if(_nodes[i].tagName.toLowerCase() === 'ol' || _nodes[i].tagName.toLowerCase() === 'ul'){
-										html += $n[0].innerHTML; // if it's a list, add all it's children
-									}else if(_nodes[i].tagName.toLowerCase() === 'span' && (_nodes[i].childNodes[0].tagName.toLowerCase() === 'ol' || _nodes[i].childNodes[0].tagName.toLowerCase() === 'ul')){
-										html += $n[0].childNodes[0].innerHTML; // if it's a list, add all it's children
-									}else{
-										html += '<' + taBrowserTag('li') + '>' + $n[0].innerHTML + '</' + taBrowserTag('li') + '>';
-									}
-									$nodes.unshift($n);
-								}
-							}
-							$target = angular.element('<' + selfTag + '>' + html + '</' + selfTag + '>');
-							$nodes.pop().replaceWith($target);
-							angular.forEach($nodes, function($node){ $node.remove(); });
-						}
-						taSelection.setSelectionToElementEnd($target[0]);
-						return;
-					}
-				}else if(command.toLowerCase() === 'formatblock'){
-					optionsTagName = options.toLowerCase().replace(/[<>]/ig, '');
-					if(optionsTagName.trim() === 'default') {
-						optionsTagName = taDefaultWrap;
-						options = '<' + taDefaultWrap + '>';
-					}
-					if(tagName === 'li') {
-						$target = $selected.parent();
-					}
-					else {
-						$target = $selected;
-					}
-					// find the first blockElement
-					while(!$target[0].tagName || !$target[0].tagName.match(BLOCKELEMENTS) && !$target.parent().attr('contenteditable')){
-						$target = $target.parent();
-						/* istanbul ignore next */
-						tagName = ($target[0].tagName || '').toLowerCase();
-					}
-					if(tagName === optionsTagName){
-						// $target is wrap element
-						_nodes = $target.children();
-						var hasBlock = false;
-						for(i = 0; i < _nodes.length; i++){
-							hasBlock = hasBlock || _nodes[i].tagName.match(BLOCKELEMENTS);
-						}
-						if(hasBlock){
-							$target.after(_nodes);
-							next = $target.next();
-							$target.remove();
-							$target = next;
-						}else{
-							defaultWrapper.append($target[0].childNodes);
-							$target.after(defaultWrapper);
-							$target.remove();
-							$target = defaultWrapper;
-						}
-					}else if($target.parent()[0].tagName.toLowerCase() === optionsTagName &&
-						!$target.parent().hasClass('ta-bind')){
-						//unwrap logic for parent
-						var blockElement = $target.parent();
-						var contents = blockElement.contents();
-						for(i = 0; i < contents.length; i ++){
-							/* istanbul ignore next: can't test - some wierd thing with how phantomjs works */
-							if(blockElement.parent().hasClass('ta-bind') && contents[i].nodeType === 3){
-								defaultWrapper = angular.element('<' + taDefaultWrap + '>');
-								defaultWrapper[0].innerHTML = contents[i].outerHTML;
-								contents[i] = defaultWrapper[0];
-							}
-							blockElement.parent()[0].insertBefore(contents[i], blockElement[0]);
-						}
-						blockElement.remove();
-					}else if(tagName.match(LISTELEMENTS)){
-						// wrapping a list element
-						$target.wrap(options);
+			//if(selectedElement !== undefined && selectedElement.tagName !== undefined){
+			var tagName = selectedElement.tagName.toLowerCase();
+			if(command.toLowerCase() === 'insertorderedlist' || command.toLowerCase() === 'insertunorderedlist'){
+				var selfTag = taBrowserTag((command.toLowerCase() === 'insertorderedlist')? 'ol' : 'ul');
+				if(tagName === selfTag){
+					// if all selected then we should remove the list
+					// grab all li elements and convert to taDefaultWrap tags
+					return listToDefault($selected, taDefaultWrap);
+				}else if(tagName === 'li' &&
+					$selected.parent()[0].tagName.toLowerCase() === selfTag &&
+					$selected.parent().children().length === 1){
+					// catch for the previous statement if only one li exists
+					return listToDefault($selected.parent(), taDefaultWrap);
+				}else if(tagName === 'li' &&
+					$selected.parent()[0].tagName.toLowerCase() !== selfTag &&
+					$selected.parent().children().length === 1){
+					// catch for the previous statement if only one li exists
+					return listToList($selected.parent(), selfTag);
+				}else if(tagName.match(BLOCKELEMENTS) && !$selected.hasClass('ta-bind')){
+					// if it's one of those block elements we have to change the contents
+					// if it's a ol/ul we are changing from one to the other
+					if(tagName === 'ol' || tagName === 'ul'){
+						return listToList($selected, selfTag);
 					}else{
-						// default wrap behaviour
-						_nodes = taSelection.getOnlySelectedElements();
-						if(_nodes.length === 0) {
-							// no nodes at all....
-							_nodes = [$target[0]];
-						}
-						// find the parent block element if any of the nodes are inline or text
-						for(i = 0; i < _nodes.length; i++){
-							if(_nodes[i].nodeType === 3 || !_nodes[i].tagName.match(BLOCKELEMENTS)){
-								while(_nodes[i].nodeType === 3 || !_nodes[i].tagName || !_nodes[i].tagName.match(BLOCKELEMENTS)){
-									_nodes[i] = _nodes[i].parentNode;
-								}
+						var childBlockElements = false;
+						angular.forEach($selected.children(), function(elem){
+							if(elem.tagName.match(BLOCKELEMENTS)) {
+								childBlockElements = true;
 							}
-						}
-						// remove any duplicates from the array of _nodes!
-						_nodes = _nodes.filter(function(value, index, self) {
-							return self.indexOf(value) === index;
 						});
-						// remove all whole taTextElement if it is here... unless it is the only element!
-						if (_nodes.length>1) {
-							_nodes = _nodes.filter(function (value, index, self) {
-								return !(value.nodeName.toLowerCase() === 'div' && /^taTextElement/.test(value.id));
-							});
+						if(childBlockElements){
+							return childElementsToList($selected.children(), $selected, selfTag);
+						}else{
+							return childElementsToList([angular.element('<div>' + selectedElement.innerHTML + '</div>')[0]], $selected, selfTag);
 						}
-						if(angular.element(_nodes[0]).hasClass('ta-bind')){
-							$target = angular.element(options);
-							$target[0].innerHTML = _nodes[0].innerHTML;
-							_nodes[0].innerHTML = $target[0].outerHTML;
-						}else if(optionsTagName === 'blockquote'){
-							// blockquotes wrap other block elements
-							html = '';
-							for(i = 0; i < _nodes.length; i++){
-								html += _nodes[i].outerHTML;
-							}
-							$target = angular.element(options);
-							$target[0].innerHTML = html;
-							_nodes[0].parentNode.insertBefore($target[0],_nodes[0]);
-							for(i = _nodes.length - 1; i >= 0; i--){
-								/* istanbul ignore else:  */
-								if(_nodes[i].parentNode) _nodes[i].parentNode.removeChild(_nodes[i]);
+					}
+				}else if(tagName.match(BLOCKELEMENTS)){
+					// if we get here then all the contents of the ta-bind are selected
+					_nodes = taSelection.getOnlySelectedElements();
+					if(_nodes.length === 0){
+						// here is if there is only text in ta-bind ie <div ta-bind>test content</div>
+						$target = angular.element('<' + selfTag + '><li>' + selectedElement.innerHTML + '</li></' + selfTag + '>');
+						$selected.html('');
+						$selected.append($target);
+					}else if(_nodes.length === 1 && (_nodes[0].tagName.toLowerCase() === 'ol' || _nodes[0].tagName.toLowerCase() === 'ul')){
+						if(_nodes[0].tagName.toLowerCase() === selfTag){
+							// remove
+							return listToDefault(angular.element(_nodes[0]), taDefaultWrap);
+						}else{
+							return listToList(angular.element(_nodes[0]), selfTag);
+						}
+					}else{
+						html = '';
+						var $nodes = [];
+						for(i = 0; i < _nodes.length; i++){
+							/* istanbul ignore else: catch for real-world can't make it occur in testing */
+							if(_nodes[i].nodeType !== 3){
+								var $n = angular.element(_nodes[i]);
+								/* istanbul ignore if: browser check only, phantomjs doesn't return children nodes but chrome at least does */
+								if(_nodes[i].tagName.toLowerCase() === 'li') continue;
+								else if(_nodes[i].tagName.toLowerCase() === 'ol' || _nodes[i].tagName.toLowerCase() === 'ul'){
+									html += $n[0].innerHTML; // if it's a list, add all it's children
+								}else if(_nodes[i].tagName.toLowerCase() === 'span' && (_nodes[i].childNodes[0].tagName.toLowerCase() === 'ol' || _nodes[i].childNodes[0].tagName.toLowerCase() === 'ul')){
+									html += $n[0].childNodes[0].innerHTML; // if it's a list, add all it's children
+								}else{
+									html += '<' + taBrowserTag('li') + '>' + $n[0].innerHTML + '</' + taBrowserTag('li') + '>';
+								}
+								$nodes.unshift($n);
 							}
 						}
-						else {
-							// regular block elements replace other block elements
-							for(i = 0; i < _nodes.length; i++){
-								turnBlockIntoBlocks(_nodes[i], options);
-							}
-						}
+						$target = angular.element('<' + selfTag + '>' + html + '</' + selfTag + '>');
+						$nodes.pop().replaceWith($target);
+						angular.forEach($nodes, function($node){ $node.remove(); });
 					}
 					taSelection.setSelectionToElementEnd($target[0]);
-					// looses focus when we have the whole container selected and no text!
-					// refocus on the shown display element, this fixes a bug when using firefox
-					$target[0].focus();
-					return;
-				}else if(command.toLowerCase() === 'createlink'){
-					/* istanbul ignore next: firefox specific fix */
-					if (taSelection.getSelectionElement().tagName.toLowerCase() === 'a') {
-						// already a link!!! we are just replacing it...
-						taSelection.getSelectionElement().href = options;
-						return;
-					}
-					var tagBegin = '<a href="' + options + '" target="' +
-							(defaultTagAttributes.a.target ? defaultTagAttributes.a.target : '') +
-							'">',
-						tagEnd = '</a>',
-						_selection = taSelection.getSelection();
-					if(_selection.collapsed){
-						// insert text at selection, then select then just let normal exec-command run
-						taSelection.insertHtml(tagBegin + options + tagEnd, topNode);
-					}else if(rangy.getSelection().getRangeAt(0).canSurroundContents()){
-						var node = angular.element(tagBegin + tagEnd)[0];
-						rangy.getSelection().getRangeAt(0).surroundContents(node);
-					}
-					return;
-				}else if(command.toLowerCase() === 'inserthtml'){
-					taSelection.insertHtml(options, topNode);
 					return;
 				}
+			}else if(command.toLowerCase() === 'formatblock'){
+				optionsTagName = options.toLowerCase().replace(/[<>]/ig, '');
+				if(optionsTagName.trim() === 'default') {
+					optionsTagName = taDefaultWrap;
+					options = '<' + taDefaultWrap + '>';
+				}
+				if(tagName === 'li') {
+					$target = $selected.parent();
+				}
+				else {
+					$target = $selected;
+				}
+				// find the first blockElement
+				while(!$target[0].tagName || !$target[0].tagName.match(BLOCKELEMENTS) && !$target.parent().attr('contenteditable')){
+					$target = $target.parent();
+					/* istanbul ignore next */
+					tagName = ($target[0].tagName || '').toLowerCase();
+				}
+				if(tagName === optionsTagName){
+					// $target is wrap element
+					_nodes = $target.children();
+					var hasBlock = false;
+					for(i = 0; i < _nodes.length; i++){
+						hasBlock = hasBlock || _nodes[i].tagName.match(BLOCKELEMENTS);
+					}
+					if(hasBlock){
+						$target.after(_nodes);
+						next = $target.next();
+						$target.remove();
+						$target = next;
+					}else{
+						defaultWrapper.append($target[0].childNodes);
+						$target.after(defaultWrapper);
+						$target.remove();
+						$target = defaultWrapper;
+					}
+				}else if($target.parent()[0].tagName.toLowerCase() === optionsTagName &&
+					!$target.parent().hasClass('ta-bind')){
+					//unwrap logic for parent
+					var blockElement = $target.parent();
+					var contents = blockElement.contents();
+					for(i = 0; i < contents.length; i ++){
+						/* istanbul ignore next: can't test - some wierd thing with how phantomjs works */
+						if(blockElement.parent().hasClass('ta-bind') && contents[i].nodeType === 3){
+							defaultWrapper = angular.element('<' + taDefaultWrap + '>');
+							defaultWrapper[0].innerHTML = contents[i].outerHTML;
+							contents[i] = defaultWrapper[0];
+						}
+						blockElement.parent()[0].insertBefore(contents[i], blockElement[0]);
+					}
+					blockElement.remove();
+				}else if(tagName.match(LISTELEMENTS)){
+					// wrapping a list element
+					$target.wrap(options);
+				}else{
+					// default wrap behaviour
+					_nodes = taSelection.getOnlySelectedElements();
+					if(_nodes.length === 0) {
+						// no nodes at all....
+						_nodes = [$target[0]];
+					}
+					// find the parent block element if any of the nodes are inline or text
+					for(i = 0; i < _nodes.length; i++){
+						if(_nodes[i].nodeType === 3 || !_nodes[i].tagName.match(BLOCKELEMENTS)){
+							while(_nodes[i].nodeType === 3 || !_nodes[i].tagName || !_nodes[i].tagName.match(BLOCKELEMENTS)){
+								_nodes[i] = _nodes[i].parentNode;
+							}
+						}
+					}
+					// remove any duplicates from the array of _nodes!
+					_nodes = _nodes.filter(function(value, index, self) {
+						return self.indexOf(value) === index;
+					});
+					// remove all whole taTextElement if it is here... unless it is the only element!
+					if (_nodes.length>1) {
+						_nodes = _nodes.filter(function (value, index, self) {
+							return !(value.nodeName.toLowerCase() === 'div' && /^taTextElement/.test(value.id));
+						});
+					}
+					if(angular.element(_nodes[0]).hasClass('ta-bind')){
+						$target = angular.element(options);
+						$target[0].innerHTML = _nodes[0].innerHTML;
+						_nodes[0].innerHTML = $target[0].outerHTML;
+					}else if(optionsTagName === 'blockquote'){
+						// blockquotes wrap other block elements
+						html = '';
+						for(i = 0; i < _nodes.length; i++){
+							html += _nodes[i].outerHTML;
+						}
+						$target = angular.element(options);
+						$target[0].innerHTML = html;
+						_nodes[0].parentNode.insertBefore($target[0],_nodes[0]);
+						for(i = _nodes.length - 1; i >= 0; i--){
+							/* istanbul ignore else:  */
+							if(_nodes[i].parentNode) _nodes[i].parentNode.removeChild(_nodes[i]);
+						}
+					}
+					else {
+						// regular block elements replace other block elements
+						for(i = 0; i < _nodes.length; i++){
+							var newBlock = turnBlockIntoBlocks(_nodes[i], options);
+							if (_nodes[i] === $target[0]) {
+								$target = angular.element(newBlock);
+							}
+						}
+					}
+				}
+				taSelection.setSelectionToElementEnd($target[0]);
+				// looses focus when we have the whole container selected and no text!
+				// refocus on the shown display element, this fixes a bug when using firefox
+				$target[0].focus();
+				return;
+			}else if(command.toLowerCase() === 'createlink'){
+				/* istanbul ignore next: firefox specific fix */
+				if (taSelection.getSelectionElement().tagName.toLowerCase() === 'a') {
+					// already a link!!! we are just replacing it...
+					taSelection.getSelectionElement().href = options;
+					return;
+				}
+				var tagBegin = '<a href="' + options + '" target="' +
+						(defaultTagAttributes.a.target ? defaultTagAttributes.a.target : '') +
+						'">',
+					tagEnd = '</a>',
+					_selection = taSelection.getSelection();
+				if(_selection.collapsed){
+					// insert text at selection, then select then just let normal exec-command run
+					taSelection.insertHtml(tagBegin + options + tagEnd, topNode);
+				}else if(rangy.getSelection().getRangeAt(0).canSurroundContents()){
+					var node = angular.element(tagBegin + tagEnd)[0];
+					rangy.getSelection().getRangeAt(0).surroundContents(node);
+				}
+				return;
+			}else if(command.toLowerCase() === 'inserthtml'){
+				taSelection.insertHtml(options, topNode);
+				return;
 			}
 			try{
 				$document[0].execCommand(command, showUI, options);
@@ -2196,6 +2221,7 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 					if(_isContentEditable && _focussed){
 						// update while focussed
 						element.removeClass('placeholder-text');
+ 						/* istanbul ignore next: don't know how to test this */
 						if(_renderTimeout) $timeout.cancel(_renderTimeout);
 						_renderTimeout = $timeout(function(){
 							/* istanbul ignore if: Can't be bothered testing this... */
@@ -2711,6 +2737,19 @@ textAngular.directive("textAngular", [
 *******/
 					_editorFunctions.focus();
 					element.triggerHandler('focus');
+					// we call editorScope.updateSelectedStyles() here because we want the toolbar to be focussed
+					// as soon as we have focus.  Otherwise this only happens on mousedown or keydown etc...
+					/* istanbul ignore else: don't run if already running */
+					if(scope.updateSelectedStyles && !scope._bUpdateSelectedStyles){
+						// we don't set editorScope._bUpdateSelectedStyles here, because we do not want the
+						// updateSelectedStyles() to run twice which it will do after 200 msec if we have
+						// set editorScope._bUpdateSelectedStyles
+						//
+						// WOW, normally I would do a scope.$apply here, but this causes ERRORs when doing tests!
+						$timeout(function () {
+							scope.updateSelectedStyles();
+						}, 0);
+					}
 				};
 				scope.displayElements.html.on('focus', _focusin);
 				scope.displayElements.text.on('focus', _focusin);

@@ -668,16 +668,25 @@ angular.module('textAngularSetup', [])
 			selectedElements = taSelection.getAllSelectedElements();
 			//$log.log('selectedElements:', selectedElements);
 			// remove lists
-			var removeListElements = function(list){
+			var removeListElements = function(list, pe){
 				list = angular.element(list);
-				var prevElement = list;
+				var prevElement = pe;
+				if (!pe) {
+					prevElement = list;
+				}
 				angular.forEach(list.children(), function(liElem){
-					var newElem = angular.element('<p></p>');
-					newElem.html(angular.element(liElem).html());
-					prevElement.after(newElem);
-					prevElement = newElem;
+					if (liElem.tagName.toLowerCase() === 'ul' ||
+						liElem.tagName.toLowerCase() === 'ol') {
+						prevElement = removeListElements(liElem, prevElement);
+					} else {
+						var newElem = angular.element('<p></p>');
+						newElem.html(angular.element(liElem).html());
+						prevElement.after(newElem);
+						prevElement = newElem;
+					}
 				});
 				list.remove();
+				return prevElement;
 			};
 
 			angular.forEach(selectedElements, function(element) {
