@@ -643,7 +643,10 @@ textAngular.directive("textAngular", [
 					/* istanbul ignore next: don't see how to test this... */
 					if (taSelection.getSelection) {
 						var _selection = taSelection.getSelection();
-						if (taSelection.getSelectionElement().nodeName.toLowerCase() === 'a') {
+						// in a weird case (can't reproduce) taSelection.getSelectionElement() can be undefined!!
+						// this comes from range.commonAncestorContainer;
+						// so I check for this here which fixes the error case
+						if (taSelection.getSelectionElement() && taSelection.getSelectionElement().nodeName.toLowerCase() === 'a') {
 							// check and see if we are at the edge of the <a>
 							if (_selection.start.element.nodeType === 3 &&
 								_selection.start.element.textContent.length === _selection.end.offset) {
