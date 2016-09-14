@@ -114,14 +114,14 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 					specialKey: 'TabKey',
 					forbiddenModifiers: _META_KEY + _SHIFT_KEY + _ALT_KEY + _CTRL_KEY,
 					mustHaveModifiers: [],
-					keyCode: 9
+					keyCode: TAB_KEYCODE
 				},
 				//		shift + TabKey
 				{
 					specialKey: 'ShiftTabKey',
 					forbiddenModifiers: _META_KEY + _ALT_KEY + _CTRL_KEY,
 					mustHaveModifiers: [_SHIFT_KEY],
-					keyCode: 9
+					keyCode: TAB_KEYCODE
 				}
 			];
 			function _mapKeys(event) {
@@ -386,7 +386,7 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 						if(eventData) angular.extend(event, eventData);
 						// Reference to http://stackoverflow.com/questions/6140632/how-to-handle-tab-in-textarea
 						/* istanbul ignore else: otherwise normal functionality */
-						if(event.keyCode === 9){ // tab was pressed
+						if(event.keyCode === TAB_KEYCODE){ // tab was pressed
 							// get caret position/selection
 							var start = this.selectionStart;
 							var end = this.selectionEnd;
@@ -784,7 +784,7 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 								event.preventDefault();
 							}
 							/* istanbul ignore next: difficult to test as can't seem to select */
-							if(event.keyCode === 13 && !event.shiftKey){
+							if(event.keyCode === ENTER_KEYCODE && !event.shiftKey){
 								var contains = function(a, obj) {
 									for (var i = 0; i < a.length; i++) {
 										if (a[i] === obj) {
@@ -795,7 +795,8 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 								};
 								var $selection;
 								var selection = taSelection.getSelectionElement();
-								if(!selection.tagName.match(VALIDELEMENTS)) return;
+								// shifted to nodeName here from tagName since it is more widely supported see: http://stackoverflow.com/questions/4878484/difference-between-tagname-and-nodename
+								if(!selection.nodeName.match(VALIDELEMENTS)) return;
 								var _new = angular.element(_defaultVal);
 								// if we are in the last element of a blockquote, or ul or ol and the element is blank
 								// we need to pull the element outside of the said type
@@ -827,19 +828,28 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 						/* istanbul ignore else: this is for catching the jqLite testing*/
 						if(eventData) angular.extend(event, eventData);
 						/* istanbul ignore next: FF specific bug fix */
-						if (event.keyCode === 9) {
+						if (event.keyCode === TAB_KEYCODE) {
 							var _selection = taSelection.getSelection();
 							if(_selection.start.element === element[0] && element.children().length) taSelection.setSelectionToElementStart(element.children()[0]);
 							return;
 						}
+						// we do this here during the 'keyup' so that the browser has already moved the slection by one character...
+						if (event.keyCode === LEFT_ARROW && !event.shiftKey) {
+							taSelection.updateLeftArrowKey(element);
+						}
+						// we do this here during the 'keyup' so that the browser has already moved the slection by one character...
+						if (event.keyCode === RIGHT_ARROW && !event.shiftKey) {
+							taSelection.updateRightArrowKey(element);
+						}
 						if(_undoKeyupTimeout) $timeout.cancel(_undoKeyupTimeout);
 						if(!_isReadonly && !BLOCKED_KEYS.test(event.keyCode)){
 							// if enter - insert new taDefaultWrap, if shift+enter insert <br/>
-							if(_defaultVal !== '' && event.keyCode === 13){
+							if(_defaultVal !== '' && event.keyCode === ENTER_KEYCODE){
 								if(!event.shiftKey){
 									// new paragraph, br should be caught correctly
 									var selection = taSelection.getSelectionElement();
-									while(!selection.tagName.match(VALIDELEMENTS) && selection !== element[0]){
+									// shifted to nodeName here from tagName since it is more widely supported see: http://stackoverflow.com/questions/4878484/difference-between-tagname-and-nodename
+									while(!selection.nodeName.match(VALIDELEMENTS) && selection !== element[0]){
 										selection = selection.parentNode;
 									}
 
@@ -848,6 +858,8 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 										selection.tagName.toLowerCase() !== 'li' &&
 										(selection.innerHTML.trim() === '' || selection.innerHTML.trim() === '<br>')
 									) {
+										// Chrome starts with a <div><br></div> after an EnterKey
+										// so we replace this with the _defaultVal
 										var _new = angular.element(_defaultVal);
 										angular.element(selection).replaceWith(_new);
 										taSelection.setSelectionToElementStart(_new[0]);

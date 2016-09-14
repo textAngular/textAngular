@@ -531,7 +531,9 @@ textAngular.directive("textAngular", [
 				// changes from taBind back up to here
 				scope.$watch('html', function(newValue, oldValue){
 					if(newValue !== oldValue){
-						if(attrs.ngModel && ngModel.$viewValue !== newValue) ngModel.$setViewValue(newValue);
+						if(attrs.ngModel && ngModel.$viewValue !== newValue) {
+							ngModel.$setViewValue(newValue);
+						}
 						scope.displayElements.forminput.val(newValue);
 					}
 				});

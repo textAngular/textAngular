@@ -461,33 +461,169 @@ function($document, taDOM, $log){
 					selection.container = container;
 				}
 			}
-			//console.log('***selection container:', selection.container);
+			//console.log('***selection container:', selection.container.nodeName, selection.start.offset, selection.container);
 			return selection;
 		},
-/* NOT FUNCTIONAL YET
-        // under Firefox, we may have a selection that needs to be normalized
-        isSelectionContainerWhole_taTextElement: function (){
-            var range = rangy.getSelection().getRangeAt(0);
-            var container = range.commonAncestorContainer;
-            if (container.nodeName.toLowerCase() === 'div' &&
-                /^taTextElement/.test(container.id)) {
-                // container is the whole taTextElement
-                return true;
-            }
-            return false;
-        },
-		setNormalizedSelection: function (){
+		// if we use the LEFT_ARROW and we are at the special place <span>&#65279;</span> we move the cursor over by one...
+		// Chrome and Firefox behave differently so so fix this for Firefox here.  No adjustment needed for Chrome.
+		updateLeftArrowKey: function(element) {
 			var range = rangy.getSelection().getRangeAt(0);
-			var container = range.commonAncestorContainer;
-			console.log(range);
-			console.log(container.childNodes);
-			if (range.collapsed) {
-				// we know what to do...
-				console.log(container.childNodes[range.startOffset]);
-				api.setSelectionToElementStart(container.childNodes[range.startOffset]);
+			if (range && range.collapsed) {
+				var _nodes = api.getFlattenedDom(range);
+				if (!_nodes.findIndex) return;
+				var _node = range.startContainer;
+				var indexStartContainer = _nodes.findIndex(function(element, index){
+					if (element.node===_node) return true;
+					var _indexp = element.parents.indexOf(_node);
+					return (_indexp !== -1);
+				});
+				var m;
+				var nextNodeToRight;
+				//console.log('indexStartContainer', indexStartContainer, _nodes.length, 'startContainer:', _node, _node === _nodes[indexStartContainer].node);
+				_nodes.forEach(function (n, i) {
+					//console.log(i, n.node);
+					n.parents.forEach(function (nn, j){
+						//console.log(i, j, nn);
+					});
+				});
+				if (indexStartContainer+1 < _nodes.length) {
+					// we need the node just after this startContainer
+					// so we can check and see it this is a special place
+					nextNodeToRight = _nodes[indexStartContainer+1].node;
+					//console.log(nextNodeToRight, range.startContainer);
+				}
+				//console.log('updateLeftArrowKey', range.startOffset, range.startContainer.textContent);
+				// this first section handles the case for Chrome browser
+				// if the first character of the nextNode is a \ufeff we know that we are just before the special span...
+				// and so we most left by one character
+				if (nextNodeToRight && nextNodeToRight.textContent) {
+					m = /^\ufeff([^\ufeff]*)$/.exec(nextNodeToRight.textContent);
+					if (m) {
+						// we are before the special node with begins with a \ufeff character
+						//console.log('LEFT ...found it...', 'startOffset:', range.startOffset, m[0].length, m[1].length);
+						// no need to change anything in this case
+						return;
+					}
+				}
+				var nextNodeToLeft;
+				if (indexStartContainer > 0) {
+					// we need the node just after this startContainer
+					// so we can check and see it this is a special place
+					nextNodeToLeft = _nodes[indexStartContainer-1].node;
+					//console.log(nextNodeToLeft, nextNodeToLeft);
+				}
+				if (range.startOffset === 0 && nextNodeToLeft) {
+					//console.log(nextNodeToLeft, range.startOffset, nextNodeToLeft.textContent);
+					m = /^\ufeff([^\ufeff]*)$/.exec(nextNodeToLeft.textContent);
+					if (m) {
+						//console.log('LEFT &&&&&&&&&&&&&&&&&&&...found it...&&&&&&&&&&&', nextNodeToLeft, m[0].length, m[1].length);
+						// move over to the left my one -- Firefox triggers this case
+						api.setSelectionToElementEnd(nextNodeToLeft);
+						return;
+					}
+				}
+			}
+			return;
+		},
+		// if we use the RIGHT_ARROW and we are at the special place <span>&#65279;</span> we move the cursor over by one...
+		updateRightArrowKey: function(element) {
+			// we do not need to make any adjustments here, so we ignore all this code
+			if (false) {
+				var range = rangy.getSelection().getRangeAt(0);
+				if (range && range.collapsed) {
+					var _nodes = api.getFlattenedDom(range);
+					if (!_nodes.findIndex) return;
+					var _node = range.startContainer;
+					var indexStartContainer = _nodes.findIndex(function (element, index) {
+						if (element.node === _node) return true;
+						var _indexp = element.parents.indexOf(_node);
+						return (_indexp !== -1);
+					});
+					var _sel;
+					var i;
+					var m;
+
+					// if the last character is a \ufeff we know that we are just before the special span...
+					// and so we most right by one character
+					var indexFound = _nodes.findIndex(function (n, index) {
+						if (n.textContent) {
+							var m = /^\ufeff([^\ufeff]*)$/.exec(n.textContent);
+							if (m) {
+								return true;
+							} else {
+								return false;
+							}
+						} else {
+							return false;
+						}
+					});
+					if (indexFound === -1) {
+						return;
+					}
+					//console.log(indexFound, range.startContainer, range.startOffset);
+					_node = _nodes[indexStartContainer];
+					//console.log('indexStartContainer', indexStartContainer);
+					if (_node && _node.textContent) {
+						m = /^\ufeff([^\ufeff]*)$/.exec(_node.textContent);
+						if (m && range.startOffset - 1 === m[1].length) {
+							//console.log('RIGHT found it...&&&&&&&&&&&', range.startOffset);
+							// no need to make any adjustment
+							return;
+						}
+					}
+					//console.log(range.startOffset);
+					if (_nodes && range.startOffset === 0) {
+						indexStartContainer = _nodes.indexOf(range.startContainer);
+						if (indexStartContainer !== -1 && indexStartContainer > 0) {
+							_node = _nodes[indexStartContainer - 1];
+							if (_node.textContent) {
+								m = /\ufeff([^\ufeff]*)$/.exec(_node.textContent);
+								if (m && true || range.startOffset === m[1].length + 1) {
+									//console.log('RIGHT &&&&&&&&&&&&&&&&&&&...found it...&&&&&&&&&&&', range.startOffset, m[1].length);
+									// no need to make any adjustment
+									return;
+								}
+							}
+						}
+					}
+				}
 			}
 		},
-*/
+		getFlattenedDom: function(range) {
+			var parent = range.commonAncestorContainer.parentNode;
+			if (!parent) {
+				return range.commonAncestorContainer.childNodes;
+			}
+			var nodes = Array.prototype.slice.call(parent.childNodes); // converts NodeList to Array
+			var indexStartContainer = nodes.indexOf(range.startContainer);
+			// make sure that we have a big enough set of nodes
+			if (indexStartContainer+1 < nodes.length && indexStartContainer > 0) {
+				// we are good
+				// we can go down one node or up one node
+			} else {
+				if (parent.parentNode) {
+					parent = parent.parentNode;
+				}
+			}
+			// now walk the parent
+			nodes = [];
+			function addNodes(_set) {
+				if (_set.node.childNodes.length) {
+					var childNodes = Array.prototype.slice.call(_set.node.childNodes); // converts NodeList to Array
+					childNodes.forEach(function(n) {
+						var _t = _set.parents.slice();
+						if (_t.slice(-1)[0]!==_set.node) {
+							_t.push(_set.node);
+						}
+						addNodes({parents: _t, node: n});
+					});
+				} else {
+					nodes.push({parents: _set.parents, node: _set.node});
+				}
+			}
+			addNodes({parents: [parent], node: parent});
+			return nodes;
+		},
 		getOnlySelectedElements: function(){
 			var range = rangy.getSelection().getRangeAt(0);
 			var container = range.commonAncestorContainer;
@@ -540,34 +676,34 @@ function($document, taDOM, $log){
 		},
 		setSelection: function(el, start, end){
 			var range = rangy.createRange();
-			
+
 			range.setStart(el, start);
 			range.setEnd(el, end);
-			
+
 			rangy.getSelection().setSingleRange(range);
 		},
 		setSelectionBeforeElement: function (el){
 			var range = rangy.createRange();
-			
+
 			range.selectNode(el);
 			range.collapse(true);
-			
+
 			rangy.getSelection().setSingleRange(range);
 		},
 		setSelectionAfterElement: function (el){
 			var range = rangy.createRange();
-			
+
 			range.selectNode(el);
 			range.collapse(false);
-			
+
 			rangy.getSelection().setSingleRange(range);
 		},
 		setSelectionToElementStart: function (el){
 			var range = rangy.createRange();
-			
+
 			range.selectNodeContents(el);
 			range.collapse(true);
-			
+
 			rangy.getSelection().setSingleRange(range);
 		},
 		setSelectionToElementEnd: function (el){
@@ -589,29 +725,47 @@ function($document, taDOM, $log){
 			var frag = _document.createDocumentFragment();
 			var children = element[0].childNodes;
 			var isInline = true;
-			
+
 			if(children.length > 0){
 				// NOTE!! We need to do the following:
 				// check for blockelements - if they exist then we have to split the current element in half (and all others up to the closest block element) and insert all children in-between.
 				// If there are no block elements, or there is a mixture we need to create textNodes for the non wrapped text (we don't want them spans messing up the picture).
 				nodes = [];
 				for(_childI = 0; _childI < children.length; _childI++){
-					if(!(
-						(children[_childI].nodeName.toLowerCase() === 'p' && children[_childI].innerHTML.trim() === '') || // empty p element
-						(children[_childI].nodeType === 3 && children[_childI].nodeValue.trim() === '') // empty text node
-					)){
-						isInline = isInline && !BLOCKELEMENTS.test(children[_childI].nodeName);
-						nodes.push(children[_childI]);
+					var _cnode = children[_childI];
+					if (_cnode.nodeName.toLowerCase() === 'p' &&
+						_cnode.innerHTML.trim() === '') { // empty p element
+						continue;
 					}
+					if((   _cnode.nodeType === 3 &&
+						   _cnode.nodeValue === '\ufeff'[0] &&
+						   _cnode.nodeValue.trim() === '') // empty no-space space element
+						) {
+						// no change to isInline
+						nodes.push(_cnode);
+						continue;
+					}
+					if(_cnode.nodeType === 3 &&
+						 _cnode.nodeValue.trim() === '') { // empty text node
+						continue;
+					}
+					isInline = isInline && !BLOCKELEMENTS.test(_cnode.nodeName);
+					nodes.push(_cnode);
 				}
-				for(var _n = 0; _n < nodes.length; _n++) lastNode = frag.appendChild(nodes[_n]);
-				if(!isInline && range.collapsed && /^(|<br(|\/)>)$/i.test(range.startContainer.innerHTML)) range.selectNode(range.startContainer);
+				for(var _n = 0; _n < nodes.length; _n++) {
+					lastNode = frag.appendChild(nodes[_n]);
+				}
+				if( !isInline &&
+					range.collapsed &&
+					/^(|<br(|\/)>)$/i.test(range.startContainer.innerHTML) ) {
+					range.selectNode(range.startContainer);
+				}
 			}else{
 				isInline = true;
 				// paste text of some sort
 				lastNode = frag = _document.createTextNode(html);
 			}
-			
+
 			// Other Edge case - selected data spans multiple blocks.
 			if(isInline){
 				range.deleteContents();
@@ -636,7 +790,7 @@ function($document, taDOM, $log){
 							secondParent = parent.cloneNode();
 							// split the nodes into two lists - before and after, splitting the node with the selection into 2 text nodes.
 							taDOM.splitNodes(parent.childNodes, parent, secondParent, range.startContainer, range.startOffset);
-							
+
 							// Escape out of the inline tags like b
 							while(!VALIDELEMENTS.test(parent.nodeName)){
 								angular.element(parent).after(secondParent);
@@ -651,13 +805,13 @@ function($document, taDOM, $log){
 							secondParent = parent.cloneNode();
 							taDOM.splitNodes(parent.childNodes, parent, secondParent, undefined, undefined, range.startOffset);
 						}
-						
+
 						angular.element(parent).after(secondParent);
 						// put cursor to end of inserted content
 						//console.log('setStartAfter', parent);
 						range.setStartAfter(parent);
 						range.setEndAfter(parent);
-						
+
 						if(/^(|<br(|\/)>)$/i.test(parent.innerHTML.trim())){
 							range.setStartBefore(parent);
 							range.setEndBefore(parent);
@@ -683,12 +837,37 @@ function($document, taDOM, $log){
 					range.deleteContents();
 				}
 			}
-			
+
 			range.insertNode(frag);
 			if(lastNode){
 				api.setSelectionToElementEnd(lastNode);
 			}
 		}
+
+		/* NOT FUNCTIONAL YET
+		 // under Firefox, we may have a selection that needs to be normalized
+		 isSelectionContainerWhole_taTextElement: function (){
+		 var range = rangy.getSelection().getRangeAt(0);
+		 var container = range.commonAncestorContainer;
+		 if (container.nodeName.toLowerCase() === 'div' &&
+		 /^taTextElement/.test(container.id)) {
+		 // container is the whole taTextElement
+		 return true;
+		 }
+		 return false;
+		 },
+		 setNormalizedSelection: function (){
+		 var range = rangy.getSelection().getRangeAt(0);
+		 var container = range.commonAncestorContainer;
+		 console.log(range);
+		 console.log(container.childNodes);
+		 if (range.collapsed) {
+		 // we know what to do...
+		 console.log(container.childNodes[range.startOffset]);
+		 api.setSelectionToElementStart(container.childNodes[range.startOffset]);
+		 }
+		 },
+		 */
 	};
 	return api;
 }]).service('taDOM', function(){
@@ -705,35 +884,35 @@ function($document, taDOM, $log){
 			if(element.attr(attribute) !== undefined) resultingElements.push(element);
 			return resultingElements;
 		},
-		
+
 		transferChildNodes: function(source, target){
 			// clear out target
 			target.innerHTML = '';
 			while(source.childNodes.length > 0) target.appendChild(source.childNodes[0]);
 			return target;
 		},
-		
+
 		splitNodes: function(nodes, target1, target2, splitNode, subSplitIndex, splitIndex){
 			if(!splitNode && isNaN(splitIndex)) throw new Error('taDOM.splitNodes requires a splitNode or splitIndex');
 			var startNodes = document.createDocumentFragment();
 			var endNodes = document.createDocumentFragment();
 			var index = 0;
-			
+
 			while(nodes.length > 0 && (isNaN(splitIndex) || splitIndex !== index) && nodes[0] !== splitNode){
 				startNodes.appendChild(nodes[0]); // this removes from the nodes array (if proper childNodes object.
 				index++;
 			}
-			
+
 			if(!isNaN(subSplitIndex) && subSplitIndex >= 0 && nodes[0]){
 				startNodes.appendChild(document.createTextNode(nodes[0].nodeValue.substring(0, subSplitIndex)));
 				nodes[0].nodeValue = nodes[0].nodeValue.substring(subSplitIndex);
 			}
 			while(nodes.length > 0) endNodes.appendChild(nodes[0]);
-			
+
 			taDOM.transferChildNodes(startNodes, target1);
 			taDOM.transferChildNodes(endNodes, target2);
 		},
-		
+
 		transferNodeAttributes: function(source, target){
 			for(var i = 0; i < source.attributes.length; i++) target.setAttribute(source.attributes[i].name, source.attributes[i].value);
 			return target;
