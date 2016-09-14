@@ -784,7 +784,8 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 								event.preventDefault();
 							}
 							/* istanbul ignore next: difficult to test as can't seem to select */
-							if(event.keyCode === ENTER_KEYCODE && !event.shiftKey){
+							if(event.keyCode === ENTER_KEYCODE && !event.shiftKey && !event.ctrlKey && !event.metaKey && !event.altKey)
+							{
 								var contains = function(a, obj) {
 									for (var i = 0; i < a.length; i++) {
 										if (a[i] === obj) {
@@ -843,49 +844,54 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 						}
 						if(_undoKeyupTimeout) $timeout.cancel(_undoKeyupTimeout);
 						if(!_isReadonly && !BLOCKED_KEYS.test(event.keyCode)){
-							// if enter - insert new taDefaultWrap, if shift+enter insert <br/>
-							if(_defaultVal !== '' && event.keyCode === ENTER_KEYCODE){
-								if(!event.shiftKey){
-									// new paragraph, br should be caught correctly
-									var selection = taSelection.getSelectionElement();
-									// shifted to nodeName here from tagName since it is more widely supported see: http://stackoverflow.com/questions/4878484/difference-between-tagname-and-nodename
-									while(!selection.nodeName.match(VALIDELEMENTS) && selection !== element[0]){
-										selection = selection.parentNode;
-									}
+							/* istanbul ignore next: Ignore any ENTER_KEYCODE that has ctrlKey, metaKey or alKey */
+							if (event.keyCode === ENTER_KEYCODE && (event.ctrlKey || event.metaKey || event.altKey)) {
+								// we ignore any ENTER_	KEYCODE that is anything but plain or a shift one...
+							} else {
+								// if enter - insert new taDefaultWrap, if shift+enter insert <br/>
+								if(_defaultVal !== '' && event.keyCode === ENTER_KEYCODE && !event.ctrlKey && !event.metaKey && !event.altKey){
+									if(!event.shiftKey){
+										// new paragraph, br should be caught correctly
+										var selection = taSelection.getSelectionElement();
+										// shifted to nodeName here from tagName since it is more widely supported see: http://stackoverflow.com/questions/4878484/difference-between-tagname-and-nodename
+										while(!selection.nodeName.match(VALIDELEMENTS) && selection !== element[0]){
+											selection = selection.parentNode;
+										}
 
-									if(selection.tagName.toLowerCase() !==
-										attrs.taDefaultWrap &&
-										selection.tagName.toLowerCase() !== 'li' &&
-										(selection.innerHTML.trim() === '' || selection.innerHTML.trim() === '<br>')
-									) {
-										// Chrome starts with a <div><br></div> after an EnterKey
-										// so we replace this with the _defaultVal
-										var _new = angular.element(_defaultVal);
-										angular.element(selection).replaceWith(_new);
-										taSelection.setSelectionToElementStart(_new[0]);
+										if(selection.tagName.toLowerCase() !==
+											attrs.taDefaultWrap &&
+											selection.tagName.toLowerCase() !== 'li' &&
+											(selection.innerHTML.trim() === '' || selection.innerHTML.trim() === '<br>')
+										) {
+											// Chrome starts with a <div><br></div> after an EnterKey
+											// so we replace this with the _defaultVal
+											var _new = angular.element(_defaultVal);
+											angular.element(selection).replaceWith(_new);
+											taSelection.setSelectionToElementStart(_new[0]);
+										}
 									}
 								}
+								var val = _compileHtml();
+								if(_defaultVal !== '' && (val.trim() === '' || val.trim() === '<br>')){
+									_setInnerHTML(_defaultVal);
+									taSelection.setSelectionToElementStart(element.children()[0]);
+								}else if(val.substring(0, 1) !== '<' && attrs.taDefaultWrap !== ''){
+									/* we no longer do this, since there can be comments here and white space
+									 var _savedSelection = rangy.saveSelection();
+									 val = _compileHtml();
+									 val = "<" + attrs.taDefaultWrap + ">" + val + "</" + attrs.taDefaultWrap + ">";
+									 _setInnerHTML(val);
+									 rangy.restoreSelection(_savedSelection);
+									 */
+								}
+								var triggerUndo = _lastKey !== event.keyCode && UNDO_TRIGGER_KEYS.test(event.keyCode);
+								if(_keyupTimeout) $timeout.cancel(_keyupTimeout);
+								_keyupTimeout = $timeout(function() {
+									_setViewValue(val, triggerUndo, true);
+								}, ngModelOptions.$options.debounce || 400);
+								if(!triggerUndo) _undoKeyupTimeout = $timeout(function(){ ngModel.$undoManager.push(val); }, 250);
+								_lastKey = event.keyCode;
 							}
-							var val = _compileHtml();
-							if(_defaultVal !== '' && (val.trim() === '' || val.trim() === '<br>')){
-								_setInnerHTML(_defaultVal);
-								taSelection.setSelectionToElementStart(element.children()[0]);
-							}else if(val.substring(0, 1) !== '<' && attrs.taDefaultWrap !== ''){
-								/* we no longer do this, since there can be comments here and white space
-								var _savedSelection = rangy.saveSelection();
-								val = _compileHtml();
-								val = "<" + attrs.taDefaultWrap + ">" + val + "</" + attrs.taDefaultWrap + ">";
-								_setInnerHTML(val);
-								rangy.restoreSelection(_savedSelection);
-								*/
-							}
-							var triggerUndo = _lastKey !== event.keyCode && UNDO_TRIGGER_KEYS.test(event.keyCode);
-							if(_keyupTimeout) $timeout.cancel(_keyupTimeout);
-							_keyupTimeout = $timeout(function() {
-								_setViewValue(val, triggerUndo, true);
-							}, ngModelOptions.$options.debounce || 400);
-							if(!triggerUndo) _undoKeyupTimeout = $timeout(function(){ ngModel.$undoManager.push(val); }, 250);
-							_lastKey = event.keyCode;
 						}
 					});
 
