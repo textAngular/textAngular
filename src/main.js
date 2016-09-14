@@ -567,8 +567,8 @@ textAngular.directive("textAngular", [
 				});
 
 				scope.$on('ta-drop-event', function(event, element, dropEvent, dataTransfer){
-					scope.displayElements.text[0].focus();
 					if(dataTransfer && dataTransfer.files && dataTransfer.files.length > 0){
+						scope.displayElements.text[0].focus();
 						angular.forEach(dataTransfer.files, function(file){
 							// taking advantage of boolean execution, if the fileDropHandler returns true, nothing else after it is executed
 							// If it is false then execute the defaultFileDropHandler if the fileDropHandler is NOT the default one

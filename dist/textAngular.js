@@ -2909,8 +2909,8 @@ textAngular.directive("textAngular", [
 				});
 
 				scope.$on('ta-drop-event', function(event, element, dropEvent, dataTransfer){
-					scope.displayElements.text[0].focus();
 					if(dataTransfer && dataTransfer.files && dataTransfer.files.length > 0){
+						scope.displayElements.text[0].focus();
 						angular.forEach(dataTransfer.files, function(file){
 							// taking advantage of boolean execution, if the fileDropHandler returns true, nothing else after it is executed
 							// If it is false then execute the defaultFileDropHandler if the fileDropHandler is NOT the default one
@@ -2985,7 +2985,10 @@ textAngular.directive("textAngular", [
 					/* istanbul ignore next: don't see how to test this... */
 					if (taSelection.getSelection) {
 						var _selection = taSelection.getSelection();
-						if (taSelection.getSelectionElement().nodeName.toLowerCase() === 'a') {
+						// in a weird case (can't reproduce) taSelection.getSelectionElement() can be undefined!!
+						// this comes from range.commonAncestorContainer;
+						// so I check for this here which fixes the error case
+						if (taSelection.getSelectionElement() && taSelection.getSelectionElement().nodeName.toLowerCase() === 'a') {
 							// check and see if we are at the edge of the <a>
 							if (_selection.start.element.nodeType === 3 &&
 								_selection.start.element.textContent.length === _selection.end.offset) {
