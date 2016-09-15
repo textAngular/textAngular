@@ -85,6 +85,11 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 			var _META_KEY = 0x0002;
 			var _ALT_KEY = 0x0004;
 			var _SHIFT_KEY = 0x0008;
+			// KEYCODEs we use
+			var _ENTER_KEYCODE = 13;
+			var _TAB_KEYCODE = 9;
+			var _LEFT_ARROW_KEYCODE = 37;
+			var _RIGHT_ARROW_KEYCODE = 39;
 			// map events to special keys...
 			// mappings is an array of maps from events to specialKeys as declared in textAngularSetup
 			var _keyMappings = [
@@ -114,14 +119,14 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 					specialKey: 'TabKey',
 					forbiddenModifiers: _META_KEY + _SHIFT_KEY + _ALT_KEY + _CTRL_KEY,
 					mustHaveModifiers: [],
-					keyCode: TAB_KEYCODE
+					keyCode: _TAB_KEYCODE
 				},
 				//		shift + TabKey
 				{
 					specialKey: 'ShiftTabKey',
 					forbiddenModifiers: _META_KEY + _ALT_KEY + _CTRL_KEY,
 					mustHaveModifiers: [_SHIFT_KEY],
-					keyCode: TAB_KEYCODE
+					keyCode: _TAB_KEYCODE
 				}
 			];
 			function _mapKeys(event) {
@@ -386,7 +391,7 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 						if(eventData) angular.extend(event, eventData);
 						// Reference to http://stackoverflow.com/questions/6140632/how-to-handle-tab-in-textarea
 						/* istanbul ignore else: otherwise normal functionality */
-						if(event.keyCode === TAB_KEYCODE){ // tab was pressed
+						if(event.keyCode === _TAB_KEYCODE){ // tab was pressed
 							// get caret position/selection
 							var start = this.selectionStart;
 							var end = this.selectionEnd;
@@ -784,7 +789,7 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 								event.preventDefault();
 							}
 							/* istanbul ignore next: difficult to test as can't seem to select */
-							if(event.keyCode === ENTER_KEYCODE && !event.shiftKey && !event.ctrlKey && !event.metaKey && !event.altKey)
+							if(event.keyCode === _ENTER_KEYCODE && !event.shiftKey && !event.ctrlKey && !event.metaKey && !event.altKey)
 							{
 								var contains = function(a, obj) {
 									for (var i = 0; i < a.length; i++) {
@@ -829,27 +834,27 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 						/* istanbul ignore else: this is for catching the jqLite testing*/
 						if(eventData) angular.extend(event, eventData);
 						/* istanbul ignore next: FF specific bug fix */
-						if (event.keyCode === TAB_KEYCODE) {
+						if (event.keyCode === _TAB_KEYCODE) {
 							var _selection = taSelection.getSelection();
 							if(_selection.start.element === element[0] && element.children().length) taSelection.setSelectionToElementStart(element.children()[0]);
 							return;
 						}
 						// we do this here during the 'keyup' so that the browser has already moved the slection by one character...
-						if (event.keyCode === LEFT_ARROW && !event.shiftKey) {
+						if (event.keyCode === _LEFT_ARROW_KEYCODE && !event.shiftKey) {
 							taSelection.updateLeftArrowKey(element);
 						}
 						// we do this here during the 'keyup' so that the browser has already moved the slection by one character...
-						if (event.keyCode === RIGHT_ARROW && !event.shiftKey) {
+						if (event.keyCode === _RIGHT_ARROW_KEYCODE && !event.shiftKey) {
 							taSelection.updateRightArrowKey(element);
 						}
 						if(_undoKeyupTimeout) $timeout.cancel(_undoKeyupTimeout);
 						if(!_isReadonly && !BLOCKED_KEYS.test(event.keyCode)){
-							/* istanbul ignore next: Ignore any ENTER_KEYCODE that has ctrlKey, metaKey or alKey */
-							if (event.keyCode === ENTER_KEYCODE && (event.ctrlKey || event.metaKey || event.altKey)) {
+							/* istanbul ignore next: Ignore any _ENTER_KEYCODE that has ctrlKey, metaKey or alKey */
+							if (event.keyCode === _ENTER_KEYCODE && (event.ctrlKey || event.metaKey || event.altKey)) {
 								// we ignore any ENTER_	KEYCODE that is anything but plain or a shift one...
 							} else {
 								// if enter - insert new taDefaultWrap, if shift+enter insert <br/>
-								if(_defaultVal !== '' && event.keyCode === ENTER_KEYCODE && !event.ctrlKey && !event.metaKey && !event.altKey){
+								if(_defaultVal !== '' && event.keyCode === _ENTER_KEYCODE && !event.ctrlKey && !event.metaKey && !event.altKey){
 									if(!event.shiftKey){
 										// new paragraph, br should be caught correctly
 										var selection = taSelection.getSelectionElement();
