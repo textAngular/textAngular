@@ -935,11 +935,13 @@ angular.module('textAngularSetup', [])
 
 			/* istanbul ignore if: will default to '' when undefined */
 			if (workingHTML.replace(/\s*<[^>]*?>\s*/g, '') !== '') {
-				noOfWords = workingHTML.replace(/<\/?(b|i|em|strong|span|u|strikethrough|a|img|small|sub|sup|label)( [^>*?])?>/gi, '') // remove inline tags without adding spaces
-										.replace(/(<[^>]*?>\s*<[^>]*?>)/ig, ' ') // replace adjacent tags with possible space between with a space
-										.replace(/(<[^>]*?>)/ig, '') // remove any singular tags
-										.replace(/\s+/ig, ' ') // condense spacing
-										.match(/\S+/g).length; // count remaining non-space strings
+				if (workingHTML.trim() !== '') {
+					noOfWords = workingHTML.replace(/<\/?(b|i|em|strong|span|u|strikethrough|a|img|small|sub|sup|label)( [^>*?])?>/gi, '') // remove inline tags without adding spaces
+						.replace(/(<[^>]*?>\s*<[^>]*?>)/ig, ' ') // replace adjacent tags with possible space between with a space
+						.replace(/(<[^>]*?>)/ig, '') // remove any singular tags
+						.replace(/\s+/ig, ' ') // condense spacing
+						.match(/\S+/g).length; // count remaining non-space strings
+				}
 			}
 
 			//Set current scope
