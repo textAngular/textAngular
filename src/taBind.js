@@ -748,6 +748,11 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 					element.on('keydown', scope.events.keydown = function(event, eventData){
 						/* istanbul ignore else: this is for catching the jqLite testing*/
 						if(eventData) angular.extend(event, eventData);
+                        if (event.shiftKey) {
+                            taSelection.setStateShiftKey(true);
+                        } else {
+                            taSelection.setStateShiftKey(false);
+                        }
 						event.specialKey = _mapKeys(event);
 						var userSpecialKey;
 						/* istanbul ignore next: difficult to test */
