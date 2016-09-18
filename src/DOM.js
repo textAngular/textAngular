@@ -333,12 +333,26 @@ angular.module('textAngular.DOM', ['textAngular.factories'])
 						_nodes[0].parentNode.insertBefore($target[0],_nodes[0]);
 						for(i = _nodes.length - 1; i >= 0; i--){
 							/* istanbul ignore else:  */
-							if(_nodes[i].parentNode) _nodes[i].parentNode.removeChild(_nodes[i]);
+							if (_nodes[i].parentNode) _nodes[i].parentNode.removeChild(_nodes[i]);
+						}
+					} else /* istanbul ignore next: not tested since identical to blockquote */
+					if (optionsTagName === 'pre' && taSelection.getStateShiftKey()) {
+						// pre wrap other block elements
+						html = '';
+						for (i = 0; i < _nodes.length; i++) {
+							html += _nodes[i].outerHTML;
+						}
+						$target = angular.element(options);
+						$target[0].innerHTML = html;
+						_nodes[0].parentNode.insertBefore($target[0], _nodes[0]);
+						for (i = _nodes.length - 1; i >= 0; i--) {
+							/* istanbul ignore else:  */
+							if (_nodes[i].parentNode) _nodes[i].parentNode.removeChild(_nodes[i]);
 						}
 					}
 					else {
 						// regular block elements replace other block elements
-						for(i = 0; i < _nodes.length; i++){
+						for (i = 0; i < _nodes.length; i++) {
 							var newBlock = turnBlockIntoBlocks(_nodes[i], options);
 							if (_nodes[i] === $target[0]) {
 								$target = angular.element(newBlock);
@@ -385,6 +399,7 @@ angular.module('textAngular.DOM', ['textAngular.factories'])
 function($document, taDOM, $log){
 	// need to dereference the document else the calls don't work correctly
 	var _document = $document[0];
+	var bShiftState;
 	var brException = function (element, offset) {
 		/* check if selection is a BR element at the beginning of a container. If so, get
 		* the parentNode instead.
@@ -715,6 +730,12 @@ function($document, taDOM, $log){
 				range.startOffset = range.endOffset = range.startOffset - 1;
 			}
 			rangy.getSelection().setSingleRange(range);
+		},
+		setStateShiftKey: function(bS) {
+			bShiftState = bS;
+		},
+		getStateShiftKey: function() {
+			return bShiftState;
 		},
 		// from http://stackoverflow.com/questions/6690752/insert-html-at-caret-in-a-contenteditable-div
 		// topNode is the contenteditable normally, all manipulation MUST be inside this.
