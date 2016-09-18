@@ -683,9 +683,11 @@ textAngular.directive("textAngular", [
 				_mouseup = function(){
 					// ensure only one execution of updateSelectedStyles()
 					scope._bUpdateSelectedStyles = false;
-					scope.$apply(function(){
-						scope.updateSelectedStyles();
-					});
+					// for some reason, unless we do a $timeout here, after a _mouseup when the line is
+					// highlighted, and instead use a scope.$apply(function(){ scope.updateSelectedStyles(); });
+					// doesn't work properly, so we replaced this with:
+					/* istanbul ignore next: not tested  */
+					$timeout(function() { scope.updateSelectedStyles(); }, 0);
 				};
 				scope.displayElements.html.on('mouseup', _mouseup);
 				scope.displayElements.text.on('mouseup', _mouseup);
