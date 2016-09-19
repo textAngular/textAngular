@@ -1,3 +1,19 @@
+<a name="1.5.10"></a>
+## [1.5.10](https://github.com/fraywing/textAngular/compare/v1.5.9...v1.5.10) (2016-09-19)
+
+
+### Bug Fixes
+
+* **DOM, globals, main, taBind:** Fix for [#1205](https://github.com/fraywing/textAngular/issues/1205) Duplicating content inside <p> ([581e050](https://github.com/fraywing/textAngular/commit/581e050))
+* **DOM, taBind, taBind.spec:** added test for ShiftKey being pressed and released ([1b94314](https://github.com/fraywing/textAngular/commit/1b94314))
+* **globals, taBind:** small code clean up and re-org ([19cfe7e](https://github.com/fraywing/textAngular/commit/19cfe7e))
+* **main:** fix for [#655](https://github.com/fraywing/textAngular/issues/655) activeState seemingly not firing after the first click after a highlight [#655](https://github.com/fraywing/textAngular/issues/655) ([6ecc1c1](https://github.com/fraywing/textAngular/commit/6ecc1c1))
+* **main:** fixed an invalid error in rare conditions ([8772907](https://github.com/fraywing/textAngular/commit/8772907))
+* **taBind:** Browser spelling correction not setting the control to dirty [#1120](https://github.com/fraywing/textAngular/issues/1120) ([5473d01](https://github.com/fraywing/textAngular/commit/5473d01))
+* **taBind:** corrected issue #607 - catching Ctrl+Return ([438e060](https://github.com/fraywing/textAngular/commit/438e060))
+* **DOM, globals, main, taBind:** Fix for #1205 Duplicating content in ... (https://github.com/fraywing/textAngular/commit/581e050a3ed5bb4f21d59e4a59856f1d4a859770)
+
+
 <a name="1.5.9"></a>
 ## [1.5.9](https://github.com/fraywing/textAngular/compare/v1.5.8...v1.5.9) (2016-09-05)
 
