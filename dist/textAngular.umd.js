@@ -951,11 +951,13 @@ angular.module('textAngularSetup', [])
 
 			/* istanbul ignore if: will default to '' when undefined */
 			if (workingHTML.replace(/\s*<[^>]*?>\s*/g, '') !== '') {
-				noOfWords = workingHTML.replace(/<\/?(b|i|em|strong|span|u|strikethrough|a|img|small|sub|sup|label)( [^>*?])?>/gi, '') // remove inline tags without adding spaces
-										.replace(/(<[^>]*?>\s*<[^>]*?>)/ig, ' ') // replace adjacent tags with possible space between with a space
-										.replace(/(<[^>]*?>)/ig, '') // remove any singular tags
-										.replace(/\s+/ig, ' ') // condense spacing
-										.match(/\S+/g).length; // count remaining non-space strings
+				if (workingHTML.trim() !== '') {
+					noOfWords = workingHTML.replace(/<\/?(b|i|em|strong|span|u|strikethrough|a|img|small|sub|sup|label)( [^>*?])?>/gi, '') // remove inline tags without adding spaces
+						.replace(/(<[^>]*?>\s*<[^>]*?>)/ig, ' ') // replace adjacent tags with possible space between with a space
+						.replace(/(<[^>]*?>)/ig, '') // remove any singular tags
+						.replace(/\s+/ig, ' ') // condense spacing
+						.match(/\S+/g).length; // count remaining non-space strings
+				}
 			}
 
 			//Set current scope
@@ -989,7 +991,7 @@ angular.module('textAngularSetup', [])
 @license textAngular
 Author : Austin Anderson
 License : 2013 MIT
-Version 1.5.9
+Version 1.5.10
 
 See README.md or https://github.com/fraywing/textAngular/wiki for requirements and use.
 */
@@ -1000,7 +1002,7 @@ Commonjs package manager support (eg componentjs).
 
 
 "use strict";// NOTE: textAngularVersion must match the Gruntfile.js 'setVersion' task.... and have format v/d+./d+./d+
-var textAngularVersion = 'v1.5.9';   // This is automatically updated during the build process to the current release!
+var textAngularVersion = 'v1.5.10';   // This is automatically updated during the build process to the current release!
 
 
 // IE version detection - http://stackoverflow.com/questions/4169160/javascript-ie-detection-why-not-use-simple-conditional-comments
@@ -1078,7 +1080,9 @@ function getDomFromHtml(html)
 
 var BLOCKELEMENTS = /^(address|article|aside|audio|blockquote|canvas|center|dd|div|dl|fieldset|figcaption|figure|footer|form|h1|h2|h3|h4|h5|h6|header|hgroup|hr|noscript|ol|output|p|pre|section|table|tfoot|ul|video)$/i;
 var LISTELEMENTS = /^(ul|li|ol)$/i;
-var VALIDELEMENTS = /^(address|article|aside|audio|blockquote|canvas|center|dd|div|dl|fieldset|figcaption|figure|footer|form|h1|h2|h3|h4|h5|h6|header|hgroup|hr|noscript|ol|output|p|pre|section|table|tfoot|ul|video|li)$/i;
+// updated VALIDELEMENTS to include #text and span so that we can use nodeName instead of tagName
+var VALIDELEMENTS = /^(#text|span|address|article|aside|audio|blockquote|canvas|center|dd|div|dl|fieldset|figcaption|figure|footer|form|h1|h2|h3|h4|h5|h6|header|hgroup|hr|noscript|ol|output|p|pre|section|table|tfoot|ul|video|li)$/i;
+
 
 // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/Trim#Compatibility
 /* istanbul ignore next: trim shim for older browsers */
@@ -1623,6 +1627,7 @@ angular.module('textAngular.DOM', ['textAngular.factories'])
                     }
                 }
             }catch(e){}
+			//console.log('************** selectedElement:', selectedElement);
 			var $selected = angular.element(selectedElement);
 			//if(selectedElement !== undefined && selectedElement.tagName !== undefined){
 			var tagName = selectedElement.tagName.toLowerCase();
@@ -1795,12 +1800,28 @@ angular.module('textAngular.DOM', ['textAngular.factories'])
 						_nodes[0].parentNode.insertBefore($target[0],_nodes[0]);
 						for(i = _nodes.length - 1; i >= 0; i--){
 							/* istanbul ignore else:  */
-							if(_nodes[i].parentNode) _nodes[i].parentNode.removeChild(_nodes[i]);
+							if (_nodes[i].parentNode) _nodes[i].parentNode.removeChild(_nodes[i]);
+						}
+					} else /* istanbul ignore next: not tested since identical to blockquote */
+					if (optionsTagName === 'pre' && taSelection.getStateShiftKey()) {
+						//console.log('shift pre', _nodes);
+						// pre wrap other block elements
+						html = '';
+						for (i = 0; i < _nodes.length; i++) {
+							html += _nodes[i].outerHTML;
+						}
+						$target = angular.element(options);
+						$target[0].innerHTML = html;
+						_nodes[0].parentNode.insertBefore($target[0], _nodes[0]);
+						for (i = _nodes.length - 1; i >= 0; i--) {
+							/* istanbul ignore else:  */
+							if (_nodes[i].parentNode) _nodes[i].parentNode.removeChild(_nodes[i]);
 						}
 					}
 					else {
+						//console.log(optionsTagName, _nodes);
 						// regular block elements replace other block elements
-						for(i = 0; i < _nodes.length; i++){
+						for (i = 0; i < _nodes.length; i++) {
 							var newBlock = turnBlockIntoBlocks(_nodes[i], options);
 							if (_nodes[i] === $target[0]) {
 								$target = angular.element(newBlock);
@@ -1847,6 +1868,7 @@ angular.module('textAngular.DOM', ['textAngular.factories'])
 function($document, taDOM, $log){
 	// need to dereference the document else the calls don't work correctly
 	var _document = $document[0];
+	var bShiftState;
 	var brException = function (element, offset) {
 		/* check if selection is a BR element at the beginning of a container. If so, get
 		* the parentNode instead.
@@ -1923,33 +1945,169 @@ function($document, taDOM, $log){
 					selection.container = container;
 				}
 			}
-			//console.log('***selection container:', selection.container);
+			//console.log('***selection container:', selection.container.nodeName, selection.start.offset, selection.container);
 			return selection;
 		},
-/* NOT FUNCTIONAL YET
-        // under Firefox, we may have a selection that needs to be normalized
-        isSelectionContainerWhole_taTextElement: function (){
-            var range = rangy.getSelection().getRangeAt(0);
-            var container = range.commonAncestorContainer;
-            if (container.nodeName.toLowerCase() === 'div' &&
-                /^taTextElement/.test(container.id)) {
-                // container is the whole taTextElement
-                return true;
-            }
-            return false;
-        },
-		setNormalizedSelection: function (){
+		// if we use the LEFT_ARROW and we are at the special place <span>&#65279;</span> we move the cursor over by one...
+		// Chrome and Firefox behave differently so so fix this for Firefox here.  No adjustment needed for Chrome.
+		updateLeftArrowKey: function(element) {
 			var range = rangy.getSelection().getRangeAt(0);
-			var container = range.commonAncestorContainer;
-			console.log(range);
-			console.log(container.childNodes);
-			if (range.collapsed) {
-				// we know what to do...
-				console.log(container.childNodes[range.startOffset]);
-				api.setSelectionToElementStart(container.childNodes[range.startOffset]);
+			if (range && range.collapsed) {
+				var _nodes = api.getFlattenedDom(range);
+				if (!_nodes.findIndex) return;
+				var _node = range.startContainer;
+				var indexStartContainer = _nodes.findIndex(function(element, index){
+					if (element.node===_node) return true;
+					var _indexp = element.parents.indexOf(_node);
+					return (_indexp !== -1);
+				});
+				var m;
+				var nextNodeToRight;
+				//console.log('indexStartContainer', indexStartContainer, _nodes.length, 'startContainer:', _node, _node === _nodes[indexStartContainer].node);
+				_nodes.forEach(function (n, i) {
+					//console.log(i, n.node);
+					n.parents.forEach(function (nn, j){
+						//console.log(i, j, nn);
+					});
+				});
+				if (indexStartContainer+1 < _nodes.length) {
+					// we need the node just after this startContainer
+					// so we can check and see it this is a special place
+					nextNodeToRight = _nodes[indexStartContainer+1].node;
+					//console.log(nextNodeToRight, range.startContainer);
+				}
+				//console.log('updateLeftArrowKey', range.startOffset, range.startContainer.textContent);
+				// this first section handles the case for Chrome browser
+				// if the first character of the nextNode is a \ufeff we know that we are just before the special span...
+				// and so we most left by one character
+				if (nextNodeToRight && nextNodeToRight.textContent) {
+					m = /^\ufeff([^\ufeff]*)$/.exec(nextNodeToRight.textContent);
+					if (m) {
+						// we are before the special node with begins with a \ufeff character
+						//console.log('LEFT ...found it...', 'startOffset:', range.startOffset, m[0].length, m[1].length);
+						// no need to change anything in this case
+						return;
+					}
+				}
+				var nextNodeToLeft;
+				if (indexStartContainer > 0) {
+					// we need the node just after this startContainer
+					// so we can check and see it this is a special place
+					nextNodeToLeft = _nodes[indexStartContainer-1].node;
+					//console.log(nextNodeToLeft, nextNodeToLeft);
+				}
+				if (range.startOffset === 0 && nextNodeToLeft) {
+					//console.log(nextNodeToLeft, range.startOffset, nextNodeToLeft.textContent);
+					m = /^\ufeff([^\ufeff]*)$/.exec(nextNodeToLeft.textContent);
+					if (m) {
+						//console.log('LEFT &&&&&&&&&&&&&&&&&&&...found it...&&&&&&&&&&&', nextNodeToLeft, m[0].length, m[1].length);
+						// move over to the left my one -- Firefox triggers this case
+						api.setSelectionToElementEnd(nextNodeToLeft);
+						return;
+					}
+				}
+			}
+			return;
+		},
+		// if we use the RIGHT_ARROW and we are at the special place <span>&#65279;</span> we move the cursor over by one...
+		updateRightArrowKey: function(element) {
+			// we do not need to make any adjustments here, so we ignore all this code
+			if (false) {
+				var range = rangy.getSelection().getRangeAt(0);
+				if (range && range.collapsed) {
+					var _nodes = api.getFlattenedDom(range);
+					if (!_nodes.findIndex) return;
+					var _node = range.startContainer;
+					var indexStartContainer = _nodes.findIndex(function (element, index) {
+						if (element.node === _node) return true;
+						var _indexp = element.parents.indexOf(_node);
+						return (_indexp !== -1);
+					});
+					var _sel;
+					var i;
+					var m;
+
+					// if the last character is a \ufeff we know that we are just before the special span...
+					// and so we most right by one character
+					var indexFound = _nodes.findIndex(function (n, index) {
+						if (n.textContent) {
+							var m = /^\ufeff([^\ufeff]*)$/.exec(n.textContent);
+							if (m) {
+								return true;
+							} else {
+								return false;
+							}
+						} else {
+							return false;
+						}
+					});
+					if (indexFound === -1) {
+						return;
+					}
+					//console.log(indexFound, range.startContainer, range.startOffset);
+					_node = _nodes[indexStartContainer];
+					//console.log('indexStartContainer', indexStartContainer);
+					if (_node && _node.textContent) {
+						m = /^\ufeff([^\ufeff]*)$/.exec(_node.textContent);
+						if (m && range.startOffset - 1 === m[1].length) {
+							//console.log('RIGHT found it...&&&&&&&&&&&', range.startOffset);
+							// no need to make any adjustment
+							return;
+						}
+					}
+					//console.log(range.startOffset);
+					if (_nodes && range.startOffset === 0) {
+						indexStartContainer = _nodes.indexOf(range.startContainer);
+						if (indexStartContainer !== -1 && indexStartContainer > 0) {
+							_node = _nodes[indexStartContainer - 1];
+							if (_node.textContent) {
+								m = /\ufeff([^\ufeff]*)$/.exec(_node.textContent);
+								if (m && true || range.startOffset === m[1].length + 1) {
+									//console.log('RIGHT &&&&&&&&&&&&&&&&&&&...found it...&&&&&&&&&&&', range.startOffset, m[1].length);
+									// no need to make any adjustment
+									return;
+								}
+							}
+						}
+					}
+				}
 			}
 		},
-*/
+		getFlattenedDom: function(range) {
+			var parent = range.commonAncestorContainer.parentNode;
+			if (!parent) {
+				return range.commonAncestorContainer.childNodes;
+			}
+			var nodes = Array.prototype.slice.call(parent.childNodes); // converts NodeList to Array
+			var indexStartContainer = nodes.indexOf(range.startContainer);
+			// make sure that we have a big enough set of nodes
+			if (indexStartContainer+1 < nodes.length && indexStartContainer > 0) {
+				// we are good
+				// we can go down one node or up one node
+			} else {
+				if (parent.parentNode) {
+					parent = parent.parentNode;
+				}
+			}
+			// now walk the parent
+			nodes = [];
+			function addNodes(_set) {
+				if (_set.node.childNodes.length) {
+					var childNodes = Array.prototype.slice.call(_set.node.childNodes); // converts NodeList to Array
+					childNodes.forEach(function(n) {
+						var _t = _set.parents.slice();
+						if (_t.slice(-1)[0]!==_set.node) {
+							_t.push(_set.node);
+						}
+						addNodes({parents: _t, node: n});
+					});
+				} else {
+					nodes.push({parents: _set.parents, node: _set.node});
+				}
+			}
+			addNodes({parents: [parent], node: parent});
+			return nodes;
+		},
 		getOnlySelectedElements: function(){
 			var range = rangy.getSelection().getRangeAt(0);
 			var container = range.commonAncestorContainer;
@@ -2002,34 +2160,34 @@ function($document, taDOM, $log){
 		},
 		setSelection: function(el, start, end){
 			var range = rangy.createRange();
-			
+
 			range.setStart(el, start);
 			range.setEnd(el, end);
-			
+
 			rangy.getSelection().setSingleRange(range);
 		},
 		setSelectionBeforeElement: function (el){
 			var range = rangy.createRange();
-			
+
 			range.selectNode(el);
 			range.collapse(true);
-			
+
 			rangy.getSelection().setSingleRange(range);
 		},
 		setSelectionAfterElement: function (el){
 			var range = rangy.createRange();
-			
+
 			range.selectNode(el);
 			range.collapse(false);
-			
+
 			rangy.getSelection().setSingleRange(range);
 		},
 		setSelectionToElementStart: function (el){
 			var range = rangy.createRange();
-			
+
 			range.selectNodeContents(el);
 			range.collapse(true);
-			
+
 			rangy.getSelection().setSingleRange(range);
 		},
 		setSelectionToElementEnd: function (el){
@@ -2042,6 +2200,12 @@ function($document, taDOM, $log){
 			}
 			rangy.getSelection().setSingleRange(range);
 		},
+		setStateShiftKey: function(bS) {
+			bShiftState = bS;
+		},
+		getStateShiftKey: function() {
+			return bShiftState;
+		},
 		// from http://stackoverflow.com/questions/6690752/insert-html-at-caret-in-a-contenteditable-div
 		// topNode is the contenteditable normally, all manipulation MUST be inside this.
 		insertHtml: function(html, topNode){
@@ -2051,29 +2215,47 @@ function($document, taDOM, $log){
 			var frag = _document.createDocumentFragment();
 			var children = element[0].childNodes;
 			var isInline = true;
-			
+
 			if(children.length > 0){
 				// NOTE!! We need to do the following:
 				// check for blockelements - if they exist then we have to split the current element in half (and all others up to the closest block element) and insert all children in-between.
 				// If there are no block elements, or there is a mixture we need to create textNodes for the non wrapped text (we don't want them spans messing up the picture).
 				nodes = [];
 				for(_childI = 0; _childI < children.length; _childI++){
-					if(!(
-						(children[_childI].nodeName.toLowerCase() === 'p' && children[_childI].innerHTML.trim() === '') || // empty p element
-						(children[_childI].nodeType === 3 && children[_childI].nodeValue.trim() === '') // empty text node
-					)){
-						isInline = isInline && !BLOCKELEMENTS.test(children[_childI].nodeName);
-						nodes.push(children[_childI]);
+					var _cnode = children[_childI];
+					if (_cnode.nodeName.toLowerCase() === 'p' &&
+						_cnode.innerHTML.trim() === '') { // empty p element
+						continue;
 					}
+					if((   _cnode.nodeType === 3 &&
+						   _cnode.nodeValue === '\ufeff'[0] &&
+						   _cnode.nodeValue.trim() === '') // empty no-space space element
+						) {
+						// no change to isInline
+						nodes.push(_cnode);
+						continue;
+					}
+					if(_cnode.nodeType === 3 &&
+						 _cnode.nodeValue.trim() === '') { // empty text node
+						continue;
+					}
+					isInline = isInline && !BLOCKELEMENTS.test(_cnode.nodeName);
+					nodes.push(_cnode);
 				}
-				for(var _n = 0; _n < nodes.length; _n++) lastNode = frag.appendChild(nodes[_n]);
-				if(!isInline && range.collapsed && /^(|<br(|\/)>)$/i.test(range.startContainer.innerHTML)) range.selectNode(range.startContainer);
+				for(var _n = 0; _n < nodes.length; _n++) {
+					lastNode = frag.appendChild(nodes[_n]);
+				}
+				if( !isInline &&
+					range.collapsed &&
+					/^(|<br(|\/)>)$/i.test(range.startContainer.innerHTML) ) {
+					range.selectNode(range.startContainer);
+				}
 			}else{
 				isInline = true;
 				// paste text of some sort
 				lastNode = frag = _document.createTextNode(html);
 			}
-			
+
 			// Other Edge case - selected data spans multiple blocks.
 			if(isInline){
 				range.deleteContents();
@@ -2098,7 +2280,7 @@ function($document, taDOM, $log){
 							secondParent = parent.cloneNode();
 							// split the nodes into two lists - before and after, splitting the node with the selection into 2 text nodes.
 							taDOM.splitNodes(parent.childNodes, parent, secondParent, range.startContainer, range.startOffset);
-							
+
 							// Escape out of the inline tags like b
 							while(!VALIDELEMENTS.test(parent.nodeName)){
 								angular.element(parent).after(secondParent);
@@ -2113,13 +2295,13 @@ function($document, taDOM, $log){
 							secondParent = parent.cloneNode();
 							taDOM.splitNodes(parent.childNodes, parent, secondParent, undefined, undefined, range.startOffset);
 						}
-						
+
 						angular.element(parent).after(secondParent);
 						// put cursor to end of inserted content
 						//console.log('setStartAfter', parent);
 						range.setStartAfter(parent);
 						range.setEndAfter(parent);
-						
+
 						if(/^(|<br(|\/)>)$/i.test(parent.innerHTML.trim())){
 							range.setStartBefore(parent);
 							range.setEndBefore(parent);
@@ -2145,12 +2327,37 @@ function($document, taDOM, $log){
 					range.deleteContents();
 				}
 			}
-			
+
 			range.insertNode(frag);
 			if(lastNode){
 				api.setSelectionToElementEnd(lastNode);
 			}
 		}
+
+		/* NOT FUNCTIONAL YET
+		 // under Firefox, we may have a selection that needs to be normalized
+		 isSelectionContainerWhole_taTextElement: function (){
+		 var range = rangy.getSelection().getRangeAt(0);
+		 var container = range.commonAncestorContainer;
+		 if (container.nodeName.toLowerCase() === 'div' &&
+		 /^taTextElement/.test(container.id)) {
+		 // container is the whole taTextElement
+		 return true;
+		 }
+		 return false;
+		 },
+		 setNormalizedSelection: function (){
+		 var range = rangy.getSelection().getRangeAt(0);
+		 var container = range.commonAncestorContainer;
+		 console.log(range);
+		 console.log(container.childNodes);
+		 if (range.collapsed) {
+		 // we know what to do...
+		 console.log(container.childNodes[range.startOffset]);
+		 api.setSelectionToElementStart(container.childNodes[range.startOffset]);
+		 }
+		 },
+		 */
 	};
 	return api;
 }]).service('taDOM', function(){
@@ -2167,35 +2374,35 @@ function($document, taDOM, $log){
 			if(element.attr(attribute) !== undefined) resultingElements.push(element);
 			return resultingElements;
 		},
-		
+
 		transferChildNodes: function(source, target){
 			// clear out target
 			target.innerHTML = '';
 			while(source.childNodes.length > 0) target.appendChild(source.childNodes[0]);
 			return target;
 		},
-		
+
 		splitNodes: function(nodes, target1, target2, splitNode, subSplitIndex, splitIndex){
 			if(!splitNode && isNaN(splitIndex)) throw new Error('taDOM.splitNodes requires a splitNode or splitIndex');
 			var startNodes = document.createDocumentFragment();
 			var endNodes = document.createDocumentFragment();
 			var index = 0;
-			
+
 			while(nodes.length > 0 && (isNaN(splitIndex) || splitIndex !== index) && nodes[0] !== splitNode){
 				startNodes.appendChild(nodes[0]); // this removes from the nodes array (if proper childNodes object.
 				index++;
 			}
-			
+
 			if(!isNaN(subSplitIndex) && subSplitIndex >= 0 && nodes[0]){
 				startNodes.appendChild(document.createTextNode(nodes[0].nodeValue.substring(0, subSplitIndex)));
 				nodes[0].nodeValue = nodes[0].nodeValue.substring(subSplitIndex);
 			}
 			while(nodes.length > 0) endNodes.appendChild(nodes[0]);
-			
+
 			taDOM.transferChildNodes(startNodes, target1);
 			taDOM.transferChildNodes(endNodes, target2);
 		},
-		
+
 		transferNodeAttributes: function(source, target){
 			for(var i = 0; i < source.attributes.length; i++) target.setAttribute(source.attributes[i].name, source.attributes[i].value);
 			return target;
@@ -2203,6 +2410,7 @@ function($document, taDOM, $log){
 	};
 	return taDOM;
 });
+
 angular.module('textAngular.validators', [])
 .directive('taMaxText', function(){
 	return {
@@ -2342,6 +2550,12 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 			var _META_KEY = 0x0002;
 			var _ALT_KEY = 0x0004;
 			var _SHIFT_KEY = 0x0008;
+			// KEYCODEs we use
+			var _ENTER_KEYCODE = 13;
+			var _SHIFT_KEYCODE = 16;
+			var _TAB_KEYCODE = 9;
+			var _LEFT_ARROW_KEYCODE = 37;
+			var _RIGHT_ARROW_KEYCODE = 39;
 			// map events to special keys...
 			// mappings is an array of maps from events to specialKeys as declared in textAngularSetup
 			var _keyMappings = [
@@ -2371,14 +2585,14 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 					specialKey: 'TabKey',
 					forbiddenModifiers: _META_KEY + _SHIFT_KEY + _ALT_KEY + _CTRL_KEY,
 					mustHaveModifiers: [],
-					keyCode: 9
+					keyCode: _TAB_KEYCODE
 				},
 				//		shift + TabKey
 				{
 					specialKey: 'ShiftTabKey',
 					forbiddenModifiers: _META_KEY + _ALT_KEY + _CTRL_KEY,
 					mustHaveModifiers: [_SHIFT_KEY],
-					keyCode: 9
+					keyCode: _TAB_KEYCODE
 				}
 			];
 			function _mapKeys(event) {
@@ -2643,7 +2857,7 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 						if(eventData) angular.extend(event, eventData);
 						// Reference to http://stackoverflow.com/questions/6140632/how-to-handle-tab-in-textarea
 						/* istanbul ignore else: otherwise normal functionality */
-						if(event.keyCode === 9){ // tab was pressed
+						if(event.keyCode === _TAB_KEYCODE){ // tab was pressed
 							// get caret position/selection
 							var start = this.selectionStart;
 							var end = this.selectionEnd;
@@ -3000,6 +3214,11 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 					element.on('keydown', scope.events.keydown = function(event, eventData){
 						/* istanbul ignore else: this is for catching the jqLite testing*/
 						if(eventData) angular.extend(event, eventData);
+                        if (event.keyCode === _SHIFT_KEYCODE) {
+                            taSelection.setStateShiftKey(true);
+                        } else {
+                            taSelection.setStateShiftKey(false);
+                        }
 						event.specialKey = _mapKeys(event);
 						var userSpecialKey;
 						/* istanbul ignore next: difficult to test */
@@ -3041,7 +3260,8 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 								event.preventDefault();
 							}
 							/* istanbul ignore next: difficult to test as can't seem to select */
-							if(event.keyCode === 13 && !event.shiftKey){
+							if(event.keyCode === _ENTER_KEYCODE && !event.shiftKey && !event.ctrlKey && !event.metaKey && !event.altKey)
+							{
 								var contains = function(a, obj) {
 									for (var i = 0; i < a.length; i++) {
 										if (a[i] === obj) {
@@ -3052,7 +3272,8 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 								};
 								var $selection;
 								var selection = taSelection.getSelectionElement();
-								if(!selection.tagName.match(VALIDELEMENTS)) return;
+								// shifted to nodeName here from tagName since it is more widely supported see: http://stackoverflow.com/questions/4878484/difference-between-tagname-and-nodename
+								if(!selection.nodeName.match(VALIDELEMENTS)) return;
 								var _new = angular.element(_defaultVal);
 								// if we are in the last element of a blockquote, or ul or ol and the element is blank
 								// we need to pull the element outside of the said type
@@ -3083,54 +3304,96 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 					element.on('keyup', scope.events.keyup = function(event, eventData){
 						/* istanbul ignore else: this is for catching the jqLite testing*/
 						if(eventData) angular.extend(event, eventData);
+						taSelection.setStateShiftKey(false);	// clear the ShiftKey state
 						/* istanbul ignore next: FF specific bug fix */
-						if (event.keyCode === 9) {
+						if (event.keyCode === _TAB_KEYCODE) {
 							var _selection = taSelection.getSelection();
 							if(_selection.start.element === element[0] && element.children().length) taSelection.setSelectionToElementStart(element.children()[0]);
 							return;
 						}
+						// we do this here during the 'keyup' so that the browser has already moved the slection by one character...
+						if (event.keyCode === _LEFT_ARROW_KEYCODE && !event.shiftKey) {
+							taSelection.updateLeftArrowKey(element);
+						}
+						// we do this here during the 'keyup' so that the browser has already moved the slection by one character...
+						if (event.keyCode === _RIGHT_ARROW_KEYCODE && !event.shiftKey) {
+							taSelection.updateRightArrowKey(element);
+						}
 						if(_undoKeyupTimeout) $timeout.cancel(_undoKeyupTimeout);
 						if(!_isReadonly && !BLOCKED_KEYS.test(event.keyCode)){
-							// if enter - insert new taDefaultWrap, if shift+enter insert <br/>
-							if(_defaultVal !== '' && event.keyCode === 13){
-								if(!event.shiftKey){
-									// new paragraph, br should be caught correctly
-									var selection = taSelection.getSelectionElement();
-									while(!selection.tagName.match(VALIDELEMENTS) && selection !== element[0]){
-										selection = selection.parentNode;
-									}
+							/* istanbul ignore next: Ignore any _ENTER_KEYCODE that has ctrlKey, metaKey or alKey */
+							if (event.keyCode === _ENTER_KEYCODE && (event.ctrlKey || event.metaKey || event.altKey)) {
+								// we ignore any ENTER_	KEYCODE that is anything but plain or a shift one...
+							} else {
+								// if enter - insert new taDefaultWrap, if shift+enter insert <br/>
+								if(_defaultVal !== '' && event.keyCode === _ENTER_KEYCODE && !event.ctrlKey && !event.metaKey && !event.altKey){
+									if(!event.shiftKey){
+										// new paragraph, br should be caught correctly
+										var selection = taSelection.getSelectionElement();
+										// shifted to nodeName here from tagName since it is more widely supported see: http://stackoverflow.com/questions/4878484/difference-between-tagname-and-nodename
+										while(!selection.nodeName.match(VALIDELEMENTS) && selection !== element[0]){
+											selection = selection.parentNode;
+										}
 
-									if(selection.tagName.toLowerCase() !==
-										attrs.taDefaultWrap &&
-										selection.tagName.toLowerCase() !== 'li' &&
-										(selection.innerHTML.trim() === '' || selection.innerHTML.trim() === '<br>')
-									) {
-										var _new = angular.element(_defaultVal);
-										angular.element(selection).replaceWith(_new);
-										taSelection.setSelectionToElementStart(_new[0]);
+										if(selection.tagName.toLowerCase() !==
+											attrs.taDefaultWrap &&
+											selection.tagName.toLowerCase() !== 'li' &&
+											(selection.innerHTML.trim() === '' || selection.innerHTML.trim() === '<br>')
+										) {
+											// Chrome starts with a <div><br></div> after an EnterKey
+											// so we replace this with the _defaultVal
+											var _new = angular.element(_defaultVal);
+											angular.element(selection).replaceWith(_new);
+											taSelection.setSelectionToElementStart(_new[0]);
+										}
 									}
 								}
+								var val = _compileHtml();
+								if(_defaultVal !== '' && (val.trim() === '' || val.trim() === '<br>')){
+									_setInnerHTML(_defaultVal);
+									taSelection.setSelectionToElementStart(element.children()[0]);
+								}else if(val.substring(0, 1) !== '<' && attrs.taDefaultWrap !== ''){
+									/* we no longer do this, since there can be comments here and white space
+									 var _savedSelection = rangy.saveSelection();
+									 val = _compileHtml();
+									 val = "<" + attrs.taDefaultWrap + ">" + val + "</" + attrs.taDefaultWrap + ">";
+									 _setInnerHTML(val);
+									 rangy.restoreSelection(_savedSelection);
+									 */
+								}
+								var triggerUndo = _lastKey !== event.keyCode && UNDO_TRIGGER_KEYS.test(event.keyCode);
+								if(_keyupTimeout) $timeout.cancel(_keyupTimeout);
+								_keyupTimeout = $timeout(function() {
+									_setViewValue(val, triggerUndo, true);
+								}, ngModelOptions.$options.debounce || 400);
+								if(!triggerUndo) _undoKeyupTimeout = $timeout(function(){ ngModel.$undoManager.push(val); }, 250);
+								_lastKey = event.keyCode;
 							}
-							var val = _compileHtml();
-							if(_defaultVal !== '' && (val.trim() === '' || val.trim() === '<br>')){
-								_setInnerHTML(_defaultVal);
-								taSelection.setSelectionToElementStart(element.children()[0]);
-							}else if(val.substring(0, 1) !== '<' && attrs.taDefaultWrap !== ''){
-								/* we no longer do this, since there can be comments here and white space
-								var _savedSelection = rangy.saveSelection();
-								val = _compileHtml();
-								val = "<" + attrs.taDefaultWrap + ">" + val + "</" + attrs.taDefaultWrap + ">";
-								_setInnerHTML(val);
-								rangy.restoreSelection(_savedSelection);
-								*/
-							}
-							var triggerUndo = _lastKey !== event.keyCode && UNDO_TRIGGER_KEYS.test(event.keyCode);
-							if(_keyupTimeout) $timeout.cancel(_keyupTimeout);
-							_keyupTimeout = $timeout(function() {
-								_setViewValue(val, triggerUndo, true);
-							}, ngModelOptions.$options.debounce || 400);
-							if(!triggerUndo) _undoKeyupTimeout = $timeout(function(){ ngModel.$undoManager.push(val); }, 250);
-							_lastKey = event.keyCode;
+						}
+					});
+
+					// when there is a change from a spelling correction in the browser, the only
+					// change that is seen is a 'input' and the $watch('html') sees nothing... So
+					// we added this element.on('input') to catch this change and call the _setViewValue()
+					// so the ngModel is updated and all works as it should.
+					var _inputTimeout;
+					element.on('input', function() {
+						if (_compileHtml() !== ngModel.$viewValue) {
+							// we wait a time now to allow the natural $watch('html') to handle this change
+							// and then after a 1 second delay, if there is still a difference we will do the
+							// _setViewValue() call.
+							/* istanbul ignore if: can't test */
+							if(_inputTimeout) $timeout.cancel(_inputTimeout);
+							/* istanbul ignore next: cant' test? */
+							_inputTimeout = $timeout(function() {
+								var _val = _compileHtml();
+								if (_val !== ngModel.$viewValue) {
+									//console.log('_setViewValue');
+								    //console.log('old:', ngModel.$viewValue);
+									//console.log('new:', _val);
+									_setViewValue(_val, true);
+								}
+							}, 1000);
 						}
 					});
 
@@ -3860,7 +4123,9 @@ textAngular.directive("textAngular", [
 				// changes from taBind back up to here
 				scope.$watch('html', function(newValue, oldValue){
 					if(newValue !== oldValue){
-						if(attrs.ngModel && ngModel.$viewValue !== newValue) ngModel.$setViewValue(newValue);
+						if(attrs.ngModel && ngModel.$viewValue !== newValue) {
+							ngModel.$setViewValue(newValue);
+						}
 						scope.displayElements.forminput.val(newValue);
 					}
 				});
@@ -3972,7 +4237,10 @@ textAngular.directive("textAngular", [
 					/* istanbul ignore next: don't see how to test this... */
 					if (taSelection.getSelection) {
 						var _selection = taSelection.getSelection();
-						if (taSelection.getSelectionElement().nodeName.toLowerCase() === 'a') {
+						// in a weird case (can't reproduce) taSelection.getSelectionElement() can be undefined!!
+						// this comes from range.commonAncestorContainer;
+						// so I check for this here which fixes the error case
+						if (taSelection.getSelectionElement() && taSelection.getSelectionElement().nodeName.toLowerCase() === 'a') {
 							// check and see if we are at the edge of the <a>
 							if (_selection.start.element.nodeType === 3 &&
 								_selection.start.element.textContent.length === _selection.end.offset) {
@@ -4007,9 +4275,11 @@ textAngular.directive("textAngular", [
 				_mouseup = function(){
 					// ensure only one execution of updateSelectedStyles()
 					scope._bUpdateSelectedStyles = false;
-					scope.$apply(function(){
-						scope.updateSelectedStyles();
-					});
+					// for some reason, unless we do a $timeout here, after a _mouseup when the line is
+					// highlighted, and instead use a scope.$apply(function(){ scope.updateSelectedStyles(); });
+					// doesn't work properly, so we replaced this with:
+					/* istanbul ignore next: not tested  */
+					$timeout(function() { scope.updateSelectedStyles(); }, 0);
 				};
 				scope.displayElements.html.on('mouseup', _mouseup);
 				scope.displayElements.text.on('mouseup', _mouseup);
