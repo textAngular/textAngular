@@ -87,6 +87,7 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 			var _SHIFT_KEY = 0x0008;
 			// KEYCODEs we use
 			var _ENTER_KEYCODE = 13;
+			var _SHIFT_KEYCODE = 16;
 			var _TAB_KEYCODE = 9;
 			var _LEFT_ARROW_KEYCODE = 37;
 			var _RIGHT_ARROW_KEYCODE = 39;
@@ -748,7 +749,7 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 					element.on('keydown', scope.events.keydown = function(event, eventData){
 						/* istanbul ignore else: this is for catching the jqLite testing*/
 						if(eventData) angular.extend(event, eventData);
-                        if (event.shiftKey) {
+                        if (event.keyCode === _SHIFT_KEYCODE) {
                             taSelection.setStateShiftKey(true);
                         } else {
                             taSelection.setStateShiftKey(false);
@@ -838,6 +839,7 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 					element.on('keyup', scope.events.keyup = function(event, eventData){
 						/* istanbul ignore else: this is for catching the jqLite testing*/
 						if(eventData) angular.extend(event, eventData);
+						taSelection.setStateShiftKey(false);	// clear the ShiftKey state
 						/* istanbul ignore next: FF specific bug fix */
 						if (event.keyCode === _TAB_KEYCODE) {
 							var _selection = taSelection.getSelection();

@@ -21,23 +21,23 @@ describe('taBind', function () {
 		$document.find('body').html('');
 	}));
 	var $rootScope;
-	
+
 	it('should require ngModel', inject(function ($compile, $rootScope) {
 		expect(function () {
 			$compile('<div ta-bind></div>')($rootScope);
 			$rootScope.$digest();
 		}).toThrow();
 	}));
-	
+
 	it('should add ta-bind class', inject(function ($compile, $rootScope) {
 		var element = $compile('<div ta-bind ng-model="test"></div>')($rootScope);
 		$rootScope.$digest();
 		expect(element.hasClass('ta-bind')).toBe(true);
 	}));
-	
+
 	describe('should function as an WYSIWYG div', function () {
 		var $rootScope, element;
-		
+
 		beforeEach(inject(function (_$compile_, _$rootScope_) {
 			$rootScope = _$rootScope_;
 			$rootScope.html = '<p>Test Contents</p>';
@@ -78,7 +78,7 @@ describe('taBind', function () {
 			$rootScope.$digest();
 			expect(element.html()).toBe('<p>Test 2 Content</p>');
 		});
-		
+
 		it('should prevent links default event', function () {
 			$rootScope.html = '<div><a href="test">Test</a> 2 Content</div>';
 			$rootScope.$digest();
@@ -87,7 +87,7 @@ describe('taBind', function () {
 			});
 			jQuery(element.find('a')[0]).trigger('click');
 		});
-		
+
 		it('should ensure cursor is correctly placed', inject(function($document, taSelection){
 			$document.find('body').append(element);
 			taSelection.getSelection = function(){
@@ -111,7 +111,7 @@ describe('taBind', function () {
 			$rootScope.$digest();
 			expect(selectedElement.innerHTML).toBe(element.children()[0].innerHTML);
 		}));
-		
+
 		describe('should trim empty content', function(){
 			it('returns undefined when <p></p>', function(){
 				element.html('<p></p>');
@@ -150,7 +150,7 @@ describe('taBind', function () {
 				expect($rootScope.html).toBe('');
 			});
 		});
-		
+
 		describe('should respect the ta-default-wrap value', function(){
 			describe('on focus', function(){
 				it('default to p element', inject(function($rootScope, $compile){
@@ -311,6 +311,34 @@ describe('taBind', function () {
 					expect(element.html()).toBe('<p><br></p>');
 					element.remove();
 				}));
+				it('should detect and set on shift keydown and then clear on keyup', inject(function ($rootScope, $compile, _taSelection_) {
+					$rootScope.html = '<p><br></p>';
+					var element = $compile('<div ta-bind ta-default-wrap="b" contenteditable="contenteditable" ng-model="html"></div>')($rootScope);
+					var taSelection = _taSelection_;
+					$rootScope.$digest();
+					var event;
+					if (angular.element === jQuery) {
+						event = jQuery.Event('keydown');
+						event.keyCode = 16;
+						element.triggerHandler(event);
+					} else {
+						event = {keyCode: 16};
+						element.triggerHandler('keydown', event);
+					}
+					$rootScope.$digest();
+					expect(taSelection.getStateShiftKey()).toBe(true);
+					if (angular.element === jQuery) {
+						event = jQuery.Event('keyup');
+						event.keyCode = 16;
+						element.triggerHandler(event);
+					} else {
+						event = {keyCode: 16};
+						element.triggerHandler('keyup', event);
+					}
+					$rootScope.$digest();
+					expect(taSelection.getStateShiftKey()).toBe(false);
+					element.remove();
+				}));
 			});
 		});
 	});
@@ -376,7 +404,7 @@ describe('taBind', function () {
 			expect(element.val()).toBe('<div>Test 2 Content</div>');
 		});
 	});
-	
+
 	describe('should create the updateTaBind function on parent scope', function () {
 		describe('without id', function () {
 			it('should exist', inject(function (_$compile_, _$rootScope_) {
@@ -396,7 +424,7 @@ describe('taBind', function () {
 			}));
 		});
 	});
-	
+
 	describe('custom renderers', function () {
 		describe('function in display mode', function () {
 			beforeEach(inject(function(taCustomRenderers){
@@ -417,12 +445,12 @@ describe('taBind', function () {
 					}
 				});
 			}));
-			
+
 			afterEach(inject(function(taCustomRenderers){
 				taCustomRenderers.pop();
 				taCustomRenderers.pop();
 			}));
-			
+
 			it('should replace with custom code for video renderer', inject(function ($compile, $rootScope) {
 				$rootScope.html = '<p><img class="ta-insert-video" ta-insert-video="http://www.youtube.com/embed/2maA1-mvicY" src="" allowfullscreen="true" width="300" frameborder="0" height="250"/></p>';
 				var element = $compile('<div ta-bind ng-model="html"></div>')($rootScope);
@@ -430,7 +458,7 @@ describe('taBind', function () {
 				expect(element.find('img').length).toBe(0);
 				expect(element.find('iframe').length).toBe(1);
 			}));
-			
+
 			it('should not replace with custom code for normal img', inject(function ($compile, $rootScope) {
 				$rootScope.html = '<p><img src=""/></p>';
 				var element = $compile('<div ta-bind ng-model="html"></div>')($rootScope);
@@ -438,7 +466,7 @@ describe('taBind', function () {
 				expect(element.find('img').length).toBe(1);
 				expect(element.find('iframe').length).toBe(0);
 			}));
-			
+
 			it('should replace for selector only', inject(function ($compile, $rootScope) {
 				$rootScope.html = '<p><a></a></p>';
 				var element = $compile('<div ta-bind ng-model="html"></div>')($rootScope);
@@ -446,7 +474,7 @@ describe('taBind', function () {
 				expect(element.find('a').length).toBe(0);
 				expect(element.find('b').length).toBe(1);
 			}));
-			
+
 			it('should replace for attribute only', inject(function ($compile, $rootScope) {
 				$rootScope.html = '<p><span href></span><b href></b></p>';
 				var element = $compile('<div ta-bind ng-model="html"></div>')($rootScope);
@@ -456,7 +484,7 @@ describe('taBind', function () {
 				expect(element.find('i').length).toBe(2);
 			}));
 		});
-		
+
 		describe('not function in edit mode', function () {
 			it('should exist', inject(function ($compile, $rootScope) {
 				$rootScope.html = '<p><img class="ta-insert-video" ta-insert-video="http://www.youtube.com/embed/2maA1-mvicY" src="" allowfullscreen="true" width="300" frameborder="0" height="250"/></p>';
@@ -491,7 +519,7 @@ describe('taBind', function () {
 		}));
 	});
 	*/
-	
+
 	describe('tests for issue as described in 484', function(){
 		var element, taSelection;
 		beforeEach(inject(function ($compile, _$rootScope_, $document, _taSelection_) {

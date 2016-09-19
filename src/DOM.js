@@ -161,6 +161,7 @@ angular.module('textAngular.DOM', ['textAngular.factories'])
                     }
                 }
             }catch(e){}
+			//console.log('************** selectedElement:', selectedElement);
 			var $selected = angular.element(selectedElement);
 			//if(selectedElement !== undefined && selectedElement.tagName !== undefined){
 			var tagName = selectedElement.tagName.toLowerCase();
@@ -337,6 +338,7 @@ angular.module('textAngular.DOM', ['textAngular.factories'])
 						}
 					} else /* istanbul ignore next: not tested since identical to blockquote */
 					if (optionsTagName === 'pre' && taSelection.getStateShiftKey()) {
+						//console.log('shift pre', _nodes);
 						// pre wrap other block elements
 						html = '';
 						for (i = 0; i < _nodes.length; i++) {
@@ -351,6 +353,7 @@ angular.module('textAngular.DOM', ['textAngular.factories'])
 						}
 					}
 					else {
+						//console.log(optionsTagName, _nodes);
 						// regular block elements replace other block elements
 						for (i = 0; i < _nodes.length; i++) {
 							var newBlock = turnBlockIntoBlocks(_nodes[i], options);
