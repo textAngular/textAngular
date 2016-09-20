@@ -2734,6 +2734,10 @@ textAngular.directive("textAngular", [
 					oneEvent($document.find('body'), 'click keyup', function(){scope.hidePopover();});
 				};
 				scope.reflowPopover = function(_el){
+                    console.log(_el[0].offsetTop, _el[0].offsetHeight,
+                        scope.displayElements.text[0].offsetTop,
+                        scope.displayElements.text[0].offsetHeight,
+                        scope.displayElements.text[0].getBoundingClientRect());
 					/* istanbul ignore if: catches only if near bottom of editor */
 					if(scope.displayElements.text[0].offsetHeight - 51 > _el[0].offsetTop){
 						scope.displayElements.popover.css('top', _el[0].offsetTop + _el[0].offsetHeight + scope.displayElements.scrollWindow[0].scrollTop + 'px');
@@ -2861,7 +2865,8 @@ textAngular.directive("textAngular", [
 					'contentEditable': 'true',
 					'ta-bind': 'ta-bind',
 					'ng-model': 'html',
-					'ng-model-options': element.attr('ng-model-options')
+					'ng-model-options': element.attr('ng-model-options'),
+                    'class': attrs.taTextEditorClass
 				});
 				scope.displayElements.scrollWindow.attr({'ng-hide': 'showHtml'});
 				if(attrs.taDefaultWrap) {
