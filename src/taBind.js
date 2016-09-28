@@ -962,7 +962,7 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 
 					element.on('mouseup', scope.events.mouseup = function(){
 						var _selection = taSelection.getSelection();
-						if(_selection.start.element === element[0] && element.children().length) taSelection.setSelectionToElementStart(element.children()[0]);
+						if(_selection && _selection.start.element === element[0] && element.children().length) taSelection.setSelectionToElementStart(element.children()[0]);
 					});
 
 					// prevent propagation on mousedown in editor, see #206
