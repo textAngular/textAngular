@@ -145,7 +145,7 @@ textAngular.directive("textAngular", [
 					scope.displayElements.popoverArrow.css('margin-left', (Math.min(_targetLeft, (Math.max(0, _targetLeft - _maxLeft))) - 11) + 'px');
 				};
 				scope.hidePopover = function(){
-					scope.displayElements.popover.css('display', '');
+					scope.displayElements.popover.css('display', 'none');
 					scope.displayElements.popoverContainer.attr('style', '');
 					scope.displayElements.popoverContainer.attr('class', 'popover-content');
 					scope.displayElements.popover.removeClass('in');
@@ -240,7 +240,7 @@ textAngular.directive("textAngular", [
 				/* istanbul ignore next: pretty sure phantomjs won't test this */
 				scope.hideResizeOverlay = function(){
 					scope.displayElements.resize.anchors[3].off('mousedown', _resizeMouseDown);
-					scope.displayElements.resize.overlay.css('display', '');
+					scope.displayElements.resize.overlay.css('display', 'none');
 				};
 
 				// allow for insertion of custom directives on the textarea and div

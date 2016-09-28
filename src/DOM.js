@@ -423,7 +423,14 @@ function($document, taDOM, $log){
 	};
 	var api = {
 		getSelection: function(){
-			var range = rangy.getSelection().getRangeAt(0);
+			var range;
+			try {
+				// catch any errors from rangy and ignore the issue
+				range = rangy.getSelection().getRangeAt(0);
+			} catch(e) {
+				//console.info(e);
+				return undefined;
+			}
 			var container = range.commonAncestorContainer;
             var selection = {
 				start: brException(range.startContainer, range.startOffset),
@@ -690,7 +697,12 @@ function($document, taDOM, $log){
 		},
 		// Some basic selection functions
 		getSelectionElement: function () {
-			return api.getSelection().container;
+			var s = api.getSelection();
+			if (s) {
+				return api.getSelection().container;
+			} else {
+				return undefined;
+			}
 		},
 		setSelection: function(el, start, end){
 			var range = rangy.createRange();
