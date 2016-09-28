@@ -225,10 +225,13 @@ angular.module('textAngular.factories', [])
 		// so we remove them here
 		// IN A FUTURE release this can be removed after all have updated through release 1.5.9
 		if (unsafe) {
-			unsafe = unsafe.replace(rsb1, '');
-			unsafe = unsafe.replace(rsb2, '');
-			unsafe = unsafe.replace(rsb1, '');
-			unsafe = unsafe.replace(rsb3, '');
+			try {
+				unsafe = unsafe.replace(rsb1, '');
+				unsafe = unsafe.replace(rsb2, '');
+				unsafe = unsafe.replace(rsb1, '');
+				unsafe = unsafe.replace(rsb3, '');
+			} catch (e) {
+			}
 		}
 
 		var safe;
