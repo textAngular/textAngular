@@ -168,7 +168,7 @@ angular.module('textAngular.DOM', ['textAngular.factories'])
 			//console.log('************** selectedElement:', selectedElement);
 			var $selected = angular.element(selectedElement);
 			//if(selectedElement !== undefined && selectedElement.tagName !== undefined){
-			var tagName = selectedElement.tagName.toLowerCase();
+			var tagName = (selectedElement.tagName && selectedElement.tagName.toLowerCase()) || "";
 			if(command.toLowerCase() === 'insertorderedlist' || command.toLowerCase() === 'insertunorderedlist'){
 				var selfTag = taBrowserTag((command.toLowerCase() === 'insertorderedlist')? 'ol' : 'ul');
 				if(tagName === selfTag){
@@ -374,7 +374,7 @@ angular.module('textAngular.DOM', ['textAngular.factories'])
 				return;
 			}else if(command.toLowerCase() === 'createlink'){
 				/* istanbul ignore next: firefox specific fix */
-				if (taSelection.getSelectionElement().tagName.toLowerCase() === 'a') {
+				if (tagName === 'a') {
 					// already a link!!! we are just replacing it...
 					taSelection.getSelectionElement().href = options;
 					return;
