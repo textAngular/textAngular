@@ -861,7 +861,7 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 								// we ignore any ENTER_	KEYCODE that is anything but plain or a shift one...
 							} else {
 								// if enter - insert new taDefaultWrap, if shift+enter insert <br/>
-								if(_defaultVal !== '' && event.keyCode === _ENTER_KEYCODE && !event.ctrlKey && !event.metaKey && !event.altKey){
+								if(_defaultVal !== '' && _defaultVal !== '<BR><BR>' && event.keyCode === _ENTER_KEYCODE && !event.ctrlKey && !event.metaKey && !event.altKey){
 									if(!event.shiftKey){
 										// new paragraph, br should be caught correctly
 										var selection = taSelection.getSelectionElement();
