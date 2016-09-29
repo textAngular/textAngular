@@ -146,8 +146,10 @@ angular.module('textAngular.DOM', ['textAngular.factories'])
                         if (/<br>/i.test(__h)) {
                             // Firefox adds <br>'s and so we remove the <br>
                             __h = __h.replace(/<br>/i, '&#8203;');  // no space-space
+							selectedElement.innerHTML = __h;
+							taSelection.setSelectionToElementEnd(selectedElement.childNodes[0]);
+							selectedElement = taSelection.getSelectionElement();
                         }
-                        selectedElement.innerHTML = __h;
                     } else if (selectedElement.tagName.toLowerCase() === 'li' &&
                         ourSelection && ourSelection.start &&
                         ourSelection.start.offset === ourSelection.end.offset) {
@@ -156,8 +158,10 @@ angular.module('textAngular.DOM', ['textAngular.factories'])
                         if (/<br>/i.test(__h)) {
                             // Firefox adds <br>'s and so we remove the <br>
                             __h = __h.replace(/<br>/i, '');  // nothing
+							selectedElement.innerHTML = __h;
+							taSelection.setSelectionToElementEnd(selectedElement.childNodes[0]);
+							selectedElement = taSelection.getSelectionElement();
                         }
-                        selectedElement.innerHTML = __h;
                     }
                 }
             }catch(e){}
