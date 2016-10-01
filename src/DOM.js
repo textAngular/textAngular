@@ -12,6 +12,151 @@ angular.module('textAngular.DOM', ['textAngular.factories'])
 		listElement.remove();
 		taSelection.setSelectionToElementEnd($target[0]);
 	};
+	var listElementToSelfTag = function(list, listElement, selfTag, bDefault, defaultWrap){
+		var $target, i;
+		// if all selected then we should remove the list
+		// grab all li elements
+		var priorElement;
+		var nextElement;
+		var children = list.find('li');
+		var foundIndex;
+		for (i = 0; i<children.length; i++) {
+			if (children[i].outerHTML === listElement[0].outerHTML) {
+				// found it...
+				foundIndex = i;
+				if (i>0) {
+					priorElement = children[i-1];
+				}
+				if (i+1<children.length) {
+					nextElement = children[i+1];
+				}
+				break;
+			}
+		}
+		//console.log('listElementToSelfTag', list, listElement, selfTag, bDefault, priorElement, nextElement);
+		// un-list the listElement
+		var html = '';
+		if (bDefault) {
+			html += '<' + defaultWrap + '>' + listElement[0].innerHTML + '</' + defaultWrap + '>';
+		} else {
+			html += '<' + taBrowserTag(selfTag) + '>';
+			html += '<li>' + listElement[0].innerHTML + '</li>';
+			html += '</' + taBrowserTag(selfTag) + '>';
+		}
+		$target = angular.element(html);
+		//console.log('$target', $target[0]);
+		if (!priorElement) {
+			// this is the first the list, so we just remove it...
+			listElement.remove();
+			list.after(angular.element(list[0].outerHTML));
+			list.after($target);
+			list.remove();
+			taSelection.setSelectionToElementEnd($target[0]);
+			return;
+		} else if (!nextElement) {
+			// this is the last in the list, so we just remove it..
+			listElement.remove();
+			list.after($target);
+			taSelection.setSelectionToElementEnd($target[0]);
+		} else {
+			var p = list.parent();
+			// okay it was some where in the middle... so we need to break apart the list...
+			var html1 = '';
+			var listTag = list[0].nodeName.toLowerCase();
+			html1 += '<' + listTag + '>';
+			for(i = 0; i < foundIndex; i++){
+				html1 += '<li>' + children[i].innerHTML + '</li>';
+			}
+			html1 += '</' + listTag + '>';
+			var html2 = '';
+			html2 += '<' + listTag + '>';
+			for(i = foundIndex+1; i < children.length; i++){
+				html2 += '<li>' + children[i].innerHTML + '</li>';
+			}
+			html2 += '</' + listTag + '>';
+			//console.log(html1, $target[0], html2);
+			list.after(angular.element(html2));
+			list.after($target);
+			list.after(angular.element(html1));
+			list.remove();
+			//console.log('parent ******XXX*****', p[0]);
+			taSelection.setSelectionToElementEnd($target[0]);
+		}
+	};
+	var listElementsToSelfTag = function(list, listElements, selfTag, bDefault, defaultWrap){
+		var $target, i, j, p;
+		// grab all li elements
+		var priorElement;
+		var afterElement;
+		//console.log('list:', list, 'listElements:', listElements, 'selfTag:', selfTag, 'bDefault:', bDefault);
+		var children = list.find('li');
+		var foundIndexes = [];
+		for (i = 0; i<children.length; i++) {
+			for (j = 0; j<listElements.length; j++) {
+				if (children[i].isEqualNode(listElements[j])) {
+					// found it...
+					foundIndexes[j] = i;
+				}
+			}
+		}
+		if (foundIndexes[0] > 0) {
+			priorElement = children[foundIndexes[0] - 1];
+		}
+		if (foundIndexes[listElements.length-1] + 1 < children.length) {
+			afterElement = children[foundIndexes[listElements.length-1] + 1];
+		}
+		//console.log('listElementsToSelfTag', list, listElements, selfTag, bDefault, !priorElement, !afterElement, foundIndexes[listElements.length-1], children.length);
+		// un-list the listElements
+		var html = '';
+		if (bDefault) {
+			for (j = 0; j < listElements.length; j++) {
+				html += '<' + defaultWrap + '>' + listElements[j].innerHTML + '</' + defaultWrap + '>';
+				listElements[j].remove();
+			}
+		} else {
+			html += '<' + taBrowserTag(selfTag) + '>';
+			for (j = 0; j < listElements.length; j++) {
+				html += listElements[j].outerHTML;
+				listElements[j].remove();
+			}
+			html += '</' + taBrowserTag(selfTag) + '>';
+		}
+		$target = angular.element(html);
+		if (!priorElement) {
+			// this is the first the list, so we just remove it...
+			list.after(angular.element(list[0].outerHTML));
+			list.after($target);
+			list.remove();
+			taSelection.setSelectionToElementEnd($target[0]);
+			return;
+		} else if (!afterElement) {
+			// this is the last in the list, so we just remove it..
+			list.after($target);
+			taSelection.setSelectionToElementEnd($target[0]);
+			return;
+		} else {
+			// okay it was some where in the middle... so we need to break apart the list...
+			var html1 = '';
+			var listTag = list[0].nodeName.toLowerCase();
+			html1 += '<' + listTag + '>';
+			for(i = 0; i < foundIndexes[0]; i++){
+				html1 += '<li>' + children[i].innerHTML + '</li>';
+			}
+			html1 += '</' + listTag + '>';
+			var html2 = '';
+			html2 += '<' + listTag + '>';
+			for(i = foundIndexes[listElements.length-1]+1; i < children.length; i++){
+				html2 += '<li>' + children[i].innerHTML + '</li>';
+			}
+			html2 += '</' + listTag + '>';
+			list.after(angular.element(html2));
+			list.after($target);
+			list.after(angular.element(html1));
+			list.remove();
+			//console.log('parent ******YYY*****', list.parent()[0]);
+			taSelection.setSelectionToElementEnd($target[0]);
+		}
+	};
 	var selectLi = function(liElement){
 		if(/(<br(|\/)>)$/i.test(liElement.innerHTML.trim())) taSelection.setSelectionBeforeElement(angular.element(liElement).find("br")[0]);
 		else taSelection.setSelectionToElementEnd(liElement);
@@ -167,14 +312,24 @@ angular.module('textAngular.DOM', ['textAngular.factories'])
             }catch(e){}
 			//console.log('************** selectedElement:', selectedElement);
 			var $selected = angular.element(selectedElement);
-			//if(selectedElement !== undefined && selectedElement.tagName !== undefined){
 			var tagName = selectedElement.tagName.toLowerCase();
 			if(command.toLowerCase() === 'insertorderedlist' || command.toLowerCase() === 'insertunorderedlist'){
 				var selfTag = taBrowserTag((command.toLowerCase() === 'insertorderedlist')? 'ol' : 'ul');
+				var selectedElements = taSelection.getOnlySelectedElements();
+				//console.log('PPPPPPPPPPPPP', tagName, selfTag, selectedElements, tagName.match(BLOCKELEMENTS), $selected.hasClass('ta-bind'), $selected.parent()[0].tagName);
+				if (selectedElements.length>1 && (tagName === 'ol' ||  tagName === 'ul' )) {
+					return listElementsToSelfTag($selected, selectedElements, selfTag, selfTag===tagName, taDefaultWrap);
+				}
 				if(tagName === selfTag){
 					// if all selected then we should remove the list
 					// grab all li elements and convert to taDefaultWrap tags
-					return listToDefault($selected, taDefaultWrap);
+					//console.log('tagName===selfTag');
+					if ($selected[0].childNodes.length !== selectedElements.length && selectedElements.length===1) {
+						$selected = angular.element(selectedElements[0]);
+						return listElementToSelfTag($selected.parent(), $selected, selfTag, true, taDefaultWrap);
+					} else {
+						return listToDefault($selected, taDefaultWrap);
+					}
 				}else if(tagName === 'li' &&
 					$selected.parent()[0].tagName.toLowerCase() === selfTag &&
 					$selected.parent().children().length === 1){
@@ -188,7 +343,15 @@ angular.module('textAngular.DOM', ['textAngular.factories'])
 				}else if(tagName.match(BLOCKELEMENTS) && !$selected.hasClass('ta-bind')){
 					// if it's one of those block elements we have to change the contents
 					// if it's a ol/ul we are changing from one to the other
+					if (selectedElements.length) {
+						if ($selected[0].childNodes.length !== selectedElements.length && selectedElements.length===1) {
+							//console.log('&&&&&&&&&&&&&&& --------- &&&&&&&&&&&&&&&&', selectedElements[0], $selected[0].childNodes);
+							$selected = angular.element(selectedElements[0]);
+							return listElementToSelfTag($selected.parent(), $selected, selfTag, selfTag===tagName, taDefaultWrap);
+						}
+					}
 					if(tagName === 'ol' || tagName === 'ul'){
+						// now if this is a set of selected elements... behave diferently
 						return listToList($selected, selfTag);
 					}else{
 						var childBlockElements = false;
@@ -204,8 +367,9 @@ angular.module('textAngular.DOM', ['textAngular.factories'])
 						}
 					}
 				}else if(tagName.match(BLOCKELEMENTS)){
-					// if we get here then all the contents of the ta-bind are selected
+					// if we get here then the contents of the ta-bind are selected
 					_nodes = taSelection.getOnlySelectedElements();
+					//console.log('_nodes', _nodes, tagName);
 					if(_nodes.length === 0){
 						// here is if there is only text in ta-bind ie <div ta-bind>test content</div>
 						$target = angular.element('<' + selfTag + '><li>' + selectedElement.innerHTML + '</li></' + selfTag + '>');
@@ -237,6 +401,7 @@ angular.module('textAngular.DOM', ['textAngular.factories'])
 								$nodes.unshift($n);
 							}
 						}
+						//console.log('$nodes', $nodes);
 						$target = angular.element('<' + selfTag + '>' + html + '</' + selfTag + '>');
 						$nodes.pop().replaceWith($target);
 						angular.forEach($nodes, function($node){ $node.remove(); });
@@ -473,15 +638,10 @@ function($document, taDOM, $log){
 			if (container.nodeName.toLowerCase() === 'div' &&
 				/^taTextElement/.test(container.id)) {
 				//console.log('*********taTextElement************');
-				//for (var i=0; i<container.childNodes.length; i++) {
-				//	console.log(i, container.childNodes[i]);
-				//}
-				//console.log('getSelection start: end:', selection.start.offset, selection.end.offset);
 				//console.log('commonAncestorContainer:', container);
-				// fix this to be the <textNode>
-				selection.end.element = selection.start.element = selection.container = container.childNodes[selection.start.offset];
-				selection.start.offset = selection.end.offset = 0;
-				selection.collapsed=true;
+				selection.start.element = container.childNodes[selection.start.offset];
+				selection.end.element = container.childNodes[selection.end.offset];
+				selection.container = container;
 			} else {
 				if (container.parentNode === selection.start.element ||
 					container.parentNode === selection.end.element) {
@@ -708,11 +868,11 @@ function($document, taDOM, $log){
 				return undefined;
 			}
 		},
-		setSelection: function(el, start, end){
+		setSelection: function(elStart, elEnd, start, end){
 			var range = rangy.createRange();
 
-			range.setStart(el, start);
-			range.setEnd(el, end);
+			range.setStart(elStart, start);
+			range.setEnd(elEnd, end);
 
 			rangy.getSelection().setSingleRange(range);
 		},

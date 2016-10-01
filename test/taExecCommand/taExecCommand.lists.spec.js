@@ -4,17 +4,25 @@ describe('taExecCommand', function(){
 	beforeEach(module('textAngular'));
 	//mock for easier testing
 	describe('handles lists correctly', function(){
-		var taSelectionMock, $document, contents, insertedHtml;
+		var taSelectionMock, $document, contents, insertedHtml, selectedElement;
 		beforeEach(function(){
 			insertedHtml = '';
 			taSelectionMock = {
 				element: undefined,
+				selections: [],
 				getSelectionElement: function (){ return this.element; },
-				getOnlySelectedElements: function(){ return this.element.childNodes; },
+				getOnlySelectedElements: function(){
+					if (this.selections.length) {
+						return this.selections;
+					} else {
+						return this.element.childNodes;
+					}
+				},
 				setSelectionToElementStart: function (){ return; },
 				setSelectionToElementEnd: function (){ return; },
 				setSelectionAfterElement: function (){ return; },
 				setSelectionBeforeElement: function (){ return; },
+				addSelection: function(e){ this.selections.push(e); return; },
 				insertHtml: function(html){ insertedHtml = html; }
 			};
 			
@@ -163,6 +171,165 @@ describe('taExecCommand', function(){
 					taSelection.element = element[0];
 					taExecCommand()('insertorderedlist', false, null);
 					expect(element.html()).toBe('<ol><li>To the List!</li><li>To the List 2!</li></ol>');
+				}));
+			});
+			describe('partial multi element selected', function(){
+				var $rootScope;
+				beforeEach(inject(function(taSelection, _$rootScope_){
+					$rootScope = _$rootScope_;
+					element = angular.element('<div class="ta-bind"><p>To the List!</p><p>To the List 2!</p><p>To the List 3!</p></div>');
+					taSelection.element = element[0].childNodes[1];
+				}));
+				it('to ol', inject(function(taSelection, taExecCommand){
+					taExecCommand()('insertorderedlist', false, null);
+					expect(element.html()).toBe('<p>To the List!</p><ol><li>To the List 2!</li></ol><p>To the List 3!</p>');
+				}));
+
+				it('to ul', inject(function(taSelection, taExecCommand){
+					taExecCommand()('insertunorderedlist', false, null);
+					expect(element.html()).toBe('<p>To the List!</p><ul><li>To the List 2!</li></ul><p>To the List 3!</p>');
+				}));
+
+				it('multi list to ol', inject(function(taSelection, taExecCommand){
+					element = angular.element('<div class="ta-bind"><ul><li>To the List!</li></ul><ul><li>To the List 2!</li></ul></div>');
+					taSelection.element = element[0];
+					taExecCommand()('insertorderedlist', false, null);
+					expect(element.html()).toBe('<ol><li>To the List!</li><li>To the List 2!</li></ol>');
+				}));
+			});
+			describe('multi elements selected last two', function(){
+				beforeEach(inject(function(taSelection){
+					element = angular.element('<div class="ta-bind"><p>To the List!</p><p>To the List 2!</p><p>To the List 3!</p></div>');
+					taSelection.element = element[0];
+					taSelection.selections = [];
+					taSelection.addSelection(element[0].childNodes[1]);
+					taSelection.addSelection(element[0].childNodes[2]);
+				}));
+				it('to ol', inject(function(taSelection, taExecCommand){
+					taExecCommand()('insertorderedlist', false, null);
+					expect(element.html()).toBe('<p>To the List!</p><ol><li>To the List 2!</li><li>To the List 3!</li></ol>');
+				}));
+
+				it('to ul', inject(function(taSelection, taExecCommand){
+					taExecCommand()('insertunorderedlist', false, null);
+					expect(element.html()).toBe('<p>To the List!</p><ul><li>To the List 2!</li><li>To the List 3!</li></ul>');
+				}));
+
+				it('partial multi list to ul', inject(function(taSelection, taExecCommand){
+					element = angular.element('<div class="ta-bind"><ul><li>To the List!</li><li>To the List 2!</li><li>To the List 3!</li></ul></div>');
+					taSelection.element = element[0].childNodes[0];
+					taSelection.selections = [];
+					taSelection.addSelection(element[0].childNodes[0].childNodes[1]);
+					taSelection.addSelection(element[0].childNodes[0].childNodes[2]);
+					taExecCommand()('insertunorderedlist', false, null);
+					expect(element.html()).toBe('<ul><li>To the List!</li></ul><p>To the List 2!</p><p>To the List 3!</p>');
+				}));
+				it('partial multi list to ol', inject(function(taSelection, taExecCommand){
+					element = angular.element('<div class="ta-bind"><ul><li>To the List!</li><li>To the List 2!</li><li>To the List 3!</li></ul></div>');
+					taSelection.element = element[0].childNodes[0];
+					taSelection.selections = [];
+					taSelection.addSelection(element[0].childNodes[0].childNodes[1]);
+					taSelection.addSelection(element[0].childNodes[0].childNodes[2]);
+					//console.log('getOnlySelectedElements()', taSelection.element, taSelection.getOnlySelectedElements());
+					taExecCommand()('insertorderedlist', false, null);
+					expect(element.html()).toBe('<ul><li>To the List!</li></ul><ol><li>To the List 2!</li><li>To the List 3!</li></ol>');
+				}));
+				it('partial multi list to ol', inject(function(taSelection, taExecCommand){
+					element = angular.element('<div class="ta-bind"><ul><li>To the List!</li><li>To the List 2!</li><li>To the List 3!</li></ul></div>');
+					taSelection.element = element[0].childNodes[0];
+					taSelection.selections = [];
+					taSelection.addSelection(element[0].childNodes[0].childNodes[1]);
+					//console.log('getOnlySelectedElements()', taSelection.element, taSelection.getOnlySelectedElements());
+					taExecCommand()('insertorderedlist', false, null);
+					expect(element.html()).toBe('<ul><li>To the List!</li></ul><ol><li>To the List 2!</li></ol><ul><li>To the List 3!</li></ul>');
+				}));
+				it('partial multi list to ol', inject(function(taSelection, taExecCommand){
+					element = angular.element('<div class="ta-bind"><ul><li>To the List!</li><li>To the List 2!</li><li>To the List 3!</li></ul></div>');
+					taSelection.element = element[0].childNodes[0];
+					taSelection.selections = [];
+					taSelection.addSelection(element[0].childNodes[0].childNodes[2]);
+					//console.log('getOnlySelectedElements()', taSelection.element, taSelection.getOnlySelectedElements());
+					taExecCommand()('insertorderedlist', false, null);
+					expect(element.html()).toBe('<ul><li>To the List!</li><li>To the List 2!</li></ul><ol><li>To the List 3!</li></ol>');
+				}));
+				it('partial multi list to ol', inject(function(taSelection, taExecCommand){
+					element = angular.element('<div class="ta-bind"><div><ul><li>To the List!</li><li>To the List 2!</li><li>To the List 3!</li></ul></div></div>');
+					taSelection.element = element[0].childNodes[0].childNodes[0];
+					taSelection.selections = [];
+					taSelection.addSelection(element[0].childNodes[0].childNodes[0].childNodes[1]);
+					taSelection.addSelection(element[0].childNodes[0].childNodes[0].childNodes[2]);
+					//console.log('getOnlySelectedElements()', taSelection.element, taSelection.getOnlySelectedElements());
+					taExecCommand()('insertorderedlist', false, null);
+					expect(element.html()).toBe('<div><ul><li>To the List!</li></ul><ol><li>To the List 2!</li><li>To the List 3!</li></ol></div>');
+				}));
+			});
+			describe('multi elements selected first two', function(){
+				beforeEach(inject(function(taSelection){
+					element = angular.element('<div class="ta-bind"><p>To the List!</p><p>To the List 2!</p><p>To the List 3!</p></div>');
+					taSelection.selections = [];
+					taSelection.element = element[0];
+					taSelection.addSelection(element[0].childNodes[0]);
+					taSelection.addSelection(element[0].childNodes[1]);
+				}));
+				it('to ol', inject(function(taSelection, taExecCommand){
+					taExecCommand()('insertorderedlist', false, null);
+					expect(element.html()).toBe('<ol><li>To the List!</li><li>To the List 2!</li></ol><p>To the List 3!</p>');
+				}));
+
+				it('to ul', inject(function(taSelection, taExecCommand){
+					taExecCommand()('insertunorderedlist', false, null);
+					expect(element.html()).toBe('<ul><li>To the List!</li><li>To the List 2!</li></ul><p>To the List 3!</p>');
+				}));
+
+				it('partial multi list to ul', inject(function(taSelection, taExecCommand){
+					element = angular.element('<div class="ta-bind"><ul><li>To the List!</li><li>To the List 2!</li><li>To the List 3!</li></ul></div>');
+					taSelection.selections = [];
+					taSelection.element = element[0].childNodes[0];
+					taSelection.addSelection(element[0].childNodes[0].childNodes[0]);
+					taSelection.addSelection(element[0].childNodes[0].childNodes[1]);
+					taExecCommand()('insertunorderedlist', false, null);
+					expect(element.html()).toBe('<p>To the List!</p><p>To the List 2!</p><ul><li>To the List 3!</li></ul>');
+					element = angular.element('<div class="ta-bind"><p>test</p><ul><li>To the List!</li><li>To the List 2!</li><li>To the List 3!</li></ul></div>');
+					taSelection.selections = [];
+					taSelection.element = element[0].childNodes[1];
+					taSelection.addSelection(element[0].childNodes[1].childNodes[0]);
+					taExecCommand()('insertunorderedlist', false, null);
+					expect(element.html()).toBe('<p>test</p><p>To the List!</p><ul><li>To the List 2!</li><li>To the List 3!</li></ul>');
+				}));
+				it('partial multi list to ol', inject(function(taSelection, taExecCommand){
+					element = angular.element('<div class="ta-bind"><ul><li>To the List!</li><li>To the List 2!</li><li>To the List 3!</li></ul></div>');
+					taSelection.selections = [];
+					taSelection.element = element[0].childNodes[0];
+					taSelection.addSelection(element[0].childNodes[0].childNodes[0]);
+					taSelection.addSelection(element[0].childNodes[0].childNodes[1]);
+					taExecCommand()('insertorderedlist', false, null);
+					expect(element.html()).toBe('<ol><li>To the List!</li><li>To the List 2!</li></ol><ul><li>To the List 3!</li></ul>');
+					element = angular.element('<div class="ta-bind"><ul><li>To the List!</li><li>To the List 2!</li><li>To the List 3!</li><li>To the List 4!</li></ul></div>');
+					taSelection.selections = [];
+					taSelection.element = element[0].childNodes[0];
+					taSelection.addSelection(element[0].childNodes[0].childNodes[1]);
+					taSelection.addSelection(element[0].childNodes[0].childNodes[2]);
+					taExecCommand()('insertunorderedlist', false, null);
+					expect(element.html()).toBe('<ul><li>To the List!</li></ul><p>To the List 2!</p><p>To the List 3!</p><ul><li>To the List 4!</li></ul>');
+				}));
+			});
+			describe('single element selected', function(){
+				var $rootScope;
+				beforeEach(inject(function(taSelection, _$rootScope_){
+					$rootScope = _$rootScope_;
+					element = angular.element('<div class="ta-bind"><ul><li>To the List!</li><li>To the List 2!</li><li>To the List 3!</li></ul></div>');
+					taSelection.selections = [];
+					taSelection.element = element[0].childNodes[0];
+					taSelection.addSelection(element[0].childNodes[0].childNodes[1]);
+					//taSelectionMock.element = element[0].childNodes[0];
+				}));
+				it('simple partial multi list to ul', inject(function(taSelection, taExecCommand){
+					taExecCommand()('insertunorderedlist', false, null);
+					expect(element.html()).toBe('<ul><li>To the List!</li></ul><p>To the List 2!</p><ul><li>To the List 3!</li></ul>');
+				}));
+				it('********** simple partial multi list to ol', inject(function(taSelection, taExecCommand){
+					taExecCommand()('insertorderedlist', false, null);
+					expect(element.html()).toBe('<ul><li>To the List!</li></ul><ol><li>To the List 2!</li></ol><ul><li>To the List 3!</li></ul>');
 				}));
 			});
 			describe('multi element selected within block element', function(){
