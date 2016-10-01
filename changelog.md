@@ -1,3 +1,16 @@
+<a name="1.5.11"></a>
+## [1.5.11](https://github.com/fraywing/textAngular/compare/v1.5.10...v1.5.11) (2016-10-01)
+
+
+### Bug Fixes
+
+* **demo:** improved the style usage ([58f7f8d](https://github.com/fraywing/textAngular/commit/58f7f8d))
+* **demo/textAngular.com.html:** fixed issue [#611](https://github.com/fraywing/textAngular/issues/611) by adding a 'clearfix' to the ta-text-editor-class attribute. ([3683747](https://github.com/fraywing/textAngular/commit/3683747))
+* **DOM:** corrected bug [#1343](https://github.com/fraywing/textAngular/issues/1343) where we were incorrectly setting the <a> link on a <li> element ([44d5c56](https://github.com/fraywing/textAngular/commit/44d5c56))
+* **factories:** small fix for undefined unsafe.replace [#1335](https://github.com/fraywing/textAngular/issues/1335) ([12a7b27](https://github.com/fraywing/textAngular/commit/12a7b27))
+
+
+
 <a name="1.5.10"></a>
 ## [1.5.10](https://github.com/fraywing/textAngular/compare/v1.5.9...v1.5.10) (2016-09-19)
 
