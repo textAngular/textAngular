@@ -441,19 +441,19 @@ textAngular.directive("textAngular", [
 					// so we reset them here....!!!
 					// this fixes bugs #423, #1129, #1105, #693 which are actually rangy bugs!
 					/* istanbul ignore next: this only active when have bold set and it SHOULD not be necessary anyway... */
-					if (_beforeStateBold && !$document[0].queryCommandState('bold')) {
+					if (_beforeStateBold != $document[0].queryCommandState('bold')) {
 						$document[0].execCommand('bold', false, null);
 					}
 					/* istanbul ignore next: this only active when have italic set and it SHOULD not be necessary anyway... */
-					if (_beforeStateItalic && !$document[0].queryCommandState('italic')) {
+					if (_beforeStateItalic != $document[0].queryCommandState('italic')) {
 						$document[0].execCommand('italic', false, null);
 					}
 					/* istanbul ignore next: this only active when have underline set and it SHOULD not be necessary anyway... */
-					if (_beforeStateUnderline && !$document[0].queryCommandState('underline')) {
+					if (_beforeStateUnderline != $document[0].queryCommandState('underline')){
 						$document[0].execCommand('underline', false, null);
 					}
 					/* istanbul ignore next: this only active when have strikeThrough set and it SHOULD not be necessary anyway... */
-					if (_beforeStateStrikethough && !$document[0].queryCommandState('strikeThrough')) {
+					if (_beforeStateStrikethough != $document[0].queryCommandState('strikeThrough')) {
 						$document[0].execCommand('strikeThrough', false, null);
 					}
 					//console.log('B', _beforeStateBold, 'I', _beforeStateItalic, '_', _beforeStateUnderline, 'S', _beforeStateStrikethough);
