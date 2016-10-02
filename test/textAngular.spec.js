@@ -1010,6 +1010,12 @@ describe('textAngular', function(){
 		});
 
 		describe('popover', function(){
+			it('getScrollTop should not error', function(){
+				expect(function(){
+					editorScope.getScrollTop(editorScope.displayElements.text.find('p'));
+					editorScope.getScrollTop(editorScope.displayElements.text.find('p'), true);
+				}).not.toThrow();
+			});
 			it('should show the popover', function(){
 				editorScope.showPopover(editorScope.displayElements.text.find('p').find('i'));
 				editorScope.$parent.$digest();

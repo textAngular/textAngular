@@ -23,6 +23,8 @@ textAngular.directive("textAngular", [
 					_originalContents, _editorFunctions,
 					_serial = (attrs.serial) ? attrs.serial : Math.floor(Math.random() * 10000000000000000),
 					_taExecCommand, _resizeMouseDown, _updateSelectedStylesTimeout;
+				var _resizeTimeout;
+				var _resizeElement;
 
 				scope._name = (attrs.name) ? attrs.name : 'textAngularEditor' + _serial;
 
@@ -123,27 +125,105 @@ textAngular.directive("textAngular", [
 					return false;
 				});
 
-				// define the popover show and hide functions
-				scope.showPopover = function(_el){
-					scope.displayElements.popover.css('display', 'block');
-					scope.reflowPopover(_el);
-					$animate.addClass(scope.displayElements.popover, 'in');
-					oneEvent($document.find('body'), 'click keyup', function(){scope.hidePopover();});
+				/* istanbul ignore next: popover resize and scroll events handled */
+				scope.handlePopoverEvents = function() {
+					if (scope.displayElements.popover.css('display')==='block') {
+						if(_resizeTimeout) $timeout.cancel(_resizeTimeout);
+						_resizeTimeout = $timeout(function() {
+							//console.log('resize', scope.displayElements.popover.css('display'));
+							scope.reflowPopover(_resizeElement);
+							scope.reflowResizeOverlay(_resizeElement);
+						}, 100);
+					}
 				};
-				var getScrollTop = function (_el) {
+
+				/* istanbul ignore next: browser resize check */
+				angular.element(window).on('resize', function(e, eventData){
+					scope.handlePopoverEvents();
+				});
+
+				/* istanbul ignore next: browser scroll check */
+				angular.element(window).on('scroll', function(e, eventData){
+					scope.handlePopoverEvents();
+				});
+
+				// we want to know if a given node has a scrollbar!
+				// credit to lotif on http://stackoverflow.com/questions/4880381/check-whether-html-element-has-scrollbars
+				var isScrollable = function(node) {
+					var cs;
+					var _notScrollable = {
+						vertical: false,
+						horizontal: false,
+					};
+					try {
+						cs = window.getComputedStyle(node);
+						if (cs === null) {
+							return _notScrollable;
+						}
+					} catch (e) {
+						/* istanbul ignore next: error handler */
+						return _notScrollable;
+					}
+					var overflowY = cs['overflow-y'];
+					var overflowX = cs['overflow-x'];
+					return {
+						vertical: (overflowY === 'scroll' || overflowY === 'auto') &&
+									/* istanbul ignore next: not tested */
+									node.scrollHeight > node.clientHeight,
+						horizontal: (overflowX === 'scroll' || overflowX === 'auto') &&
+									/* istanbul ignore next: not tested */
+						    		node.scrollWidth > node.clientWidth,
+					};
+				};
+
+				// getScrollTop
+				//
+				// we structure this so that it can climb the parents of the _el and when it finds
+				// one with scrollbars, it adds an EventListener, so that no matter how the
+				// DOM is structured in the user APP, if there is a scrollbar not as part of the
+				// ta-scroll-window, we will still capture the 'scroll' events...
+				// and handle the scroll event properly and do the resize, etc.
+				//
+				scope.getScrollTop = function (_el, bAddListener) {
 					var scrollTop = _el.scrollTop;
+					if (typeof scrollTop === 'undefined') {
+						scrollTop = 0;
+					}
+					/* istanbul ignore next: triggered only if has scrollbar */
+					if (bAddListener && isScrollable(_el).vertical) {
+						// remove element eventListener
+						_el.removeEventListener('scroll', scope._scrollListener, false);
+						_el.addEventListener('scroll', scope._scrollListener, false);
+					}
+					/* istanbul ignore next: triggered only if has scrollbar and scrolled */
 					if (scrollTop !== 0) {
 						return { node:_el.nodeName, top:scrollTop };
 					}
 					/* istanbul ignore else: catches only if no scroll */
 					if (_el.parentNode) {
-						return getScrollTop(_el.parentNode);
+						return scope.getScrollTop(_el.parentNode, bAddListener);
 					} else {
 						return { node:'<none>', top:0 };
 					}
 				};
+
+				// define the popover show and hide functions
+				scope.showPopover = function(_el){
+					scope.getScrollTop(scope.displayElements.scrollWindow[0], true);
+					scope.displayElements.popover.css('display', 'block');
+					_resizeElement = _el;
+					scope.reflowPopover(_el);
+					$animate.addClass(scope.displayElements.popover, 'in');
+					oneEvent($document.find('body'), 'click keyup', function(){scope.hidePopover();});
+				};
+
+				/* istanbul ignore next: browser scroll event handler */
+				scope._scrollListener = function (e, eventData){
+					scope.handlePopoverEvents();
+				};
+
 				scope.reflowPopover = function(_el){
-					var scrollTop = getScrollTop(scope.displayElements.scrollWindow[0]);
+					var scrollTop = scope.getScrollTop(scope.displayElements.scrollWindow[0], false);
 					var spaceAboveImage = _el[0].offsetTop-scrollTop.top;
 
 					/* istanbul ignore if: catches only if near bottom of editor */
