@@ -155,12 +155,12 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 				_defaultTest = (_browserDetect.ie === undefined)? '<div><br></div>' : (_browserDetect.ie >= 11)? '<p><br></p>' : (_browserDetect.ie <= 8)? '<P>&nbsp;</P>' : '<p>&nbsp;</p>';
 			}else{
 				_defaultVal = (_browserDetect.ie === undefined || _browserDetect.ie >= 11)?
-					'<' + attrs.taDefaultWrap + '><br></' + attrs.taDefaultWrap + '>' :
+					(attrs.taDefaultWrap.toLowerCase() === 'br' ? '<BR><BR>' : '<' + attrs.taDefaultWrap + '><br></' + attrs.taDefaultWrap + '>') :
 					(_browserDetect.ie <= 8)?
 						'<' + attrs.taDefaultWrap.toUpperCase() + '></' + attrs.taDefaultWrap.toUpperCase() + '>' :
 						'<' + attrs.taDefaultWrap + '></' + attrs.taDefaultWrap + '>';
 				_defaultTest = (_browserDetect.ie === undefined || _browserDetect.ie >= 11)?
-					'<' + attrs.taDefaultWrap + '><br></' + attrs.taDefaultWrap + '>' :
+					(attrs.taDefaultWrap.toLowerCase() === 'br' ? '<br><br>' : '<' + attrs.taDefaultWrap + '><br></' + attrs.taDefaultWrap + '>') :
 					(_browserDetect.ie <= 8)?
 						'<' + attrs.taDefaultWrap.toUpperCase() + '>&nbsp;</' + attrs.taDefaultWrap.toUpperCase() + '>' :
 						'<' + attrs.taDefaultWrap + '>&nbsp;</' + attrs.taDefaultWrap + '>';
@@ -861,7 +861,7 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 								// we ignore any ENTER_	KEYCODE that is anything but plain or a shift one...
 							} else {
 								// if enter - insert new taDefaultWrap, if shift+enter insert <br/>
-								if(_defaultVal !== '' && event.keyCode === _ENTER_KEYCODE && !event.ctrlKey && !event.metaKey && !event.altKey){
+								if(_defaultVal !== '' && _defaultVal !== '<BR><BR>' && event.keyCode === _ENTER_KEYCODE && !event.ctrlKey && !event.metaKey && !event.altKey){
 									if(!event.shiftKey){
 										// new paragraph, br should be caught correctly
 										var selection = taSelection.getSelectionElement();
