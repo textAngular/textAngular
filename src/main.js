@@ -422,6 +422,12 @@ textAngular.directive("textAngular", [
 				scope.displayElements.scrollWindow.addClass("ta-text ta-editor " + scope.classes.textEditor);
 				scope.displayElements.html.addClass("ta-html ta-editor " + scope.classes.htmlEditor);
 
+				var testAndSet = function(choice, beforeState) {
+					/* istanbul ignore next: this is only here because of a bug in rangy where rangy.saveSelection() has cleared the state */
+					if (beforeState !== $document[0].queryCommandState(choice)) {
+						$document[0].execCommand(choice, false, null);
+					}
+				};
 				// used in the toolbar actions
 				scope._actionRunning = false;
 				var _savedSelection = false;
@@ -435,28 +441,17 @@ textAngular.directive("textAngular", [
 					_beforeStateItalic = $document[0].queryCommandState('italic');
 					_beforeStateUnderline = $document[0].queryCommandState('underline');
 					_beforeStateStrikethough = $document[0].queryCommandState('strikeThrough');
+					//console.log('B', _beforeStateBold, 'I', _beforeStateItalic, '_', _beforeStateUnderline, 'S', _beforeStateStrikethough);
 					// if rangy library is loaded return a function to reload the current selection
 					_savedSelection = rangy.saveSelection();
 					// rangy.saveSelection() clear the state of bold, italic, underline, strikethrough
 					// so we reset them here....!!!
 					// this fixes bugs #423, #1129, #1105, #693 which are actually rangy bugs!
-					/* istanbul ignore next: this only active when have bold set and it SHOULD not be necessary anyway... */
-					if (_beforeStateBold && !$document[0].queryCommandState('bold')) {
-						$document[0].execCommand('bold', false, null);
-					}
-					/* istanbul ignore next: this only active when have italic set and it SHOULD not be necessary anyway... */
-					if (_beforeStateItalic && !$document[0].queryCommandState('italic')) {
-						$document[0].execCommand('italic', false, null);
-					}
-					/* istanbul ignore next: this only active when have underline set and it SHOULD not be necessary anyway... */
-					if (_beforeStateUnderline && !$document[0].queryCommandState('underline')) {
-						$document[0].execCommand('underline', false, null);
-					}
-					/* istanbul ignore next: this only active when have strikeThrough set and it SHOULD not be necessary anyway... */
-					if (_beforeStateStrikethough && !$document[0].queryCommandState('strikeThrough')) {
-						$document[0].execCommand('strikeThrough', false, null);
-					}
-					//console.log('B', _beforeStateBold, 'I', _beforeStateItalic, '_', _beforeStateUnderline, 'S', _beforeStateStrikethough);
+					testAndSet('bold', _beforeStateBold);
+					testAndSet('italic', _beforeStateItalic);
+					testAndSet('underline', _beforeStateUnderline);
+					testAndSet('strikeThrough', _beforeStateStrikethough);
+					//console.log('B', $document[0].queryCommandState('bold'), 'I', $document[0].queryCommandState('italic'), '_', $document[0].queryCommandState('underline'), 'S', $document[0].queryCommandState('strikeThrough') );
 					return function(){
 						if(_savedSelection) rangy.restoreSelection(_savedSelection);
 						// perhaps if we restore the selections here, we would do better overall???
