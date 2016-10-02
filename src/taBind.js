@@ -634,6 +634,8 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
                                 if(_isOneNote){
                                     text = targetDom.html() || dom.html();
                                 }
+								// LF characters instead of spaces in some spots and they are replaced by "/n", so we need to just swap them to spaces
+								text = text.replace(/\n/g, ' ');
 							}else{
 								// remove unnecessary chrome insert
 								text = text.replace(/<(|\/)meta[^>]*?>/ig, '');
