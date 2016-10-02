@@ -130,19 +130,38 @@ textAngular.directive("textAngular", [
 					$animate.addClass(scope.displayElements.popover, 'in');
 					oneEvent($document.find('body'), 'click keyup', function(){scope.hidePopover();});
 				};
+				var getScrollTop = function (_el) {
+					var scrollTop = _el.scrollTop;
+					if (scrollTop !== 0) {
+						return { node:_el.nodeName, top:scrollTop };
+					}
+					/* istanbul ignore else: catches only if no scroll */
+					if (_el.parentNode) {
+						return getScrollTop(_el.parentNode);
+					} else {
+						return { node:'<none>', top:0 };
+					}
+				};
 				scope.reflowPopover = function(_el){
+					var scrollTop = getScrollTop(scope.displayElements.scrollWindow[0]);
+					var spaceAboveImage = _el[0].offsetTop-scrollTop.top;
+
 					/* istanbul ignore if: catches only if near bottom of editor */
-					if(scope.displayElements.text[0].offsetHeight - 51 > _el[0].offsetTop){
+					if(spaceAboveImage < 51) {
 						scope.displayElements.popover.css('top', _el[0].offsetTop + _el[0].offsetHeight + scope.displayElements.scrollWindow[0].scrollTop + 'px');
 						scope.displayElements.popover.removeClass('top').addClass('bottom');
-					}else{
+					} else {
 						scope.displayElements.popover.css('top', _el[0].offsetTop - 54 + scope.displayElements.scrollWindow[0].scrollTop + 'px');
 						scope.displayElements.popover.removeClass('bottom').addClass('top');
 					}
 					var _maxLeft = scope.displayElements.text[0].offsetWidth - scope.displayElements.popover[0].offsetWidth;
 					var _targetLeft = _el[0].offsetLeft + (_el[0].offsetWidth / 2.0) - (scope.displayElements.popover[0].offsetWidth / 2.0);
-					scope.displayElements.popover.css('left', Math.max(0, Math.min(_maxLeft, _targetLeft)) + 'px');
-					scope.displayElements.popoverArrow.css('margin-left', (Math.min(_targetLeft, (Math.max(0, _targetLeft - _maxLeft))) - 11) + 'px');
+					var _rleft = Math.max(0, Math.min(_maxLeft, _targetLeft));
+					var _marginLeft = (Math.min(_targetLeft, (Math.max(0, _targetLeft - _maxLeft))) - 11);
+					_rleft += window.scrollX;
+					_marginLeft -= window.scrollX;
+					scope.displayElements.popover.css('left', _rleft + 'px');
+					scope.displayElements.popoverArrow.css('margin-left', _marginLeft + 'px');
 				};
 				scope.hidePopover = function(){
 					scope.displayElements.popover.css('display', 'none');
