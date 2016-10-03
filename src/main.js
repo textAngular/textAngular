@@ -225,6 +225,8 @@ textAngular.directive("textAngular", [
 				scope.reflowPopover = function(_el){
 					var scrollTop = scope.getScrollTop(scope.displayElements.scrollWindow[0], false);
 					var spaceAboveImage = _el[0].offsetTop-scrollTop.top;
+					//var spaceBelowImage = scope.displayElements.text[0].offsetHeight - _el[0].offsetHeight - spaceAboveImage;
+					//console.log(spaceAboveImage, spaceBelowImage);
 
 					/* istanbul ignore if: catches only if near bottom of editor */
 					if(spaceAboveImage < 51) {
@@ -256,6 +258,12 @@ textAngular.directive("textAngular", [
 				scope.displayElements.resize.overlay.append(scope.displayElements.resize.info);
 				scope.displayElements.scrollWindow.append(scope.displayElements.resize.overlay);
 
+				// A click event on the resize.background will now shift the focus to the editor
+				/* istanbul ignore next: click on the resize.background to focus back to editor */
+				scope.displayElements.resize.background.on('click', function(e) {
+					scope.displayElements.text[0].focus();
+				});
+				
 				// define the show and hide events
 				scope.reflowResizeOverlay = function(_el){
 					_el = angular.element(_el)[0];
