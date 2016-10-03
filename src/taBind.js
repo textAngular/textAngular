@@ -864,17 +864,17 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 							} else {
 								// if enter - insert new taDefaultWrap, if shift+enter insert <br/>
 								if(_defaultVal !== '' && _defaultVal !== '<BR><BR>' && event.keyCode === _ENTER_KEYCODE && !event.ctrlKey && !event.metaKey && !event.altKey){
+									var selection = taSelection.getSelectionElement();
+									while(!selection.nodeName.match(VALIDELEMENTS) && selection !== element[0]){
+										selection = selection.parentNode;
+									}
 									if(!event.shiftKey){
 										// new paragraph, br should be caught correctly
-										var selection = taSelection.getSelectionElement();
 										// shifted to nodeName here from tagName since it is more widely supported see: http://stackoverflow.com/questions/4878484/difference-between-tagname-and-nodename
-										while(!selection.nodeName.match(VALIDELEMENTS) && selection !== element[0]){
-											selection = selection.parentNode;
-										}
-
+										//console.log('Enter', selection.nodeName, attrs.taDefaultWrap, selection.innerHTML.trim());
 										if(selection.tagName.toLowerCase() !==
 											attrs.taDefaultWrap &&
-											selection.tagName.toLowerCase() !== 'li' &&
+											selection.nodeName.toLowerCase() !== 'li' &&
 											(selection.innerHTML.trim() === '' || selection.innerHTML.trim() === '<br>')
 										) {
 											// Chrome starts with a <div><br></div> after an EnterKey
@@ -882,6 +882,29 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 											var _new = angular.element(_defaultVal);
 											angular.element(selection).replaceWith(_new);
 											taSelection.setSelectionToElementStart(_new[0]);
+										}
+									} else {
+										// shift + Enter
+										var tagName = selection.tagName.toLowerCase();
+										//console.log('Shift+Enter', selection.tagName, attrs.taDefaultWrap, selection.innerHTML.trim());
+										// For an LI: We see: LI p ....<br><br>
+										// For a P: We see: P p ....<br><br>
+										// on Safari, the browser ignores the Shift+Enter and acts just as an Enter Key
+										// For an LI: We see: LI p <br>
+										// For a P: We see: P p <br>
+										if((tagName === attrs.taDefaultWrap ||
+											tagName === 'li' ||
+											tagName === 'pre' ||
+											tagName === 'div') &&
+											!/.+<br><br>/.test(selection.innerHTML.trim())) {
+											var ps = selection.previousSibling;
+											//console.log('wrong....', ps);
+											// we need to remove this selection and fix the previousSibling up...
+											if (ps) {
+												ps.innerHTML = ps.innerHTML + '<br><br>';
+												angular.element(selection).remove();
+												taSelection.setSelectionToElementEnd(ps);
+											}
 										}
 									}
 								}
