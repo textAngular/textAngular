@@ -1,3 +1,20 @@
+<a name="1.5.12"></a>
+## [1.5.12](https://github.com/fraywing/textAngular/compare/v1.5.11...v1.5.12) (2016-10-03)
+
+
+### Bug Fixes
+
+* **DOM:** Issue [#754](https://github.com/fraywing/textAngular/issues/754) is not corrected.  Now wrapSelection('insertHtml', embed, true) can insert '\n' ([424ac59](https://github.com/fraywing/textAngular/commit/424ac59))
+* **main:** added a click monitor to the resize.background to shift the focus back to editor when closed. ([a3133ca](https://github.com/fraywing/textAngular/commit/a3133ca))
+* **main:** Corrected issue editor only focuses when files are dropped - drop text behavior, Schamelhout
+* **main:** Fix multi-deselect problem [#1334](https://github.com/fraywing/textAngular/issues/1334) from mikolawannabe ([64d0c4a](https://github.com/fraywing/textAngular/commit/64d0c4a))
+* **taBind:** Corrected console errors caused by #text nodes - damien-otis. ([6dd1556](https://github.com/fraywing/textAngular/commit/6dd1556))
+* **main:** Corrected issue [#299](https://github.com/fraywing/textAngular/issues/299) around the positioning of the popover on scrolling ([53f9529](https://github.com/fraywing/textAngular/commit/53f9529))
+* **main:** Corrected Issue: [#1326](https://github.com/fraywing/textAngular/issues/1326) ([f9715de](https://github.com/fraywing/textAngular/commit/f9715de)) No reflowPopover() when window resized or scrolled. 
+* **taBind:** Corrected 'MS Word, some word spaces get lost (line break issue?)' [#598](https://github.com/fraywing/textAngular/issues/598) ([e29e463](https://github.com/fraywing/textAngular/commit/e29e463))
+
+
+
 <a name="1.5.11"></a>
 ## [1.5.11](https://github.com/fraywing/textAngular/compare/v1.5.10...v1.5.11) (2016-10-01)
 
