@@ -845,7 +845,7 @@ angular.module('textAngularSetup', [])
 				/* istanbul ignore next: don't know how to test this... since it needs a dialogPrompt */
 				// block javascript here
 				if (!blockJavascript(imageLink)) {
-					if (taSelection.getSelectionElement().tagName.toLowerCase() === 'a') {
+					if (taSelection.getSelectionElement().tagName && taSelection.getSelectionElement().tagName.toLowerCase() === 'a') {
 						// due to differences in implementation between FireFox and Chrome, we must move the
 						// insertion point past the <a> element, otherwise FireFox inserts inside the <a>
 						// With this change, both FireFox and Chrome behave the same way!
@@ -892,7 +892,7 @@ angular.module('textAngularSetup', [])
 						// maxresdefault.jpg seems to be undefined on some.
 						var embed = '<img class="ta-insert-video" src="https://img.youtube.com/vi/' + videoId + '/hqdefault.jpg" ta-insert-video="' + urlLink + '" contenteditable="false" allowfullscreen="true" frameborder="0" />';
 						/* istanbul ignore next: don't know how to test this... since it needs a dialogPrompt */
-						if (taSelection.getSelectionElement().tagName.toLowerCase() === 'a') {
+						if (taSelection.getSelectionElement().tagName && taSelection.getSelectionElement().tagName.toLowerCase() === 'a') {
 							// due to differences in implementation between FireFox and Chrome, we must move the
 							// insertion point past the <a> element, otherwise FireFox inserts inside the <a>
 							// With this change, both FireFox and Chrome behave the same way!
@@ -917,7 +917,7 @@ angular.module('textAngularSetup', [])
 			var urlLink;
 			// if this link has already been set, we need to just edit the existing link
 			/* istanbul ignore if: we do not test this */
-			if (taSelection.getSelectionElement().tagName.toLowerCase() === 'a') {
+			if (taSelection.getSelectionElement().tagName && taSelection.getSelectionElement().tagName.toLowerCase() === 'a') {
 				urlLink = $window.prompt(taTranslations.insertLink.dialogPrompt, taSelection.getSelectionElement().href);
 			} else {
 				urlLink = $window.prompt(taTranslations.insertLink.dialogPrompt, 'http://');
@@ -991,7 +991,7 @@ angular.module('textAngularSetup', [])
 @license textAngular
 Author : Austin Anderson
 License : 2013 MIT
-Version 1.5.11
+Version 1.5.12
 
 See README.md or https://github.com/fraywing/textAngular/wiki for requirements and use.
 */
@@ -1002,7 +1002,7 @@ Commonjs package manager support (eg componentjs).
 
 
 "use strict";// NOTE: textAngularVersion must match the Gruntfile.js 'setVersion' task.... and have format v/d+./d+./d+
-var textAngularVersion = 'v1.5.11';   // This is automatically updated during the build process to the current release!
+var textAngularVersion = 'v1.5.12';   // This is automatically updated during the build process to the current release!
 
 
 // IE version detection - http://stackoverflow.com/questions/4169160/javascript-ie-detection-why-not-use-simple-conditional-comments
@@ -1781,7 +1781,8 @@ angular.module('textAngular.DOM', ['textAngular.factories'])
             }catch(e){}
 			//console.log('************** selectedElement:', selectedElement);
 			var $selected = angular.element(selectedElement);
-			var tagName = selectedElement.tagName.toLowerCase();
+			var tagName = (selectedElement.tagName && selectedElement.tagName.toLowerCase()) ||
+				/* istanbul ignore next: */ "";
 			if(command.toLowerCase() === 'insertorderedlist' || command.toLowerCase() === 'insertunorderedlist'){
 				var selfTag = taBrowserTag((command.toLowerCase() === 'insertorderedlist')? 'ol' : 'ul');
 				var selectedElements = taSelection.getOnlySelectedElements();
@@ -2008,7 +2009,7 @@ angular.module('textAngular.DOM', ['textAngular.factories'])
 				return;
 			}else if(command.toLowerCase() === 'createlink'){
 				/* istanbul ignore next: firefox specific fix */
-				if (taSelection.getSelectionElement().tagName.toLowerCase() === 'a') {
+				if (tagName === 'a') {
 					// already a link!!! we are just replacing it...
 					taSelection.getSelectionElement().href = options;
 					return;
@@ -2406,6 +2407,8 @@ function($document, taDOM, $log){
 						_cnode.innerHTML.trim() === '') { // empty p element
 						continue;
 					}
+					/****************
+					 *  allow any text to be inserted...
 					if((   _cnode.nodeType === 3 &&
 						   _cnode.nodeValue === '\ufeff'[0] &&
 						   _cnode.nodeValue.trim() === '') // empty no-space space element
@@ -2418,6 +2421,7 @@ function($document, taDOM, $log){
 						 _cnode.nodeValue.trim() === '') { // empty text node
 						continue;
 					}
+					*****************/
 					isInline = isInline && !BLOCKELEMENTS.test(_cnode.nodeName);
 					nodes.push(_cnode);
 				}
@@ -2799,12 +2803,12 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 				_defaultTest = (_browserDetect.ie === undefined)? '<div><br></div>' : (_browserDetect.ie >= 11)? '<p><br></p>' : (_browserDetect.ie <= 8)? '<P>&nbsp;</P>' : '<p>&nbsp;</p>';
 			}else{
 				_defaultVal = (_browserDetect.ie === undefined || _browserDetect.ie >= 11)?
-					'<' + attrs.taDefaultWrap + '><br></' + attrs.taDefaultWrap + '>' :
+					(attrs.taDefaultWrap.toLowerCase() === 'br' ? '<BR><BR>' : '<' + attrs.taDefaultWrap + '><br></' + attrs.taDefaultWrap + '>') :
 					(_browserDetect.ie <= 8)?
 						'<' + attrs.taDefaultWrap.toUpperCase() + '></' + attrs.taDefaultWrap.toUpperCase() + '>' :
 						'<' + attrs.taDefaultWrap + '></' + attrs.taDefaultWrap + '>';
 				_defaultTest = (_browserDetect.ie === undefined || _browserDetect.ie >= 11)?
-					'<' + attrs.taDefaultWrap + '><br></' + attrs.taDefaultWrap + '>' :
+					(attrs.taDefaultWrap.toLowerCase() === 'br' ? '<br><br>' : '<' + attrs.taDefaultWrap + '><br></' + attrs.taDefaultWrap + '>') :
 					(_browserDetect.ie <= 8)?
 						'<' + attrs.taDefaultWrap.toUpperCase() + '>&nbsp;</' + attrs.taDefaultWrap.toUpperCase() + '>' :
 						'<' + attrs.taDefaultWrap + '>&nbsp;</' + attrs.taDefaultWrap + '>';
@@ -3278,6 +3282,8 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
                                 if(_isOneNote){
                                     text = targetDom.html() || dom.html();
                                 }
+								// LF characters instead of spaces in some spots and they are replaced by "/n", so we need to just swap them to spaces
+								text = text.replace(/\n/g, ' ');
 							}else{
 								// remove unnecessary chrome insert
 								text = text.replace(/<(|\/)meta[^>]*?>/ig, '');
@@ -3505,7 +3511,7 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 								// we ignore any ENTER_	KEYCODE that is anything but plain or a shift one...
 							} else {
 								// if enter - insert new taDefaultWrap, if shift+enter insert <br/>
-								if(_defaultVal !== '' && event.keyCode === _ENTER_KEYCODE && !event.ctrlKey && !event.metaKey && !event.altKey){
+								if(_defaultVal !== '' && _defaultVal !== '<BR><BR>' && event.keyCode === _ENTER_KEYCODE && !event.ctrlKey && !event.metaKey && !event.altKey){
 									if(!event.shiftKey){
 										// new paragraph, br should be caught correctly
 										var selection = taSelection.getSelectionElement();
@@ -3794,6 +3800,8 @@ textAngular.directive("textAngular", [
 					_originalContents, _editorFunctions,
 					_serial = (attrs.serial) ? attrs.serial : Math.floor(Math.random() * 10000000000000000),
 					_taExecCommand, _resizeMouseDown, _updateSelectedStylesTimeout;
+				var _resizeTimeout;
+				var _resizeElement;
 
 				scope._name = (attrs.name) ? attrs.name : 'textAngularEditor' + _serial;
 
@@ -3894,26 +3902,125 @@ textAngular.directive("textAngular", [
 					return false;
 				});
 
+				/* istanbul ignore next: popover resize and scroll events handled */
+				scope.handlePopoverEvents = function() {
+					if (scope.displayElements.popover.css('display')==='block') {
+						if(_resizeTimeout) $timeout.cancel(_resizeTimeout);
+						_resizeTimeout = $timeout(function() {
+							//console.log('resize', scope.displayElements.popover.css('display'));
+							scope.reflowPopover(_resizeElement);
+							scope.reflowResizeOverlay(_resizeElement);
+						}, 100);
+					}
+				};
+
+				/* istanbul ignore next: browser resize check */
+				angular.element(window).on('resize', function(e, eventData){
+					scope.handlePopoverEvents();
+				});
+
+				/* istanbul ignore next: browser scroll check */
+				angular.element(window).on('scroll', function(e, eventData){
+					scope.handlePopoverEvents();
+				});
+
+				// we want to know if a given node has a scrollbar!
+				// credit to lotif on http://stackoverflow.com/questions/4880381/check-whether-html-element-has-scrollbars
+				var isScrollable = function(node) {
+					var cs;
+					var _notScrollable = {
+						vertical: false,
+						horizontal: false,
+					};
+					try {
+						cs = window.getComputedStyle(node);
+						if (cs === null) {
+							return _notScrollable;
+						}
+					} catch (e) {
+						/* istanbul ignore next: error handler */
+						return _notScrollable;
+					}
+					var overflowY = cs['overflow-y'];
+					var overflowX = cs['overflow-x'];
+					return {
+						vertical: (overflowY === 'scroll' || overflowY === 'auto') &&
+									/* istanbul ignore next: not tested */
+									node.scrollHeight > node.clientHeight,
+						horizontal: (overflowX === 'scroll' || overflowX === 'auto') &&
+									/* istanbul ignore next: not tested */
+						    		node.scrollWidth > node.clientWidth,
+					};
+				};
+
+				// getScrollTop
+				//
+				// we structure this so that it can climb the parents of the _el and when it finds
+				// one with scrollbars, it adds an EventListener, so that no matter how the
+				// DOM is structured in the user APP, if there is a scrollbar not as part of the
+				// ta-scroll-window, we will still capture the 'scroll' events...
+				// and handle the scroll event properly and do the resize, etc.
+				//
+				scope.getScrollTop = function (_el, bAddListener) {
+					var scrollTop = _el.scrollTop;
+					if (typeof scrollTop === 'undefined') {
+						scrollTop = 0;
+					}
+					/* istanbul ignore next: triggered only if has scrollbar */
+					if (bAddListener && isScrollable(_el).vertical) {
+						// remove element eventListener
+						_el.removeEventListener('scroll', scope._scrollListener, false);
+						_el.addEventListener('scroll', scope._scrollListener, false);
+					}
+					/* istanbul ignore next: triggered only if has scrollbar and scrolled */
+					if (scrollTop !== 0) {
+						return { node:_el.nodeName, top:scrollTop };
+					}
+					/* istanbul ignore else: catches only if no scroll */
+					if (_el.parentNode) {
+						return scope.getScrollTop(_el.parentNode, bAddListener);
+					} else {
+						return { node:'<none>', top:0 };
+					}
+				};
+
 				// define the popover show and hide functions
 				scope.showPopover = function(_el){
+					scope.getScrollTop(scope.displayElements.scrollWindow[0], true);
 					scope.displayElements.popover.css('display', 'block');
+					_resizeElement = _el;
 					scope.reflowPopover(_el);
 					$animate.addClass(scope.displayElements.popover, 'in');
 					oneEvent($document.find('body'), 'click keyup', function(){scope.hidePopover();});
 				};
+
+				/* istanbul ignore next: browser scroll event handler */
+				scope._scrollListener = function (e, eventData){
+					scope.handlePopoverEvents();
+				};
+
 				scope.reflowPopover = function(_el){
+					var scrollTop = scope.getScrollTop(scope.displayElements.scrollWindow[0], false);
+					var spaceAboveImage = _el[0].offsetTop-scrollTop.top;
+					//var spaceBelowImage = scope.displayElements.text[0].offsetHeight - _el[0].offsetHeight - spaceAboveImage;
+					//console.log(spaceAboveImage, spaceBelowImage);
+
 					/* istanbul ignore if: catches only if near bottom of editor */
-					if(scope.displayElements.text[0].offsetHeight - 51 > _el[0].offsetTop){
+					if(spaceAboveImage < 51) {
 						scope.displayElements.popover.css('top', _el[0].offsetTop + _el[0].offsetHeight + scope.displayElements.scrollWindow[0].scrollTop + 'px');
 						scope.displayElements.popover.removeClass('top').addClass('bottom');
-					}else{
+					} else {
 						scope.displayElements.popover.css('top', _el[0].offsetTop - 54 + scope.displayElements.scrollWindow[0].scrollTop + 'px');
 						scope.displayElements.popover.removeClass('bottom').addClass('top');
 					}
 					var _maxLeft = scope.displayElements.text[0].offsetWidth - scope.displayElements.popover[0].offsetWidth;
 					var _targetLeft = _el[0].offsetLeft + (_el[0].offsetWidth / 2.0) - (scope.displayElements.popover[0].offsetWidth / 2.0);
-					scope.displayElements.popover.css('left', Math.max(0, Math.min(_maxLeft, _targetLeft)) + 'px');
-					scope.displayElements.popoverArrow.css('margin-left', (Math.min(_targetLeft, (Math.max(0, _targetLeft - _maxLeft))) - 11) + 'px');
+					var _rleft = Math.max(0, Math.min(_maxLeft, _targetLeft));
+					var _marginLeft = (Math.min(_targetLeft, (Math.max(0, _targetLeft - _maxLeft))) - 11);
+					_rleft += window.scrollX;
+					_marginLeft -= window.scrollX;
+					scope.displayElements.popover.css('left', _rleft + 'px');
+					scope.displayElements.popoverArrow.css('margin-left', _marginLeft + 'px');
 				};
 				scope.hidePopover = function(){
 					scope.displayElements.popover.css('display', 'none');
@@ -3928,6 +4035,12 @@ textAngular.directive("textAngular", [
 				scope.displayElements.resize.overlay.append(scope.displayElements.resize.info);
 				scope.displayElements.scrollWindow.append(scope.displayElements.resize.overlay);
 
+				// A click event on the resize.background will now shift the focus to the editor
+				/* istanbul ignore next: click on the resize.background to focus back to editor */
+				scope.displayElements.resize.background.on('click', function(e) {
+					scope.displayElements.text[0].focus();
+				});
+				
 				// define the show and hide events
 				scope.reflowResizeOverlay = function(_el){
 					_el = angular.element(_el)[0];
@@ -4094,6 +4207,12 @@ textAngular.directive("textAngular", [
 				scope.displayElements.scrollWindow.addClass("ta-text ta-editor " + scope.classes.textEditor);
 				scope.displayElements.html.addClass("ta-html ta-editor " + scope.classes.htmlEditor);
 
+				var testAndSet = function(choice, beforeState) {
+					/* istanbul ignore next: this is only here because of a bug in rangy where rangy.saveSelection() has cleared the state */
+					if (beforeState !== $document[0].queryCommandState(choice)) {
+						$document[0].execCommand(choice, false, null);
+					}
+				};
 				// used in the toolbar actions
 				scope._actionRunning = false;
 				var _savedSelection = false;
@@ -4107,28 +4226,17 @@ textAngular.directive("textAngular", [
 					_beforeStateItalic = $document[0].queryCommandState('italic');
 					_beforeStateUnderline = $document[0].queryCommandState('underline');
 					_beforeStateStrikethough = $document[0].queryCommandState('strikeThrough');
+					//console.log('B', _beforeStateBold, 'I', _beforeStateItalic, '_', _beforeStateUnderline, 'S', _beforeStateStrikethough);
 					// if rangy library is loaded return a function to reload the current selection
 					_savedSelection = rangy.saveSelection();
 					// rangy.saveSelection() clear the state of bold, italic, underline, strikethrough
 					// so we reset them here....!!!
 					// this fixes bugs #423, #1129, #1105, #693 which are actually rangy bugs!
-					/* istanbul ignore next: this only active when have bold set and it SHOULD not be necessary anyway... */
-					if (_beforeStateBold && !$document[0].queryCommandState('bold')) {
-						$document[0].execCommand('bold', false, null);
-					}
-					/* istanbul ignore next: this only active when have italic set and it SHOULD not be necessary anyway... */
-					if (_beforeStateItalic && !$document[0].queryCommandState('italic')) {
-						$document[0].execCommand('italic', false, null);
-					}
-					/* istanbul ignore next: this only active when have underline set and it SHOULD not be necessary anyway... */
-					if (_beforeStateUnderline && !$document[0].queryCommandState('underline')) {
-						$document[0].execCommand('underline', false, null);
-					}
-					/* istanbul ignore next: this only active when have strikeThrough set and it SHOULD not be necessary anyway... */
-					if (_beforeStateStrikethough && !$document[0].queryCommandState('strikeThrough')) {
-						$document[0].execCommand('strikeThrough', false, null);
-					}
-					//console.log('B', _beforeStateBold, 'I', _beforeStateItalic, '_', _beforeStateUnderline, 'S', _beforeStateStrikethough);
+					testAndSet('bold', _beforeStateBold);
+					testAndSet('italic', _beforeStateItalic);
+					testAndSet('underline', _beforeStateUnderline);
+					testAndSet('strikeThrough', _beforeStateStrikethough);
+					//console.log('B', $document[0].queryCommandState('bold'), 'I', $document[0].queryCommandState('italic'), '_', $document[0].queryCommandState('underline'), 'S', $document[0].queryCommandState('strikeThrough') );
 					return function(){
 						if(_savedSelection) rangy.restoreSelection(_savedSelection);
 						// perhaps if we restore the selections here, we would do better overall???
