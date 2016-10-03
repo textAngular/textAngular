@@ -938,6 +938,8 @@ function($document, taDOM, $log){
 						_cnode.innerHTML.trim() === '') { // empty p element
 						continue;
 					}
+					/****************
+					 *  allow any text to be inserted...
 					if((   _cnode.nodeType === 3 &&
 						   _cnode.nodeValue === '\ufeff'[0] &&
 						   _cnode.nodeValue.trim() === '') // empty no-space space element
@@ -950,6 +952,7 @@ function($document, taDOM, $log){
 						 _cnode.nodeValue.trim() === '') { // empty text node
 						continue;
 					}
+					*****************/
 					isInline = isInline && !BLOCKELEMENTS.test(_cnode.nodeName);
 					nodes.push(_cnode);
 				}
