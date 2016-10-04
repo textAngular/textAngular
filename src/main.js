@@ -263,7 +263,7 @@ textAngular.directive("textAngular", [
 				scope.displayElements.resize.background.on('click', function(e) {
 					scope.displayElements.text[0].focus();
 				});
-				
+
 				// define the show and hide events
 				scope.reflowResizeOverlay = function(_el){
 					_el = angular.element(_el)[0];
@@ -670,9 +670,60 @@ textAngular.directive("textAngular", [
 					}
 				});
 
+/******************* no working fully
+				var distanceFromPoint = function (px, py, x, y) {
+					return Math.sqrt((px-x)*(px-x)+(py-y)*(py-y));
+				};
+				// because each object is a rectangle and we have a single point,
+				// we need to give priority if the point is inside the rectangle
+				var getPositionDistance = function(el, x, y) {
+					var range = document.createRange();
+					range.selectNode(el);
+					var rect = range.getBoundingClientRect();
+					console.log(el, rect);
+					range.detach();
+					var bcr = rect;
+					// top left
+					var d1 = distanceFromPoint(bcr.left, bcr.top, x, y);
+					// bottom left
+					var d2 = distanceFromPoint(bcr.left, bcr.bottom, x, y);
+					// top right
+					var d3 = distanceFromPoint(bcr.right, bcr.top, x, y);
+					// bottom right
+					var d4 = distanceFromPoint(bcr.right, bcr.bottom, x, y);
+					return Math.min(d1, d2, d3, d4);
+				};
+				var findClosest = function(el, minElement, maxDistance, x, y) {
+					var _d=0;
+					for (var i = 0; i < el.childNodes.length; i++) {
+						var _n = el.childNodes[i];
+						if (!_n.childNodes.length) {
+							_d = getPositionDistance(_n, x, y);
+							//console.log(_n, _n.childNodes, _d);
+							if (_d < maxDistance) {
+								maxDistance = _d;
+								minElement = _n;
+							}
+						}
+						var res = findClosest(_n, minElement, maxDistance, x, y);
+						if (res.max < maxDistance) {
+							maxDistance = res.max;
+							minElement = res.min;
+						}
+					}
+					return { max: maxDistance, min: minElement };
+				};
+				var getClosestElement = function (el, x, y) {
+					return findClosest(el, null, 12341234124, x, y);
+				};
+****************/
+
 				scope.$on('ta-drop-event', function(event, element, dropEvent, dataTransfer){
 					if(dataTransfer && dataTransfer.files && dataTransfer.files.length > 0){
 						scope.displayElements.text[0].focus();
+						// we must set the location of the drop!
+						//console.log(dropEvent.clientX, dropEvent.clientY, dropEvent.target);
+						taSelection.setSelectionToElementEnd(dropEvent.target);
 						angular.forEach(dataTransfer.files, function(file){
 							// taking advantage of boolean execution, if the fileDropHandler returns true, nothing else after it is executed
 							// If it is false then execute the defaultFileDropHandler if the fileDropHandler is NOT the default one
