@@ -563,7 +563,14 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 										continue;
 									} else {
 										var tagName = dom[0].childNodes[i].tagName.toLowerCase();
-										if(tagName !== "p" && tagName !== "h1" && tagName !== "h2" && tagName !== "h3" && tagName !== "h4" && tagName !== "h5" && tagName !== "h6"){
+										if(tagName !== "p" &&
+											tagName !== "h1" &&
+											tagName !== "h2" &&
+											tagName !== "h3" &&
+											tagName !== "h4" &&
+											tagName !== "h5" &&
+											tagName !== "h6" &&
+										    tagName !== "table"){
 											continue;
 										}
 									}
