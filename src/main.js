@@ -24,18 +24,12 @@ textAngular.directive("textAngular", [
 					_serial = (attrs.serial) ? attrs.serial : Math.floor(Math.random() * 10000000000000000),
 					_taExecCommand, _resizeMouseDown, _updateSelectedStylesTimeout;
 				var _resizeTimeout;
-				var _resizeElement;
 
 				scope._name = (attrs.name) ? attrs.name : 'textAngularEditor' + _serial;
 
 				var oneEvent = function(_element, event, action){
 					$timeout(function(){
-						// shim the .one till fixed
-						var _func = function(){
-							_element.off(event, _func);
-							action.apply(this, arguments);
-						};
-						_element.on(event, _func);
+						_element.one(event, action);
 					}, 100);
 				};
 				_taExecCommand = taExecCommand(attrs.taDefaultWrap);
@@ -131,8 +125,8 @@ textAngular.directive("textAngular", [
 						if(_resizeTimeout) $timeout.cancel(_resizeTimeout);
 						_resizeTimeout = $timeout(function() {
 							//console.log('resize', scope.displayElements.popover.css('display'));
-							scope.reflowPopover(_resizeElement);
-							scope.reflowResizeOverlay(_resizeElement);
+							scope.reflowPopover(scope.resizeElement);
+							scope.reflowResizeOverlay(scope.resizeElement);
 						}, 100);
 					}
 				};
@@ -211,7 +205,13 @@ textAngular.directive("textAngular", [
 				scope.showPopover = function(_el){
 					scope.getScrollTop(scope.displayElements.scrollWindow[0], true);
 					scope.displayElements.popover.css('display', 'block');
-					_resizeElement = _el;
+					// we must use a $timeout here, or the css change to the
+					// displayElements.resize.overlay will not take!!!
+					// WHY???
+					$timeout(function() {
+						scope.displayElements.resize.overlay.css('display', 'block');
+					});
+					scope.resizeElement = _el;
 					scope.reflowPopover(_el);
 					$animate.addClass(scope.displayElements.popover, 'in');
 					oneEvent($document.find('body'), 'click keyup', function(){scope.hidePopover();});
@@ -250,6 +250,7 @@ textAngular.directive("textAngular", [
 					scope.displayElements.popoverContainer.attr('style', '');
 					scope.displayElements.popoverContainer.attr('class', 'popover-content');
 					scope.displayElements.popover.removeClass('in');
+					scope.displayElements.resize.overlay.css('display', 'none');
 				};
 
 				// setup the resize overlay
