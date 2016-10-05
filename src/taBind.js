@@ -689,7 +689,11 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 
 							if(_pasteHandler) text = _pasteHandler(scope, {$html: text}) || text;
 
+							// turn span vertical-align:super into <sup></sup>
+							text = text.replace(/<span style=("|')([^<]*?)vertical-align\s*:\s*super;?([^>]*?)("|')>([^<]+?)<\/span>/g, "<sup style='$2$3'>$5</sup>");
+
 							text = taSanitize(text, '', _disableSanitizer);
+							//console.log('DONE\n', text);
 
 							taSelection.insertHtml(text, element[0]);
 							$timeout(function(){
