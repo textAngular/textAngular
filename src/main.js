@@ -132,14 +132,10 @@ textAngular.directive("textAngular", [
 				};
 
 				/* istanbul ignore next: browser resize check */
-				angular.element(window).on('resize', function(e, eventData){
-					scope.handlePopoverEvents();
-				});
+				angular.element(window).on('resize', scope.handlePopoverEvents);
 
 				/* istanbul ignore next: browser scroll check */
-				angular.element(window).on('scroll', function(e, eventData){
-					scope.handlePopoverEvents();
-				});
+				angular.element(window).on('scroll', scope.handlePopoverEvents);
 
 				// we want to know if a given node has a scrollbar!
 				// credit to lotif on http://stackoverflow.com/questions/4880381/check-whether-html-element-has-scrollbars
@@ -662,6 +658,8 @@ textAngular.directive("textAngular", [
 				scope.$on('$destroy', function(){
 					textAngularManager.unregisterEditor(scope._name);
 					angular.element(window).off('blur');
+					angular.element(window).off('resize', scope.handlePopoverEvents);
+					angular.element(window).off('scroll', scope.handlePopoverEvents);
 				});
 
 				// catch element select event and pass to toolbar tools
