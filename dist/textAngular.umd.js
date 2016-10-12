@@ -845,7 +845,7 @@ angular.module('textAngularSetup', [])
 				/* istanbul ignore next: don't know how to test this... since it needs a dialogPrompt */
 				// block javascript here
 				if (!blockJavascript(imageLink)) {
-					if (taSelection.getSelectionElement().tagName.toLowerCase() === 'a') {
+					if (taSelection.getSelectionElement().tagName && taSelection.getSelectionElement().tagName.toLowerCase() === 'a') {
 						// due to differences in implementation between FireFox and Chrome, we must move the
 						// insertion point past the <a> element, otherwise FireFox inserts inside the <a>
 						// With this change, both FireFox and Chrome behave the same way!
@@ -892,7 +892,7 @@ angular.module('textAngularSetup', [])
 						// maxresdefault.jpg seems to be undefined on some.
 						var embed = '<img class="ta-insert-video" src="https://img.youtube.com/vi/' + videoId + '/hqdefault.jpg" ta-insert-video="' + urlLink + '" contenteditable="false" allowfullscreen="true" frameborder="0" />';
 						/* istanbul ignore next: don't know how to test this... since it needs a dialogPrompt */
-						if (taSelection.getSelectionElement().tagName.toLowerCase() === 'a') {
+						if (taSelection.getSelectionElement().tagName && taSelection.getSelectionElement().tagName.toLowerCase() === 'a') {
 							// due to differences in implementation between FireFox and Chrome, we must move the
 							// insertion point past the <a> element, otherwise FireFox inserts inside the <a>
 							// With this change, both FireFox and Chrome behave the same way!
@@ -917,7 +917,7 @@ angular.module('textAngularSetup', [])
 			var urlLink;
 			// if this link has already been set, we need to just edit the existing link
 			/* istanbul ignore if: we do not test this */
-			if (taSelection.getSelectionElement().tagName.toLowerCase() === 'a') {
+			if (taSelection.getSelectionElement().tagName && taSelection.getSelectionElement().tagName.toLowerCase() === 'a') {
 				urlLink = $window.prompt(taTranslations.insertLink.dialogPrompt, taSelection.getSelectionElement().href);
 			} else {
 				urlLink = $window.prompt(taTranslations.insertLink.dialogPrompt, 'http://');
@@ -991,7 +991,7 @@ angular.module('textAngularSetup', [])
 @license textAngular
 Author : Austin Anderson
 License : 2013 MIT
-Version 1.5.10
+Version 1.5.12
 
 See README.md or https://github.com/fraywing/textAngular/wiki for requirements and use.
 */
@@ -1002,7 +1002,7 @@ Commonjs package manager support (eg componentjs).
 
 
 "use strict";// NOTE: textAngularVersion must match the Gruntfile.js 'setVersion' task.... and have format v/d+./d+./d+
-var textAngularVersion = 'v1.5.10';   // This is automatically updated during the build process to the current release!
+var textAngularVersion = 'v1.5.12';   // This is automatically updated during the build process to the current release!
 
 
 // IE version detection - http://stackoverflow.com/questions/4169160/javascript-ie-detection-why-not-use-simple-conditional-comments
@@ -1408,10 +1408,13 @@ angular.module('textAngular.factories', [])
 		// so we remove them here
 		// IN A FUTURE release this can be removed after all have updated through release 1.5.9
 		if (unsafe) {
-			unsafe = unsafe.replace(rsb1, '');
-			unsafe = unsafe.replace(rsb2, '');
-			unsafe = unsafe.replace(rsb1, '');
-			unsafe = unsafe.replace(rsb3, '');
+			try {
+				unsafe = unsafe.replace(rsb1, '');
+				unsafe = unsafe.replace(rsb2, '');
+				unsafe = unsafe.replace(rsb1, '');
+				unsafe = unsafe.replace(rsb3, '');
+			} catch (e) {
+			}
 		}
 
 		var safe;
@@ -1477,6 +1480,151 @@ angular.module('textAngular.DOM', ['textAngular.factories'])
 		}
 		listElement.remove();
 		taSelection.setSelectionToElementEnd($target[0]);
+	};
+	var listElementToSelfTag = function(list, listElement, selfTag, bDefault, defaultWrap){
+		var $target, i;
+		// if all selected then we should remove the list
+		// grab all li elements
+		var priorElement;
+		var nextElement;
+		var children = list.find('li');
+		var foundIndex;
+		for (i = 0; i<children.length; i++) {
+			if (children[i].outerHTML === listElement[0].outerHTML) {
+				// found it...
+				foundIndex = i;
+				if (i>0) {
+					priorElement = children[i-1];
+				}
+				if (i+1<children.length) {
+					nextElement = children[i+1];
+				}
+				break;
+			}
+		}
+		//console.log('listElementToSelfTag', list, listElement, selfTag, bDefault, priorElement, nextElement);
+		// un-list the listElement
+		var html = '';
+		if (bDefault) {
+			html += '<' + defaultWrap + '>' + listElement[0].innerHTML + '</' + defaultWrap + '>';
+		} else {
+			html += '<' + taBrowserTag(selfTag) + '>';
+			html += '<li>' + listElement[0].innerHTML + '</li>';
+			html += '</' + taBrowserTag(selfTag) + '>';
+		}
+		$target = angular.element(html);
+		//console.log('$target', $target[0]);
+		if (!priorElement) {
+			// this is the first the list, so we just remove it...
+			listElement.remove();
+			list.after(angular.element(list[0].outerHTML));
+			list.after($target);
+			list.remove();
+			taSelection.setSelectionToElementEnd($target[0]);
+			return;
+		} else if (!nextElement) {
+			// this is the last in the list, so we just remove it..
+			listElement.remove();
+			list.after($target);
+			taSelection.setSelectionToElementEnd($target[0]);
+		} else {
+			var p = list.parent();
+			// okay it was some where in the middle... so we need to break apart the list...
+			var html1 = '';
+			var listTag = list[0].nodeName.toLowerCase();
+			html1 += '<' + listTag + '>';
+			for(i = 0; i < foundIndex; i++){
+				html1 += '<li>' + children[i].innerHTML + '</li>';
+			}
+			html1 += '</' + listTag + '>';
+			var html2 = '';
+			html2 += '<' + listTag + '>';
+			for(i = foundIndex+1; i < children.length; i++){
+				html2 += '<li>' + children[i].innerHTML + '</li>';
+			}
+			html2 += '</' + listTag + '>';
+			//console.log(html1, $target[0], html2);
+			list.after(angular.element(html2));
+			list.after($target);
+			list.after(angular.element(html1));
+			list.remove();
+			//console.log('parent ******XXX*****', p[0]);
+			taSelection.setSelectionToElementEnd($target[0]);
+		}
+	};
+	var listElementsToSelfTag = function(list, listElements, selfTag, bDefault, defaultWrap){
+		var $target, i, j, p;
+		// grab all li elements
+		var priorElement;
+		var afterElement;
+		//console.log('list:', list, 'listElements:', listElements, 'selfTag:', selfTag, 'bDefault:', bDefault);
+		var children = list.find('li');
+		var foundIndexes = [];
+		for (i = 0; i<children.length; i++) {
+			for (j = 0; j<listElements.length; j++) {
+				if (children[i].isEqualNode(listElements[j])) {
+					// found it...
+					foundIndexes[j] = i;
+				}
+			}
+		}
+		if (foundIndexes[0] > 0) {
+			priorElement = children[foundIndexes[0] - 1];
+		}
+		if (foundIndexes[listElements.length-1] + 1 < children.length) {
+			afterElement = children[foundIndexes[listElements.length-1] + 1];
+		}
+		//console.log('listElementsToSelfTag', list, listElements, selfTag, bDefault, !priorElement, !afterElement, foundIndexes[listElements.length-1], children.length);
+		// un-list the listElements
+		var html = '';
+		if (bDefault) {
+			for (j = 0; j < listElements.length; j++) {
+				html += '<' + defaultWrap + '>' + listElements[j].innerHTML + '</' + defaultWrap + '>';
+				listElements[j].remove();
+			}
+		} else {
+			html += '<' + taBrowserTag(selfTag) + '>';
+			for (j = 0; j < listElements.length; j++) {
+				html += listElements[j].outerHTML;
+				listElements[j].remove();
+			}
+			html += '</' + taBrowserTag(selfTag) + '>';
+		}
+		$target = angular.element(html);
+		if (!priorElement) {
+			// this is the first the list, so we just remove it...
+			list.after(angular.element(list[0].outerHTML));
+			list.after($target);
+			list.remove();
+			taSelection.setSelectionToElementEnd($target[0]);
+			return;
+		} else if (!afterElement) {
+			// this is the last in the list, so we just remove it..
+			list.after($target);
+			taSelection.setSelectionToElementEnd($target[0]);
+			return;
+		} else {
+			// okay it was some where in the middle... so we need to break apart the list...
+			var html1 = '';
+			var listTag = list[0].nodeName.toLowerCase();
+			html1 += '<' + listTag + '>';
+			for(i = 0; i < foundIndexes[0]; i++){
+				html1 += '<li>' + children[i].innerHTML + '</li>';
+			}
+			html1 += '</' + listTag + '>';
+			var html2 = '';
+			html2 += '<' + listTag + '>';
+			for(i = foundIndexes[listElements.length-1]+1; i < children.length; i++){
+				html2 += '<li>' + children[i].innerHTML + '</li>';
+			}
+			html2 += '</' + listTag + '>';
+			list.after(angular.element(html2));
+			list.after($target);
+			list.after(angular.element(html1));
+			list.remove();
+			//console.log('parent ******YYY*****', list.parent()[0]);
+			taSelection.setSelectionToElementEnd($target[0]);
+		}
 	};
 	var selectLi = function(liElement){
 		if(/(<br(|\/)>)$/i.test(liElement.innerHTML.trim())) taSelection.setSelectionBeforeElement(angular.element(liElement).find("br")[0]);
@@ -1612,8 +1760,10 @@ angular.module('textAngular.DOM', ['textAngular.factories'])
                         if (/<br>/i.test(__h)) {
                             // Firefox adds <br>'s and so we remove the <br>
                             __h = __h.replace(/<br>/i, '&#8203;');  // no space-space
+							selectedElement.innerHTML = __h;
+							taSelection.setSelectionToElementEnd(selectedElement.childNodes[0]);
+							selectedElement = taSelection.getSelectionElement();
                         }
-                        selectedElement.innerHTML = __h;
                     } else if (selectedElement.tagName.toLowerCase() === 'li' &&
                         ourSelection && ourSelection.start &&
                         ourSelection.start.offset === ourSelection.end.offset) {
@@ -1622,21 +1772,34 @@ angular.module('textAngular.DOM', ['textAngular.factories'])
                         if (/<br>/i.test(__h)) {
                             // Firefox adds <br>'s and so we remove the <br>
                             __h = __h.replace(/<br>/i, '');  // nothing
+							selectedElement.innerHTML = __h;
+							taSelection.setSelectionToElementEnd(selectedElement.childNodes[0]);
+							selectedElement = taSelection.getSelectionElement();
                         }
-                        selectedElement.innerHTML = __h;
                     }
                 }
             }catch(e){}
 			//console.log('************** selectedElement:', selectedElement);
 			var $selected = angular.element(selectedElement);
-			//if(selectedElement !== undefined && selectedElement.tagName !== undefined){
-			var tagName = selectedElement.tagName.toLowerCase();
+			var tagName = (selectedElement.tagName && selectedElement.tagName.toLowerCase()) ||
+				/* istanbul ignore next: */ "";
 			if(command.toLowerCase() === 'insertorderedlist' || command.toLowerCase() === 'insertunorderedlist'){
 				var selfTag = taBrowserTag((command.toLowerCase() === 'insertorderedlist')? 'ol' : 'ul');
+				var selectedElements = taSelection.getOnlySelectedElements();
+				//console.log('PPPPPPPPPPPPP', tagName, selfTag, selectedElements, tagName.match(BLOCKELEMENTS), $selected.hasClass('ta-bind'), $selected.parent()[0].tagName);
+				if (selectedElements.length>1 && (tagName === 'ol' ||  tagName === 'ul' )) {
+					return listElementsToSelfTag($selected, selectedElements, selfTag, selfTag===tagName, taDefaultWrap);
+				}
 				if(tagName === selfTag){
 					// if all selected then we should remove the list
 					// grab all li elements and convert to taDefaultWrap tags
-					return listToDefault($selected, taDefaultWrap);
+					//console.log('tagName===selfTag');
+					if ($selected[0].childNodes.length !== selectedElements.length && selectedElements.length===1) {
+						$selected = angular.element(selectedElements[0]);
+						return listElementToSelfTag($selected.parent(), $selected, selfTag, true, taDefaultWrap);
+					} else {
+						return listToDefault($selected, taDefaultWrap);
+					}
 				}else if(tagName === 'li' &&
 					$selected.parent()[0].tagName.toLowerCase() === selfTag &&
 					$selected.parent().children().length === 1){
@@ -1650,7 +1813,15 @@ angular.module('textAngular.DOM', ['textAngular.factories'])
 				}else if(tagName.match(BLOCKELEMENTS) && !$selected.hasClass('ta-bind')){
 					// if it's one of those block elements we have to change the contents
 					// if it's a ol/ul we are changing from one to the other
+					if (selectedElements.length) {
+						if ($selected[0].childNodes.length !== selectedElements.length && selectedElements.length===1) {
+							//console.log('&&&&&&&&&&&&&&& --------- &&&&&&&&&&&&&&&&', selectedElements[0], $selected[0].childNodes);
+							$selected = angular.element(selectedElements[0]);
+							return listElementToSelfTag($selected.parent(), $selected, selfTag, selfTag===tagName, taDefaultWrap);
+						}
+					}
 					if(tagName === 'ol' || tagName === 'ul'){
+						// now if this is a set of selected elements... behave diferently
 						return listToList($selected, selfTag);
 					}else{
 						var childBlockElements = false;
@@ -1666,8 +1837,9 @@ angular.module('textAngular.DOM', ['textAngular.factories'])
 						}
 					}
 				}else if(tagName.match(BLOCKELEMENTS)){
-					// if we get here then all the contents of the ta-bind are selected
+					// if we get here then the contents of the ta-bind are selected
 					_nodes = taSelection.getOnlySelectedElements();
+					//console.log('_nodes', _nodes, tagName);
 					if(_nodes.length === 0){
 						// here is if there is only text in ta-bind ie <div ta-bind>test content</div>
 						$target = angular.element('<' + selfTag + '><li>' + selectedElement.innerHTML + '</li></' + selfTag + '>');
@@ -1699,6 +1871,7 @@ angular.module('textAngular.DOM', ['textAngular.factories'])
 								$nodes.unshift($n);
 							}
 						}
+						//console.log('$nodes', $nodes);
 						$target = angular.element('<' + selfTag + '>' + html + '</' + selfTag + '>');
 						$nodes.pop().replaceWith($target);
 						angular.forEach($nodes, function($node){ $node.remove(); });
@@ -1836,7 +2009,7 @@ angular.module('textAngular.DOM', ['textAngular.factories'])
 				return;
 			}else if(command.toLowerCase() === 'createlink'){
 				/* istanbul ignore next: firefox specific fix */
-				if (taSelection.getSelectionElement().tagName.toLowerCase() === 'a') {
+				if (tagName === 'a') {
 					// already a link!!! we are just replacing it...
 					taSelection.getSelectionElement().href = options;
 					return;
@@ -1889,7 +2062,14 @@ function($document, taDOM, $log){
 	};
 	var api = {
 		getSelection: function(){
-			var range = rangy.getSelection().getRangeAt(0);
+			var range;
+			try {
+				// catch any errors from rangy and ignore the issue
+				range = rangy.getSelection().getRangeAt(0);
+			} catch(e) {
+				//console.info(e);
+				return undefined;
+			}
 			var container = range.commonAncestorContainer;
             var selection = {
 				start: brException(range.startContainer, range.startOffset),
@@ -1928,15 +2108,10 @@ function($document, taDOM, $log){
 			if (container.nodeName.toLowerCase() === 'div' &&
 				/^taTextElement/.test(container.id)) {
 				//console.log('*********taTextElement************');
-				//for (var i=0; i<container.childNodes.length; i++) {
-				//	console.log(i, container.childNodes[i]);
-				//}
-				//console.log('getSelection start: end:', selection.start.offset, selection.end.offset);
 				//console.log('commonAncestorContainer:', container);
-				// fix this to be the <textNode>
-				selection.end.element = selection.start.element = selection.container = container.childNodes[selection.start.offset];
-				selection.start.offset = selection.end.offset = 0;
-				selection.collapsed=true;
+				selection.start.element = container.childNodes[selection.start.offset];
+				selection.end.element = container.childNodes[selection.end.offset];
+				selection.container = container;
 			} else {
 				if (container.parentNode === selection.start.element ||
 					container.parentNode === selection.end.element) {
@@ -2156,13 +2331,18 @@ function($document, taDOM, $log){
 		},
 		// Some basic selection functions
 		getSelectionElement: function () {
-			return api.getSelection().container;
+			var s = api.getSelection();
+			if (s) {
+				return api.getSelection().container;
+			} else {
+				return undefined;
+			}
 		},
-		setSelection: function(el, start, end){
+		setSelection: function(elStart, elEnd, start, end){
 			var range = rangy.createRange();
 
-			range.setStart(el, start);
-			range.setEnd(el, end);
+			range.setStart(elStart, start);
+			range.setEnd(elEnd, end);
 
 			rangy.getSelection().setSingleRange(range);
 		},
@@ -2227,6 +2407,8 @@ function($document, taDOM, $log){
 						_cnode.innerHTML.trim() === '') { // empty p element
 						continue;
 					}
+					/****************
+					 *  allow any text to be inserted...
 					if((   _cnode.nodeType === 3 &&
 						   _cnode.nodeValue === '\ufeff'[0] &&
 						   _cnode.nodeValue.trim() === '') // empty no-space space element
@@ -2239,6 +2421,7 @@ function($document, taDOM, $log){
 						 _cnode.nodeValue.trim() === '') { // empty text node
 						continue;
 					}
+					*****************/
 					isInline = isInline && !BLOCKELEMENTS.test(_cnode.nodeName);
 					nodes.push(_cnode);
 				}
@@ -2620,12 +2803,12 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 				_defaultTest = (_browserDetect.ie === undefined)? '<div><br></div>' : (_browserDetect.ie >= 11)? '<p><br></p>' : (_browserDetect.ie <= 8)? '<P>&nbsp;</P>' : '<p>&nbsp;</p>';
 			}else{
 				_defaultVal = (_browserDetect.ie === undefined || _browserDetect.ie >= 11)?
-					'<' + attrs.taDefaultWrap + '><br></' + attrs.taDefaultWrap + '>' :
+					(attrs.taDefaultWrap.toLowerCase() === 'br' ? '<BR><BR>' : '<' + attrs.taDefaultWrap + '><br></' + attrs.taDefaultWrap + '>') :
 					(_browserDetect.ie <= 8)?
 						'<' + attrs.taDefaultWrap.toUpperCase() + '></' + attrs.taDefaultWrap.toUpperCase() + '>' :
 						'<' + attrs.taDefaultWrap + '></' + attrs.taDefaultWrap + '>';
 				_defaultTest = (_browserDetect.ie === undefined || _browserDetect.ie >= 11)?
-					'<' + attrs.taDefaultWrap + '><br></' + attrs.taDefaultWrap + '>' :
+					(attrs.taDefaultWrap.toLowerCase() === 'br' ? '<br><br>' : '<' + attrs.taDefaultWrap + '><br></' + attrs.taDefaultWrap + '>') :
 					(_browserDetect.ie <= 8)?
 						'<' + attrs.taDefaultWrap.toUpperCase() + '>&nbsp;</' + attrs.taDefaultWrap.toUpperCase() + '>' :
 						'<' + attrs.taDefaultWrap + '>&nbsp;</' + attrs.taDefaultWrap + '>';
@@ -3099,6 +3282,8 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
                                 if(_isOneNote){
                                     text = targetDom.html() || dom.html();
                                 }
+								// LF characters instead of spaces in some spots and they are replaced by "/n", so we need to just swap them to spaces
+								text = text.replace(/\n/g, ' ');
 							}else{
 								// remove unnecessary chrome insert
 								text = text.replace(/<(|\/)meta[^>]*?>/ig, '');
@@ -3326,7 +3511,7 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 								// we ignore any ENTER_	KEYCODE that is anything but plain or a shift one...
 							} else {
 								// if enter - insert new taDefaultWrap, if shift+enter insert <br/>
-								if(_defaultVal !== '' && event.keyCode === _ENTER_KEYCODE && !event.ctrlKey && !event.metaKey && !event.altKey){
+								if(_defaultVal !== '' && _defaultVal !== '<BR><BR>' && event.keyCode === _ENTER_KEYCODE && !event.ctrlKey && !event.metaKey && !event.altKey){
 									if(!event.shiftKey){
 										// new paragraph, br should be caught correctly
 										var selection = taSelection.getSelectionElement();
@@ -3427,7 +3612,7 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 
 					element.on('mouseup', scope.events.mouseup = function(){
 						var _selection = taSelection.getSelection();
-						if(_selection.start.element === element[0] && element.children().length) taSelection.setSelectionToElementStart(element.children()[0]);
+						if(_selection && _selection.start.element === element[0] && element.children().length) taSelection.setSelectionToElementStart(element.children()[0]);
 					});
 
 					// prevent propagation on mousedown in editor, see #206
@@ -3615,6 +3800,8 @@ textAngular.directive("textAngular", [
 					_originalContents, _editorFunctions,
 					_serial = (attrs.serial) ? attrs.serial : Math.floor(Math.random() * 10000000000000000),
 					_taExecCommand, _resizeMouseDown, _updateSelectedStylesTimeout;
+				var _resizeTimeout;
+				var _resizeElement;
 
 				scope._name = (attrs.name) ? attrs.name : 'textAngularEditor' + _serial;
 
@@ -3715,29 +3902,128 @@ textAngular.directive("textAngular", [
 					return false;
 				});
 
+				/* istanbul ignore next: popover resize and scroll events handled */
+				scope.handlePopoverEvents = function() {
+					if (scope.displayElements.popover.css('display')==='block') {
+						if(_resizeTimeout) $timeout.cancel(_resizeTimeout);
+						_resizeTimeout = $timeout(function() {
+							//console.log('resize', scope.displayElements.popover.css('display'));
+							scope.reflowPopover(_resizeElement);
+							scope.reflowResizeOverlay(_resizeElement);
+						}, 100);
+					}
+				};
+
+				/* istanbul ignore next: browser resize check */
+				angular.element(window).on('resize', function(e, eventData){
+					scope.handlePopoverEvents();
+				});
+
+				/* istanbul ignore next: browser scroll check */
+				angular.element(window).on('scroll', function(e, eventData){
+					scope.handlePopoverEvents();
+				});
+
+				// we want to know if a given node has a scrollbar!
+				// credit to lotif on http://stackoverflow.com/questions/4880381/check-whether-html-element-has-scrollbars
+				var isScrollable = function(node) {
+					var cs;
+					var _notScrollable = {
+						vertical: false,
+						horizontal: false,
+					};
+					try {
+						cs = window.getComputedStyle(node);
+						if (cs === null) {
+							return _notScrollable;
+						}
+					} catch (e) {
+						/* istanbul ignore next: error handler */
+						return _notScrollable;
+					}
+					var overflowY = cs['overflow-y'];
+					var overflowX = cs['overflow-x'];
+					return {
+						vertical: (overflowY === 'scroll' || overflowY === 'auto') &&
+									/* istanbul ignore next: not tested */
+									node.scrollHeight > node.clientHeight,
+						horizontal: (overflowX === 'scroll' || overflowX === 'auto') &&
+									/* istanbul ignore next: not tested */
+						    		node.scrollWidth > node.clientWidth,
+					};
+				};
+
+				// getScrollTop
+				//
+				// we structure this so that it can climb the parents of the _el and when it finds
+				// one with scrollbars, it adds an EventListener, so that no matter how the
+				// DOM is structured in the user APP, if there is a scrollbar not as part of the
+				// ta-scroll-window, we will still capture the 'scroll' events...
+				// and handle the scroll event properly and do the resize, etc.
+				//
+				scope.getScrollTop = function (_el, bAddListener) {
+					var scrollTop = _el.scrollTop;
+					if (typeof scrollTop === 'undefined') {
+						scrollTop = 0;
+					}
+					/* istanbul ignore next: triggered only if has scrollbar */
+					if (bAddListener && isScrollable(_el).vertical) {
+						// remove element eventListener
+						_el.removeEventListener('scroll', scope._scrollListener, false);
+						_el.addEventListener('scroll', scope._scrollListener, false);
+					}
+					/* istanbul ignore next: triggered only if has scrollbar and scrolled */
+					if (scrollTop !== 0) {
+						return { node:_el.nodeName, top:scrollTop };
+					}
+					/* istanbul ignore else: catches only if no scroll */
+					if (_el.parentNode) {
+						return scope.getScrollTop(_el.parentNode, bAddListener);
+					} else {
+						return { node:'<none>', top:0 };
+					}
+				};
+
 				// define the popover show and hide functions
 				scope.showPopover = function(_el){
+					scope.getScrollTop(scope.displayElements.scrollWindow[0], true);
 					scope.displayElements.popover.css('display', 'block');
+					_resizeElement = _el;
 					scope.reflowPopover(_el);
 					$animate.addClass(scope.displayElements.popover, 'in');
 					oneEvent($document.find('body'), 'click keyup', function(){scope.hidePopover();});
 				};
+
+				/* istanbul ignore next: browser scroll event handler */
+				scope._scrollListener = function (e, eventData){
+					scope.handlePopoverEvents();
+				};
+
 				scope.reflowPopover = function(_el){
+					var scrollTop = scope.getScrollTop(scope.displayElements.scrollWindow[0], false);
+					var spaceAboveImage = _el[0].offsetTop-scrollTop.top;
+					//var spaceBelowImage = scope.displayElements.text[0].offsetHeight - _el[0].offsetHeight - spaceAboveImage;
+					//console.log(spaceAboveImage, spaceBelowImage);
+
 					/* istanbul ignore if: catches only if near bottom of editor */
-					if(scope.displayElements.text[0].offsetHeight - 51 > _el[0].offsetTop){
+					if(spaceAboveImage < 51) {
 						scope.displayElements.popover.css('top', _el[0].offsetTop + _el[0].offsetHeight + scope.displayElements.scrollWindow[0].scrollTop + 'px');
 						scope.displayElements.popover.removeClass('top').addClass('bottom');
-					}else{
+					} else {
 						scope.displayElements.popover.css('top', _el[0].offsetTop - 54 + scope.displayElements.scrollWindow[0].scrollTop + 'px');
 						scope.displayElements.popover.removeClass('bottom').addClass('top');
 					}
 					var _maxLeft = scope.displayElements.text[0].offsetWidth - scope.displayElements.popover[0].offsetWidth;
 					var _targetLeft = _el[0].offsetLeft + (_el[0].offsetWidth / 2.0) - (scope.displayElements.popover[0].offsetWidth / 2.0);
-					scope.displayElements.popover.css('left', Math.max(0, Math.min(_maxLeft, _targetLeft)) + 'px');
-					scope.displayElements.popoverArrow.css('margin-left', (Math.min(_targetLeft, (Math.max(0, _targetLeft - _maxLeft))) - 11) + 'px');
+					var _rleft = Math.max(0, Math.min(_maxLeft, _targetLeft));
+					var _marginLeft = (Math.min(_targetLeft, (Math.max(0, _targetLeft - _maxLeft))) - 11);
+					_rleft += window.scrollX;
+					_marginLeft -= window.scrollX;
+					scope.displayElements.popover.css('left', _rleft + 'px');
+					scope.displayElements.popoverArrow.css('margin-left', _marginLeft + 'px');
 				};
 				scope.hidePopover = function(){
-					scope.displayElements.popover.css('display', '');
+					scope.displayElements.popover.css('display', 'none');
 					scope.displayElements.popoverContainer.attr('style', '');
 					scope.displayElements.popoverContainer.attr('class', 'popover-content');
 					scope.displayElements.popover.removeClass('in');
@@ -3749,6 +4035,12 @@ textAngular.directive("textAngular", [
 				scope.displayElements.resize.overlay.append(scope.displayElements.resize.info);
 				scope.displayElements.scrollWindow.append(scope.displayElements.resize.overlay);
 
+				// A click event on the resize.background will now shift the focus to the editor
+				/* istanbul ignore next: click on the resize.background to focus back to editor */
+				scope.displayElements.resize.background.on('click', function(e) {
+					scope.displayElements.text[0].focus();
+				});
+				
 				// define the show and hide events
 				scope.reflowResizeOverlay = function(_el){
 					_el = angular.element(_el)[0];
@@ -3832,7 +4124,7 @@ textAngular.directive("textAngular", [
 				/* istanbul ignore next: pretty sure phantomjs won't test this */
 				scope.hideResizeOverlay = function(){
 					scope.displayElements.resize.anchors[3].off('mousedown', _resizeMouseDown);
-					scope.displayElements.resize.overlay.css('display', '');
+					scope.displayElements.resize.overlay.css('display', 'none');
 				};
 
 				// allow for insertion of custom directives on the textarea and div
@@ -3915,6 +4207,12 @@ textAngular.directive("textAngular", [
 				scope.displayElements.scrollWindow.addClass("ta-text ta-editor " + scope.classes.textEditor);
 				scope.displayElements.html.addClass("ta-html ta-editor " + scope.classes.htmlEditor);
 
+				var testAndSet = function(choice, beforeState) {
+					/* istanbul ignore next: this is only here because of a bug in rangy where rangy.saveSelection() has cleared the state */
+					if (beforeState !== $document[0].queryCommandState(choice)) {
+						$document[0].execCommand(choice, false, null);
+					}
+				};
 				// used in the toolbar actions
 				scope._actionRunning = false;
 				var _savedSelection = false;
@@ -3928,28 +4226,17 @@ textAngular.directive("textAngular", [
 					_beforeStateItalic = $document[0].queryCommandState('italic');
 					_beforeStateUnderline = $document[0].queryCommandState('underline');
 					_beforeStateStrikethough = $document[0].queryCommandState('strikeThrough');
+					//console.log('B', _beforeStateBold, 'I', _beforeStateItalic, '_', _beforeStateUnderline, 'S', _beforeStateStrikethough);
 					// if rangy library is loaded return a function to reload the current selection
 					_savedSelection = rangy.saveSelection();
 					// rangy.saveSelection() clear the state of bold, italic, underline, strikethrough
 					// so we reset them here....!!!
 					// this fixes bugs #423, #1129, #1105, #693 which are actually rangy bugs!
-					/* istanbul ignore next: this only active when have bold set and it SHOULD not be necessary anyway... */
-					if (_beforeStateBold && !$document[0].queryCommandState('bold')) {
-						$document[0].execCommand('bold', false, null);
-					}
-					/* istanbul ignore next: this only active when have italic set and it SHOULD not be necessary anyway... */
-					if (_beforeStateItalic && !$document[0].queryCommandState('italic')) {
-						$document[0].execCommand('italic', false, null);
-					}
-					/* istanbul ignore next: this only active when have underline set and it SHOULD not be necessary anyway... */
-					if (_beforeStateUnderline && !$document[0].queryCommandState('underline')) {
-						$document[0].execCommand('underline', false, null);
-					}
-					/* istanbul ignore next: this only active when have strikeThrough set and it SHOULD not be necessary anyway... */
-					if (_beforeStateStrikethough && !$document[0].queryCommandState('strikeThrough')) {
-						$document[0].execCommand('strikeThrough', false, null);
-					}
-					//console.log('B', _beforeStateBold, 'I', _beforeStateItalic, '_', _beforeStateUnderline, 'S', _beforeStateStrikethough);
+					testAndSet('bold', _beforeStateBold);
+					testAndSet('italic', _beforeStateItalic);
+					testAndSet('underline', _beforeStateUnderline);
+					testAndSet('strikeThrough', _beforeStateStrikethough);
+					//console.log('B', $document[0].queryCommandState('bold'), 'I', $document[0].queryCommandState('italic'), '_', $document[0].queryCommandState('underline'), 'S', $document[0].queryCommandState('strikeThrough') );
 					return function(){
 						if(_savedSelection) rangy.restoreSelection(_savedSelection);
 						// perhaps if we restore the selections here, we would do better overall???
@@ -4161,8 +4448,8 @@ textAngular.directive("textAngular", [
 				});
 
 				scope.$on('ta-drop-event', function(event, element, dropEvent, dataTransfer){
-					scope.displayElements.text[0].focus();
 					if(dataTransfer && dataTransfer.files && dataTransfer.files.length > 0){
+						scope.displayElements.text[0].focus();
 						angular.forEach(dataTransfer.files, function(file){
 							// taking advantage of boolean execution, if the fileDropHandler returns true, nothing else after it is executed
 							// If it is false then execute the defaultFileDropHandler if the fileDropHandler is NOT the default one

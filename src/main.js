@@ -23,17 +23,13 @@ textAngular.directive("textAngular", [
 					_originalContents, _editorFunctions,
 					_serial = (attrs.serial) ? attrs.serial : Math.floor(Math.random() * 10000000000000000),
 					_taExecCommand, _resizeMouseDown, _updateSelectedStylesTimeout;
+				var _resizeTimeout;
 
 				scope._name = (attrs.name) ? attrs.name : 'textAngularEditor' + _serial;
 
 				var oneEvent = function(_element, event, action){
 					$timeout(function(){
-						// shim the .one till fixed
-						var _func = function(){
-							_element.off(event, _func);
-							action.apply(this, arguments);
-						};
-						_element.on(event, _func);
+						_element.one(event, action);
 					}, 100);
 				};
 				_taExecCommand = taExecCommand(attrs.taDefaultWrap);
@@ -123,32 +119,138 @@ textAngular.directive("textAngular", [
 					return false;
 				});
 
+				/* istanbul ignore next: popover resize and scroll events handled */
+				scope.handlePopoverEvents = function() {
+					if (scope.displayElements.popover.css('display')==='block') {
+						if(_resizeTimeout) $timeout.cancel(_resizeTimeout);
+						_resizeTimeout = $timeout(function() {
+							//console.log('resize', scope.displayElements.popover.css('display'));
+							scope.reflowPopover(scope.resizeElement);
+							scope.reflowResizeOverlay(scope.resizeElement);
+						}, 100);
+					}
+				};
+
+				/* istanbul ignore next: browser resize check */
+				angular.element(window).on('resize', function(e, eventData){
+					scope.handlePopoverEvents();
+				});
+
+				/* istanbul ignore next: browser scroll check */
+				angular.element(window).on('scroll', function(e, eventData){
+					scope.handlePopoverEvents();
+				});
+
+				// we want to know if a given node has a scrollbar!
+				// credit to lotif on http://stackoverflow.com/questions/4880381/check-whether-html-element-has-scrollbars
+				var isScrollable = function(node) {
+					var cs;
+					var _notScrollable = {
+						vertical: false,
+						horizontal: false,
+					};
+					try {
+						cs = window.getComputedStyle(node);
+						if (cs === null) {
+							return _notScrollable;
+						}
+					} catch (e) {
+						/* istanbul ignore next: error handler */
+						return _notScrollable;
+					}
+					var overflowY = cs['overflow-y'];
+					var overflowX = cs['overflow-x'];
+					return {
+						vertical: (overflowY === 'scroll' || overflowY === 'auto') &&
+									/* istanbul ignore next: not tested */
+									node.scrollHeight > node.clientHeight,
+						horizontal: (overflowX === 'scroll' || overflowX === 'auto') &&
+									/* istanbul ignore next: not tested */
+						    		node.scrollWidth > node.clientWidth,
+					};
+				};
+
+				// getScrollTop
+				//
+				// we structure this so that it can climb the parents of the _el and when it finds
+				// one with scrollbars, it adds an EventListener, so that no matter how the
+				// DOM is structured in the user APP, if there is a scrollbar not as part of the
+				// ta-scroll-window, we will still capture the 'scroll' events...
+				// and handle the scroll event properly and do the resize, etc.
+				//
+				scope.getScrollTop = function (_el, bAddListener) {
+					var scrollTop = _el.scrollTop;
+					if (typeof scrollTop === 'undefined') {
+						scrollTop = 0;
+					}
+					/* istanbul ignore next: triggered only if has scrollbar */
+					if (bAddListener && isScrollable(_el).vertical) {
+						// remove element eventListener
+						_el.removeEventListener('scroll', scope._scrollListener, false);
+						_el.addEventListener('scroll', scope._scrollListener, false);
+					}
+					/* istanbul ignore next: triggered only if has scrollbar and scrolled */
+					if (scrollTop !== 0) {
+						return { node:_el.nodeName, top:scrollTop };
+					}
+					/* istanbul ignore else: catches only if no scroll */
+					if (_el.parentNode) {
+						return scope.getScrollTop(_el.parentNode, bAddListener);
+					} else {
+						return { node:'<none>', top:0 };
+					}
+				};
+
 				// define the popover show and hide functions
 				scope.showPopover = function(_el){
+					scope.getScrollTop(scope.displayElements.scrollWindow[0], true);
 					scope.displayElements.popover.css('display', 'block');
+					// we must use a $timeout here, or the css change to the
+					// displayElements.resize.overlay will not take!!!
+					// WHY???
+					$timeout(function() {
+						scope.displayElements.resize.overlay.css('display', 'block');
+					});
+					scope.resizeElement = _el;
 					scope.reflowPopover(_el);
 					$animate.addClass(scope.displayElements.popover, 'in');
 					oneEvent($document.find('body'), 'click keyup', function(){scope.hidePopover();});
 				};
+
+				/* istanbul ignore next: browser scroll event handler */
+				scope._scrollListener = function (e, eventData){
+					scope.handlePopoverEvents();
+				};
+
 				scope.reflowPopover = function(_el){
+					var scrollTop = scope.getScrollTop(scope.displayElements.scrollWindow[0], false);
+					var spaceAboveImage = _el[0].offsetTop-scrollTop.top;
+					//var spaceBelowImage = scope.displayElements.text[0].offsetHeight - _el[0].offsetHeight - spaceAboveImage;
+					//console.log(spaceAboveImage, spaceBelowImage);
+
 					/* istanbul ignore if: catches only if near bottom of editor */
-					if(scope.displayElements.text[0].offsetHeight - 51 > _el[0].offsetTop){
+					if(spaceAboveImage < 51) {
 						scope.displayElements.popover.css('top', _el[0].offsetTop + _el[0].offsetHeight + scope.displayElements.scrollWindow[0].scrollTop + 'px');
 						scope.displayElements.popover.removeClass('top').addClass('bottom');
-					}else{
+					} else {
 						scope.displayElements.popover.css('top', _el[0].offsetTop - 54 + scope.displayElements.scrollWindow[0].scrollTop + 'px');
 						scope.displayElements.popover.removeClass('bottom').addClass('top');
 					}
 					var _maxLeft = scope.displayElements.text[0].offsetWidth - scope.displayElements.popover[0].offsetWidth;
 					var _targetLeft = _el[0].offsetLeft + (_el[0].offsetWidth / 2.0) - (scope.displayElements.popover[0].offsetWidth / 2.0);
-					scope.displayElements.popover.css('left', Math.max(0, Math.min(_maxLeft, _targetLeft)) + 'px');
-					scope.displayElements.popoverArrow.css('margin-left', (Math.min(_targetLeft, (Math.max(0, _targetLeft - _maxLeft))) - 11) + 'px');
+					var _rleft = Math.max(0, Math.min(_maxLeft, _targetLeft));
+					var _marginLeft = (Math.min(_targetLeft, (Math.max(0, _targetLeft - _maxLeft))) - 11);
+					_rleft += window.scrollX;
+					_marginLeft -= window.scrollX;
+					scope.displayElements.popover.css('left', _rleft + 'px');
+					scope.displayElements.popoverArrow.css('margin-left', _marginLeft + 'px');
 				};
 				scope.hidePopover = function(){
 					scope.displayElements.popover.css('display', 'none');
 					scope.displayElements.popoverContainer.attr('style', '');
 					scope.displayElements.popoverContainer.attr('class', 'popover-content');
 					scope.displayElements.popover.removeClass('in');
+					scope.displayElements.resize.overlay.css('display', 'none');
 				};
 
 				// setup the resize overlay
@@ -156,6 +258,12 @@ textAngular.directive("textAngular", [
 				angular.forEach(scope.displayElements.resize.anchors, function(anchor){ scope.displayElements.resize.overlay.append(anchor);});
 				scope.displayElements.resize.overlay.append(scope.displayElements.resize.info);
 				scope.displayElements.scrollWindow.append(scope.displayElements.resize.overlay);
+
+				// A click event on the resize.background will now shift the focus to the editor
+				/* istanbul ignore next: click on the resize.background to focus back to editor */
+				scope.displayElements.resize.background.on('click', function(e) {
+					scope.displayElements.text[0].focus();
+				});
 
 				// define the show and hide events
 				scope.reflowResizeOverlay = function(_el){
@@ -323,6 +431,12 @@ textAngular.directive("textAngular", [
 				scope.displayElements.scrollWindow.addClass("ta-text ta-editor " + scope.classes.textEditor);
 				scope.displayElements.html.addClass("ta-html ta-editor " + scope.classes.htmlEditor);
 
+				var testAndSet = function(choice, beforeState) {
+					/* istanbul ignore next: this is only here because of a bug in rangy where rangy.saveSelection() has cleared the state */
+					if (beforeState !== $document[0].queryCommandState(choice)) {
+						$document[0].execCommand(choice, false, null);
+					}
+				};
 				// used in the toolbar actions
 				scope._actionRunning = false;
 				var _savedSelection = false;
@@ -336,28 +450,17 @@ textAngular.directive("textAngular", [
 					_beforeStateItalic = $document[0].queryCommandState('italic');
 					_beforeStateUnderline = $document[0].queryCommandState('underline');
 					_beforeStateStrikethough = $document[0].queryCommandState('strikeThrough');
+					//console.log('B', _beforeStateBold, 'I', _beforeStateItalic, '_', _beforeStateUnderline, 'S', _beforeStateStrikethough);
 					// if rangy library is loaded return a function to reload the current selection
 					_savedSelection = rangy.saveSelection();
 					// rangy.saveSelection() clear the state of bold, italic, underline, strikethrough
 					// so we reset them here....!!!
 					// this fixes bugs #423, #1129, #1105, #693 which are actually rangy bugs!
-					/* istanbul ignore next: this only active when have bold set and it SHOULD not be necessary anyway... */
-					if (_beforeStateBold && !$document[0].queryCommandState('bold')) {
-						$document[0].execCommand('bold', false, null);
-					}
-					/* istanbul ignore next: this only active when have italic set and it SHOULD not be necessary anyway... */
-					if (_beforeStateItalic && !$document[0].queryCommandState('italic')) {
-						$document[0].execCommand('italic', false, null);
-					}
-					/* istanbul ignore next: this only active when have underline set and it SHOULD not be necessary anyway... */
-					if (_beforeStateUnderline && !$document[0].queryCommandState('underline')) {
-						$document[0].execCommand('underline', false, null);
-					}
-					/* istanbul ignore next: this only active when have strikeThrough set and it SHOULD not be necessary anyway... */
-					if (_beforeStateStrikethough && !$document[0].queryCommandState('strikeThrough')) {
-						$document[0].execCommand('strikeThrough', false, null);
-					}
-					//console.log('B', _beforeStateBold, 'I', _beforeStateItalic, '_', _beforeStateUnderline, 'S', _beforeStateStrikethough);
+					testAndSet('bold', _beforeStateBold);
+					testAndSet('italic', _beforeStateItalic);
+					testAndSet('underline', _beforeStateUnderline);
+					testAndSet('strikeThrough', _beforeStateStrikethough);
+					//console.log('B', $document[0].queryCommandState('bold'), 'I', $document[0].queryCommandState('italic'), '_', $document[0].queryCommandState('underline'), 'S', $document[0].queryCommandState('strikeThrough') );
 					return function(){
 						if(_savedSelection) rangy.restoreSelection(_savedSelection);
 						// perhaps if we restore the selections here, we would do better overall???
@@ -568,9 +671,60 @@ textAngular.directive("textAngular", [
 					}
 				});
 
+/******************* no working fully
+				var distanceFromPoint = function (px, py, x, y) {
+					return Math.sqrt((px-x)*(px-x)+(py-y)*(py-y));
+				};
+				// because each object is a rectangle and we have a single point,
+				// we need to give priority if the point is inside the rectangle
+				var getPositionDistance = function(el, x, y) {
+					var range = document.createRange();
+					range.selectNode(el);
+					var rect = range.getBoundingClientRect();
+					console.log(el, rect);
+					range.detach();
+					var bcr = rect;
+					// top left
+					var d1 = distanceFromPoint(bcr.left, bcr.top, x, y);
+					// bottom left
+					var d2 = distanceFromPoint(bcr.left, bcr.bottom, x, y);
+					// top right
+					var d3 = distanceFromPoint(bcr.right, bcr.top, x, y);
+					// bottom right
+					var d4 = distanceFromPoint(bcr.right, bcr.bottom, x, y);
+					return Math.min(d1, d2, d3, d4);
+				};
+				var findClosest = function(el, minElement, maxDistance, x, y) {
+					var _d=0;
+					for (var i = 0; i < el.childNodes.length; i++) {
+						var _n = el.childNodes[i];
+						if (!_n.childNodes.length) {
+							_d = getPositionDistance(_n, x, y);
+							//console.log(_n, _n.childNodes, _d);
+							if (_d < maxDistance) {
+								maxDistance = _d;
+								minElement = _n;
+							}
+						}
+						var res = findClosest(_n, minElement, maxDistance, x, y);
+						if (res.max < maxDistance) {
+							maxDistance = res.max;
+							minElement = res.min;
+						}
+					}
+					return { max: maxDistance, min: minElement };
+				};
+				var getClosestElement = function (el, x, y) {
+					return findClosest(el, null, 12341234124, x, y);
+				};
+****************/
+
 				scope.$on('ta-drop-event', function(event, element, dropEvent, dataTransfer){
-					scope.displayElements.text[0].focus();
 					if(dataTransfer && dataTransfer.files && dataTransfer.files.length > 0){
+						scope.displayElements.text[0].focus();
+						// we must set the location of the drop!
+						//console.log(dropEvent.clientX, dropEvent.clientY, dropEvent.target);
+						taSelection.setSelectionToElementEnd(dropEvent.target);
 						angular.forEach(dataTransfer.files, function(file){
 							// taking advantage of boolean execution, if the fileDropHandler returns true, nothing else after it is executed
 							// If it is false then execute the defaultFileDropHandler if the fileDropHandler is NOT the default one
