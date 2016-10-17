@@ -310,9 +310,10 @@ angular.module('textAngular.DOM', ['textAngular.factories'])
                     }
                 }
             }catch(e){}
-			//console.log('************** selectedElement:', selectedElement);
+			/* istanbul ignore if: */
+			if (!selectedElement){return;}
 			var $selected = angular.element(selectedElement);
-			var tagName = (selectedElement.tagName && selectedElement.tagName.toLowerCase()) ||
+			var tagName = (selectedElement && selectedElement.tagName && selectedElement.tagName.toLowerCase()) ||
 				/* istanbul ignore next: */ "";
 			if(command.toLowerCase() === 'insertorderedlist' || command.toLowerCase() === 'insertunorderedlist'){
 				var selfTag = taBrowserTag((command.toLowerCase() === 'insertorderedlist')? 'ol' : 'ul');
