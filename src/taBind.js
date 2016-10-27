@@ -957,6 +957,7 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 							if(_inputTimeout) $timeout.cancel(_inputTimeout);
 							/* istanbul ignore next: cant' test? */
 							_inputTimeout = $timeout(function() {
+								var _savedSelection = rangy.saveSelection();
 								var _val = _compileHtml();
 								if (_val !== ngModel.$viewValue) {
 									//console.log('_setViewValue');
@@ -964,6 +965,7 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 									//console.log('new:', _val);
 									_setViewValue(_val, true);
 								}
+								rangy.restoreSelection(_savedSelection);
 							}, 1000);
 						}
 					});
