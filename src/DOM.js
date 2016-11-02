@@ -447,10 +447,17 @@ angular.module('textAngular.DOM', ['textAngular.factories'])
 						$target.remove();
 						$target = next;
 					}else{
-						defaultWrapper.append($target[0].childNodes);
-						$target.after(defaultWrapper);
-						$target.remove();
-						$target = defaultWrapper;
+						if (taDefaultWrap === 'br'){
+							var firstChild = angular.element($target[0].childNodes[0]);
+							$target.replaceWith($target[0].childNodes);
+							$target = firstChild;
+							return;
+						} else {
+							defaultWrapper.append($target[0].childNodes);
+							$target.after(defaultWrapper);
+							$target.remove();
+							$target = defaultWrapper;
+						}
 					}
 				}else if($target.parent()[0].tagName.toLowerCase() === optionsTagName &&
 					!$target.parent().hasClass('ta-bind')){
@@ -499,6 +506,7 @@ angular.module('textAngular.DOM', ['textAngular.factories'])
 						$target = angular.element(options);
 						$target[0].innerHTML = _nodes[0].innerHTML;
 						_nodes[0].innerHTML = $target[0].outerHTML;
+						$target = angular.element(_nodes[0]);
 					}else if(optionsTagName === 'blockquote'){
 						// blockquotes wrap other block elements
 						html = '';
