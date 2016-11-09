@@ -714,7 +714,8 @@ angular.module('textAngularSetup', [])
 			// check if in list. If not in list then use formatBlock option
 			if(possibleNodes[0] && possibleNodes[0].tagName.toLowerCase() !== 'li' &&
 				possibleNodes[0].tagName.toLowerCase() !== 'ol' &&
-				possibleNodes[0].tagName.toLowerCase() !== 'ul') {
+				possibleNodes[0].tagName.toLowerCase() !== 'ul' &&
+				possibleNodes[0].getAttribute("contenteditable") !== "true") {
 				this.$editor().wrapSelection("formatBlock", "default");
 			}
 			restoreSelection();

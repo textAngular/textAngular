@@ -631,9 +631,43 @@ describe('textAngular', function(){
 			$rootScope.$digest();
 			expect(element.html()).toBe('<div><br></div>');
 		}));
+		it('without ng-model ta-default-wrap="br"', inject(function($rootScope, $compile, textAngularManager){
+			$compile('<text-angular ta-default-wrap="br" name="test"></text-angular>')($rootScope);
+			element = textAngularManager.retrieveEditor('test').scope.displayElements.text;
+			$rootScope.$digest();
+			element.triggerHandler('focus');
+			$rootScope.$digest();
+			expect(element.html()).toBe('<br><br>');
+		}));
 	});
 
-
+	describe('should respect the ta-default-wrap value and undo blockquote correctly', function(){
+		beforeEach(function(){
+			module(function($provide){
+				$provide.value('taSelection', {
+					element: undefined,
+					getSelectionElement: function (){ return this.element; },
+					getOnlySelectedElements: function(){ return [].slice.call(this.element.childNodes); },
+					setSelectionToElementStart: function (){ return; },
+					setSelectionToElementEnd: function (){ return; }
+				});
+			});
+		});
+		it('without ng-model ta-default-wrap="br" deselect blockquotes', inject(function($document, $rootScope, $compile, textAngularManager, taSelection, taExecCommand){
+			$rootScope.html = '<br><blockquote><b>Test</b></blockquote>';
+			element = $compile('<div ta-bind ta-default-wrap="br" contenteditable="contenteditable" ng-model="html"></div>')($rootScope);
+			$document.find('body').append(element);
+			$rootScope.$digest();
+			element.triggerHandler('focus');
+			$rootScope.$digest();
+			var sel_elem = element.find('b')[0];
+			taSelection.element = sel_elem;
+			$rootScope.$digest();
+			taExecCommand()('formatBlock', false, '<BLOCKQUOTE>');
+			$rootScope.$digest();
+			expect(element.html()).toBe('<br><br><br><b>Test</b>');
+		}));
+	});
 
 	describe('should respect taUnsafeSanitizer attribute', function () {
 		var element2, displayElements, $timeout;

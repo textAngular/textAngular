@@ -165,6 +165,9 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 						'<' + attrs.taDefaultWrap.toUpperCase() + '>&nbsp;</' + attrs.taDefaultWrap.toUpperCase() + '>' :
 						'<' + attrs.taDefaultWrap + '>&nbsp;</' + attrs.taDefaultWrap + '>';
 			}
+			taOptions.taDefaultWrap = attrs.taDefaultWrap;
+			taOptions._defaultVal = _defaultVal;
+			taOptions._defaultTest = _defaultTest;
 
 			/* istanbul ignore else */
 			if(!ngModelOptions.$options) ngModelOptions.$options = {}; // ng-model-options support
@@ -957,6 +960,7 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 							if(_inputTimeout) $timeout.cancel(_inputTimeout);
 							/* istanbul ignore next: cant' test? */
 							_inputTimeout = $timeout(function() {
+								var _savedSelection = rangy.saveSelection();
 								var _val = _compileHtml();
 								if (_val !== ngModel.$viewValue) {
 									//console.log('_setViewValue');
@@ -964,6 +968,7 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 									//console.log('new:', _val);
 									_setViewValue(_val, true);
 								}
+								rangy.restoreSelection(_savedSelection);
 							}, 1000);
 						}
 					});
