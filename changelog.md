@@ -1,3 +1,19 @@
+<a name="1.5.13"></a>
+## [1.5.13](https://github.com/fraywing/textAngular/compare/v1.5.12...v1.5.13) (2016-11-10)
+
+
+### Bug Fixes
+
+* **main:** Corrected issue [#1353](https://github.com/fraywing/textAngular/issues/1353) where the dropEvent.target was not being used. ([be038c2](https://github.com/fraywing/textAngular/commit/be038c2))
+* **main:** Corrected issue [#1359](https://github.com/fraywing/textAngular/issues/1359) and some older issues around refesh of popover display ([4ef827e](https://github.com/fraywing/textAngular/commit/4ef827e))
+* **taBind:** Corrected issue [#1361](https://github.com/fraywing/textAngular/issues/1361) can't paste word document with tables ([f27d444](https://github.com/fraywing/textAngular/commit/f27d444))
+* **taBind:** Corrected issue where Apple ignores Shift+Enter on Safari ([cd9de24](https://github.com/fraywing/textAngular/commit/cd9de24))
+* **taBind, textAngular-sanitize:** Corrected and enhanced formating comming from Word and OneNote ([fbcd381](https://github.com/fraywing/textAngular/commit/fbcd381))
+* **main:** Cleanup event handlers that are placed on the window (from Bret Little)
+* **textAngularSetup:** Fix clear formatting functionality when used with ta-default-wrap=br #1374 - thanks to damien-otis for this fix. 0e45059062fadf2499b4d4d4f78621a49cb89968
+* **taBind:** Fix don't deselect after 1000ms after applying styling #1381 - thanks to damien-otis for this fix 
+
+
 <a name="1.5.12"></a>
 ## [1.5.12](https://github.com/fraywing/textAngular/compare/v1.5.11...v1.5.12) (2016-10-03)
 
