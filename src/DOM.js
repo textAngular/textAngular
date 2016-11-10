@@ -190,11 +190,16 @@ angular.module('textAngular.DOM', ['textAngular.factories'])
 			// nothing left to do..
 			return element;
 		}
-		var $target = angular.element(options);
-		$target[0].innerHTML = element.innerHTML;
-		element.parentNode.insertBefore($target[0], element);
-		element.parentNode.removeChild(element);
-		return $target;
+		if (options === '<br>'){
+			return element;
+		}
+		else {
+			var $target = angular.element(options);
+			$target[0].innerHTML = element.innerHTML;
+			element.parentNode.insertBefore($target[0], element);
+			element.parentNode.removeChild(element);
+			return $target;
+		}
 	};
 	return function(taDefaultWrap, topNode){
 		// NOTE: here we are dealing with the html directly from the browser and not the html the user sees.
@@ -311,8 +316,10 @@ angular.module('textAngular.DOM', ['textAngular.factories'])
                 }
             }catch(e){}
 			//console.log('************** selectedElement:', selectedElement);
+			/* istanbul ignore if: */
+			if (!selectedElement){return;}
 			var $selected = angular.element(selectedElement);
-			var tagName = (selectedElement.tagName && selectedElement.tagName.toLowerCase()) ||
+			var tagName = (selectedElement && selectedElement.tagName && selectedElement.tagName.toLowerCase()) ||
 				/* istanbul ignore next: */ "";
 			if(command.toLowerCase() === 'insertorderedlist' || command.toLowerCase() === 'insertunorderedlist'){
 				var selfTag = taBrowserTag((command.toLowerCase() === 'insertorderedlist')? 'ol' : 'ul');
