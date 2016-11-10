@@ -190,6 +190,7 @@ angular.module('textAngular.DOM', ['textAngular.factories'])
 			// nothing left to do..
 			return element;
 		}
+		/* istanbul ignore next - not sure have to test this */
 		if (options === '<br>'){
 			return element;
 		}
