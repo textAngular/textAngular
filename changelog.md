@@ -1,3 +1,17 @@
+<a name="1.5.14"></a>
+## [1.5.14](https://github.com/fraywing/textAngular/compare/v1.5.13...v1.5.14) (2016-11-30)
+
+
+### Bug Fixes
+
+* **DOM:** corrected a bug where we could not insertHTML when the document was empty. ([ba156c4](https://github.com/fraywing/textAngular/commit/ba156c4))
+* **taBind:** corrected a bug where we attempted to restore the selection in element.on('input') when the
+     document was empty after a delete.
+* **textAngularSetup):** corrected a bug where we would throw an error in taRegisterTool('justifyFull'),
+     taRegisterTool('justifyRight'), and taRegisterTool('justifyLeft') when it was illegal to call
+     .css('text-align).  We now catch and suppress those errors.
+
+
 <a name="1.5.13"></a>
 ## [1.5.13](https://github.com/fraywing/textAngular/compare/v1.5.12...v1.5.13) (2016-11-10)
 
