@@ -2,7 +2,7 @@
 @license textAngular
 Author : Austin Anderson
 License : 2013 MIT
-Version 1.5.13
+Version 1.5.14
 
 See README.md or https://github.com/fraywing/textAngular/wiki for requirements and use.
 */
@@ -13,7 +13,7 @@ Commonjs package manager support (eg componentjs).
 
 
 "use strict";// NOTE: textAngularVersion must match the Gruntfile.js 'setVersion' task.... and have format v/d+./d+./d+
-var textAngularVersion = 'v1.5.13';   // This is automatically updated during the build process to the current release!
+var textAngularVersion = 'v1.5.14';   // This is automatically updated during the build process to the current release!
 
 
 // IE version detection - http://stackoverflow.com/questions/4169160/javascript-ie-detection-why-not-use-simple-conditional-comments
@@ -729,7 +729,6 @@ angular.module('textAngular.DOM', ['textAngular.factories'])
                         //console.log('inner whole container', selectedElement.childNodes);
                         _innerNode = '<div>' + __h + '</div>';
                         selectedElement.innerHTML = _innerNode;
-                        //console.log('childNodes:', selectedElement.childNodes);
                         taSelection.setSelectionToElementEnd(selectedElement.childNodes[0]);
                         selectedElement = taSelection.getSelectionElement();
                     } else if (selectedElement.tagName.toLowerCase() === 'span' &&
@@ -778,9 +777,7 @@ angular.module('textAngular.DOM', ['textAngular.factories'])
                             // Firefox adds <br>'s and so we remove the <br>
                             __h = __h.replace(/<br>/i, '&#8203;');  // no space-space
 							selectedElement.innerHTML = __h;
-							taSelection.setSelectionToElementEnd(selectedElement.childNodes[0]);
-							selectedElement = taSelection.getSelectionElement();
-                        }
+						}
                     } else if (selectedElement.tagName.toLowerCase() === 'li' &&
                         ourSelection && ourSelection.start &&
                         ourSelection.start.offset === ourSelection.end.offset) {
@@ -790,8 +787,6 @@ angular.module('textAngular.DOM', ['textAngular.factories'])
                             // Firefox adds <br>'s and so we remove the <br>
                             __h = __h.replace(/<br>/i, '');  // nothing
 							selectedElement.innerHTML = __h;
-							taSelection.setSelectionToElementEnd(selectedElement.childNodes[0]);
-							selectedElement = taSelection.getSelectionElement();
                         }
                     }
                 }
@@ -1039,6 +1034,7 @@ angular.module('textAngular.DOM', ['textAngular.factories'])
 					tagEnd = '</a>',
 					_selection = taSelection.getSelection();
 				if(_selection.collapsed){
+					//console.log('collapsed');
 					// insert text at selection, then select then just let normal exec-command run
 					taSelection.insertHtml(tagBegin + options + tagEnd, topNode);
 				}else if(rangy.getSelection().getRangeAt(0).canSurroundContents()){
@@ -1047,6 +1043,7 @@ angular.module('textAngular.DOM', ['textAngular.factories'])
 				}
 				return;
 			}else if(command.toLowerCase() === 'inserthtml'){
+				//console.log('inserthtml');
 				taSelection.insertHtml(options, topNode);
 				return;
 			}
@@ -2632,7 +2629,11 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 									//console.log('new:', _val);
 									_setViewValue(_val, true);
 								}
-								rangy.restoreSelection(_savedSelection);
+								// if the savedSelection marker is gone at this point, we cannot restore the selection!!!
+                                //console.log('rangy.restoreSelection', ngModel.$viewValue.length, _savedSelection);
+								if (ngModel.$viewValue.length !== 0) {
+                                    rangy.restoreSelection(_savedSelection);
+                                }
 							}, 1000);
 						}
 					});
