@@ -249,7 +249,6 @@ angular.module('textAngular.DOM', ['textAngular.factories'])
                         //console.log('inner whole container', selectedElement.childNodes);
                         _innerNode = '<div>' + __h + '</div>';
                         selectedElement.innerHTML = _innerNode;
-                        //console.log('childNodes:', selectedElement.childNodes);
                         taSelection.setSelectionToElementEnd(selectedElement.childNodes[0]);
                         selectedElement = taSelection.getSelectionElement();
                     } else if (selectedElement.tagName.toLowerCase() === 'span' &&
@@ -298,9 +297,7 @@ angular.module('textAngular.DOM', ['textAngular.factories'])
                             // Firefox adds <br>'s and so we remove the <br>
                             __h = __h.replace(/<br>/i, '&#8203;');  // no space-space
 							selectedElement.innerHTML = __h;
-							taSelection.setSelectionToElementEnd(selectedElement.childNodes[0]);
-							selectedElement = taSelection.getSelectionElement();
-                        }
+						}
                     } else if (selectedElement.tagName.toLowerCase() === 'li' &&
                         ourSelection && ourSelection.start &&
                         ourSelection.start.offset === ourSelection.end.offset) {
@@ -310,8 +307,6 @@ angular.module('textAngular.DOM', ['textAngular.factories'])
                             // Firefox adds <br>'s and so we remove the <br>
                             __h = __h.replace(/<br>/i, '');  // nothing
 							selectedElement.innerHTML = __h;
-							taSelection.setSelectionToElementEnd(selectedElement.childNodes[0]);
-							selectedElement = taSelection.getSelectionElement();
                         }
                     }
                 }
@@ -559,6 +554,7 @@ angular.module('textAngular.DOM', ['textAngular.factories'])
 					tagEnd = '</a>',
 					_selection = taSelection.getSelection();
 				if(_selection.collapsed){
+					//console.log('collapsed');
 					// insert text at selection, then select then just let normal exec-command run
 					taSelection.insertHtml(tagBegin + options + tagEnd, topNode);
 				}else if(rangy.getSelection().getRangeAt(0).canSurroundContents()){
@@ -567,6 +563,7 @@ angular.module('textAngular.DOM', ['textAngular.factories'])
 				}
 				return;
 			}else if(command.toLowerCase() === 'inserthtml'){
+				//console.log('inserthtml');
 				taSelection.insertHtml(options, topNode);
 				return;
 			}

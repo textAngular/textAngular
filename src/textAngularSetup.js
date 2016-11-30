@@ -547,15 +547,24 @@ angular.module('textAngularSetup', [])
 			/* istanbul ignore next: */
 			if (commonElement && commonElement.nodeName === '#document') return false;
 			var result = false;
-			if (commonElement)
-				result =
-					commonElement.css('text-align') === 'left' ||
-					commonElement.attr('align') === 'left' ||
-					(
-						commonElement.css('text-align') !== 'right' &&
-						commonElement.css('text-align') !== 'center' &&
-						commonElement.css('text-align') !== 'justify' && !this.$editor().queryCommandState('justifyRight') && !this.$editor().queryCommandState('justifyCenter')
-					) && !this.$editor().queryCommandState('justifyFull');
+			if (commonElement) {
+                // commonELement.css('text-align') can throw an error 'Cannot read property 'defaultView' of null' in rare conditions
+				// so we do try catch here...
+				try {
+                    result =
+                        commonElement.css('text-align') === 'left' ||
+                        commonElement.attr('align') === 'left' ||
+                        (
+                            commonElement.css('text-align') !== 'right' &&
+                            commonElement.css('text-align') !== 'center' &&
+                            commonElement.css('text-align') !== 'justify' && !this.$editor().queryCommandState('justifyRight') && !this.$editor().queryCommandState('justifyCenter')
+                        ) && !this.$editor().queryCommandState('justifyFull');
+                } catch(e) {
+					/* istanbul ignore next: error handler */
+                    //console.log(e);
+					result = false;
+				}
+            }
 			result = result || this.$editor().queryCommandState('justifyLeft');
 			return result;
 		}
@@ -570,7 +579,17 @@ angular.module('textAngularSetup', [])
 			/* istanbul ignore next: */
 			if (commonElement && commonElement.nodeName === '#document') return false;
 			var result = false;
-			if(commonElement) result = commonElement.css('text-align') === 'right';
+			if(commonElement) {
+                // commonELement.css('text-align') can throw an error 'Cannot read property 'defaultView' of null' in rare conditions
+                // so we do try catch here...
+                try {
+                    result = commonElement.css('text-align') === 'right';
+                } catch(e) {
+					/* istanbul ignore next: error handler */
+                    //console.log(e);
+                    result = false;
+                }
+            }
 			result = result || this.$editor().queryCommandState('justifyRight');
 			return result;
 		}
@@ -583,7 +602,17 @@ angular.module('textAngularSetup', [])
 		},
 		activeState: function(commonElement){
 			var result = false;
-			if(commonElement) result = commonElement.css('text-align') === 'justify';
+			if(commonElement) {
+                // commonELement.css('text-align') can throw an error 'Cannot read property 'defaultView' of null' in rare conditions
+                // so we do try catch here...
+                try {
+					result = commonElement.css('text-align') === 'justify';
+                } catch(e) {
+					/* istanbul ignore next: error handler */
+                    //console.log(e);
+                    result = false;
+                }
+            }
 			result = result || this.$editor().queryCommandState('justifyFull');
 			return result;
 		}
@@ -598,7 +627,18 @@ angular.module('textAngularSetup', [])
 			/* istanbul ignore next: */
 			if (commonElement && commonElement.nodeName === '#document') return false;
 			var result = false;
-			if(commonElement) result = commonElement.css('text-align') === 'center';
+			if(commonElement) {
+                // commonELement.css('text-align') can throw an error 'Cannot read property 'defaultView' of null' in rare conditions
+                // so we do try catch here...
+				try {
+                    result = commonElement.css('text-align') === 'center';
+                } catch(e) {
+					/* istanbul ignore next: error handler */
+					//console.log(e);
+					result = false;
+            	}
+
+        	}
 			result = result || this.$editor().queryCommandState('justifyCenter');
 			return result;
 		}

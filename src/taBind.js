@@ -965,7 +965,11 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 									//console.log('new:', _val);
 									_setViewValue(_val, true);
 								}
-								rangy.restoreSelection(_savedSelection);
+								// if the savedSelection marker is gone at this point, we cannot restore the selection!!!
+                                //console.log('rangy.restoreSelection', ngModel.$viewValue.length, _savedSelection);
+								if (ngModel.$viewValue.length !== 0) {
+                                    rangy.restoreSelection(_savedSelection);
+                                }
 							}, 1000);
 						}
 					});
