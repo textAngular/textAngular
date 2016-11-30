@@ -2389,17 +2389,17 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 						var pastedContent;
 						var clipboardData = (e.originalEvent || e).clipboardData;
 						if (clipboardData && clipboardData.getData && clipboardData.types.length > 0) {// Webkit - get data from clipboard, put into editdiv, cleanup, then cancel event
-							var _types = "";
-							for(var _t = 0; _t < clipboardData.types.length; _t++){
-								_types += " " + clipboardData.types[_t];
-							}
-							/* istanbul ignore next: browser tests */
-							if (/text\/html/i.test(_types)) {
-								pastedContent = clipboardData.getData('text/html');
-							} else if (/text\/plain/i.test(_types)) {
-								pastedContent = clipboardData.getData('text/plain');
-							}
-
+							//var _types = "";
+							//for(var _t = 0; _t < clipboardData.types.length; _t++){
+							//	_types += " " + clipboardData.types[_t];
+							//}
+							///* istanbul ignore next: browser tests */
+							//if (/text\/html/i.test(_types)) {
+							//	pastedContent = clipboardData.getData('text/html');
+							//} else if (/text\/plain/i.test(_types)) {
+							//	pastedContent = clipboardData.getData('text/plain');
+							//}
+							pastedContent = clipboardData.getData('text/plain');
 							processpaste(pastedContent);
 							e.stopPropagation();
 							e.preventDefault();
