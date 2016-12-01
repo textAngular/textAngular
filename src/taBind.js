@@ -685,7 +685,22 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 									result += '&nbsp;';
 								}
 								return result;
-							}).replace(/\n|\r\n|\r/g, '<br />').replace(/\t/g, '&nbsp;&nbsp;&nbsp;&nbsp;');
+							}).replace(/\t/g, '&nbsp;&nbsp;&nbsp;&nbsp;');
+
+							// on windows, I needed to remove this, as the above text is actually:
+							// <html>
+							// <body>
+							//<!--StartFragment-->
+							// ...
+							//<!--EndFragment-->
+							//</body>
+							//</html>
+							//
+							// and if the \n or is replaced with <br /> it is totally messed up!!!
+							//
+							// If this is needed, we need to ignore any lines before or after <!--StartFragment> and
+							// <!--EndFragment-->
+							//text = text.replace(/\n|\r\n|\r/g, '<br />');
 
 							if(_pasteHandler) text = _pasteHandler(scope, {$html: text}) || text;
 
