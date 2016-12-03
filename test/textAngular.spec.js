@@ -671,7 +671,8 @@ describe('textAngular', function(){
 			beforeEach(inject(function (_$compile_, _$rootScope_, textAngularManager) {
 				$rootScope = _$rootScope_;
 				$rootScope.html = '<p>Test Contents</p>';
-				element = _$compile_('<text-angular name="test" ta-unsafe-sanitizer="true" ng-model="html"></text-angular>')($rootScope);
+				// note that ta-unsafe-sanitizer has no effect for these tests, we simply set it true here to enable 100% coverage
+				element = _$compile_('<text-angular name="test" ta-keep-styles="false" ta-unsafe-sanitizer="true" ng-model="html"></text-angular>')($rootScope);
 				$rootScope.$digest();
 				editorScope = textAngularManager.retrieveEditor('test').scope;
 				element = editorScope.displayElements.text;

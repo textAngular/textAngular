@@ -375,7 +375,12 @@ textAngular.directive("textAngular", [
 					scope.displayElements.html.attr('ta-unsafe-sanitizer', attrs.taUnsafeSanitizer);
 				}
 
-				// add the main elements to the origional element
+                if(attrs.taKeepStyles){
+                    scope.displayElements.text.attr('ta-keep-styles', attrs.taKeepStyles);
+                    scope.displayElements.html.attr('ta-keep-styles', attrs.taKeepStyles);
+                }
+
+                // add the main elements to the origional element
 				scope.displayElements.scrollWindow.append(scope.displayElements.text);
 				element.append(scope.displayElements.scrollWindow);
 				element.append(scope.displayElements.html);

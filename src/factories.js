@@ -33,7 +33,7 @@ angular.module('textAngular.factories', [])
 }]).factory('taFixChrome', function(){
 	// get whaterever rubbish is inserted in chrome
 	// should be passed an html string, returns an html string
-	var taFixChrome = function(html){
+	var taFixChrome = function(html, keepStyles){
 		if(!html || !angular.isString(html) || html.length <= 0) return html;
 		// grab all elements with a style attibute
 		// a betterSpanMatch matches only a style=... with matching quotes
@@ -62,25 +62,40 @@ angular.module('textAngular.factories', [])
 			finalHtml='';
 			lastIndex=0;
 		}
-		while(match = betterSpanMatch.exec(html)){
-			//console.log('matched string:', match[0], 'before:', html.substring(lastIndex, match.index-1));
-			finalHtml += html.substring(lastIndex, match.index-1);
-            lastIndex += match.index;
-			styleVal = match[0];
-			lastIndex += match[0].length;
-			// test for chrome inserted junk
-			match = /font-family: inherit;|line-height: 1.[0-9]{3,12};|color: inherit; line-height: 1.1;|color: rgb\(\d{1,3}, \d{1,3}, \d{1,3}\);|background-color: rgb\(\d{1,3}, \d{1,3}, \d{1,3}\);/gi.exec(styleVal);
-			if (match) {
-                styleVal = styleVal.replace(/( |)font-family: inherit;|( |)line-height: 1.[0-9]{3,12};|( |)color: inherit;|( |)color: rgb\(\d{1,3}, \d{1,3}, \d{1,3}\);|( |)background-color: rgb\(\d{1,3}, \d{1,3}, \d{1,3}\);/ig, '');
-				//console.log(styleVal, styleVal.length);
-				if (styleVal.length>8) {
+        /////////////////////////////////////////////////////////////
+        //
+        // Allow control of this modification
+        // taKeepStyles: False - removes these modification
+        //
+        // taFixChrome removes the following styles:
+        //    font-family: inherit;
+        //    line-height: <number>
+        //    color: inherit;
+        //    color: rgb( <rgb-component>#{3} )
+        //    background-color: rgb( <rgb-component>#{3} )
+        //
+        /////////////////////////////////////////////////////////////
+		if (!keepStyles) {
+            while (match = betterSpanMatch.exec(html)) {
+                //console.log('matched string:', match[0], 'before:', html.substring(lastIndex, match.index-1));
+                finalHtml += html.substring(lastIndex, match.index - 1);
+                lastIndex += match.index;
+                styleVal = match[0];
+                lastIndex += match[0].length;
+                // test for chrome inserted junk
+                match = /font-family: inherit;|line-height: 1.[0-9]{3,12};|color: inherit; line-height: 1.1;|color: rgb\(\d{1,3}, \d{1,3}, \d{1,3}\);|background-color: rgb\(\d{1,3}, \d{1,3}, \d{1,3}\);/gi.exec(styleVal);
+                if (match) {
+                    styleVal = styleVal.replace(/( |)font-family: inherit;|( |)line-height: 1.[0-9]{3,12};|( |)color: inherit;|( |)color: rgb\(\d{1,3}, \d{1,3}, \d{1,3}\);|( |)background-color: rgb\(\d{1,3}, \d{1,3}, \d{1,3}\);/ig, '');
+                    //console.log(styleVal, styleVal.length);
+                    if (styleVal.length > 8) {
+                        finalHtml += ' ' + styleVal;
+                    }
+                } else {
                     finalHtml += ' ' + styleVal;
                 }
-			} else {
-				finalHtml += ' ' + styleVal;
-			}
-		}
-		finalHtml += html.substring(lastIndex);
+            }
+            finalHtml += html.substring(lastIndex);
+        }
 		//console.log('final:', finalHtml);
 		// only replace when something has changed, else we get focus problems on inserting lists
 		if(lastIndex > 0){
