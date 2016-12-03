@@ -32,5 +32,10 @@ describe('taFixChrome', function(){
 			expect(taFixChrome('<p class="p1">I can see this part of the text<span class="Apple-converted-space">&nbsp; </span>but not this part</p>')).toBe('<p class="p1">I can see this part of the text  but not this part</p>');
 		});
 
+        it('should not damage a reasonable background-color style', function(){
+            //expect(taFixChrome('<a style="background-color: rgb(255, 255, 255);" href="https://www.google.pl" target="_blank">google</a>')).toBe('<a style="background-color: rgb(255, 255, 255);" href="https://www.google.pl" target="_blank">google</a>');
+            expect(taFixChrome('<a style="background-color: rgb(255, 255, 255);" href="https://www.google.pl" target="_blank">google</a>')).toBe('<a href="https://www.google.pl" target="_blank">google</a>');
+        });
+
 	});
 });
