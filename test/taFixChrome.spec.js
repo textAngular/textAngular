@@ -32,10 +32,16 @@ describe('taFixChrome', function(){
 			expect(taFixChrome('<p class="p1">I can see this part of the text<span class="Apple-converted-space">&nbsp; </span>but not this part</p>')).toBe('<p class="p1">I can see this part of the text  but not this part</p>');
 		});
 
-        it('should not damage a reasonable background-color style', function(){
-            //expect(taFixChrome('<a style="background-color: rgb(255, 255, 255);" href="https://www.google.pl" target="_blank">google</a>')).toBe('<a style="background-color: rgb(255, 255, 255);" href="https://www.google.pl" target="_blank">google</a>');
+        it('should not damage html when removing style', function(){
             expect(taFixChrome('<a style="background-color: rgb(255, 255, 255);" href="https://www.google.pl" target="_blank">google</a>')).toBe('<a href="https://www.google.pl" target="_blank">google</a>');
         });
 
+        it('should keep background-color style', function(){
+            expect(taFixChrome('<a style="background-color: rgb(255, 255, 255);" href="https://www.google.pl" target="_blank">google</a>', true)).toBe('<a style="background-color: rgb(255, 255, 255);" href="https://www.google.pl" target="_blank">google</a>');
+        });
+
+        it('should keep styles', function(){
+            expect(taFixChrome('<div><span style="font-family: inherit; line-height: 1.428571429;">Test Content</span></div>', true)).toBe('<div><span style="font-family: inherit; line-height: 1.428571429;">Test Content</span></div>');
+        });
 	});
 });
