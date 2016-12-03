@@ -36,10 +36,17 @@ angular.module('textAngular.factories', [])
 	var taFixChrome = function(html){
 		if(!html || !angular.isString(html) || html.length <= 0) return html;
 		// grab all elements with a style attibute
+		// a betterSpanMatch matches only a style=... with matching quotes
+		// this captures the whole:
+		// 'style="background-color: rgb(255, 255, 255);"'
+		var betterSpanMatch = /style\s?=\s?(["'])(?:(?=(\\?))\2.)*?\1/ig;
+		// where the original spanMatch = /<([^>\/]+?)style=("([^\"]+)"|'([^']+)')([^>]*)>/ig;
+		// captures too much and includes the front tag!
 		var spanMatch = /<([^>\/]+?)style=("([^\"]+)"|'([^']+)')([^>]*)>/ig;
 		var appleConvertedSpaceMatch = /<span class="Apple-converted-space">([^<]+)<\/span>/ig;
 		var match, styleVal, appleSpaceVal, newTag, finalHtml = '', lastIndex = 0;
 		// remove all the Apple-converted-space spans and replace with the content of the span
+        //console.log('before:', html);
 		/* istanbul ignore next: apple-contereted-space span match */
 		while(match = appleConvertedSpaceMatch.exec(html)){
 			appleSpaceVal = match[1];
@@ -55,22 +62,26 @@ angular.module('textAngular.factories', [])
 			finalHtml='';
 			lastIndex=0;
 		}
-		while(match = spanMatch.exec(html)){
-			// one of the quoted values ' or "
-			/* istanbul ignore next: quotations match */
-			styleVal = match[3] || match[4];
+		while(match = betterSpanMatch.exec(html)){
+			//console.log('matched string:', match[0], 'before:', html.substring(lastIndex, match.index-1));
+			finalHtml += html.substring(lastIndex, match.index-1);
+            lastIndex += match.index;
+			styleVal = match[0];
+			lastIndex += match[0].length;
 			// test for chrome inserted junk
-			if(styleVal && styleVal.match(/line-height: 1.[0-9]{3,12};|color: inherit; line-height: 1.1;|color: rgb\(\d{1,3}, \d{1,3}, \d{1,3}\);|background-color: rgb\(\d{1,3}, \d{1,3}, \d{1,3}\);/i)){
-				// replace original tag with new tag
-				styleVal = styleVal.replace(/( |)font-family: inherit;|( |)line-height: 1.[0-9]{3,12};|( |)color: inherit;|( |)color: rgb\(\d{1,3}, \d{1,3}, \d{1,3}\);|( |)background-color: rgb\(\d{1,3}, \d{1,3}, \d{1,3}\);/ig, '');
-				newTag = '<' + match[1].trim();
-				if(styleVal.trim().length > 0) newTag += ' style=' + match[2].substring(0,1) + styleVal + match[2].substring(0,1);
-				newTag += match[5].trim() + ">";
-				finalHtml += html.substring(lastIndex, match.index) + newTag;
-				lastIndex = match.index + match[0].length;
+			match = /font-family: inherit;|line-height: 1.[0-9]{3,12};|color: inherit; line-height: 1.1;|color: rgb\(\d{1,3}, \d{1,3}, \d{1,3}\);|background-color: rgb\(\d{1,3}, \d{1,3}, \d{1,3}\);/gi.exec(styleVal);
+			if (match) {
+                styleVal = styleVal.replace(/( |)font-family: inherit;|( |)line-height: 1.[0-9]{3,12};|( |)color: inherit;|( |)color: rgb\(\d{1,3}, \d{1,3}, \d{1,3}\);|( |)background-color: rgb\(\d{1,3}, \d{1,3}, \d{1,3}\);/ig, '');
+				//console.log(styleVal, styleVal.length);
+				if (styleVal.length>8) {
+                    finalHtml += ' ' + styleVal;
+                }
+			} else {
+				finalHtml += ' ' + styleVal;
 			}
 		}
 		finalHtml += html.substring(lastIndex);
+		//console.log('final:', finalHtml);
 		// only replace when something has changed, else we get focus problems on inserting lists
 		if(lastIndex > 0){
 			// replace all empty strings
