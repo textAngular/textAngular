@@ -1,31 +1,31 @@
 describe('taBind._taBlankTest', function () {
-	'use strict';
-	beforeEach(module('textAngular'));
-	afterEach(inject(function($document){
-		$document.find('body').html('');
-	}));
-	var testString = function(result){ return function(_str){
-		it(_str, inject(function (_taBlankTest) {
-			expect(_taBlankTest(_str)).toBe(result);
-		}));
-	};};
-	
-	describe('should return true for', function () {
-		it('undefined', inject(function (_taBlankTest) {
-			expect(_taBlankTest()).toBe(true);
-		}));
-		angular.forEach(['<p></p>','<p><br></p>','', '<pre><br/></pre>'], testString(true));
-	});
-	
-	describe('should return false for', function () {
-		angular.forEach(
-			[
-				'<p>test</p>',
-				'<p>Test Some<br></p>',
-				'Some Test',
-				'<p><img class="ta-insert-video" src="https://img.youtube.com/vi/sbQQKI1Fwo4/hqdefault.jpg" ta-insert-video="https://www.youtube.com/embed/sbQQKI1Fwo4" contenteditable="false" allowfullscreen="true" frameborder="0"><br></p>',
-				'<p></p><p style="color: rgb(68, 68, 68);text-align: left;background-color: rgb(255, 255, 255);"><u><b>ATTITUDES:</b></u></p>',
-				'<div class="AppContainer" style="width: 1280px;color: rgb(0, 0, 0);">' + // a real world case from #512
+    'use strict';
+    beforeEach(module('textAngular'));
+    afterEach(inject(function($document){
+        $document.find('body').html('');
+    }));
+    var testString = function(result){ return function(_str){
+        it(_str, inject(function (_taBlankTest) {
+            expect(_taBlankTest(_str)).toBe(result);
+        }));
+    };};
+
+    describe('should return true for', function () {
+        it('undefined', inject(function (_taBlankTest) {
+            expect(_taBlankTest()).toBe(true);
+        }));
+        angular.forEach(['<p></p>','<p><br></p>','', '<pre><br/></pre>'], testString(true));
+    });
+
+    describe('should return false for', function () {
+        angular.forEach(
+            [
+                '<p>test</p>',
+                '<p>Test Some<br></p>',
+                'Some Test',
+                '<p><img class="ta-insert-video" src="https://img.youtube.com/vi/sbQQKI1Fwo4/hqdefault.jpg" ta-insert-video="https://www.youtube.com/embed/sbQQKI1Fwo4" contenteditable="false" allowfullscreen="true" frameborder="0"><br></p>',
+                '<p></p><p style="color: rgb(68, 68, 68);text-align: left;background-color: rgb(255, 255, 255);"><u><b>ATTITUDES:</b></u></p>',
+                '<div class="AppContainer" style="width: 1280px;color: rgb(0, 0, 0);">' + // a real world case from #512
     '<div id="c_base" class="c_base">' +
         '<div id="c_content" class="c_main">' +
             '<div id="pageContent">' +
@@ -43,10 +43,10 @@ describe('taBind._taBlankTest', function () {
                                                             '<div id="bodyreadMessagePartBodyControl1609f" class="ExternalClass MsgBodyContainer">' +
                                                                 '<p><u><b>Lorem ipsum</b></u></p>' +
                                                                 '<p><b>Lorem ipsum</b></p>' +
-				'</div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div>'
-			],
-			testString(false)
-		);
-	});
+                '</div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div>'
+            ],
+            testString(false)
+        );
+    });
 
 });
