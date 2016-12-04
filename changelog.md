@@ -1,3 +1,15 @@
+<a name="1.5.15"></a>
+## [1.5.15](https://github.com/fraywing/textAngular/compare/v1.5.14...v1.5.15) (2016-12-04)
+
+
+### Bug Fixes
+
+* **taBind:** (from damien-otis) Add code to handle pasting text in IE [#1410](https://github.com/fraywing/textAngular/issues/1410) ([b9863c2](https://github.com/fraywing/textAngular/commit/b9863c2))
+* **taBind:** corrected bug [#1379](https://github.com/fraywing/textAngular/issues/1379) where the paste from word was broken for lists ([c11765d](https://github.com/fraywing/textAngular/commit/c11765d))
+* **taFixChrome, taFixChrom.spec:** fixed bug where the html was being damaged on pasted html ([425396d](https://github.com/fraywing/textAngular/commit/425396d))
+* Note: with this release we shift from tab's in the source code to 4 spaces!
+
+
 <a name="1.5.14"></a>
 ## [1.5.14](https://github.com/fraywing/textAngular/compare/v1.5.13...v1.5.14) (2016-11-30)
 
