@@ -722,6 +722,14 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
                         element.addClass('processing-paste');
                         var pastedContent;
                         var clipboardData = (e.originalEvent || e).clipboardData;
+                        /* istanbul ignore next: Handle legacy IE paste */
+                        if ( !clipboardData && window.clipboardData && window.clipboardData.getData ){
+                            pastedContent = window.clipboardData.getData("Text");
+                            processpaste(pastedContent);
+                            e.stopPropagation();
+                            e.preventDefault();
+                            return false;
+                        }
                         if (clipboardData && clipboardData.getData && clipboardData.types.length > 0) {// Webkit - get data from clipboard, put into editdiv, cleanup, then cancel event
                             var _types = "";
                             for(var _t = 0; _t < clipboardData.types.length; _t++){
@@ -733,7 +741,6 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
                             } else if (/text\/plain/i.test(_types)) {
                                 pastedContent = clipboardData.getData('text/plain');
                             }
-
                             processpaste(pastedContent);
                             e.stopPropagation();
                             e.preventDefault();
