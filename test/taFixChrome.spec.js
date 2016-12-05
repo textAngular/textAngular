@@ -43,5 +43,13 @@ describe('taFixChrome', function(){
         it('should keep styles', function(){
             expect(taFixChrome('<div><span style="font-family: inherit; line-height: 1.428571429;">Test Content</span></div>', true)).toBe('<div><span style="font-family: inherit; line-height: 1.428571429;">Test Content</span></div>');
         });
+
+        it('should handle multiple styles', function(){
+            expect(
+        taFixChrome('<pre class="command-line" style="text-align: left;"><span class="command">git checkout master</span><span>git fetch upstream</span>git merge upstream/master</pre><pre class="command-line" style="text-align: left;">git push</pre>', false))
+            .toBe(
+            '<pre class="command-line" style="text-align: left;"><span class="command">git checkout master</span>git fetch upstreamgit merge upstream/master</pre><pre class="command-line" style="text-align: left;">git push</pre>');
+        });
+
     });
 });
