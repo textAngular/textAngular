@@ -3,11 +3,9 @@
   "version": "1.5.16",
   "main": [
     "./dist/textAngular.js",
-    "./dist/textAngular-sanitize.js",
-    "./dist/textAngularSetup.js",
     "./dist/textAngular.css"
   ],
-  "description": "A radically powerful Text-Editor/Wysiwyg editor for Angular.js",
+  "description": "A radically powerful Text-Editor/Wysiwyg editor for AngularJS",
   "keywords": [
     "editor",
     "angular",
