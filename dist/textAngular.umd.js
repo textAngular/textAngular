@@ -1032,7 +1032,7 @@ angular.module('textAngularSetup', [])
 @license textAngular
 Author : Austin Anderson
 License : 2013 MIT
-Version 1.5.15
+Version 1.5.16
 
 See README.md or https://github.com/fraywing/textAngular/wiki for requirements and use.
 */
@@ -1043,7 +1043,7 @@ Commonjs package manager support (eg componentjs).
 
 
 "use strict";// NOTE: textAngularVersion must match the Gruntfile.js 'setVersion' task.... and have format v/d+./d+./d+
-var textAngularVersion = 'v1.5.15';   // This is automatically updated during the build process to the current release!
+var textAngularVersion = 'v1.5.16';   // This is automatically updated during the build process to the current release!
 
 
 // IE version detection - http://stackoverflow.com/questions/4169160/javascript-ie-detection-why-not-use-simple-conditional-comments
@@ -1301,11 +1301,8 @@ angular.module('textAngular.factories', [])
         /////////////////////////////////////////////////////////////
         if (!keepStyles) {
             while (match = betterSpanMatch.exec(html)) {
-                //console.log('matched string:', match[0], 'before:', html.substring(lastIndex, match.index-1));
-                finalHtml += html.substring(lastIndex, match.index - 1);
-                lastIndex += match.index;
+                finalHtml += html.substring(lastIndex, match.index-1);
                 styleVal = match[0];
-                lastIndex += match[0].length;
                 // test for chrome inserted junk
                 match = /font-family: inherit;|line-height: 1.[0-9]{3,12};|color: inherit; line-height: 1.1;|color: rgb\(\d{1,3}, \d{1,3}, \d{1,3}\);|background-color: rgb\(\d{1,3}, \d{1,3}, \d{1,3}\);/gi.exec(styleVal);
                 if (match) {
@@ -1317,6 +1314,7 @@ angular.module('textAngular.factories', [])
                 } else {
                     finalHtml += ' ' + styleVal;
                 }
+                lastIndex = betterSpanMatch.lastIndex;
             }
             finalHtml += html.substring(lastIndex);
         }
@@ -1324,7 +1322,8 @@ angular.module('textAngular.factories', [])
         // only replace when something has changed, else we get focus problems on inserting lists
         if(lastIndex > 0){
             // replace all empty strings
-            return finalHtml.replace(/<span\s?>(.*?)<\/span>(<br(\/|)>|)/ig, '$1');
+            var fe = finalHtml.replace(/<span\s?>(.*?)<\/span>(<br(\/|)>|)/ig, '$1');
+            return fe;
         } else return html;
     };
     return taFixChrome;
