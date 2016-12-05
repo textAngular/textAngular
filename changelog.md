@@ -1,3 +1,13 @@
+<a name="1.5.16"></a>
+## [1.5.16](https://github.com/fraywing/textAngular/compare/v1.5.15...v1.5.16) (2016-12-05)
+
+
+### Bug Fixes
+
+* **taFixChrome, taFixChrome.spec:** corrected a bug introduced when correcting pasted html (see PR [#1411](https://github.com/fraywing/textAngular/issues/1411)) ([35be0a0](https://github.com/fraywing/textAngular/commit/35be0a0))
+
+
+
 <a name="1.5.15"></a>
 ## [1.5.15](https://github.com/fraywing/textAngular/compare/v1.5.14...v1.5.15) (2016-12-04)
 
