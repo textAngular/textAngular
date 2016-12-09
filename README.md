@@ -139,7 +139,7 @@ When you are ready to create A PR check that `grunt` passes without errors and y
 ## Customization
 
 It is possible to override the toolbar by using a decorator in the module's .config block. Simply set the taOptions.toolbar to an array of arrays comprised of button names. Each array of button names represents a button group. The default toolbar can be represented like so:
-```html
+```javascript
   taOptions.toolbar = [
       ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'pre', 'quote'],
       ['bold', 'italics', 'underline', 'strikeThrough', 'ul', 'ol', 'redo', 'undo', 'clear'],
