@@ -244,7 +244,7 @@ angular.module('textAngularSetup', [])
     },
     insertVideo: {
         tooltip: 'Insert video',
-        dialogPrompt: 'Please enter a youtube URL to embed'
+        dialogPrompt: 'Please enter a video URL to embed'
     },
     insertLink: {
         tooltip: 'Insert / edit link',
@@ -429,15 +429,36 @@ angular.module('textAngularSetup', [])
             container.append(buttonGroup);
             editorScope.showPopover($element);
         },
-        extractYoutubeVideoId: function(url) {
-            var re = /(?:youtube(?:-nocookie)?\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/i;
+        extractVideoId: function(url,provider) {
+            var re;
+            /* istanbul ignore next:*/
+            if (provider === "y"){
+                re = /(?:youtube(?:-nocookie)?\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/i;
+            }
+            else{
+                re = /(?:dailymotion\.com(?:\/video|\/hub)|dai\.ly)\/([0-9a-z]+)(?:[\-_0-9a-zA-Z]+#video=([a-z0-9]+))?/g;
+                var m = re.exec(url);
+                if (m[2]?m[2]:m[1].length>8) return null;
+                else return m[2]?m[2]:m[1];
+            }
             var match = url.match(re);
             return (match && match[1]) || null;
+        },
+        determineVideoProvider: function(url) {
+            // determines the video provider
+            // y = youtube , d = dailymotion , v = vimeo (todo)
+            var regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=|\?v=)([^#\&\?]*).*/;
+            var match = url.match(regExp);
+            if (match && match[2].length === 11) {
+                return "y";
+            }
+            else return "d";
+
         }
     };
 }])
-.run(['taRegisterTool', '$window', 'taTranslations', 'taSelection', 'taToolFunctions', '$sanitize', 'taOptions', '$log',
-    function(taRegisterTool, $window, taTranslations, taSelection, taToolFunctions, $sanitize, taOptions, $log){
+.run(['taRegisterTool', '$window', 'taTranslations', 'taSelection', 'taToolFunctions', '$sanitize', 'taOptions', '$log', '$http',
+    function(taRegisterTool, $window, taTranslations, taSelection, taToolFunctions, $sanitize, taOptions, $lo, $http){
     // test for the version of $sanitize that is in use
     // You can disable this check by setting taOptions.textAngularSanitize == false
     var gv = {}; $sanitize('', gv);
@@ -898,33 +919,55 @@ angular.module('textAngularSetup', [])
         iconclass: 'fa fa-youtube-play',
         tooltiptext: taTranslations.insertVideo.tooltip,
         action: function(){
+            /* istanbul ignore next: if it's javascript don't worry - though probably should show some kind of error message */
             var urlPrompt;
+            var urlLink;
+            var embed;
+            var th = this;
             urlPrompt = $window.prompt(taTranslations.insertVideo.dialogPrompt, 'https://');
             // block javascript here
-            /* istanbul ignore else: if it's javascript don't worry - though probably should show some kind of error message */
+            /* istanbul ignore next: if it's javascript don't worry - though probably should show some kind of error message */
             if (!blockJavascript(urlPrompt)) {
-
                 if (urlPrompt && urlPrompt !== '' && urlPrompt !== 'https://') {
-
-                    videoId = taToolFunctions.extractYoutubeVideoId(urlPrompt);
-
-                    /* istanbul ignore else: if it's invalid don't worry - though probably should show some kind of error message */
+                    videoProvider = taToolFunctions.determineVideoProvider(urlPrompt);
+                    videoId = taToolFunctions.extractVideoId(urlPrompt,videoProvider);
                     if (videoId) {
-                        // create the embed link
-                        var urlLink = "https://www.youtube.com/embed/" + videoId;
-                        // create the HTML
-                        // for all options see: http://stackoverflow.com/questions/2068344/how-do-i-get-a-youtube-video-thumbnail-from-the-youtube-api
-                        // maxresdefault.jpg seems to be undefined on some.
-                        var embed = '<img class="ta-insert-video" src="https://img.youtube.com/vi/' + videoId + '/hqdefault.jpg" ta-insert-video="' + urlLink + '" contenteditable="false" allowfullscreen="true" frameborder="0" />';
-                        /* istanbul ignore next: don't know how to test this... since it needs a dialogPrompt */
-                        if (taSelection.getSelectionElement().tagName && taSelection.getSelectionElement().tagName.toLowerCase() === 'a') {
-                            // due to differences in implementation between FireFox and Chrome, we must move the
-                            // insertion point past the <a> element, otherwise FireFox inserts inside the <a>
-                            // With this change, both FireFox and Chrome behave the same way!
-                            taSelection.setSelectionAfterElement(taSelection.getSelectionElement());
+                        if (videoProvider === "y"){
+                            // create the embed link
+                            // create the embed link
+                            urlLink = "https://www.youtube.com/embed/" + videoId;
+                            // create the HTML
+                            // for all options see: http://stackoverflow.com/questions/2068344/how-do-i-get-a-youtube-video-thumbnail-from-the-youtube-api
+                            // maxresdefault.jpg seems to be undefined on some.
+                            embed = '<img class="ta-insert-video" src="https://img.youtube.com/vi/' + videoId + '/hqdefault.jpg" ta-insert-video="' + urlLink + '" contenteditable="false" allowfullscreen="true" frameborder="0" />';
+                            /* istanbul ignore next: don't know how to test this... since it needs a dialogPrompt */
+                            if (taSelection.getSelectionElement().tagName && taSelection.getSelectionElement().tagName.toLowerCase() === 'a') {
+                                // due to differences in implementation between FireFox and Chrome, we must move the
+                                // insertion point past the <a> element, otherwise FireFox inserts inside the <a>
+                                // With this change, both FireFox and Chrome behave the same way!
+                                taSelection.setSelectionAfterElement(taSelection.getSelectionElement());
+                            }
+                            // insert
+                            return this.$editor().wrapSelection('insertHTML', embed, true);
                         }
-                        // insert
-                        return this.$editor().wrapSelection('insertHTML', embed, true);
+                        else{
+                            $http({
+                                method: 'GET',
+                                url: 'https://api.dailymotion.com/video/'+videoId+'?fields=thumbnail_360_url'
+                            }).then(function successCallback(response) {
+                                urlLink = "//www.dailymotion.com/embed/video/" + videoId;
+                                embed ='<img class="ta-insert-video" src="'+response.data.thumbnail_360_url+'" ta-insert-video="' + urlLink + '" contenteditable="false" allowfullscreen="true" frameborder="0" />';
+                                if (taSelection.getSelectionElement().tagName && taSelection.getSelectionElement().tagName.toLowerCase() === 'a') {
+                                    taSelection.setSelectionAfterElement(taSelection.getSelectionElement());
+                                }
+                                return th.$editor().wrapSelection('insertHTML', embed, true);
+
+                            }, function errorCallback(response) {
+                                console.log("Http request error");
+                                return false;
+                            });
+
+                        }
                     }
                 }
             }
