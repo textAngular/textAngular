@@ -585,6 +585,20 @@ function validStyles(styleAttr){
 				)
 			|| // Reference #520
 				(key === 'direction' && value.match(/^ltr|rtl|initial|inherit$/))
+			||
+				(key === 'padding' || key === 'padding-bottom' || key === 'padding-top' || key === 'padding-right' || key === 'padding-left') && (
+					value.match(/[0-9\.]*(px|em|rem|%)/)
+				)
+			||
+				key === 'display' && (
+					value === 'block'
+					|| value === 'inline'
+					|| value === 'flex'
+				)
+			||
+				(key === 'margin' || key === 'margin-bottom' || key === 'margin-top' || key === 'margin-right' || key === 'margin-left') && (
+					value.match(/[0-9\.]*(px|em|rem|%)/)
+				)
 			) result += key + ': ' + value + ';';
 		}
 	});
