@@ -586,19 +586,34 @@ function validStyles(styleAttr){
 			|| // Reference #520
 				(key === 'direction' && value.match(/^ltr|rtl|initial|inherit$/))
 			||
-				(key === 'padding' || key === 'padding-bottom' || key === 'padding-top' || key === 'padding-right' || key === 'padding-left') && (
+				((key === 'padding' || key === 'padding-bottom' || key === 'padding-top' || key === 'padding-right' || key === 'padding-left') && (
 					value.match(/[0-9\.]*(px|em|rem|%)/)
-				)
+				))
 			||
-				key === 'display' && (
+				(key === 'display' && (
 					value === 'block'
 					|| value === 'inline'
 					|| value === 'flex'
-				)
+				))
 			||
-				(key === 'margin' || key === 'margin-bottom' || key === 'margin-top' || key === 'margin-right' || key === 'margin-left') && (
+				((key === 'margin' || key === 'margin-bottom' || key === 'margin-top' || key === 'margin-right' || key === 'margin-left') && (
 					value.match(/[0-9\.]*(px|em|rem|%)/)
-				)
+				))
+			||
+				(key === 'text-decoration' && (
+					value === 'none'
+					|| value === 'underline'
+					|| value === 'line-through'
+				))
+			||
+				((key === 'border' || key === 'border-bottom' || key === 'border-top' || key === 'border-right' || key === 'border-left') && (
+					var lengthComponent = '([0-9\.]+(px|em|rem))?';
+					var styleComponent = '(none|hidden|dotted|dashed|solid|double|groove|ridge|inset|outset)?';
+					var colorComponent = '((rgb|hsl)a?\([0-9%,\.]+\)|#[0-9a-f]{3,6}|[a-z]+)?';
+					var borderRegex = new RegExp('^'+lengthComponent+'\s*'+styleComponent+'\s*'+colorComponent+'$', 'i');
+					
+					value.match(borderRegex)
+				))
 			) result += key + ': ' + value + ';';
 		}
 	});
