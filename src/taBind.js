@@ -526,7 +526,7 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
                     // all the code specific to contenteditable divs
                     var _processingPaste = false;
                     /* istanbul ignore next: phantom js cannot test this for some reason */
-                    var processpaste = function(text) {
+                    var processpaste = function(text, isHtml) {
                        var _isOneNote = text!==undefined? text.match(/content=["']*OneNote.File/i): false;
                         /* istanbul ignore else: don't care if nothing pasted */
                         //console.log(text);
@@ -679,14 +679,16 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
                                 text = text.replace(/<li(\s.*)?>.*<\/li(\s.*)?>/i, '<ul>$&</ul>');
                             }
 
-                            // parse whitespace from plaintext input, starting with preceding spaces that get stripped on paste
-                            text = text.replace(/^[ |\u00A0]+/gm, function (match) {
-                                var result = '';
-                                for (var i = 0; i < match.length; i++) {
-                                    result += '&nbsp;';
-                                }
-                                return result;
-                            }).replace(/\n|\r\n|\r/g, '<br />').replace(/\t/g, '&nbsp;&nbsp;&nbsp;&nbsp;');
+                            if (!isHtml) {
+                                // parse whitespace from plaintext input, starting with preceding spaces that get stripped on paste
+                                text = text.replace(/^[ |\u00A0]+/gm, function (match) {
+                                    var result = '';
+                                    for (var i = 0; i < match.length; i++) {
+                                        result += '&nbsp;';
+                                    }
+                                    return result;
+                                }).replace(/\n|\r\n|\r/g, '<br />').replace(/\t/g, '&nbsp;&nbsp;&nbsp;&nbsp;');
+                            }
 
                             if(_pasteHandler) text = _pasteHandler(scope, {$html: text}) || text;
 
@@ -731,17 +733,18 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
                             return false;
                         }
                         if (clipboardData && clipboardData.getData && clipboardData.types.length > 0) {// Webkit - get data from clipboard, put into editdiv, cleanup, then cancel event
-                            var _types = "";
+                            var _types = "", _isHtml = false;
                             for(var _t = 0; _t < clipboardData.types.length; _t++){
                                 _types += " " + clipboardData.types[_t];
                             }
                             /* istanbul ignore next: browser tests */
                             if (/text\/html/i.test(_types)) {
                                 pastedContent = clipboardData.getData('text/html');
+                                _isHtml = true;
                             } else if (/text\/plain/i.test(_types)) {
                                 pastedContent = clipboardData.getData('text/plain');
                             }
-                            processpaste(pastedContent);
+                            processpaste(pastedContent, _isHtml);
                             e.stopPropagation();
                             e.preventDefault();
                             return false;
