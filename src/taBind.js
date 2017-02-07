@@ -536,7 +536,7 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
                                 var textFragment = text.match(/<!--StartFragment-->([\s\S]*?)<!--EndFragment-->/i);
                                 if(!textFragment) textFragment = text;
                                 else textFragment = textFragment[1];
-                                textFragment = textFragment.replace(/<o:p>[\s\S]*?<\/o:p>/ig, '').replace(/class=(["']|)MsoNormal(["']|)/ig, '');
+                                textFragment = textFragment.replace(/<o:p>([\s\S]*?)<\/o:p>/ig, '<span>$1</span>').replace(/class=(["']|)MsoNormal(["']|)/ig, '');
                                 var dom = angular.element("<div>" + textFragment + "</div>");
                                 var targetDom = angular.element("<div></div>");
                                 var _list = {
