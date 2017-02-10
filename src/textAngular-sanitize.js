@@ -608,6 +608,10 @@ function validStyles(styleAttr){
 					value.match(/[0-9\.]*(px|em|rem|%)/)
 				))
 			||
+				((key === 'font-size') && (
+					value.match(/[0-9\.]*(px|em|rem|%)/)
+				))
+			||
 				(key === 'text-decoration' && (
 					value === 'none'
 					|| value === 'underline'
