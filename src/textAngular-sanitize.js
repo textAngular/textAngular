@@ -523,7 +523,9 @@ function validStyles(styleAttr){
 		var v = value.split(':');
 		if(v.length == 2){
 			var key = trim(angular.lowercase(v[0]));
-			var value = trim(angular.lowercase(v[1]));
+			var full_value = trim(angular.lowercase(v[1]));
+			var split_value = full_value.match(/^(.*?)\s+(!important)?$/);
+			var value = trim(split_value[1]); // 0 index is the full thing, 1 is the stuff before "!important" (which need not exist)
 			if(
 				(key === 'color' || key === 'background-color') && (
 					value.match(/^rgb\([0-9%,\. ]*\)$/i)
@@ -615,7 +617,7 @@ function validStyles(styleAttr){
 				((key === 'border' || key === 'border-bottom' || key === 'border-top' || key === 'border-right' || key === 'border-left') && (
 					value.match(borderRegex)
 				))
-			) result += key + ': ' + value + ';';
+			) result += key + ': ' + full_value + ';';
 		}
 	});
 	return result;
