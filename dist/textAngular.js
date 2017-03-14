@@ -424,7 +424,7 @@ angular.module('textAngular.factories', [])
     // use precompiled regexp for speed
     var rsb1 = new RegExp(/<span id="selectionBoundary_\d+_\d+" class="rangySelectionBoundary">[^<>]+?<\/span>/ig);
     var rsb2 = new RegExp(/<span class="rangySelectionBoundary" id="selectionBoundary_\d+_\d+">[^<>]+?<\/span>/ig);
-    var rsb3 = new RegExp(/<span id="selectionBoundary_\d+_\d+" class="rangySelectionBoundary">[^<>]+?<\/span>/ig);
+    var rsb3 = new RegExp(/<span id="selectionBoundary_\d+_\d+" class="rangySelectionBoundary".*?>[^<>]+?<\/span>/ig);
 
     return function taSanitize(unsafe, oldsafe, ignore){
         // unsafe html should NEVER built into a DOM object via angular.element. This allows XSS to be inserted and run.
