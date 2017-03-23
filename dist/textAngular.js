@@ -2866,7 +2866,7 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 
 // this global var is used to prevent multiple fires of the drop event. Needs to be global to the textAngular file.
 var dropFired = false;
-var textAngular = angular.module("textAngular", ['ngSanitize', 'textAngularSetup', 'textAngular.factories', 'textAngular.DOM', 'textAngular.validators', 'textAngular.taBind']); //This makes ngSanitize required
+var textAngular = angular.module("textAngular", ['ngSanitize', 'textAngularSetup', 'textAngular.factories', 'textAngular.DOM', 'textAngular.validators', 'textAngular.taBind', 'ui.bootstrap']); //This makes ngSanitize required
 
 textAngular.config([function(){
     // clear taTools variable. Just catches testing and any other time that this config may run multiple times...
@@ -2875,9 +2875,9 @@ textAngular.config([function(){
 
 textAngular.directive("textAngular", [
     '$compile', '$timeout', 'taOptions', 'taSelection', 'taExecCommand',
-    'textAngularManager', '$document', '$animate', '$log', '$q', '$parse',
+    'textAngularManager', '$document', '$animate', '$log', '$q', '$parse', '$uibModal',
     function($compile, $timeout, taOptions, taSelection, taExecCommand,
-        textAngularManager, $document, $animate, $log, $q, $parse){
+        textAngularManager, $document, $animate, $log, $q, $parse, $uibModal){
         return {
             require: '?ngModel',
             scope: {},
@@ -3718,8 +3718,8 @@ textAngular.directive("textAngular", [
         };
     }
 ]);
-textAngular.service('textAngularManager', ['taToolExecuteAction', 'taTools', 'taRegisterTool', '$interval', '$rootScope', '$log',
-    function(taToolExecuteAction, taTools, taRegisterTool, $interval, $rootScope, $log){
+textAngular.service('textAngularManager', ['taToolExecuteAction', 'taTools', 'taRegisterTool', '$interval', '$rootScope', '$log', '$uibModal',
+    function(taToolExecuteAction, taTools, taRegisterTool, $interval, $rootScope, $log, $uibModal){
     // this service is used to manage all textAngular editors and toolbars.
     // All publicly published functions that modify/need to access the toolbar or editor scopes should be in here
     // these contain references to all the editors and toolbars that have been initialised in this app
@@ -4086,8 +4086,8 @@ textAngular.service('textAngularManager', ['taToolExecuteAction', 'taTools', 'ta
     };
 }]);
 textAngular.directive('textAngularToolbar', [
-    '$compile', 'textAngularManager', 'taOptions', 'taTools', 'taToolExecuteAction', '$window',
-    function($compile, textAngularManager, taOptions, taTools, taToolExecuteAction, $window){
+    '$compile', 'textAngularManager', 'taOptions', 'taTools', 'taToolExecuteAction', '$window', '$uibModal',
+    function($compile, textAngularManager, taOptions, taTools, taToolExecuteAction, $window, $uibModals){
         return {
             scope: {
                 name: '@' // a name IS required

@@ -4,13 +4,13 @@
     define('textAngular', ["rangy","rangy/lib/rangy-selectionsaverestore"], function (a0,b1) {
       return (root['textAngular.name'] = factory(a0,b1));
     });
-  } else if (typeof exports === 'object') {
+  } else if (typeof module === 'object' && module.exports) {
     // Node. Does not work with strict CommonJS, but
     // only CommonJS-like environments that support module.exports,
     // like Node.
     module.exports = factory(require("rangy"),require("rangy/lib/rangy-selectionsaverestore"));
   } else {
-    root['textAngular'] = factory(rangy);
+    root['textAngular'] = factory(root["rangy"]);
   }
 }(this, function (rangy) {
 
@@ -79,7 +79,7 @@ function registerTextAngularTool(name, toolDefinition){
     taTools[name] = toolDefinition;
 }
 
-angular.module('textAngularSetup', [])
+angular.module('textAngularSetup', ['ui.bootstrap'])
 .constant('taRegisterTool', registerTextAngularTool)
 .value('taTools', taTools)
 // Here we set up the global display defaults, to set your own use a angular $provider#decorator.
@@ -452,8 +452,8 @@ angular.module('textAngularSetup', [])
         }
     };
 }])
-.run(['taRegisterTool', '$window', 'taTranslations', 'taSelection', 'taToolFunctions', '$sanitize', 'taOptions', '$log',
-    function(taRegisterTool, $window, taTranslations, taSelection, taToolFunctions, $sanitize, taOptions, $log){
+.run(['taRegisterTool', '$window', 'taTranslations', 'taSelection', 'taToolFunctions', '$sanitize', 'taOptions', '$log', '$uibModal',
+    function(taRegisterTool, $window, taTranslations, taSelection, taToolFunctions, $sanitize, taOptions, $log, $uibModal){
     // test for the version of $sanitize that is in use
     // You can disable this check by setting taOptions.textAngularSanitize == false
     var gv = {}; $sanitize('', gv);
@@ -956,20 +956,47 @@ angular.module('textAngularSetup', [])
         iconclass: 'fa fa-link',
         action: function(){
             var urlLink;
-            // if this link has already been set, we need to just edit the existing link
-            /* istanbul ignore if: we do not test this */
-            if (taSelection.getSelectionElement().tagName && taSelection.getSelectionElement().tagName.toLowerCase() === 'a') {
-                urlLink = $window.prompt(taTranslations.insertLink.dialogPrompt, taSelection.getSelectionElement().href);
-            } else {
-                urlLink = $window.prompt(taTranslations.insertLink.dialogPrompt, 'http://');
-            }
-            if(urlLink && urlLink !== '' && urlLink !== 'http://'){
-                // block javascript here
-                /* istanbul ignore else: if it's javascript don't worry - though probably should show some kind of error message */
-                if (!blockJavascript(urlLink)) {
-                    return this.$editor().wrapSelection('createLink', urlLink, true);
+            var that = this;
+
+            var selection = taSelection.getSelection();
+            console.log(selection);
+
+            function afterSubmit() {
+                taSelection.setSelection(selection.start.element, selection.end.element, selection.start.offset - 1, selection.end.offset - 1);
+
+                if(urlLink && urlLink !== '' && urlLink !== 'http://'){
+                    // block javascript here
+                    /* istanbul ignore else: if it's javascript don't worry - though probably should show some kind of error message */
+                    if (!blockJavascript(urlLink)) {
+                        return that.$editor().wrapSelection('createLink', urlLink, true);
+                    }
                 }
             }
+
+            var modal = $uibModal.open({
+                animation: true,
+                templateUrl: '../views/insertLink.html',
+                backdrop: 'static',
+                controller: function ($scope, $uibModalInstance) {
+
+                    $scope.cancel = $uibModalInstance.close;
+
+                    $scope.text = taTranslations.insertLink.dialogPrompt;
+                    $scope.url = taSelection.getSelectionElement().tagName && taSelection.getSelectionElement().tagName.toLowerCase() === 'a' ? taSelection.getSelectionElement().href : 'http://';
+
+                    $scope.submit = function() {
+                        urlLink = $scope.url;
+                        $uibModalInstance.close();
+                        afterSubmit();
+                    };
+
+                    $scope.close = function () {
+                        $uibModalInstance.close();
+                    };
+                }
+            });
+
+
         },
         activeState: function(commonElement){
             if(commonElement) return commonElement[0].tagName === 'A';
@@ -3896,7 +3923,7 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 
 // this global var is used to prevent multiple fires of the drop event. Needs to be global to the textAngular file.
 var dropFired = false;
-var textAngular = angular.module("textAngular", ['ngSanitize', 'textAngularSetup', 'textAngular.factories', 'textAngular.DOM', 'textAngular.validators', 'textAngular.taBind']); //This makes ngSanitize required
+var textAngular = angular.module("textAngular", ['ngSanitize', 'textAngularSetup', 'textAngular.factories', 'textAngular.DOM', 'textAngular.validators', 'textAngular.taBind', 'ui.bootstrap']); //This makes ngSanitize required
 
 textAngular.config([function(){
     // clear taTools variable. Just catches testing and any other time that this config may run multiple times...
@@ -3905,9 +3932,9 @@ textAngular.config([function(){
 
 textAngular.directive("textAngular", [
     '$compile', '$timeout', 'taOptions', 'taSelection', 'taExecCommand',
-    'textAngularManager', '$document', '$animate', '$log', '$q', '$parse',
+    'textAngularManager', '$document', '$animate', '$log', '$q', '$parse', '$uibModal',
     function($compile, $timeout, taOptions, taSelection, taExecCommand,
-        textAngularManager, $document, $animate, $log, $q, $parse){
+        textAngularManager, $document, $animate, $log, $q, $parse, $uibModal){
         return {
             require: '?ngModel',
             scope: {},
@@ -4748,8 +4775,8 @@ textAngular.directive("textAngular", [
         };
     }
 ]);
-textAngular.service('textAngularManager', ['taToolExecuteAction', 'taTools', 'taRegisterTool', '$interval', '$rootScope', '$log',
-    function(taToolExecuteAction, taTools, taRegisterTool, $interval, $rootScope, $log){
+textAngular.service('textAngularManager', ['taToolExecuteAction', 'taTools', 'taRegisterTool', '$interval', '$rootScope', '$log', '$uibModal',
+    function(taToolExecuteAction, taTools, taRegisterTool, $interval, $rootScope, $log, $uibModal){
     // this service is used to manage all textAngular editors and toolbars.
     // All publicly published functions that modify/need to access the toolbar or editor scopes should be in here
     // these contain references to all the editors and toolbars that have been initialised in this app
@@ -5116,8 +5143,8 @@ textAngular.service('textAngularManager', ['taToolExecuteAction', 'taTools', 'ta
     };
 }]);
 textAngular.directive('textAngularToolbar', [
-    '$compile', 'textAngularManager', 'taOptions', 'taTools', 'taToolExecuteAction', '$window',
-    function($compile, textAngularManager, taOptions, taTools, taToolExecuteAction, $window){
+    '$compile', 'textAngularManager', 'taOptions', 'taTools', 'taToolExecuteAction', '$window', '$uibModal',
+    function($compile, textAngularManager, taOptions, taTools, taToolExecuteAction, $window, $uibModals){
         return {
             scope: {
                 name: '@' // a name IS required

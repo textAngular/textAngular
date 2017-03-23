@@ -63,7 +63,7 @@ function registerTextAngularTool(name, toolDefinition){
     taTools[name] = toolDefinition;
 }
 
-angular.module('textAngularSetup', [])
+angular.module('textAngularSetup', ['ui.bootstrap'])
 .constant('taRegisterTool', registerTextAngularTool)
 .value('taTools', taTools)
 // Here we set up the global display defaults, to set your own use a angular $provider#decorator.
@@ -436,8 +436,8 @@ angular.module('textAngularSetup', [])
         }
     };
 }])
-.run(['taRegisterTool', '$window', 'taTranslations', 'taSelection', 'taToolFunctions', '$sanitize', 'taOptions', '$log',
-    function(taRegisterTool, $window, taTranslations, taSelection, taToolFunctions, $sanitize, taOptions, $log){
+.run(['taRegisterTool', '$window', 'taTranslations', 'taSelection', 'taToolFunctions', '$sanitize', 'taOptions', '$log', '$uibModal',
+    function(taRegisterTool, $window, taTranslations, taSelection, taToolFunctions, $sanitize, taOptions, $log, $uibModal){
     // test for the version of $sanitize that is in use
     // You can disable this check by setting taOptions.textAngularSanitize == false
     var gv = {}; $sanitize('', gv);
@@ -940,20 +940,47 @@ angular.module('textAngularSetup', [])
         iconclass: 'fa fa-link',
         action: function(){
             var urlLink;
-            // if this link has already been set, we need to just edit the existing link
-            /* istanbul ignore if: we do not test this */
-            if (taSelection.getSelectionElement().tagName && taSelection.getSelectionElement().tagName.toLowerCase() === 'a') {
-                urlLink = $window.prompt(taTranslations.insertLink.dialogPrompt, taSelection.getSelectionElement().href);
-            } else {
-                urlLink = $window.prompt(taTranslations.insertLink.dialogPrompt, 'http://');
-            }
-            if(urlLink && urlLink !== '' && urlLink !== 'http://'){
-                // block javascript here
-                /* istanbul ignore else: if it's javascript don't worry - though probably should show some kind of error message */
-                if (!blockJavascript(urlLink)) {
-                    return this.$editor().wrapSelection('createLink', urlLink, true);
+            var that = this;
+
+            var selection = taSelection.getSelection();
+            console.log(selection);
+
+            function afterSubmit() {
+                taSelection.setSelection(selection.start.element, selection.end.element, selection.start.offset - 1, selection.end.offset - 1);
+
+                if(urlLink && urlLink !== '' && urlLink !== 'http://'){
+                    // block javascript here
+                    /* istanbul ignore else: if it's javascript don't worry - though probably should show some kind of error message */
+                    if (!blockJavascript(urlLink)) {
+                        return that.$editor().wrapSelection('createLink', urlLink, true);
+                    }
                 }
             }
+
+            var modal = $uibModal.open({
+                animation: true,
+                templateUrl: '../views/insertLink.html',
+                backdrop: 'static',
+                controller: function ($scope, $uibModalInstance) {
+
+                    $scope.cancel = $uibModalInstance.close;
+
+                    $scope.text = taTranslations.insertLink.dialogPrompt;
+                    $scope.url = taSelection.getSelectionElement().tagName && taSelection.getSelectionElement().tagName.toLowerCase() === 'a' ? taSelection.getSelectionElement().href : 'http://';
+
+                    $scope.submit = function() {
+                        urlLink = $scope.url;
+                        $uibModalInstance.close();
+                        afterSubmit();
+                    };
+
+                    $scope.close = function () {
+                        $uibModalInstance.close();
+                    };
+                }
+            });
+
+
         },
         activeState: function(commonElement){
             if(commonElement) return commonElement[0].tagName === 'A';
