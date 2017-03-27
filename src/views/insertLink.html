@@ -1,7 +1,7 @@
-<div>
+<div class="insert-link-modal">
     {{ text }}
-    <form ng-submit="submit()">
-        <input type="text" ng-model="url" />
+    <form ng-submit="submit()" class="insert-link-form">
+        <input type="text" ng-model="url" class="link" />
     </form>
-    <span ng-click="cancel()">close</span>
+    <span ng-click="cancel()" class="close-button"><i class="fa fa-cross"></i></span>
 </div>
