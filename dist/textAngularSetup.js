@@ -1,4 +1,3 @@
-
 // tests against the current jqLite/jquery implementation if this can be an element
 function validElementString(string){
     try{
@@ -401,6 +400,14 @@ angular.module('textAngularSetup', ['ui.bootstrap'])
 
                 var urlLink;
 
+                var modalHTML = '<div class="insert-link-modal">' +
+                                    '{{ text }}' +
+                                    '<form ng-submit="submit()" class="insert-link-form">' +
+                                        '<input type="text" ng-model="url" class="link" />' +
+                                    '</form>' +
+                                    '<span ng-click="cancel()" class="close-button"><i class="fa fa-cross"></i></span>' +
+                                '</div>';
+
                 function afterSubmit() {
                     if(urlLink && urlLink !== '' && urlLink !== 'http://'){
                         $element.attr('href', urlLink);
@@ -411,7 +418,7 @@ angular.module('textAngularSetup', ['ui.bootstrap'])
 
                 var modal = $uibModal.open({
                     animation: true,
-                    templateUrl: '../views/insertLink.html',
+                    template: modalHTML,
                     backdrop: 'static',
                     controller: function ($scope, $uibModalInstance) {
 
@@ -972,6 +979,14 @@ angular.module('textAngularSetup', ['ui.bootstrap'])
 
             var selection = taSelection.getSelection();
 
+            var modalHTML = '<div class="insert-link-modal">' +
+                                '{{ text }}' +
+                                '<form ng-submit="submit()" class="insert-link-form">' +
+                                    '<input type="text" ng-model="url" class="link" />' +
+                                '</form>' +
+                                '<span ng-click="cancel()" class="close-button"><i class="fa fa-cross"></i></span>' +
+                            '</div>';
+
             function afterSubmit() {
                 //taSelection.setSelectionToElementStart();
                 var start = selection.start.offset <= 0 ? 0 : selection.start.offset - 1;
@@ -989,7 +1004,7 @@ angular.module('textAngularSetup', ['ui.bootstrap'])
 
             var modal = $uibModal.open({
                 animation: true,
-                templateUrl: '../views/insertLink.html',
+                template: modalHTML,
                 backdrop: 'static',
                 controller: function ($scope, $uibModalInstance) {
 
