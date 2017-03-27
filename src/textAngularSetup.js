@@ -899,7 +899,7 @@ angular.module('textAngularSetup', ['ui.bootstrap'])
 
     var checkLink = function(link) {
         var allOk = true;
-        var urlRegEx = /[(http(s)?):\/\/(www\.)?a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)/;
+        var urlRegEx = /[(http(s)?):\/\/(www.)]+[?a-zA-Z0-9@:%._+~#=]+\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_+.~#?&//=]*)/;
 
         if (blockJavascript(link)) allOk = false;
 
