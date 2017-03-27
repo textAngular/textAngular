@@ -404,11 +404,13 @@ angular.module('textAngularSetup', ['ui.bootstrap'])
                     '<div class="insert-link-modal">' +
                         '<h2>{{ text }}</h2>' +
                         '<form ng-submit="submit()" class="insert-link-form">' +
-                            '<input type="text" ng-model="linkName" class="name" placeholder="Link name" />' +
-                            '<input type="text" ng-model="url" class="link" placeholder="Link url" />' +
+                            '<input type="text" ng-model="linkName" class="name" />' +
+                            '<input type="text" ng-model="url" class="link" />' +
                             '<input type="submit" class="button" value="Add link" />' +
                         '</form>' +
-                        '<span ng-click="cancel()" class="close-button"><i class="fa fa-times"></i></span>' +
+                        '<span ng-click="cancel()" class="close-button">' +
+                            '<div class="close-icon" data-ng-include="" src="\'./application/icons/closeButton.svg\'" uib-tooltip="Cancel" tooltip-placement="bottom"></div>' +
+                        '</span>' +
                     '</div>';
 
                 function afterSubmit() {
@@ -919,7 +921,9 @@ angular.module('textAngularSetup', ['ui.bootstrap'])
                 '<input type="text" ng-model="url" class="link" />' +
                 '<input type="submit" class="button" value="Add link" />' +
             '</form>' +
-        '<span ng-click="cancel()" class="close-button"><i class="fa fa-times"></i></span>' +
+            '<span ng-click="cancel()" class="close-button">' +
+                '<div class="close-icon" data-ng-include="" src="\'./application/icons/closeButton.svg\'" uib-tooltip="Cancel" tooltip-placement="bottom"></div>' +
+            '</span>' +
         '</div>';
 
     taRegisterTool('insertImage', {
