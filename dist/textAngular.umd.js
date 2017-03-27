@@ -416,6 +416,17 @@ angular.module('textAngularSetup', ['ui.bootstrap'])
 
                 var urlLink;
 
+                var insertLinkModalTemplate =
+                    '<div class="insert-link-modal">' +
+                        '<h2>{{ text }}</h2>' +
+                        '<form ng-submit="submit()" class="insert-link-form">' +
+                            '<input type="text" ng-model="linkName" class="name" />' +
+                            '<input type="text" ng-model="url" class="link" />' +
+                            '<input type="submit" class="button" value="Add link" />' +
+                        '</form>' +
+                        '<span ng-click="cancel()" class="close-button"><i class="fa fa-times"></i></span>' +
+                    '</div>';
+
                 function afterSubmit() {
                     if(urlLink && urlLink !== '' && urlLink !== 'http://'){
                         $element.attr('href', urlLink);
