@@ -1010,6 +1010,11 @@ angular.module('textAngularSetup', ['ui.bootstrap'])
 
             var selection = taSelection.getSelection();
 
+            var start = selection.container.firstChild ? selection.container.firstChild.length : 0;
+            var end = selection.container.lastChild ? selection.container.innerText.length - selection.container.lastChild.length : selection.container.innerText.length;
+
+            var selectedText = selection.container.innerText.substring(start, end);
+
             function afterSubmit() {
                 //taSelection.setSelectionToElementStart();
                 var start = selection.start.offset <= 0 ? 0 : selection.start.offset - 1;
@@ -1034,6 +1039,7 @@ angular.module('textAngularSetup', ['ui.bootstrap'])
                     $scope.cancel = $uibModalInstance.close;
 
                     $scope.text = taTranslations.insertLink.dialogPrompt;
+                    $scope.linkName = selectedText;
                     $scope.url = taSelection.getSelectionElement().tagName && taSelection.getSelectionElement().tagName.toLowerCase() === 'a' ? taSelection.getSelectionElement().href : 'http://';
 
                     $scope.submit = function() {

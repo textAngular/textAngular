@@ -420,8 +420,8 @@ angular.module('textAngularSetup', ['ui.bootstrap'])
                     '<div class="insert-link-modal">' +
                         '<h2>{{ text }}</h2>' +
                         '<form ng-submit="submit()" class="insert-link-form">' +
-                            '<input type="text" ng-model="linkName" class="name" />' +
-                            '<input type="text" ng-model="url" class="link" />' +
+                            '<input type="text" ng-model="linkName" class="name" placeholder="Link name" />' +
+                            '<input type="text" ng-model="url" class="link" placeholder="Link url" />' +
                             '<input type="submit" class="button" value="Add link" />' +
                         '</form>' +
                         '<span ng-click="cancel()" class="close-button">' +
@@ -933,8 +933,8 @@ angular.module('textAngularSetup', ['ui.bootstrap'])
         '<div class="insert-link-modal">' +
             '<h2>{{ text }}</h2>' +
             '<form ng-submit="submit()" class="insert-link-form">' +
-                '<input type="text" ng-model="linkName" class="name" />' +
-                '<input type="text" ng-model="url" class="link" />' +
+                '<input type="text" ng-model="linkName" class="name" placeholder="Link name" />' +
+                '<input type="text" ng-model="url" class="link" placeholder="Link url" />' +
                 '<input type="submit" class="button" value="Add link" />' +
             '</form>' +
             '<span ng-click="cancel()" class="close-button">' +
@@ -1025,6 +1025,17 @@ angular.module('textAngularSetup', ['ui.bootstrap'])
             var that = this;
 
             var selection = taSelection.getSelection();
+            var selectionEl = taSelection.getSelectionElement();
+
+            console.log(selection);
+
+            var start = selection.container.firstChild ? selection.container.firstChild.length : 0;
+            var end = selection.container.lastChild ? selection.container.innerText.length - selection.container.lastChild.length : selection.container.innerText.length;
+
+            var selectedText = selection.container.innerText.substring(start, end);
+            console.log(start);
+            console.log(end);
+            console.log(selectedText);
 
             function afterSubmit() {
                 //taSelection.setSelectionToElementStart();
@@ -1050,6 +1061,7 @@ angular.module('textAngularSetup', ['ui.bootstrap'])
                     $scope.cancel = $uibModalInstance.close;
 
                     $scope.text = taTranslations.insertLink.dialogPrompt;
+                    $scope.linkName = 'test123';
                     $scope.url = taSelection.getSelectionElement().tagName && taSelection.getSelectionElement().tagName.toLowerCase() === 'a' ? taSelection.getSelectionElement().href : 'http://';
 
                     $scope.submit = function() {
