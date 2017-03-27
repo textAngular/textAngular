@@ -416,14 +416,6 @@ angular.module('textAngularSetup', ['ui.bootstrap'])
 
                 var urlLink;
 
-                var modalHTML = '<div class="insert-link-modal">' +
-                                    '{{ text }}' +
-                                    '<form ng-submit="submit()" class="insert-link-form">' +
-                                        '<input type="text" ng-model="url" class="link" />' +
-                                    '</form>' +
-                                    '<span ng-click="cancel()" class="close-button"><i class="fa fa-times"></i></span>' +
-                                '</div>';
-
                 function afterSubmit() {
                     if(urlLink && urlLink !== '' && urlLink !== 'http://'){
                         $element.attr('href', urlLink);
@@ -434,7 +426,7 @@ angular.module('textAngularSetup', ['ui.bootstrap'])
 
                 var modal = $uibModal.open({
                     animation: true,
-                    template: modalHTML,
+                    template: insertLinkModalTemplate,
                     backdrop: 'static',
                     controller: function ($scope, $uibModalInstance) {
 
@@ -912,13 +904,13 @@ angular.module('textAngularSetup', ['ui.bootstrap'])
 
     var checkLink = function(link) {
         var allOk = true;
-        var urlRegEx = /[(http(s)?):\/\/(www\.)?a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)/ig;
+        var urlRegEx = /[(http(s)?):\/\/(www\.)?a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)/;
 
         if (blockJavascript(link)) allOk = false;
 
         if (link.indexOf('http://') !== 0 && link.indexOf('https://') !== 0) allOk = false;
 
-        if (link.match(urlRegEx)) allOk = false;
+        if (link.match(urlRegEx) === null) allOk = false;
 
         return allOk;
 
@@ -977,7 +969,7 @@ angular.module('textAngularSetup', ['ui.bootstrap'])
             urlPrompt = $window.prompt(taTranslations.insertVideo.dialogPrompt, 'https://');
             // block javascript here
             /* istanbul ignore else: if it's javascript don't worry - though probably should show some kind of error message */
-            if (!blockJavascript(urlPrompt)) {
+            if (!checkLink(urlPrompt)) {
 
                 if (urlPrompt && urlPrompt !== '' && urlPrompt !== 'https://') {
 
@@ -1019,16 +1011,6 @@ angular.module('textAngularSetup', ['ui.bootstrap'])
 
             var selection = taSelection.getSelection();
 
-            var modalHTML = '<div class="insert-link-modal">' +
-                                '<h2>{{ text }}</h2>' +
-                                '<form ng-submit="submit()" class="insert-link-form">' +
-                                    '<input type="text" ng-model="linkName" class="name" />' +
-                                    '<input type="text" ng-model="url" class="link" />' +
-                                    '<input type="submit" class="button" value="Add link" />' +
-                                '</form>' +
-                                '<span ng-click="cancel()" class="close-button"><i class="fa fa-times"></i></span>' +
-                            '</div>';
-
             function afterSubmit() {
                 //taSelection.setSelectionToElementStart();
                 var start = selection.start.offset <= 0 ? 0 : selection.start.offset - 1;
@@ -1038,7 +1020,7 @@ angular.module('textAngularSetup', ['ui.bootstrap'])
                 if(urlLink && urlLink !== '' && urlLink !== 'http://'){
                     // block javascript here
                     /* istanbul ignore else: if it's javascript don't worry - though probably should show some kind of error message */
-                    if (!blockJavascript(urlLink)) {
+                    if (checkLink(urlLink)) {
                         return that.$editor().wrapSelection('createLink', urlLink, true);
                     }
                 }
@@ -1046,7 +1028,7 @@ angular.module('textAngularSetup', ['ui.bootstrap'])
 
             var modal = $uibModal.open({
                 animation: true,
-                template: modalHTML,
+                template: insertLinkModalTemplate,
                 backdrop: 'static',
                 controller: function ($scope, $uibModalInstance) {
 
