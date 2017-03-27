@@ -452,7 +452,8 @@ angular.module('textAngularSetup', ['ui.bootstrap'])
                         $scope.close = function () {
                             $uibModalInstance.close();
                         };
-                    }
+                    },
+                    size: 'insertlink'
                 });
 
             });
@@ -1038,7 +1039,8 @@ angular.module('textAngularSetup', ['ui.bootstrap'])
                     $scope.close = function () {
                         $uibModalInstance.close();
                     };
-                }
+                },
+                size: 'insertlink'
             });
 
 

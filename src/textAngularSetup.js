@@ -405,7 +405,7 @@ angular.module('textAngularSetup', ['ui.bootstrap'])
                                     '<form ng-submit="submit()" class="insert-link-form">' +
                                         '<input type="text" ng-model="url" class="link" />' +
                                     '</form>' +
-                                    '<span ng-click="cancel()" class="close-button"><i class="fa fa-cross"></i></span>' +
+                                    '<span ng-click="cancel()" class="close-button"><i class="fa fa-times"></i></span>' +
                                 '</div>';
 
                 function afterSubmit() {
@@ -985,7 +985,7 @@ angular.module('textAngularSetup', ['ui.bootstrap'])
                                 '<form ng-submit="submit()" class="insert-link-form">' +
                                     '<input type="text" ng-model="url" class="link" />' +
                                 '</form>' +
-                                '<span ng-click="cancel()" class="close-button"><i class="fa fa-cross"></i></span>' +
+                                '<span ng-click="cancel()" class="close-button"><i class="fa fa-times"></i></span>' +
                             '</div>';
 
             function afterSubmit() {
