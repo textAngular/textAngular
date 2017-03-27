@@ -404,8 +404,8 @@ angular.module('textAngularSetup', ['ui.bootstrap'])
                     '<div class="insert-link-modal">' +
                         '<h2>{{ text }}</h2>' +
                         '<form ng-submit="submit()" class="insert-link-form">' +
-                            '<input type="text" ng-model="linkName" class="name" />' +
-                            '<input type="text" ng-model="url" class="link" />' +
+                            '<input type="text" ng-model="linkName" class="name" placeholder="Link name" />' +
+                            '<input type="text" ng-model="url" class="link" placeholder="Link url" />' +
                             '<input type="submit" class="button" value="Add link" />' +
                         '</form>' +
                         '<span ng-click="cancel()" class="close-button">' +
@@ -917,8 +917,8 @@ angular.module('textAngularSetup', ['ui.bootstrap'])
         '<div class="insert-link-modal">' +
             '<h2>{{ text }}</h2>' +
             '<form ng-submit="submit()" class="insert-link-form">' +
-                '<input type="text" ng-model="linkName" class="name" />' +
-                '<input type="text" ng-model="url" class="link" />' +
+                '<input type="text" ng-model="linkName" class="name" placeholder="Link name" />' +
+                '<input type="text" ng-model="url" class="link" placeholder="Link url" />' +
                 '<input type="submit" class="button" value="Add link" />' +
             '</form>' +
             '<span ng-click="cancel()" class="close-button">' +
