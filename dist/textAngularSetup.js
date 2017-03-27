@@ -991,7 +991,7 @@ angular.module('textAngularSetup', ['ui.bootstrap'])
             function afterSubmit() {
                 //taSelection.setSelectionToElementStart();
                 var start = selection.start.offset <= 0 ? 0 : selection.start.offset - 1;
-                var end = selection.end.offset >= selection.end.element.previousSibling.length -1 ? selection.end.element.previousSibling.length - 1 : selection.end.offset - 1;
+                var end = selection.end.element.lastChild ? selection.end.offset - 1 : selection.end.offset;
                 taSelection.setSelection(selection.start.element, selection.end.element, start, end);
 
                 if(urlLink && urlLink !== '' && urlLink !== 'http://'){

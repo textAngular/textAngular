@@ -421,7 +421,7 @@ angular.module('textAngularSetup', ['ui.bootstrap'])
                                     '<form ng-submit="submit()" class="insert-link-form">' +
                                         '<input type="text" ng-model="url" class="link" />' +
                                     '</form>' +
-                                    '<span ng-click="cancel()" class="close-button"><i class="fa fa-cross"></i></span>' +
+                                    '<span ng-click="cancel()" class="close-button"><i class="fa fa-times"></i></span>' +
                                 '</div>';
 
                 function afterSubmit() {
@@ -1001,13 +1001,15 @@ angular.module('textAngularSetup', ['ui.bootstrap'])
                                 '<form ng-submit="submit()" class="insert-link-form">' +
                                     '<input type="text" ng-model="url" class="link" />' +
                                 '</form>' +
-                                '<span ng-click="cancel()" class="close-button"><i class="fa fa-cross"></i></span>' +
+                                '<span ng-click="cancel()" class="close-button"><i class="fa fa-times"></i></span>' +
                             '</div>';
 
             function afterSubmit() {
                 //taSelection.setSelectionToElementStart();
+                console.log(selection);
+                console.log(selection.end.element.previousSibling.length);
                 var start = selection.start.offset <= 0 ? 0 : selection.start.offset - 1;
-                var end = selection.end.offset >= selection.end.element.previousSibling.length -1 ? selection.end.element.previousSibling.length - 1 : selection.end.offset - 1;
+                var end = selection.end.element.lastChild ? selection.end.offset - 1 : selection.end.offset;
                 taSelection.setSelection(selection.start.element, selection.end.element, start, end);
 
                 if(urlLink && urlLink !== '' && urlLink !== 'http://'){
