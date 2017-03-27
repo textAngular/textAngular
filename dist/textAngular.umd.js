@@ -263,7 +263,7 @@ angular.module('textAngularSetup', ['ui.bootstrap'])
     },
     insertLink: {
         tooltip: 'Insert / edit link',
-        dialogPrompt: "Please enter a URL to insert"
+        dialogPrompt: "Insert link"
     },
     editLink: {
         reLinkButton: {
@@ -906,11 +906,34 @@ angular.module('textAngularSetup', ['ui.bootstrap'])
 
     /* istanbul ignore next: if it's javascript don't worry - though probably should show some kind of error message */
     var blockJavascript = function (link) {
-        if (link.toLowerCase().indexOf('javascript')!==-1) {
-            return true;
-        }
-        return false;
+        return link.toLowerCase().indexOf('javascript') !== -1;
+
     };
+
+    var checkLink = function(link) {
+        var allOk = true;
+        var urlRegEx = /[(http(s)?):\/\/(www\.)?a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)/ig;
+
+        if (blockJavascript(link)) allOk = false;
+
+        if (link.indexOf('http://') !== 0 && link.indexOf('https://') !== 0) allOk = false;
+
+        if (link.match(urlRegEx)) allOk = false;
+
+        return allOk;
+
+    };
+
+    var insertLinkModalTemplate =
+        '<div class="insert-link-modal">' +
+            '<h2>{{ text }}</h2>' +
+            '<form ng-submit="submit()" class="insert-link-form">' +
+                '<input type="text" ng-model="linkName" class="name" />' +
+                '<input type="text" ng-model="url" class="link" />' +
+                '<input type="submit" class="button" value="Add link" />' +
+            '</form>' +
+        '<span ng-click="cancel()" class="close-button"><i class="fa fa-times"></i></span>' +
+        '</div>';
 
     taRegisterTool('insertImage', {
         iconclass: 'fa fa-picture-o',
@@ -997,17 +1020,17 @@ angular.module('textAngularSetup', ['ui.bootstrap'])
             var selection = taSelection.getSelection();
 
             var modalHTML = '<div class="insert-link-modal">' +
-                                '{{ text }}' +
+                                '<h2>{{ text }}</h2>' +
                                 '<form ng-submit="submit()" class="insert-link-form">' +
+                                    '<input type="text" ng-model="linkName" class="name" />' +
                                     '<input type="text" ng-model="url" class="link" />' +
+                                    '<input type="submit" class="button" value="Add link" />' +
                                 '</form>' +
                                 '<span ng-click="cancel()" class="close-button"><i class="fa fa-times"></i></span>' +
                             '</div>';
 
             function afterSubmit() {
                 //taSelection.setSelectionToElementStart();
-                console.log(selection);
-                console.log(selection.end.element.previousSibling.length);
                 var start = selection.start.offset <= 0 ? 0 : selection.start.offset - 1;
                 var end = selection.end.element.lastChild ? selection.end.offset - 1 : selection.end.offset;
                 taSelection.setSelection(selection.start.element, selection.end.element, start, end);
