@@ -414,12 +414,40 @@ angular.module('textAngularSetup', ['ui.bootstrap'])
             var reLinkButton = angular.element('<button type="button" class="btn btn-default btn-sm btn-small" tabindex="-1" unselectable="on" title="' + taTranslations.editLink.reLinkButton.tooltip + '"><i class="fa fa-edit icon-edit"></i></button>');
             reLinkButton.on('click', function(event){
                 event.preventDefault();
-                var urlLink = $window.prompt(taTranslations.insertLink.dialogPrompt, $element.attr('href'));
-                if(urlLink && urlLink !== '' && urlLink !== 'http://'){
-                    $element.attr('href', urlLink);
-                    editorScope.updateTaBindtaTextElement();
+
+                var urlLink;
+
+                function afterSubmit() {
+                    if(urlLink && urlLink !== '' && urlLink !== 'http://'){
+                        $element.attr('href', urlLink);
+                        editorScope.updateTaBindtaTextElement();
+                    }
+                    editorScope.hidePopover();
                 }
-                editorScope.hidePopover();
+
+                var modal = $uibModal.open({
+                    animation: true,
+                    templateUrl: '../views/insertLink.html',
+                    backdrop: 'static',
+                    controller: function ($scope, $uibModalInstance) {
+
+                        $scope.cancel = $uibModalInstance.close;
+
+                        $scope.text = taTranslations.insertLink.dialogPrompt;
+                        $scope.url = $element.attr('href');
+
+                        $scope.submit = function() {
+                            urlLink = $scope.url;
+                            $uibModalInstance.close();
+                            afterSubmit();
+                        };
+
+                        $scope.close = function () {
+                            $uibModalInstance.close();
+                        };
+                    }
+                });
+
             });
             buttonGroup.append(reLinkButton);
             var unLinkButton = angular.element('<button type="button" class="btn btn-default btn-sm btn-small" tabindex="-1" unselectable="on" title="' + taTranslations.editLink.unLinkButton.tooltip + '"><i class="fa fa-unlink icon-unlink"></i></button>');
@@ -959,12 +987,11 @@ angular.module('textAngularSetup', ['ui.bootstrap'])
             var that = this;
 
             var selection = taSelection.getSelection();
-            console.log(selection);
 
             function afterSubmit() {
                 //taSelection.setSelectionToElementStart();
                 var start = selection.start.offset <= 0 ? 0 : selection.start.offset - 1;
-                var end = selection.end.offset >= selection.end.element.previousSibling.length ? selection.end.element.previousSibling.length : selection.end.offset - 1;
+                var end = selection.end.offset >= selection.end.element.previousSibling.length -1 ? selection.end.element.previousSibling.length - 1 : selection.end.offset - 1;
                 taSelection.setSelection(selection.start.element, selection.end.element, start, end);
 
                 if(urlLink && urlLink !== '' && urlLink !== 'http://'){
