@@ -1022,26 +1022,34 @@ angular.module('textAngularSetup', ['ui.bootstrap'])
         iconclass: 'fa fa-link',
         action: function(){
             var urlLink;
+            var linkName;
             var that = this;
 
             var selection = taSelection.getSelection();
-            var selectionEl = taSelection.getSelectionElement();
+            var selectedText = window.getSelection().toString();
 
             console.log(selection);
 
-            var start = selection.container.firstChild ? selection.container.firstChild.length : 0;
-            var end = selection.container.lastChild ? selection.container.innerText.length - selection.container.lastChild.length : selection.container.innerText.length;
+            function replaceSelectedText(replacementText) {
+                //var start = selection.start.offset <= 0 ? 0 : selection.start.offset - 1;
+                //var end = selection.end.element.lastChild ? selection.end.offset - 1 : selection.end.offset;
+                //taSelection.setSelection(selection.start.element, selection.end.element, start, end);
 
-            var selectedText = selection.container.innerText.substring(start, end);
-            console.log(start);
-            console.log(end);
-            console.log(selectedText);
+                var sel, range;
+                sel = window.getSelection();
+                if (sel.rangeCount) {
+                    range = sel.getRangeAt(0);
+                    range.deleteContents();
+
+                    var node = document.createTextNode(replacementText);
+                    range.insertNode(node);
+
+                    taSelection.setSelection(node, node, 0, node.textContent.length);
+                }
+            }
 
             function afterSubmit() {
-                //taSelection.setSelectionToElementStart();
-                var start = selection.start.offset <= 0 ? 0 : selection.start.offset - 1;
-                var end = selection.end.element.lastChild ? selection.end.offset - 1 : selection.end.offset;
-                taSelection.setSelection(selection.start.element, selection.end.element, start, end);
+                replaceSelectedText(linkName);
 
                 if(urlLink && urlLink !== '' && urlLink !== 'http://'){
                     // block javascript here
@@ -1061,11 +1069,12 @@ angular.module('textAngularSetup', ['ui.bootstrap'])
                     $scope.cancel = $uibModalInstance.close;
 
                     $scope.text = taTranslations.insertLink.dialogPrompt;
-                    $scope.linkName = 'test123';
+                    $scope.linkName = selectedText;
                     $scope.url = taSelection.getSelectionElement().tagName && taSelection.getSelectionElement().tagName.toLowerCase() === 'a' ? taSelection.getSelectionElement().href : 'http://';
 
                     $scope.submit = function() {
                         urlLink = $scope.url;
+                        linkName = $scope.linkName;
                         $uibModalInstance.close();
                         afterSubmit();
                     };
