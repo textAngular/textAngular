@@ -4,16 +4,15 @@
     define('textAngular', ["rangy","rangy/lib/rangy-selectionsaverestore"], function (a0,b1) {
       return (root['textAngular.name'] = factory(a0,b1));
     });
-  } else if (typeof exports === 'object') {
+  } else if (typeof module === 'object' && module.exports) {
     // Node. Does not work with strict CommonJS, but
     // only CommonJS-like environments that support module.exports,
     // like Node.
     module.exports = factory(require("rangy"),require("rangy/lib/rangy-selectionsaverestore"));
   } else {
-    root['textAngular'] = factory(rangy);
+    root['textAngular'] = factory(root["rangy"]);
   }
 }(this, function (rangy) {
-
 
 // tests against the current jqLite/jquery implementation if this can be an element
 function validElementString(string){
@@ -79,7 +78,7 @@ function registerTextAngularTool(name, toolDefinition){
     taTools[name] = toolDefinition;
 }
 
-angular.module('textAngularSetup', [])
+angular.module('textAngularSetup', ['ui.bootstrap'])
 .constant('taRegisterTool', registerTextAngularTool)
 .value('taTools', taTools)
 // Here we set up the global display defaults, to set your own use a angular $provider#decorator.
@@ -264,7 +263,7 @@ angular.module('textAngularSetup', [])
     },
     insertLink: {
         tooltip: 'Insert / edit link',
-        dialogPrompt: "Please enter a URL to insert"
+        dialogPrompt: "Insert link"
     },
     editLink: {
         reLinkButton: {
@@ -284,7 +283,7 @@ angular.module('textAngularSetup', [])
         tooltip: 'Display characters Count'
     }
 })
-.factory('taToolFunctions', ['$window','taTranslations', function($window, taTranslations) {
+.factory('taToolFunctions', ['$window','taTranslations', '$uibModal', function($window, taTranslations, $uibModal) {
     return {
         imgOnSelectAction: function(event, $element, editorScope){
             // setup the editor toolbar
@@ -414,12 +413,81 @@ angular.module('textAngularSetup', [])
             var reLinkButton = angular.element('<button type="button" class="btn btn-default btn-sm btn-small" tabindex="-1" unselectable="on" title="' + taTranslations.editLink.reLinkButton.tooltip + '"><i class="fa fa-edit icon-edit"></i></button>');
             reLinkButton.on('click', function(event){
                 event.preventDefault();
-                var urlLink = $window.prompt(taTranslations.insertLink.dialogPrompt, $element.attr('href'));
-                if(urlLink && urlLink !== '' && urlLink !== 'http://'){
-                    $element.attr('href', urlLink);
-                    editorScope.updateTaBindtaTextElement();
+
+                var urlLink;
+                var linkName;
+
+                var insertLinkModalTemplate =
+                    '<div class="insert-link-modal">' +
+                        '<h2>{{ text }}</h2>' +
+                        '<form ng-submit="submit()" class="insert-link-form">' +
+                            '<input type="text" ng-model="linkName" class="name" placeholder="Link name" />' +
+                            '<input type="text" ng-model="url" class="link" placeholder="Link url" ng-class="{invalid: error}" />' +
+                            '<input type="submit" class="button" value="Add link" />' +
+                        '</form>' +
+                        '<span ng-click="cancel()" class="close-button">' +
+                            '<div class="close-icon" data-ng-include="" src="\'./application/icons/closeButton.svg\'" uib-tooltip="Cancel" tooltip-placement="bottom"></div>' +
+                        '</span>' +
+                    '</div>';
+
+                var blockJavascript = function (link) {
+                    return link.toLowerCase().indexOf('javascript') !== -1;
+
+                };
+
+                var checkLink = function(link) {
+                    var allOk = true;
+                    var urlRegEx = /(https?:\/\/)([?a-zA-Z0-9@:%._+~#=]+\.[a-z]{2,})([-a-zA-Z0-9@:%_+.~#?&//=]*)/i;
+
+                    if (blockJavascript(link)) allOk = false;
+
+                    if (link.indexOf('http://') !== 0 && link.indexOf('https://') !== 0) allOk = false;
+
+                    if (link.match(urlRegEx) === null) allOk = false;
+
+                    return allOk;
+                };
+
+                function afterSubmit() {
+                    if(urlLink && urlLink !== '' && urlLink !== 'http://'){
+                        $element.attr('href', urlLink);
+                        $element[0].text(linkName);
+                        editorScope.updateTaBindtaTextElement();
+                    }
+                    editorScope.hidePopover();
                 }
-                editorScope.hidePopover();
+
+                var modal = $uibModal.open({
+                    animation: true,
+                    template: insertLinkModalTemplate,
+                    backdrop: 'static',
+                    controller: function ($scope, $uibModalInstance) {
+
+                        $scope.cancel = $uibModalInstance.close;
+
+                        $scope.text = taTranslations.insertLink.dialogPrompt;
+                        $scope.linkName = $element[0].text;
+                        $scope.url = $element.attr('href');
+
+                        $scope.submit = function() {
+                            urlLink = $scope.url;
+                            linkName = $scope.linkName;
+
+                            if (checkLink(urlLink)) {
+                                $uibModalInstance.close();
+                                afterSubmit();
+                            } else {
+                                $scope.error = 'URL is invalid';
+                            }
+                        };
+
+                        $scope.close = function () {
+                            $uibModalInstance.close();
+                        };
+                    },
+                    size: 'insertlink'
+                });
+
             });
             buttonGroup.append(reLinkButton);
             var unLinkButton = angular.element('<button type="button" class="btn btn-default btn-sm btn-small" tabindex="-1" unselectable="on" title="' + taTranslations.editLink.unLinkButton.tooltip + '"><i class="fa fa-unlink icon-unlink"></i></button>');
@@ -452,8 +520,8 @@ angular.module('textAngularSetup', [])
         }
     };
 }])
-.run(['taRegisterTool', '$window', 'taTranslations', 'taSelection', 'taToolFunctions', '$sanitize', 'taOptions', '$log',
-    function(taRegisterTool, $window, taTranslations, taSelection, taToolFunctions, $sanitize, taOptions, $log){
+.run(['taRegisterTool', '$window', 'taTranslations', 'taSelection', 'taToolFunctions', '$sanitize', 'taOptions', '$log', '$uibModal',
+    function(taRegisterTool, $window, taTranslations, taSelection, taToolFunctions, $sanitize, taOptions, $log, $uibModal){
     // test for the version of $sanitize that is in use
     // You can disable this check by setting taOptions.textAngularSanitize == false
     var gv = {}; $sanitize('', gv);
@@ -870,11 +938,35 @@ angular.module('textAngularSetup', [])
 
     /* istanbul ignore next: if it's javascript don't worry - though probably should show some kind of error message */
     var blockJavascript = function (link) {
-        if (link.toLowerCase().indexOf('javascript')!==-1) {
-            return true;
-        }
-        return false;
+        return link.toLowerCase().indexOf('javascript') !== -1;
+
     };
+
+    var checkLink = function(link) {
+        var allOk = true;
+        var urlRegEx = /(https?:\/\/)([?a-zA-Z0-9@:%._+~#=]+\.[a-z]{2,})([-a-zA-Z0-9@:%_+.~#?&//=]*)/i;
+
+        if (blockJavascript(link)) allOk = false;
+
+        if (link.indexOf('http://') !== 0 && link.indexOf('https://') !== 0) allOk = false;
+
+        if (link.match(urlRegEx) === null) allOk = false;
+
+        return allOk;
+    };
+
+    var insertLinkModalTemplate =
+        '<div class="insert-link-modal">' +
+            '<h2>{{ text }}</h2>' +
+            '<form ng-submit="submit()" class="insert-link-form">' +
+                '<input type="text" ng-model="linkName" class="name" placeholder="Link name" />' +
+                '<input type="text" ng-model="url" class="link" placeholder="Link url" ng-class="{invalid: error}" />' +
+                '<input type="submit" class="button" value="Add link" />' +
+            '</form>' +
+            '<span ng-click="cancel()" class="close-button">' +
+                '<div class="close-icon" data-ng-include="" src="\'./application/icons/closeButton.svg\'" uib-tooltip="Cancel" tooltip-placement="bottom"></div>' +
+            '</span>' +
+        '</div>';
 
     taRegisterTool('insertImage', {
         iconclass: 'fa fa-picture-o',
@@ -918,7 +1010,7 @@ angular.module('textAngularSetup', [])
             urlPrompt = $window.prompt(taTranslations.insertVideo.dialogPrompt, 'https://');
             // block javascript here
             /* istanbul ignore else: if it's javascript don't worry - though probably should show some kind of error message */
-            if (!blockJavascript(urlPrompt)) {
+            if (!checkLink(urlPrompt)) {
 
                 if (urlPrompt && urlPrompt !== '' && urlPrompt !== 'https://') {
 
@@ -956,20 +1048,75 @@ angular.module('textAngularSetup', [])
         iconclass: 'fa fa-link',
         action: function(){
             var urlLink;
-            // if this link has already been set, we need to just edit the existing link
-            /* istanbul ignore if: we do not test this */
-            if (taSelection.getSelectionElement().tagName && taSelection.getSelectionElement().tagName.toLowerCase() === 'a') {
-                urlLink = $window.prompt(taTranslations.insertLink.dialogPrompt, taSelection.getSelectionElement().href);
-            } else {
-                urlLink = $window.prompt(taTranslations.insertLink.dialogPrompt, 'http://');
-            }
-            if(urlLink && urlLink !== '' && urlLink !== 'http://'){
-                // block javascript here
-                /* istanbul ignore else: if it's javascript don't worry - though probably should show some kind of error message */
-                if (!blockJavascript(urlLink)) {
-                    return this.$editor().wrapSelection('createLink', urlLink, true);
+            var linkName;
+            var that = this;
+
+            var selection = taSelection.getSelection();
+            var selectedText = window.getSelection().toString();
+
+            function replaceSelectedText(replacementText) {
+                var start = selection.start.offset <= 0 ? 0 : selection.start.offset - 1;
+                var end = selection.end.element.lastChild ? selection.end.offset - 1 : selection.end.offset;
+                taSelection.setSelection(selection.start.element, selection.end.element, start, end);
+
+                var sel, range;
+                sel = window.getSelection();
+                if (sel.rangeCount) {
+                    range = sel.getRangeAt(0);
+                    range.deleteContents();
+
+                    var node = document.createTextNode(replacementText);
+                    range.insertNode(node);
+
+                    taSelection.setSelection(node, node, 0, node.textContent.length);
                 }
             }
+
+            function afterSubmit() {
+                replaceSelectedText(linkName);
+
+                if(urlLink && urlLink !== '' && urlLink !== 'http://'){
+                    // block javascript here
+                    /* istanbul ignore else: if it's javascript don't worry - though probably should show some kind of error message */
+                    if (checkLink(urlLink)) {
+                        return that.$editor().wrapSelection('createLink', urlLink, true);
+                    }
+                }
+            }
+
+            var modal = $uibModal.open({
+                animation: true,
+                template: insertLinkModalTemplate,
+                backdrop: 'static',
+                controller: function ($scope, $uibModalInstance) {
+
+                    $scope.cancel = $uibModalInstance.close;
+
+                    $scope.text = taTranslations.insertLink.dialogPrompt;
+                    $scope.linkName = selectedText;
+                    $scope.url = taSelection.getSelectionElement().tagName && taSelection.getSelectionElement().tagName.toLowerCase() === 'a' ? taSelection.getSelectionElement().href : 'http://';
+
+                    $scope.submit = function() {
+                        urlLink = $scope.url;
+                        linkName = $scope.linkName;
+
+
+                        if (checkLink(urlLink)) {
+                            $uibModalInstance.close();
+                            afterSubmit();
+                        } else {
+                            $scope.error = 'URL is invalid';
+                        }
+                    };
+
+                    $scope.close = function () {
+                        $uibModalInstance.close();
+                    };
+                },
+                size: 'insertlink'
+            });
+
+
         },
         activeState: function(commonElement){
             if(commonElement) return commonElement[0].tagName === 'A';
@@ -3896,7 +4043,7 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 
 // this global var is used to prevent multiple fires of the drop event. Needs to be global to the textAngular file.
 var dropFired = false;
-var textAngular = angular.module("textAngular", ['ngSanitize', 'textAngularSetup', 'textAngular.factories', 'textAngular.DOM', 'textAngular.validators', 'textAngular.taBind']); //This makes ngSanitize required
+var textAngular = angular.module("textAngular", ['ngSanitize', 'textAngularSetup', 'textAngular.factories', 'textAngular.DOM', 'textAngular.validators', 'textAngular.taBind', 'ui.bootstrap']); //This makes ngSanitize required
 
 textAngular.config([function(){
     // clear taTools variable. Just catches testing and any other time that this config may run multiple times...
@@ -3905,9 +4052,9 @@ textAngular.config([function(){
 
 textAngular.directive("textAngular", [
     '$compile', '$timeout', 'taOptions', 'taSelection', 'taExecCommand',
-    'textAngularManager', '$document', '$animate', '$log', '$q', '$parse',
+    'textAngularManager', '$document', '$animate', '$log', '$q', '$parse', '$uibModal',
     function($compile, $timeout, taOptions, taSelection, taExecCommand,
-        textAngularManager, $document, $animate, $log, $q, $parse){
+        textAngularManager, $document, $animate, $log, $q, $parse, $uibModal){
         return {
             require: '?ngModel',
             scope: {},
@@ -4748,8 +4895,8 @@ textAngular.directive("textAngular", [
         };
     }
 ]);
-textAngular.service('textAngularManager', ['taToolExecuteAction', 'taTools', 'taRegisterTool', '$interval', '$rootScope', '$log',
-    function(taToolExecuteAction, taTools, taRegisterTool, $interval, $rootScope, $log){
+textAngular.service('textAngularManager', ['taToolExecuteAction', 'taTools', 'taRegisterTool', '$interval', '$rootScope', '$log', '$uibModal',
+    function(taToolExecuteAction, taTools, taRegisterTool, $interval, $rootScope, $log, $uibModal){
     // this service is used to manage all textAngular editors and toolbars.
     // All publicly published functions that modify/need to access the toolbar or editor scopes should be in here
     // these contain references to all the editors and toolbars that have been initialised in this app
@@ -5116,8 +5263,8 @@ textAngular.service('textAngularManager', ['taToolExecuteAction', 'taTools', 'ta
     };
 }]);
 textAngular.directive('textAngularToolbar', [
-    '$compile', 'textAngularManager', 'taOptions', 'taTools', 'taToolExecuteAction', '$window',
-    function($compile, textAngularManager, taOptions, taTools, taToolExecuteAction, $window){
+    '$compile', 'textAngularManager', 'taOptions', 'taTools', 'taToolExecuteAction', '$window', '$uibModal',
+    function($compile, textAngularManager, taOptions, taTools, taToolExecuteAction, $window, $uibModals){
         return {
             scope: {
                 name: '@' // a name IS required

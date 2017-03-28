@@ -17,7 +17,7 @@ module.exports = function (grunt) {
 	grunt.loadNpmTasks('grunt-umd');
 
 	grunt.registerTask('compile', ['concat', 'umd', 'copy:setupFiles', 'jshint', 'uglify']);
-	grunt.registerTask('default', ['compile', 'test']);
+	grunt.registerTask('default', ['compile']);
 	grunt.registerTask('test', ['clean:coverage', 'jshint', 'karma', 'coverage']);
 	grunt.registerTask('travis-test', ['concat', 'umd', 'copy:setupFiles', 'jshint', 'karma', 'coverage', 'coveralls']);
 
