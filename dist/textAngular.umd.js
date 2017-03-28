@@ -1031,9 +1031,9 @@ angular.module('textAngularSetup', ['ui.bootstrap'])
             console.log(selection);
 
             function replaceSelectedText(replacementText) {
-                //var start = selection.start.offset <= 0 ? 0 : selection.start.offset - 1;
-                //var end = selection.end.element.lastChild ? selection.end.offset - 1 : selection.end.offset;
-                //taSelection.setSelection(selection.start.element, selection.end.element, start, end);
+                var start = selection.start.offset <= 0 ? 0 : selection.start.offset - 1;
+                var end = selection.end.element.lastChild ? selection.end.offset - 1 : selection.end.offset;
+                taSelection.setSelection(selection.start.element, selection.end.element, start, end);
 
                 var sel, range;
                 sel = window.getSelection();

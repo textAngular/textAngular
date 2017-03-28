@@ -405,7 +405,7 @@ angular.module('textAngularSetup', ['ui.bootstrap'])
                         '<h2>{{ text }}</h2>' +
                         '<form ng-submit="submit()" class="insert-link-form">' +
                             '<input type="text" ng-model="linkName" class="name" placeholder="Link name" />' +
-                            '<input type="text" ng-model="url" class="link" placeholder="Link url" />' +
+                            '<input type="text" ng-model="url" class="link" placeholder="Link url" ng-class="{invalid: error}" />' +
                             '<input type="submit" class="button" value="Add link" />' +
                         '</form>' +
                         '<span ng-click="cancel()" class="close-button">' +
@@ -918,7 +918,7 @@ angular.module('textAngularSetup', ['ui.bootstrap'])
             '<h2>{{ text }}</h2>' +
             '<form ng-submit="submit()" class="insert-link-form">' +
                 '<input type="text" ng-model="linkName" class="name" placeholder="Link name" />' +
-                '<input type="text" ng-model="url" class="link" placeholder="Link url" />' +
+                '<input type="text" ng-model="url" class="link" placeholder="Link url" ng-class="{invalid: error}" />' +
                 '<input type="submit" class="button" value="Add link" />' +
             '</form>' +
             '<span ng-click="cancel()" class="close-button">' +
@@ -1059,8 +1059,14 @@ angular.module('textAngularSetup', ['ui.bootstrap'])
                     $scope.submit = function() {
                         urlLink = $scope.url;
                         linkName = $scope.linkName;
-                        $uibModalInstance.close();
-                        afterSubmit();
+
+
+                        if (checkLink(urlLink)) {
+                            $uibModalInstance.close();
+                            afterSubmit();
+                        } else {
+                            $scope.error = 'URL is invalid';
+                        }
                     };
 
                     $scope.close = function () {
