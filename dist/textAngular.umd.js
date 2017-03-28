@@ -415,13 +415,14 @@ angular.module('textAngularSetup', ['ui.bootstrap'])
                 event.preventDefault();
 
                 var urlLink;
+                var linkName;
 
                 var insertLinkModalTemplate =
                     '<div class="insert-link-modal">' +
                         '<h2>{{ text }}</h2>' +
                         '<form ng-submit="submit()" class="insert-link-form">' +
                             '<input type="text" ng-model="linkName" class="name" placeholder="Link name" />' +
-                            '<input type="text" ng-model="url" class="link" placeholder="Link url" />' +
+                            '<input type="text" ng-model="url" class="link" placeholder="Link url" ng-class="{invalid: error}" />' +
                             '<input type="submit" class="button" value="Add link" />' +
                         '</form>' +
                         '<span ng-click="cancel()" class="close-button">' +
@@ -429,9 +430,28 @@ angular.module('textAngularSetup', ['ui.bootstrap'])
                         '</span>' +
                     '</div>';
 
+                var blockJavascript = function (link) {
+                    return link.toLowerCase().indexOf('javascript') !== -1;
+
+                };
+
+                var checkLink = function(link) {
+                    var allOk = true;
+                    var urlRegEx = /(https?:\/\/)([?a-zA-Z0-9@:%._+~#=]+\.[a-z]{2,})([-a-zA-Z0-9@:%_+.~#?&//=]*)/i;
+
+                    if (blockJavascript(link)) allOk = false;
+
+                    if (link.indexOf('http://') !== 0 && link.indexOf('https://') !== 0) allOk = false;
+
+                    if (link.match(urlRegEx) === null) allOk = false;
+
+                    return allOk;
+                };
+
                 function afterSubmit() {
                     if(urlLink && urlLink !== '' && urlLink !== 'http://'){
                         $element.attr('href', urlLink);
+                        $element[0].text(linkName);
                         editorScope.updateTaBindtaTextElement();
                     }
                     editorScope.hidePopover();
@@ -446,12 +466,19 @@ angular.module('textAngularSetup', ['ui.bootstrap'])
                         $scope.cancel = $uibModalInstance.close;
 
                         $scope.text = taTranslations.insertLink.dialogPrompt;
+                        $scope.linkName = $element[0].text;
                         $scope.url = $element.attr('href');
 
                         $scope.submit = function() {
                             urlLink = $scope.url;
-                            $uibModalInstance.close();
-                            afterSubmit();
+                            linkName = $scope.linkName;
+
+                            if (checkLink(urlLink)) {
+                                $uibModalInstance.close();
+                                afterSubmit();
+                            } else {
+                                $scope.error = 'URL is invalid';
+                            }
                         };
 
                         $scope.close = function () {
@@ -926,7 +953,6 @@ angular.module('textAngularSetup', ['ui.bootstrap'])
         if (link.match(urlRegEx) === null) allOk = false;
 
         return allOk;
-
     };
 
     var insertLinkModalTemplate =
@@ -934,7 +960,7 @@ angular.module('textAngularSetup', ['ui.bootstrap'])
             '<h2>{{ text }}</h2>' +
             '<form ng-submit="submit()" class="insert-link-form">' +
                 '<input type="text" ng-model="linkName" class="name" placeholder="Link name" />' +
-                '<input type="text" ng-model="url" class="link" placeholder="Link url" />' +
+                '<input type="text" ng-model="url" class="link" placeholder="Link url" ng-class="{invalid: error}" />' +
                 '<input type="submit" class="button" value="Add link" />' +
             '</form>' +
             '<span ng-click="cancel()" class="close-button">' +
@@ -1028,8 +1054,6 @@ angular.module('textAngularSetup', ['ui.bootstrap'])
             var selection = taSelection.getSelection();
             var selectedText = window.getSelection().toString();
 
-            console.log(selection);
-
             function replaceSelectedText(replacementText) {
                 var start = selection.start.offset <= 0 ? 0 : selection.start.offset - 1;
                 var end = selection.end.element.lastChild ? selection.end.offset - 1 : selection.end.offset;
@@ -1075,8 +1099,14 @@ angular.module('textAngularSetup', ['ui.bootstrap'])
                     $scope.submit = function() {
                         urlLink = $scope.url;
                         linkName = $scope.linkName;
-                        $uibModalInstance.close();
-                        afterSubmit();
+
+
+                        if (checkLink(urlLink)) {
+                            $uibModalInstance.close();
+                            afterSubmit();
+                        } else {
+                            $scope.error = 'URL is invalid';
+                        }
                     };
 
                     $scope.close = function () {
