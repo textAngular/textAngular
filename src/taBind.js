@@ -572,7 +572,8 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
                                             tagName !== 'h4' &&
                                             tagName !== 'h5' &&
                                             tagName !== 'h6' &&
-                                            tagName !== 'table'){
+                                            tagName !== 'table' &&
+                                            tagName !== 'span'){
                                             continue;
                                         }
                                     }
