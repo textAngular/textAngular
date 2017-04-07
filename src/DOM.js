@@ -542,13 +542,27 @@ angular.module('textAngular.DOM', ['textAngular.factories'])
                 $target[0].focus();
                 return;
             }else if(command.toLowerCase() === 'createlink'){
+                var url,text;
+                if(Array.isArray(options)) {
+                    url = options[0];
+                    text = options[1];
+                    if (options[2]){
+                        text = '<i class="' + options[2] + '"></i> <span>' + text + '</span>';
+                    }
+                } else {
+                    url = options;
+                    text = options;
+                }
+
                 /* istanbul ignore next: firefox specific fix */
                 if (tagName === 'a') {
                     // already a link!!! we are just replacing it...
-                    taSelection.getSelectionElement().href = options;
+                    taSelection.getSelectionElement().href = url;
+                    taSelection.getSelectionElement().html = text;
+
                     return;
                 }
-                var tagBegin = '<a href="' + options + '" target="' +
+                var tagBegin = '<a href="' + url + '" target="' +
                         (defaultTagAttributes.a.target ? defaultTagAttributes.a.target : '') +
                         '">',
                     tagEnd = '</a>',
@@ -556,7 +570,7 @@ angular.module('textAngular.DOM', ['textAngular.factories'])
                 if(_selection.collapsed){
                     //console.log('collapsed');
                     // insert text at selection, then select then just let normal exec-command run
-                    taSelection.insertHtml(tagBegin + options + tagEnd, topNode);
+                    taSelection.insertHtml(tagBegin + text + tagEnd, topNode);
                 }else if(rangy.getSelection().getRangeAt(0).canSurroundContents()){
                     var node = angular.element(tagBegin + tagEnd)[0];
                     rangy.getSelection().getRangeAt(0).surroundContents(node);
