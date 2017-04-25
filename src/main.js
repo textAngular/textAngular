@@ -1139,7 +1139,7 @@ textAngular.service('textAngularManager', ['taToolExecuteAction', 'taTools', 'ta
                         if(toolbarIndex !== undefined) break;
                     }
                     if(toolbarIndex !== undefined){
-                        toolbarScope.toolbar[toolbarIndex.group].slice(toolbarIndex.index, 1);
+                        toolbarScope.toolbar[toolbarIndex.group].splice(toolbarIndex.index, 1);
                         toolbarScope._$element.children().eq(toolbarIndex.group).children().eq(toolbarIndex.index).remove();
                     }
                 }
@@ -1385,7 +1385,7 @@ textAngular.directive('textAngularToolbar', [
 
                     if(index === undefined){
                         group.append(scope.tools[key].$element);
-                        scope.toolbar[groupIndex][scope.toolbar[groupIndex].length - 1] = key;
+                        scope.toolbar[groupIndex][scope.toolbar[groupIndex].length] = key;
                     }else{
                         group.children().eq(index).after(scope.tools[key].$element);
                         scope.toolbar[groupIndex][index] = key;
