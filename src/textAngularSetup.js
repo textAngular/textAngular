@@ -898,7 +898,7 @@ angular.module('textAngularSetup', [])
         iconclass: 'fa fa-youtube-play',
         tooltiptext: taTranslations.insertVideo.tooltip,
         action: function(){
-            var urlPrompt;
+            var urlPrompt, videoId;
             urlPrompt = $window.prompt(taTranslations.insertVideo.dialogPrompt, 'https://');
             // block javascript here
             /* istanbul ignore else: if it's javascript don't worry - though probably should show some kind of error message */
