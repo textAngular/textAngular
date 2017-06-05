@@ -27,7 +27,7 @@ To upgrade from version 1.2.2 or earlier you need to follow these steps:
 
 **Via Bower:**
 
-Run `bower install textAngular` from the command line.
+Run `bower install textAngular --save` from the command line.
 Include script tags similar to the following:
 ```html
 <link rel='stylesheet' href='/bower_components/textAngular/dist/textAngular.css'>
