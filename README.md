@@ -106,7 +106,7 @@ This acts similar to a regular AngularJS / form input if you give it a name attr
 
 Have fun!
 
-**Important Note:** Though textAngular supports the use of all attributes in it's input, please note that angulars ng-bind-html **WILL** strip out all of your style attributes if you are using `angular-sanitize.js`.
+**Important Note:** Though textAngular supports the use of all attributes in it's input, please note that angular's ng-bind-html **WILL** strip out all of your style attributes if you are using `angular-sanitize.js`.
 
 For Additional options see the [github Wiki](https://github.com/fraywing/textAngular/wiki).
 
@@ -154,7 +154,7 @@ New buttons can be created using taRegisterTool. Examples can be found inside de
 This project is licensed under the [MIT license](http://opensource.org/licenses/MIT).
 
 
-## Contributers
+## Contributors
 
 Special thanks to all the contributions thus far!
 
