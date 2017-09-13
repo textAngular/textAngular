@@ -1002,7 +1002,7 @@ angular.module('textAngularSetup', [])
             var sourceText = textElement[0].innerText || textElement[0].textContent; // to cover the non-jquery use case.
 
             // Caculate number of chars
-            var noOfChars = sourceText.replace(/(\r\n|\n|\r)/gm,"").replace(/^\s+/g,' ').replace(/\s+$/g, ' ').length;
+            var noOfChars = sourceText.replace(/(\r\n|\n|\r)/gm,"").replace(/^\s+/g,'').replace(/\s+$/g, '').length;
             //Set current scope
             this.charcount = noOfChars;
             //Set editor scope
