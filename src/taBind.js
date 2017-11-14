@@ -440,7 +440,7 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
                         var _subnodes = listNode.childNodes;
                         tablevel++;
                         // tab out and add the <ul> or <ol> html piece
-                        _html += _repeat('\t', tablevel-1) + listNode.outerHTML.substring(0, 4);
+                        _html += _repeat('\t', tablevel-1) + listNode.outerHTML.substring(0, listNode.outerHTML.indexOf('>') + 1);
                         forEach(_subnodes, function (index, node) {
                             /* istanbul ignore next: browser catch */
                             var nodeName = node.nodeName.toLowerCase();
