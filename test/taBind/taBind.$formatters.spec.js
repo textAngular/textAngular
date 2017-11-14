@@ -26,6 +26,11 @@ describe('taBind.$formatters', function () {
             $rootScope.html = '<ul><li>Test Line 1</li><li>Test Line 2</li><li>Test Line 3</li></ul>';
             $rootScope.$digest();
             expect(element.val()).toBe('<ul>\n\t<li>Test Line 1</li>\n\t<li>Test Line 2</li>\n\t<li>Test Line 3</li>\n</ul>');
+        });        
+        it('handle lists with attributes', function(){
+            $rootScope.html = '<ul style="font-size: 10pt;"><li>Test Line 1</li><li>Test Line 2</li><li>Test Line 3</li></ul>';
+            $rootScope.$digest();
+            expect(element.val()).toBe('<ul style="font-size: 10pt;">\n\t<li>Test Line 1</li>\n\t<li>Test Line 2</li>\n\t<li>Test Line 3</li>\n</ul>');
         });
         it('handle nested lists', function(){
             $rootScope.html = '<ol><li>Test Line 1</li><ul><li>Nested Line 1</li><li>Nested Line 2</li></ul><li>Test Line 3</li></ol>';
