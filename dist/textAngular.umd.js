@@ -4,13 +4,13 @@
     define('textAngular', ["rangy","rangy/lib/rangy-selectionsaverestore"], function (a0,b1) {
       return (root['textAngular.name'] = factory(a0,b1));
     });
-  } else if (typeof exports === 'object') {
+  } else if (typeof module === 'object' && module.exports) {
     // Node. Does not work with strict CommonJS, but
     // only CommonJS-like environments that support module.exports,
     // like Node.
     module.exports = factory(require("rangy"),require("rangy/lib/rangy-selectionsaverestore"));
   } else {
-    root['textAngular'] = factory(rangy);
+    root['textAngular'] = factory(root["rangy"]);
   }
 }(this, function (rangy) {
 
@@ -1712,6 +1712,233 @@ angular.module('textAngular.DOM', ['textAngular.factories'])
         listElement.remove();
         selectLi($target.find('li')[0]);
     };
+    var findListOrBlockContainer = function (element) {
+        /* since <li> is neither block nor inline element */
+           if (element.tagName && element.tagName.match(/li/i)) {
+               return element;
+           } else if (element.tagName && element.tagName.match(BLOCKELEMENTS)) {
+               return element;
+           } else if (angular.element(element).parent().hasClass('ta-bind')) {
+               return element;
+           } else {
+               return findListOrBlockContainer(element.parentNode);
+           }
+    };
+       /** finds the child node of container that contains the selection element
+     * if container is the same as the selectrion element, return selElement */
+    var findChildContainer = function(container, selElement) {
+           if (!selElement.parentNode) {
+            return null;
+        } else if (container === selElement) {
+            return selElement;
+        } else if (container === selElement.parentNode) {
+               return selElement;
+           } else {
+               return findChildContainer(container, selElement.parentNode);
+           }
+       };
+       var wrapElement = function (defaultWrap, itemElement) {
+           var elem = angular.element('<' + defaultWrap + '>');
+           if (itemElement.childNodes && itemElement.childNodes.length > 0) {
+               while (itemElement.childNodes.length > 0) {
+                   elem[0].appendChild(itemElement.childNodes[0]);
+               }
+           } else {
+               elem[0].innerHTML = itemElement.innerHTML;
+           }
+           return elem[0];
+       };
+    /** moves contents of itemElement after the anchor element */
+    var moveChildNodesAfter = function (anchor, itemElement) {
+        var last, current;
+        if (!itemElement.childNodes){
+            last = document.createTextNode(itemElement.textContent || itemElement.innerText);
+            angular.element(anchor).after(last);
+        } else {
+            last = anchor;
+            while (itemElement.childNodes && itemElement.childNodes.length > 0) {
+                current = itemElement.childNodes[0];
+                angular.element(last).after(current);
+                last = current;
+            }
+        }
+        return last;
+    };
+    var indentListItem = function (itemElement) {
+        var newContainer, tagName, prev, parent;
+        tagName = itemElement.tagName;
+        prev = itemElement.previousSibling;
+        parent = itemElement.parentNode;
+        if (!tagName || !tagName.match(/li/i)) {
+            newContainer = wrapElement("blockquote", itemElement);
+            angular.element(itemElement).after(newContainer);
+            angular.element(itemElement).remove();
+            taSelection.setSelectionToElementStart(itemElement);
+            return;
+           } else if (!prev ){
+            /* if the element is the first of a list, it can not be indented */
+            return;
+        } else if ( prev && prev.lastChild && prev.lastChild.tagName && prev.lastChild.tagName.match(/[ou]l/gi) && prev.lastChild.tagName.match(parent.tagName)) {
+            /* only if the lastChild of the previous element has the same tagName as current parent */
+            prev.lastChild.appendChild(itemElement);
+            taSelection.setSelectionToElementStart(itemElement);
+            return;
+        } else {
+            /* add a complete list container with the current item to the previous sibling.*/
+            newContainer = document.createElement(parent.tagName.toLowerCase());
+            prev.appendChild(newContainer);
+            newContainer.appendChild(itemElement);
+            taSelection.setSelectionToElementStart(itemElement);
+            return;
+        }
+    };
+    var indentBlock = function (defaultWrap, $selected) {
+        var sel, beginElement, endElement, items, current, done ;
+        sel = taSelection.getSelection();
+        sel.container = findListOrBlockContainer(sel.container);
+        sel.start.element = findListOrBlockContainer(sel.start.element);
+        sel.end.element = findListOrBlockContainer(sel.end.element);
+        beginElement = findChildContainer(sel.container, sel.start.element);
+        endElement = findChildContainer(sel.container, sel.end.element);
+        done = false;
+        items = [beginElement];
+        while (items.slice(-1)[0].nextSibling  && !done ) {
+            if (items.slice(-1)[0] === endElement){
+                done = true;
+            } else {
+                items.push(items.slice(-1)[0].nextSibling);
+            }
+        }
+        angular.forEach(items, indentListItem);
+    };
+       var isDefaultWrap = function (element, defaultWrap) {
+        var wrap = angular.element("<" + defaultWrap + ">");
+        angular.forEach(wrap[0].className.split(' '), function (className) {
+            if (!element.className && element.className.match(className)) {
+                return false;
+            }
+        });
+        if (wrap.tagName && (!element.tagName ||
+            element.tagName.toLowerCase.match(wrap.tagName.toLowerCase() ) )
+        ) { return false; }
+        return true;
+    };
+    var outdentListItem = function (itemElement, defaultWrap, options) {
+        var newContainer, tagName, prev, parent, wrapElem;
+        tagName = itemElement.tagName;
+        prev = itemElement.previousSibling;
+        parent = itemElement.parentNode;
+        if (!tagName || !tagName.match(/li/gi) || !parent.tagName || !parent.tagName.match(/[ou]l/gi)) {
+            //console.log("parent is not list container");
+            newContainer = wrapElement(defaultWrap, itemElement);
+            angular.element(itemElement).after(newContainer);
+            angular.element(itemElement).remove();
+            taSelection.setSelectionToElementStart(itemElement);
+            return;
+        } else if (angular.element(parent).hasClass('ta-bind')) {
+            //console.log("parent is editor, won't outdent");
+            return;
+        } else if (parent.parentNode.tagName.match(/li/i)) {
+            //console.log('parent.parentNode is <li>');
+            if (itemElement !== parent.lastChild) {
+                newContainer = angular.element('<' + parent.tagName + ' class="' + parent.className + '">');
+                while (itemElement.nextSibling) {
+                    newContainer.append(itemElement.nextSibling);
+                }
+                itemElement.appendChild(newContainer[0]);
+            }
+            /* suppose parent of parent is <li>. This adds the new outdented element after it */
+            angular.element(parent.parentNode).after(itemElement);
+            if (parent.childNodes.length === 0) parent.remove();
+            taSelection.setSelectionToElementStart(itemElement);
+            return;
+        } else if (angular.element(parent.parentNode).hasClass('ta-bind')) {
+            /* use default wrap to wrap the item content */
+            //console.log('parent  of parent is not a list element');
+            if (itemElement !== parent.lastChild) {
+                newContainer = angular.element('<' + parent.tagName + ' class="' + parent.className + '">');
+                while (itemElement.nextSibling) {
+                    newContainer.append(itemElement.nextSibling);
+                }
+                wrapElem = wrapElement(defaultWrap, itemElement);
+                angular.element(parent).after(wrapElem);
+                /* not appending here, but add after the new root element */
+                angular.element(wrapElem).after(newContainer[0]);
+            } else {
+                wrapElem = wrapElement(defaultWrap, itemElement);
+                angular.element(parent).after(wrapElem);
+            }
+            angular.element(itemElement).remove();
+            if (angular.element(parent).children().length === 0) angular.element(parent).remove();
+            taSelection.setSelectionToElementStart(wrapElem);
+            return;
+        } else if ( !options || !options.preserveList ) {
+            /* when the parent of list container ol is a DIV, we can chose to preserve list or outdent
+             * list item.
+             * this case we outdent the list item
+             * */
+            // console.log('outdent list');
+                if (itemElement !== parent.lastChild) {
+                /* move all nextSiblings to new list container */
+                newContainer = angular.element('<' + parent.tagName + ' class="' + parent.className + '">');
+                while (itemElement.nextSibling) {
+                    newContainer.append(itemElement.nextSibling);
+                }
+                /* wrapElem here is the last childNode of itemElement */
+                wrapElem = moveChildNodesAfter(parent, itemElement);
+                angular.element(wrapElem).after(newContainer[0]);
+            } else {
+                wrapElem = moveChildNodesAfter(parent, itemElement);
+            }
+            angular.element(itemElement).remove();
+            if (angular.element(parent).children().length === 0) angular.element(parent).remove();
+            taSelection.setSelectionToElementStart(wrapElem);
+            return;
+        } else if ( options.preserveList ) {
+            /* when the parent of list container ol is a DIV, we can chose to preserve list or outdent
+             * list item.
+             * this case we preserve the list.
+             * */
+            //console.log('preserve list');
+            if (parent !== parent.parentNode.lastChild) {
+                /* move all nextSiblings of parent to new list container */
+                newContainer = angular.element("<" + defaultWrap + ">");
+                while (parent.nextSibling) {
+                    newContainer.append(parent.nextSibling);
+                }
+            } else { newContainer = false; }
+            /* move list container after grand parent */
+            var paragraphContainer = angular.element(parent.parentNode);
+            var newParent = paragraphContainer.after(parent);
+            if ( newContainer ) angular.element(newParent).after(newContainer[0]);
+            if (paragraphContainer.children().length === 0) paragraphContainer.remove();
+            taSelection.setSelectionToElementStart(itemElement);
+            return;
+        }
+       };
+    var outdentBlock = function (defaultWrap, $selected, options) {
+        //console.log('outdenting block');
+        var sel, beginElement, endElement, items, current, done ;
+        sel = taSelection.getSelection();
+        /* container shows common ancester of children */
+        sel.container = findListOrBlockContainer(sel.container);
+        sel.start.element = findListOrBlockContainer(sel.start.element);
+        sel.end.element = findListOrBlockContainer(sel.end.element);
+        beginElement = findChildContainer(sel.container, sel.start.element);
+        endElement = findChildContainer(sel.container, sel.end.element);
+        done = false;
+        items = [beginElement];
+        while (items.slice(-1)[0].nextSibling  && !done ) {
+            if (items.slice(-1)[0] === endElement){
+                done = true;
+            } else {
+                items.push(items.slice(-1)[0].nextSibling);
+            }
+        }
+        angular.forEach(items, function(item) {
+            outdentListItem(item, defaultWrap, options);
+        });
+    };
     var turnBlockIntoBlocks = function(element, options) {
         for(var i = 0; i<element.childNodes.length; i++) {
             var _n = element.childNodes[i];
@@ -1742,7 +1969,18 @@ angular.module('textAngular.DOM', ['textAngular.factories'])
         // IF you want to modify the html the user sees, do it when the user does a switchView
         taDefaultWrap = taBrowserTag(taDefaultWrap);
         return function(command, showUI, options, defaultTagAttributes){
-            var i, $target, html, _nodes, next, optionsTagName, selectedElement, ourSelection;
+            var wrap = function ($selected) {
+                var elem = angular.element('<' + taDefaultWrap + '>');
+                if ($selected[0].childNodes && $selected[0].childNodes.length > 0) {
+                    while ($selected[0].childNodes.length > 0) {
+                        elem[0].appendChild($selected[0].childNodes[0]);
+                    }
+                } else {
+                    elem[0].innerHTML = $selected[0].innerHTML;
+                }
+                return elem;
+            };
+            var i, $target, html, _nodes, next, optionsTagName, selectedElement, ourSelection, prev, parent, listContainer, wrapElem;
             var defaultWrapper = angular.element('<' + taDefaultWrap + '>');
             try{
                 if (taSelection.getSelection) {
@@ -1948,6 +2186,10 @@ angular.module('textAngular.DOM', ['textAngular.factories'])
                     taSelection.setSelectionToElementEnd($target[0]);
                     return;
                 }
+            }else if(command.toLowerCase() === 'indent'){
+                return indentBlock(taDefaultWrap, $selected, options);
+            }else if(command.toLowerCase() === 'outdent'){
+                return outdentBlock(taDefaultWrap, $selected, options);
             }else if(command.toLowerCase() === 'formatblock'){
                 optionsTagName = options.toLowerCase().replace(/[<>]/ig, '');
                 if(optionsTagName.trim() === 'default') {
@@ -2759,11 +3001,11 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 .directive('taBind', [
         'taSanitize', '$timeout', '$document', 'taFixChrome', 'taBrowserTag',
         'taSelection', 'taSelectableElements', 'taApplyCustomRenderers', 'taOptions',
-        '_taBlankTest', '$parse', 'taDOM', 'textAngularManager',
+        '_taBlankTest', 'taExecCommand', '$parse', 'taDOM', 'textAngularManager',
         function(
             taSanitize, $timeout, $document, taFixChrome, taBrowserTag,
             taSelection, taSelectableElements, taApplyCustomRenderers, taOptions,
-            _taBlankTest, $parse, taDOM, textAngularManager){
+            _taBlankTest, taExecCommandProvider, $parse, taDOM, textAngularManager){
     // Uses for this are textarea or input with ng-model and ta-bind='text'
     // OR any non-form element with contenteditable="contenteditable" ta-bind="html|text" ng-model
     return {
@@ -2795,6 +3037,7 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
             // (, <), (- _), (. >), (/ ?), (` ~), ([ {), (\ |), (] }), (' ")
             // NOTE - Firefox: 173 = (- _) -- adding this to UNDO_TRIGGER_KEYS
             var UNDO_TRIGGER_KEYS = /^(8|13|32|46|59|61|107|109|173|186|187|188|189|190|191|192|219|220|221|222)$/i;
+            var _taExecCommand = taExecCommandProvider(attrs.taDefaultWrap);
             var _pasteHandler;
 
             // defaults to the paragraph element, but we need the line-break or it doesn't allow you to type into the empty element
@@ -3107,7 +3350,200 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
                         if(!_isReadonly) ngModel.$setViewValue(_compileHtml());
                     });
 
-                    element.on('keydown', scope.events.keydown = function(event, eventData){
+                    /* a short list of block elements. We assume that these can NOT contain <ol> and <ul> */
+                    function findLastBlockOrListItem(elem) {
+                        if (!elem.lastChild || !elem.lastChild.tagName) {
+                            return elem;
+                        } else if (elem.lastChild.tagName.match(/^li$/i) ) {
+                            if (!elem.lastChild.lastChild || !elem.lastChild.lastChild.tagName) {
+                                return elem.lastChild;
+                            } else {
+                                return findLastBlockOrListItem(elem.lastChild);
+                            }
+                            /*if (!elem.lastChild.lastChild || !elem.lastChild.lastChild.tagName) {
+                                return elem.lastChild;
+                            } if (elem.lastChild.lastChild.tagName.match(/^[uo]l$/i)) {
+                                return findLastBlockOrListItem(elem.lastChild.lastChild);
+                            } if (elem.lastChild.lastChild.tagName.match(BLOCKELEMENTS)) {
+                                return elem.lastChild.lastChild;
+                            } else {
+                                return findLastBlockOrListItem(elem.lastChild);
+                            }*/
+                        } else if (elem.lastChild.tagName.match(/^[uo]l$/i) ) {
+                            return findLastBlockOrListItem(elem.lastChild);
+                        } else if (elem.lastChild.tagName.match(/^br$/i) ) {
+                            return elem;
+                        //} else if (elem.lastChild.tagName.match(BLOCKELEMENTS) ) {
+                        } else {
+                            return elem.lastChild;
+                        }
+                    }
+                    function appendContent(target, elem) {
+                        var originalFirstChild = elem.firstChild;
+                        while (elem.firstChild) {
+                            target.appendChild(elem.firstChild);
+                        }
+                        taSelection.setSelectionToElementStart(originalFirstChild);
+                        elem.parentNode.removeChild(elem);
+                        return ;
+                    };
+                    function isAtElementStart(selection) {
+                        return (selection.start.offset === 0 && (selection.start.element == selection.container || selection.start.element == selection.container.firstChild))
+                    };
+                    //also used for exiting out of elements when hitting enter twice e.g. <li>
+                    function onBackspace(event) {
+                        // console.log('backspace handler fired in textAngular');
+                        var selection = taSelection.getSelection();
+                        var startElement =  selection.start.element;
+                        // console.log(selection.start.element);
+                        // console.log(selection.container);
+                        // or when selection is not collapsed
+                        if (startElement !== selection.end.element || selection.start.offset !== selection.end.offset){
+                            return;
+                        // element start exception handling before the isAtElementStrat test.
+                        } else if (selection.start.offset ===0 && !startElement.tagName) {
+                            if (startElement === selection.container.firstChild) {
+                                taSelection.setSelectionToElementStart(startElement.parentNode);
+                                return onBackspace(event);
+                            } else {
+                                // default to browser default behavior.
+                                return;
+                            }
+                        } else if (isAtElementStart(selection)) {
+                        /* selection is at the begining of element 
+                            * sometimes start.element is a textNode, while the container is the <li>, or <span> .
+                            * This is okay. 
+                            * We also don't need to worry about <br> because that's excluded in 
+                            * `taSelection.getSelection` already */
+                        if (startElement.tagName.match(/^li$/i) ) {
+                                /* at the begining of list element
+                                *  when the tag is <span>, we might want to trace back to parent. */
+                                //console.log('at the beginning of a list element');
+                                _taExecCommand('outdent', false, {preserveList: true});
+                            //} else if (!selection.container.previousSibling && selection.container.tagName.match(INLINEELEMENTS)) {
+                                /* if the offset is 0 and the selection contaienr */
+                            } else if (!startElement.previousSibling || !startElement.previousSibling.tagName ) {
+                                /* if either there is no previous sibling, or the previous sibling is a textnode, 
+                                * defer to browser deault */
+                                return;
+                            } else if (!startElement.previousSibling) {
+                                return;
+                            } else {
+                                /* iteratively find the last child of the last child...
+                                * previousSibling is a list. Find the last list item, and add to it
+                                * if the last list item contain other elements, add a new list item.  */
+                                //console.log(startElement.previousSibling);
+                                var lastDescendant = findLastBlockOrListItem(startElement.previousSibling);
+                                //console.log(lastDescendant.outerHTML);
+                                var orphanBr = lastDescendant.querySelector(':scope >br:first-child:last-child');
+                                //console.log(orphanBr);
+                                var firstBrOfSelection = startElement.querySelector(':scope >br:first-child');
+                                appendContent(lastDescendant, startElement);
+                                if (orphanBr) lastDescendant.removeChild(orphanBr);
+                                if (firstBrOfSelection) lastDescendant.removeChild(firstBrOfSelection);
+                            }
+                            event.preventDefault();
+                            return;
+                        } else {
+                            return;
+                        }
+                    };
+                    function onEnter(event) {
+                        // console.log('enter handler fired in textAngular');
+                        var selection = taSelection.getSelection();
+                        var startElement =  selection.start.element;
+                        // console.log(selection.start.element);
+                        // console.log(selection.container);
+                        // or when selection is not collapsed
+                        if (startElement !== selection.end.element || selection.start.offset !== selection.end.offset){
+                            return;
+                        // element start exception handling before the isAtElementStrat test.
+                        } else if (selection.start.offset ===0 && !startElement.tagName) {
+                            if (startElement === selection.container.firstChild) {
+                                taSelection.setSelectionToElementStart(startElement.parentNode);
+                                return onEnter(event);
+                            } else {
+                                // default to browser default behavior.
+                                return;
+                            }
+                        } else if (isAtElementStart(selection)) {
+                        /* selection is at the begining of element 
+                            * sometimes start.element is a textNode, while the container is the <li>, or <span> .
+                            * This is okay. 
+                            * We also don't need to worry about <br> because that's excluded in 
+                            * `taSelection.getSelection` already */
+                        if (startElement.tagName.match(/^li$/i) ) {
+                                /* at the begining of list element
+                                *  when the tag is <span>, we might want to trace back to parent. */
+                                //console.log('at the beginning of a list element');
+                                _taExecCommand('outdent', false, {preserveList: true});
+                            //} else if (!selection.container.previousSibling && selection.container.tagName.match(INLINEELEMENTS)) {
+                                /* if the offset is 0 and the selection contaienr */
+                            } else if (!startElement.previousSibling || !startElement.previousSibling.tagName ) {
+                                /* if either there is no previous sibling, or the previous sibling is a textnode, 
+                                * defer to browser deault */
+                                return;
+                            } else if (!startElement.previousSibling) {
+                                return;
+                            } else {
+                                /* iteratively find the last child of the last child...
+                                * previousSibling is a list. Find the last list item, and add to it
+                                * if the last list item contain other elements, add a new list item.  */
+                                //console.log(startElement.previousSibling);
+                                var lastDescendant = findLastBlockOrListItem(startElement.previousSibling);
+                                //console.log(lastDescendant.outerHTML);
+                                var orphanBr = lastDescendant.querySelector(':scope >br:first-child:last-child');
+                                //console.log(orphanBr);
+                                var firstBrOfSelection = startElement.querySelector(':scope >br:first-child');
+                                appendContent(lastDescendant, startElement);
+                                if (orphanBr) lastDescendant.removeChild(orphanBr);
+                                if (firstBrOfSelection) lastDescendant.removeChild(firstBrOfSelection);
+                            }
+                            event.preventDefault();
+                            return;
+                        } else {
+                            return;
+                        }
+                    };
+                    function onShiftTab(event) {
+                        var selection = taSelection.getSelection();
+                        if (!selection.container.tagName || !selection.container.tagName.match(VALIDELEMENTS)) {
+                            return;
+                        } else if (selection.container.tagName.match(/li/i)
+                            && (   selection.start.element === selection.container.firstChild ||
+                            selection.start.element === selection.container )
+                            && selection.start.offset === 0) {
+                            /* at the begining of list element
+                            *  when the tag is <span>, we might want to trace back to parent. */
+                            //console.log('at the beginning of a list element');
+                            _taExecCommand('outdent', false, {preserveList: true});
+                            event.preventDefault();
+                            //event.stopPropagation();
+                            return;
+                        } else {
+                            return;
+                        }
+                    };
+                    function onTab(event) {
+                        var selection = taSelection.getSelection();
+                        if (!selection.container.tagName || !selection.container.tagName.match(VALIDELEMENTS)) {
+                            return;
+                        } else if (selection.container.tagName.match(/li/i)
+                            && (   selection.start.element === selection.container.firstChild ||
+                            selection.start.element === selection.container )
+                            && selection.start.offset === 0) {
+                            /* at the begining of list element
+                            *  when the tag is <span>, we might want to trace back to parent. */
+                            //console.log('at the beginning of a list element');
+                            _taExecCommand('indent');
+                            event.preventDefault();
+                            //event.stopPropagation();
+                            return;
+                        } else {
+                            return;
+                        }
+                    };
+                    scope.keydownHandler = function(event, eventData){
                         /* istanbul ignore else: this is for catching the jqLite testing*/
                         if(eventData) angular.extend(event, eventData);
                         // Reference to http://stackoverflow.com/questions/6140632/how-to-handle-tab-in-textarea
@@ -3138,7 +3574,7 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
                             // prevent the focus lose
                             event.preventDefault();
                         }
-                    });
+                    };
 
                     var _repeat = function(string, n){
                         var result = '';
@@ -3534,7 +3970,17 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
                                 _redo();
                                 event.preventDefault();
                             }
+                            else if(event.keyCode === 8 && !event.shiftKey ) {
+                                //console.log('on backspace');
+                                return onBackspace(event);
+                            }else if(event.keyCode === 9 && event.shiftKey )  {
+                                //console.log('on shift-tab');
+                                return onShiftTab(event);
+                            }else if(event.keyCode === 9 && !event.shiftKey){
+                                //console.log('on tab');
+                                return onTab(event);
                             /* istanbul ignore next: difficult to test as can't seem to select */
+                            }
                             if(event.keyCode === _ENTER_KEYCODE && !event.shiftKey && !event.ctrlKey && !event.metaKey && !event.altKey)
                             {
                                 var contains = function(a, obj) {
@@ -3570,6 +4016,11 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
                                         $selection.remove();
                                         taSelection.setSelectionToElementStart(_new[0]);
                                         event.preventDefault();
+                                    }
+                                    else if (/^<br(|\/)>$/i.test(selection.innerHTML.trim()) && (selection.parentNode.tagName.toLowerCase() === 'ol' || selection.parentNode.tagName.toLowerCase() === 'ul') && !selection.nextSibling) {
+                                        onEnter(event)
+                                    }else if (/^<[^>]+><br(|\/)><\/[^>]+>$/i.test(selection.innerHTML.trim()) && (selection.tagName.toLowerCase() === 'ol' || selection.tagName.toLowerCase() === 'ul' )){
+                                        onEnter(event)
                                     }
                                 }
                             }
@@ -3897,6 +4348,11 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 // this global var is used to prevent multiple fires of the drop event. Needs to be global to the textAngular file.
 var dropFired = false;
 var textAngular = angular.module("textAngular", ['ngSanitize', 'textAngularSetup', 'textAngular.factories', 'textAngular.DOM', 'textAngular.validators', 'textAngular.taBind']); //This makes ngSanitize required
+
+// Workaround if textAngularSetup is not injected before this file, since this file depends on taTools to be available in the encompassing scope.
+if (window.taTools === 'undefined'){
+    var taTools = {};
+}
 
 textAngular.config([function(){
     // clear taTools variable. Just catches testing and any other time that this config may run multiple times...
