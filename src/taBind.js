@@ -40,11 +40,11 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 .directive('taBind', [
         'taSanitize', '$timeout', '$document', 'taFixChrome', 'taBrowserTag',
         'taSelection', 'taSelectableElements', 'taApplyCustomRenderers', 'taOptions',
-        '_taBlankTest', '$parse', 'taDOM', 'textAngularManager',
+        '_taBlankTest', 'taExecCommand', '$parse', 'taDOM', 'textAngularManager',
         function(
             taSanitize, $timeout, $document, taFixChrome, taBrowserTag,
             taSelection, taSelectableElements, taApplyCustomRenderers, taOptions,
-            _taBlankTest, $parse, taDOM, textAngularManager){
+            _taBlankTest, taExecCommandProvider, $parse, taDOM, textAngularManager){
     // Uses for this are textarea or input with ng-model and ta-bind='text'
     // OR any non-form element with contenteditable="contenteditable" ta-bind="html|text" ng-model
     return {
@@ -76,6 +76,7 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
             // (, <), (- _), (. >), (/ ?), (` ~), ([ {), (\ |), (] }), (' ")
             // NOTE - Firefox: 173 = (- _) -- adding this to UNDO_TRIGGER_KEYS
             var UNDO_TRIGGER_KEYS = /^(8|13|32|46|59|61|107|109|173|186|187|188|189|190|191|192|219|220|221|222)$/i;
+            var _taExecCommand = taExecCommandProvider(attrs.taDefaultWrap);
             var _pasteHandler;
 
             // defaults to the paragraph element, but we need the line-break or it doesn't allow you to type into the empty element
@@ -388,7 +389,200 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
                         if(!_isReadonly) ngModel.$setViewValue(_compileHtml());
                     });
 
-                    element.on('keydown', scope.events.keydown = function(event, eventData){
+                    /* a short list of block elements. We assume that these can NOT contain <ol> and <ul> */
+                    function findLastBlockOrListItem(elem) {
+                        if (!elem.lastChild || !elem.lastChild.tagName) {
+                            return elem;
+                        } else if (elem.lastChild.tagName.match(/^li$/i) ) {
+                            if (!elem.lastChild.lastChild || !elem.lastChild.lastChild.tagName) {
+                                return elem.lastChild;
+                            } else {
+                                return findLastBlockOrListItem(elem.lastChild);
+                            }
+                            /*if (!elem.lastChild.lastChild || !elem.lastChild.lastChild.tagName) {
+                                return elem.lastChild;
+                            } if (elem.lastChild.lastChild.tagName.match(/^[uo]l$/i)) {
+                                return findLastBlockOrListItem(elem.lastChild.lastChild);
+                            } if (elem.lastChild.lastChild.tagName.match(BLOCKELEMENTS)) {
+                                return elem.lastChild.lastChild;
+                            } else {
+                                return findLastBlockOrListItem(elem.lastChild);
+                            }*/
+                        } else if (elem.lastChild.tagName.match(/^[uo]l$/i) ) {
+                            return findLastBlockOrListItem(elem.lastChild);
+                        } else if (elem.lastChild.tagName.match(/^br$/i) ) {
+                            return elem;
+                        //} else if (elem.lastChild.tagName.match(BLOCKELEMENTS) ) {
+                        } else {
+                            return elem.lastChild;
+                        }
+                    }
+                    function appendContent(target, elem) {
+                        var originalFirstChild = elem.firstChild;
+                        while (elem.firstChild) {
+                            target.appendChild(elem.firstChild);
+                        }
+                        taSelection.setSelectionToElementStart(originalFirstChild);
+                        elem.parentNode.removeChild(elem);
+                        return ;
+                    };
+                    function isAtElementStart(selection) {
+                        return (selection.start.offset === 0 && (selection.start.element == selection.container || selection.start.element == selection.container.firstChild))
+                    };
+                    //also used for exiting out of elements when hitting enter twice e.g. <li>
+                    function onBackspace(event) {
+                        // console.log('backspace handler fired in textAngular');
+                        var selection = taSelection.getSelection();
+                        var startElement =  selection.start.element;
+                        // console.log(selection.start.element);
+                        // console.log(selection.container);
+                        // or when selection is not collapsed
+                        if (startElement !== selection.end.element || selection.start.offset !== selection.end.offset){
+                            return;
+                        // element start exception handling before the isAtElementStrat test.
+                        } else if (selection.start.offset ===0 && !startElement.tagName) {
+                            if (startElement === selection.container.firstChild) {
+                                taSelection.setSelectionToElementStart(startElement.parentNode);
+                                return onBackspace(event);
+                            } else {
+                                // default to browser default behavior.
+                                return;
+                            }
+                        } else if (isAtElementStart(selection)) {
+                        /* selection is at the begining of element 
+                            * sometimes start.element is a textNode, while the container is the <li>, or <span> .
+                            * This is okay. 
+                            * We also don't need to worry about <br> because that's excluded in 
+                            * `taSelection.getSelection` already */
+                        if (startElement.tagName.match(/^li$/i) ) {
+                                /* at the begining of list element
+                                *  when the tag is <span>, we might want to trace back to parent. */
+                                //console.log('at the beginning of a list element');
+                                _taExecCommand('outdent', false, {preserveList: true});
+                            //} else if (!selection.container.previousSibling && selection.container.tagName.match(INLINEELEMENTS)) {
+                                /* if the offset is 0 and the selection contaienr */
+                            } else if (!startElement.previousSibling || !startElement.previousSibling.tagName ) {
+                                /* if either there is no previous sibling, or the previous sibling is a textnode, 
+                                * defer to browser deault */
+                                return;
+                            } else if (!startElement.previousSibling) {
+                                return;
+                            } else {
+                                /* iteratively find the last child of the last child...
+                                * previousSibling is a list. Find the last list item, and add to it
+                                * if the last list item contain other elements, add a new list item.  */
+                                //console.log(startElement.previousSibling);
+                                var lastDescendant = findLastBlockOrListItem(startElement.previousSibling);
+                                //console.log(lastDescendant.outerHTML);
+                                var orphanBr = lastDescendant.querySelector(':scope >br:first-child:last-child');
+                                //console.log(orphanBr);
+                                var firstBrOfSelection = startElement.querySelector(':scope >br:first-child');
+                                appendContent(lastDescendant, startElement);
+                                if (orphanBr) lastDescendant.removeChild(orphanBr);
+                                if (firstBrOfSelection) lastDescendant.removeChild(firstBrOfSelection);
+                            }
+                            event.preventDefault();
+                            return;
+                        } else {
+                            return;
+                        }
+                    };
+                    function onEnter(event) {
+                        // console.log('enter handler fired in textAngular');
+                        var selection = taSelection.getSelection();
+                        var startElement =  selection.start.element;
+                        // console.log(selection.start.element);
+                        // console.log(selection.container);
+                        // or when selection is not collapsed
+                        if (startElement !== selection.end.element || selection.start.offset !== selection.end.offset){
+                            return;
+                        // element start exception handling before the isAtElementStrat test.
+                        } else if (selection.start.offset ===0 && !startElement.tagName) {
+                            if (startElement === selection.container.firstChild) {
+                                taSelection.setSelectionToElementStart(startElement.parentNode);
+                                return onEnter(event);
+                            } else {
+                                // default to browser default behavior.
+                                return;
+                            }
+                        } else if (isAtElementStart(selection)) {
+                        /* selection is at the begining of element 
+                            * sometimes start.element is a textNode, while the container is the <li>, or <span> .
+                            * This is okay. 
+                            * We also don't need to worry about <br> because that's excluded in 
+                            * `taSelection.getSelection` already */
+                        if (startElement.tagName.match(/^li$/i) ) {
+                                /* at the begining of list element
+                                *  when the tag is <span>, we might want to trace back to parent. */
+                                //console.log('at the beginning of a list element');
+                                _taExecCommand('outdent', false, {preserveList: true});
+                            //} else if (!selection.container.previousSibling && selection.container.tagName.match(INLINEELEMENTS)) {
+                                /* if the offset is 0 and the selection contaienr */
+                            } else if (!startElement.previousSibling || !startElement.previousSibling.tagName ) {
+                                /* if either there is no previous sibling, or the previous sibling is a textnode, 
+                                * defer to browser deault */
+                                return;
+                            } else if (!startElement.previousSibling) {
+                                return;
+                            } else {
+                                /* iteratively find the last child of the last child...
+                                * previousSibling is a list. Find the last list item, and add to it
+                                * if the last list item contain other elements, add a new list item.  */
+                                //console.log(startElement.previousSibling);
+                                var lastDescendant = findLastBlockOrListItem(startElement.previousSibling);
+                                //console.log(lastDescendant.outerHTML);
+                                var orphanBr = lastDescendant.querySelector(':scope >br:first-child:last-child');
+                                //console.log(orphanBr);
+                                var firstBrOfSelection = startElement.querySelector(':scope >br:first-child');
+                                appendContent(lastDescendant, startElement);
+                                if (orphanBr) lastDescendant.removeChild(orphanBr);
+                                if (firstBrOfSelection) lastDescendant.removeChild(firstBrOfSelection);
+                            }
+                            event.preventDefault();
+                            return;
+                        } else {
+                            return;
+                        }
+                    };
+                    function onShiftTab(event) {
+                        var selection = taSelection.getSelection();
+                        if (!selection.container.tagName || !selection.container.tagName.match(VALIDELEMENTS)) {
+                            return;
+                        } else if (selection.container.tagName.match(/li/i)
+                            && (   selection.start.element === selection.container.firstChild ||
+                            selection.start.element === selection.container )
+                            && selection.start.offset === 0) {
+                            /* at the begining of list element
+                            *  when the tag is <span>, we might want to trace back to parent. */
+                            //console.log('at the beginning of a list element');
+                            _taExecCommand('outdent', false, {preserveList: true});
+                            event.preventDefault();
+                            //event.stopPropagation();
+                            return;
+                        } else {
+                            return;
+                        }
+                    };
+                    function onTab(event) {
+                        var selection = taSelection.getSelection();
+                        if (!selection.container.tagName || !selection.container.tagName.match(VALIDELEMENTS)) {
+                            return;
+                        } else if (selection.container.tagName.match(/li/i)
+                            && (   selection.start.element === selection.container.firstChild ||
+                            selection.start.element === selection.container )
+                            && selection.start.offset === 0) {
+                            /* at the begining of list element
+                            *  when the tag is <span>, we might want to trace back to parent. */
+                            //console.log('at the beginning of a list element');
+                            _taExecCommand('indent');
+                            event.preventDefault();
+                            //event.stopPropagation();
+                            return;
+                        } else {
+                            return;
+                        }
+                    };
+                    scope.keydownHandler = function(event, eventData){
                         /* istanbul ignore else: this is for catching the jqLite testing*/
                         if(eventData) angular.extend(event, eventData);
                         // Reference to http://stackoverflow.com/questions/6140632/how-to-handle-tab-in-textarea
@@ -419,7 +613,7 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
                             // prevent the focus lose
                             event.preventDefault();
                         }
-                    });
+                    };
 
                     var _repeat = function(string, n){
                         var result = '';
@@ -815,7 +1009,17 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
                                 _redo();
                                 event.preventDefault();
                             }
+                            else if(event.keyCode === 8 && !event.shiftKey ) {
+                                //console.log('on backspace');
+                                return onBackspace(event);
+                            }else if(event.keyCode === 9 && event.shiftKey )  {
+                                //console.log('on shift-tab');
+                                return onShiftTab(event);
+                            }else if(event.keyCode === 9 && !event.shiftKey){
+                                //console.log('on tab');
+                                return onTab(event);
                             /* istanbul ignore next: difficult to test as can't seem to select */
+                            }
                             if(event.keyCode === _ENTER_KEYCODE && !event.shiftKey && !event.ctrlKey && !event.metaKey && !event.altKey)
                             {
                                 var contains = function(a, obj) {
@@ -851,6 +1055,11 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
                                         $selection.remove();
                                         taSelection.setSelectionToElementStart(_new[0]);
                                         event.preventDefault();
+                                    }
+                                    else if (/^<br(|\/)>$/i.test(selection.innerHTML.trim()) && (selection.parentNode.tagName.toLowerCase() === 'ol' || selection.parentNode.tagName.toLowerCase() === 'ul') && !selection.nextSibling) {
+                                        onEnter(event)
+                                    }else if (/^<[^>]+><br(|\/)><\/[^>]+>$/i.test(selection.innerHTML.trim()) && (selection.tagName.toLowerCase() === 'ol' || selection.tagName.toLowerCase() === 'ul' )){
+                                        onEnter(event)
                                     }
                                 }
                             }
