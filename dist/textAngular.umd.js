@@ -254,7 +254,7 @@ angular.module('textAngularSetup', [])
         tooltip: 'Clear formatting'
     },
     insertImage: {
-        dialogPrompt: 'Please enter an image URL to insert',
+        dialogPrompt: 'Enter an image URL or cancel this and drag an image into the editor',
         tooltip: 'Insert image',
         hotkey: 'the - possibly language dependent hotkey ... for some future implementation'
     },
