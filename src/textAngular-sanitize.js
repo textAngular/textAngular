@@ -513,11 +513,12 @@ var trim = (function() {
 function validStyles(styleAttr){
 	var result = '';
 	var styleArray = styleAttr.split(';');
-	
+
 	//This regex is a bit of a monster, so composing it here to try to make it a little less scary
 	var lengthComponent = '([0-9\.]+(px|em|rem))?';
 	var styleComponent = '(none|hidden|dotted|dashed|solid|double|groove|ridge|inset|outset)?';
 	var colorComponent = '((rgb|hsl)a?\\([0-9%,\.]+\\)|#[0-9a-f]{3,6}|[a-z]+)?';
+	var collapseComponent = '(separate|collapse|initial|inherit)';
 	var borderRegex = new RegExp('^'+lengthComponent+'\\s*'+styleComponent+'\\s*'+colorComponent+'$', 'i');
 	angular.forEach(styleArray, function(value){
 		var v = value.split(':');
@@ -547,7 +548,7 @@ function validStyles(styleAttr){
             value === 'underline'
             || value === 'line-through'
         )
-      || 
+      ||
         key === 'font-weight' && (
             value === 'bold'
         )
@@ -621,6 +622,12 @@ function validStyles(styleAttr){
 				((key === 'border' || key === 'border-bottom' || key === 'border-top' || key === 'border-right' || key === 'border-left') && (
 					value.match(borderRegex)
 				))
+			||
+				(key === 'border-collapse' && value.match(collapseComponent))
+			||
+				(key === 'border-style' && value.match(styleComponent))
+			||
+				(key === 'border-color' && value.match(colorComponent))
 			) result += key + ': ' + full_value + ';';
 		}
 	});
