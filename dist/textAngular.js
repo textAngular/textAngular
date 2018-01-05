@@ -2,7 +2,7 @@
 @license textAngular
 Author : Austin Anderson
 License : 2013 MIT
-Version 1.5.16
+Version 1.5.17-0
 
 See README.md or https://github.com/fraywing/textAngular/wiki for requirements and use.
 */
@@ -13,7 +13,7 @@ Commonjs package manager support (eg componentjs).
 
 
 "use strict";// NOTE: textAngularVersion must match the Gruntfile.js 'setVersion' task.... and have format v/d+./d+./d+
-var textAngularVersion = 'v1.5.16';   // This is automatically updated during the build process to the current release!
+var textAngularVersion = 'v1.5.17-0';   // This is automatically updated during the build process to the current release!
 
 
 // IE version detection - http://stackoverflow.com/questions/4169160/javascript-ie-detection-why-not-use-simple-conditional-comments
@@ -723,11 +723,14 @@ angular.module('textAngular.DOM', ['textAngular.factories'])
                 var __h, _innerNode;
                 /* istanbul ignore next */
                 if (selectedElement.tagName !== undefined) {
+                    _nodes = taSelection.getOnlySelectedElements();
                     if (selectedElement.tagName.toLowerCase() === 'div' &&
                         /taTextElement.+/.test(selectedElement.id) &&
                         ourSelection && ourSelection.start &&
                         ourSelection.start.offset === 1 &&
-                        ourSelection.end.offset === 1) {
+                        ourSelection.end.offset === 1 &&
+                        // only if all nodes of the whole container were selected
+                        (_nodes.length === 0 || (_nodes.length === selectedElement.childNodes.length))) {
                         // opps we are actually selecting the whole container!
                         //console.log('selecting whole container!');
                         __h = selectedElement.innerHTML;

@@ -1,5 +1,10 @@
-<a name="1.5.16.1"></a>
-## [1.5.16.1](https://github.com/mimacom/textAngular/compare/v1.5.16...v1.5.16.1) (2018-01-05)
+<a name="1.5.17-0"></a>
+## [1.5.17-0](https://github.com/fraywing/textAngular/compare/v1.5.16...v1.5.17-0) (2018-01-05)
+
+
+
+<a name="1.5.17-0"></a>
+## [1.5.17-0](https://github.com/mimacom/textAngular/compare/v1.5.16...v1.5.17-0) (2018-01-05)
 
 
 ### Bug Fixes
