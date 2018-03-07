@@ -218,11 +218,14 @@ angular.module('textAngular.DOM', ['textAngular.factories'])
                 var __h, _innerNode;
                 /* istanbul ignore next */
                 if (selectedElement.tagName !== undefined) {
+                    _nodes = taSelection.getOnlySelectedElements();
                     if (selectedElement.tagName.toLowerCase() === 'div' &&
                         /taTextElement.+/.test(selectedElement.id) &&
                         ourSelection && ourSelection.start &&
                         ourSelection.start.offset === 1 &&
-                        ourSelection.end.offset === 1) {
+                        ourSelection.end.offset === 1 &&
+                        // only if all nodes of the whole container were selected
+                        (_nodes.length === 0 || (_nodes.length === selectedElement.childNodes.length))) {
                         // opps we are actually selecting the whole container!
                         //console.log('selecting whole container!');
                         __h = selectedElement.innerHTML;
@@ -323,6 +326,15 @@ angular.module('textAngular.DOM', ['textAngular.factories'])
                 //console.log('PPPPPPPPPPPPP', tagName, selfTag, selectedElements, tagName.match(BLOCKELEMENTS), $selected.hasClass('ta-bind'), $selected.parent()[0].tagName);
                 if (selectedElements.length>1 && (tagName === 'ol' ||  tagName === 'ul' )) {
                     return listElementsToSelfTag($selected, selectedElements, selfTag, selfTag===tagName, taDefaultWrap);
+                } else if (tagName === 'li' && $selected.parent().children().length > 1) {
+                    // if list has more than one elements and only one of them is selected
+                    var parent = $selected.parent();
+                    if (parent.length > 0 && parent[0].tagName) {
+                        var parentTagName = parent[0].tagName.toLowerCase();
+                        if (parentTagName === 'ol' || parentTagName === 'ul') {
+                            return listElementsToSelfTag(parent, [selectedElement], selfTag, parentTagName, taDefaultWrap);
+                        }
+                    }
                 }
                 if(tagName === selfTag){
                     // if all selected then we should remove the list

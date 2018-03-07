@@ -1,3 +1,18 @@
+<a name="1.5.17-0"></a>
+## [1.5.17-0](https://github.com/fraywing/textAngular/compare/v1.5.16...v1.5.17-0) (2018-01-05)
+
+
+
+<a name="1.5.17-0"></a>
+## [1.5.17-0](https://github.com/mimacom/textAngular/compare/v1.5.16...v1.5.17-0) (2018-01-05)
+
+
+### Bug Fixes
+
+* ESHAB-3491: Do not treat selection as if the whole container was selected when only some elements are selected.
+
+
+
 <a name="1.5.16"></a>
 ## [1.5.16](https://github.com/fraywing/textAngular/compare/v1.5.15...v1.5.16) (2016-12-05)
 

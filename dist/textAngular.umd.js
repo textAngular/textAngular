@@ -4,13 +4,13 @@
     define('textAngular', ["rangy","rangy/lib/rangy-selectionsaverestore"], function (a0,b1) {
       return (root['textAngular.name'] = factory(a0,b1));
     });
-  } else if (typeof exports === 'object') {
+  } else if (typeof module === 'object' && module.exports) {
     // Node. Does not work with strict CommonJS, but
     // only CommonJS-like environments that support module.exports,
     // like Node.
     module.exports = factory(require("rangy"),require("rangy/lib/rangy-selectionsaverestore"));
   } else {
-    root['textAngular'] = factory(rangy);
+    root['textAngular'] = factory(root["rangy"]);
   }
 }(this, function (rangy) {
 
@@ -1032,7 +1032,7 @@ angular.module('textAngularSetup', [])
 @license textAngular
 Author : Austin Anderson
 License : 2013 MIT
-Version 1.5.16
+Version 1.5.17-0
 
 See README.md or https://github.com/fraywing/textAngular/wiki for requirements and use.
 */
@@ -1043,7 +1043,7 @@ Commonjs package manager support (eg componentjs).
 
 
 "use strict";// NOTE: textAngularVersion must match the Gruntfile.js 'setVersion' task.... and have format v/d+./d+./d+
-var textAngularVersion = 'v1.5.16';   // This is automatically updated during the build process to the current release!
+var textAngularVersion = 'v1.5.17-0';   // This is automatically updated during the build process to the current release!
 
 
 // IE version detection - http://stackoverflow.com/questions/4169160/javascript-ie-detection-why-not-use-simple-conditional-comments
@@ -1753,11 +1753,14 @@ angular.module('textAngular.DOM', ['textAngular.factories'])
                 var __h, _innerNode;
                 /* istanbul ignore next */
                 if (selectedElement.tagName !== undefined) {
+                    _nodes = taSelection.getOnlySelectedElements();
                     if (selectedElement.tagName.toLowerCase() === 'div' &&
                         /taTextElement.+/.test(selectedElement.id) &&
                         ourSelection && ourSelection.start &&
                         ourSelection.start.offset === 1 &&
-                        ourSelection.end.offset === 1) {
+                        ourSelection.end.offset === 1 &&
+                        // only if all nodes of the whole container were selected
+                        (_nodes.length === 0 || (_nodes.length === selectedElement.childNodes.length))) {
                         // opps we are actually selecting the whole container!
                         //console.log('selecting whole container!');
                         __h = selectedElement.innerHTML;
@@ -1858,6 +1861,15 @@ angular.module('textAngular.DOM', ['textAngular.factories'])
                 //console.log('PPPPPPPPPPPPP', tagName, selfTag, selectedElements, tagName.match(BLOCKELEMENTS), $selected.hasClass('ta-bind'), $selected.parent()[0].tagName);
                 if (selectedElements.length>1 && (tagName === 'ol' ||  tagName === 'ul' )) {
                     return listElementsToSelfTag($selected, selectedElements, selfTag, selfTag===tagName, taDefaultWrap);
+                } else if (tagName === 'li' && $selected.parent().children().length > 1) {
+                    // if list has more than one elements and only one of them is selected
+                    var parent = $selected.parent();
+                    if (parent.length > 0 && parent[0].tagName) {
+                        var parentTagName = parent[0].tagName.toLowerCase();
+                        if (parentTagName === 'ol' || parentTagName === 'ul') {
+                            return listElementsToSelfTag(parent, [selectedElement], selfTag, parentTagName, taDefaultWrap);
+                        }
+                    }
                 }
                 if(tagName === selfTag){
                     // if all selected then we should remove the list
@@ -3247,17 +3259,19 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
                     /* istanbul ignore next: phantom js cannot test this for some reason */
                     var processpaste = function(text) {
                        var _isOneNote = text!==undefined? text.match(/content=["']*OneNote.File/i): false;
+                        var _isExcelSheet = text!==undefined? text.match(/content=["']*Excel.Sheet/i): false;
                         /* istanbul ignore else: don't care if nothing pasted */
                         //console.log(text);
                         if(text && text.trim().length){
+                            var tagName,textFragment, dom, targetDom, el;
                             // test paste from word/microsoft product
-                            if(text.match(/class=["']*Mso(Normal|List)/i) || text.match(/content=["']*Word.Document/i) || text.match(/content=["']*OneNote.File/i)){
-                                var textFragment = text.match(/<!--StartFragment-->([\s\S]*?)<!--EndFragment-->/i);
+                            if(text.match(/class=["']*Mso(Normal|List)/i) || text.match(/content=["']*Word.Document/i) || _isOneNote){
+                                textFragment = text.match(/<!--StartFragment-->([\s\S]*?)<!--EndFragment-->/i);
                                 if(!textFragment) textFragment = text;
                                 else textFragment = textFragment[1];
                                 textFragment = textFragment.replace(/<o:p>[\s\S]*?<\/o:p>/ig, '').replace(/class=(["']|)MsoNormal(["']|)/ig, '');
-                                var dom = angular.element("<div>" + textFragment + "</div>");
-                                var targetDom = angular.element("<div></div>");
+                                dom = angular.element("<div>" + textFragment + "</div>");
+                                targetDom = angular.element("<div></div>");
                                 var _list = {
                                     element: null,
                                     lastIndent: [],
@@ -3282,7 +3296,7 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
                                     if(!dom[0].childNodes[i] || dom[0].childNodes[i].nodeName === "#text"){
                                         continue;
                                     } else {
-                                        var tagName = dom[0].childNodes[i].tagName.toLowerCase();
+                                        tagName = dom[0].childNodes[i].tagName.toLowerCase();
                                         if(tagName !== 'p' &&
                                             tagName !== 'ul' &&
                                             tagName !== 'h1' &&
@@ -3295,7 +3309,7 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
                                             continue;
                                         }
                                     }
-                                    var el = angular.element(dom[0].childNodes[i]);
+                                    el = angular.element(dom[0].childNodes[i]);
                                     var _listMatch = (el.attr('class') || '').match(/MsoList(Bullet|Number|Paragraph)(CxSp(First|Middle|Last)|)/i);
 
                                     if(_listMatch){
@@ -3364,7 +3378,72 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
                                 }
                                 // LF characters instead of spaces in some spots and they are replaced by '/n', so we need to just swap them to spaces
                                 text = text.replace(/\n/g, ' ');
-                            }else{
+                            } else if (_isExcelSheet) {
+                                textFragment = text.match(/<!--StartFragment-->([\s\S]*?)<!--EndFragment-->/i);
+                                if (!textFragment) textFragment = text;
+                                else textFragment = textFragment[1];
+                                textFragment = textFragment.replace(/<o:p>[\s\S]*?<\/o:p>/ig, '').replace(/class=(["']|)MsoNormal(["']|)/ig, '');
+                                dom = angular.element("<table>" + textFragment + "</table>");
+                                targetDom = angular.element("<div></div>");
+                                var getCellContent = function (cellNode) {
+                                    var cellContent = '';
+                                    for (var c = 0; c <= cellNode.childNodes.length; c++) {
+                                        if (cellNode.childNodes[c]) {
+                                            if (cellNode.childNodes[c].nodeName === "#text") {
+                                                cellContent += cellNode.childNodes[c].textContent.replace(/\n/g, ' ');
+                                            } else if (cellNode.childNodes[c].tagName.toLowerCase() === 'br') {
+                                                cellContent += '<br>';
+                                            } else if (cellNode.childNodes[c].tagName.toLowerCase() === 'font') {
+                                                cellContent += cellNode.childNodes[c].textContent.replace(/\n/g, ' ');
+                                            }
+                                        }
+                                    }
+                                    return cellContent;
+                                };
+                                var unwrapTableRow = function (node) {
+                                    var rowElement = angular.element('<p>');
+                                    var amountOfProcessedCells = 0;
+                                    for (var c = 0; c <= node.childNodes.length; c++) {
+                                        var rowChild = node.childNodes[c];
+                                        if (!rowChild || rowChild.nodeName === "#text") {
+                                            continue;
+                                        } else if (rowChild.tagName.toLowerCase() === 'td') {
+                                            if (amountOfProcessedCells > 0) {
+                                                rowElement.append(angular.element('<br>'));
+                                            }
+                                            rowElement.append(getCellContent(rowChild));
+                                            amountOfProcessedCells += 1;
+                                        }
+                                    }
+                                    return rowElement;
+                                };
+                                var unwrapTableBody = function (node) {
+                                    var paragraphEl = angular.element('<p>');
+                                    for (var k = 0; k <= node.childNodes.length; k++) {
+                                        if (!node.childNodes[k] || node.childNodes[k].nodeName === "#text") {
+                                            continue;
+                                        } else {
+                                            if (node.childNodes[k].tagName.toLowerCase() === 'tr') {
+                                                var tableRow = unwrapTableRow(node.childNodes[k]);
+                                                paragraphEl.append(tableRow);
+                                            }
+                                        }
+                                    }
+                                    return paragraphEl.html();
+                                };
+                                for (var j = 0; j <= dom[0].childNodes.length; j++) {
+                                    var childNode = dom[0].childNodes[j];
+                                    if (childNode && childNode.nodeName !== "#text") {
+                                        tagName = childNode.tagName.toLowerCase();
+                                        if (tagName !== 'tbody') {
+                                            continue;
+                                        }
+                                        targetDom.append(unwrapTableBody(childNode));
+                                    }
+                                }
+                                text = targetDom.html();
+                                text = text.replace(/\n/g, ' ');
+                            } else{
                                 // remove unnecessary chrome insert
                                 text = text.replace(/<(|\/)meta[^>]*?>/ig, '');
                                 if(text.match(/<[^>]*?(ta-bind)[^>]*?>/)){
