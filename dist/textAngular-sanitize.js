@@ -513,11 +513,20 @@ var trim = (function() {
 function validStyles(styleAttr){
 	var result = '';
 	var styleArray = styleAttr.split(';');
+
+	//This regex is a bit of a monster, so composing it here to try to make it a little less scary
+	var lengthComponent = '([0-9\.]+(px|em|rem))?';
+	var styleComponent = '(none|hidden|dotted|dashed|solid|double|groove|ridge|inset|outset)?';
+	var colorComponent = '((rgb|hsl)a?\\([0-9%,\.]+\\)|#[0-9a-f]{3,6}|[a-z]+)?';
+	var collapseComponent = '(separate|collapse|initial|inherit)';
+	var borderRegex = new RegExp('^'+lengthComponent+'\\s*'+styleComponent+'\\s*'+colorComponent+'$', 'i');
 	angular.forEach(styleArray, function(value){
 		var v = value.split(':');
 		if(v.length == 2){
 			var key = trim(angular.lowercase(v[0]));
-			var value = trim(angular.lowercase(v[1]));
+			var full_value = trim(angular.lowercase(v[1]));
+			var split_value = full_value.match(/^(.*?)\s*(!important)?$/);
+			var value = trim(split_value[1]); // 0 index is the full thing, 1 is the stuff before "!important" (which need not exist)
 			if(
 				(key === 'color' || key === 'background-color') && (
 					value.match(/^rgb\([0-9%,\. ]*\)$/i)
@@ -539,7 +548,7 @@ function validStyles(styleAttr){
             value === 'underline'
             || value === 'line-through'
         )
-      || 
+      ||
         key === 'font-weight' && (
             value === 'bold'
         )
@@ -585,7 +594,41 @@ function validStyles(styleAttr){
 				)
 			|| // Reference #520
 				(key === 'direction' && value.match(/^ltr|rtl|initial|inherit$/))
-			) result += key + ': ' + value + ';';
+			||
+				((key === 'padding' || key === 'padding-bottom' || key === 'padding-top' || key === 'padding-right' || key === 'padding-left') && (
+					value.match(/[0-9\.]*(px|em|rem|%)/)
+				))
+			||
+				(key === 'display' && (
+					value === 'block'
+					|| value === 'inline'
+					|| value === 'flex'
+				))
+			||
+				((key === 'margin' || key === 'margin-bottom' || key === 'margin-top' || key === 'margin-right' || key === 'margin-left') && (
+					value.match(/[0-9\.]*(px|em|rem|%)/)
+				))
+			||
+				((key === 'font-size') && (
+					value.match(/[0-9\.]*(px|em|rem|%)/)
+				))
+			||
+				(key === 'text-decoration' && (
+					value === 'none'
+					|| value === 'underline'
+					|| value === 'line-through'
+				))
+			||
+				((key === 'border' || key === 'border-bottom' || key === 'border-top' || key === 'border-right' || key === 'border-left') && (
+					value.match(borderRegex)
+				))
+			||
+				(key === 'border-collapse' && value.match(collapseComponent))
+			||
+				(key === 'border-style' && value.match(styleComponent))
+			||
+				(key === 'border-color' && value.match(colorComponent))
+			) result += key + ': ' + full_value + ';';
 		}
 	});
 	return result;
