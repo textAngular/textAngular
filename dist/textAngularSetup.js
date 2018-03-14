@@ -54,7 +54,7 @@ var taTools = {};
 */
 // name and toolDefinition to add into the tools available to be added on the toolbar
 function registerTextAngularTool(name, toolDefinition){
-    if(!name || name === '' || taTools.hasOwnProperty(name)) throw('textAngular Error: A unique name is required for a Tool Definition');
+    if(!name || name === '') throw('textAngular Error: A name is required for a Tool Definition');
     if(
         (toolDefinition.display && (toolDefinition.display === '' || !validElementString(toolDefinition.display))) ||
         (!toolDefinition.display && !toolDefinition.buttontext && !toolDefinition.iconclass)
@@ -238,7 +238,7 @@ angular.module('textAngularSetup', [])
         tooltip: 'Clear formatting'
     },
     insertImage: {
-        dialogPrompt: 'Please enter an image URL to insert',
+        dialogPrompt: 'Enter an image URL or cancel this and drag an image into the editor',
         tooltip: 'Insert image',
         hotkey: 'the - possibly language dependent hotkey ... for some future implementation'
     },

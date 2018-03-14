@@ -177,6 +177,233 @@ angular.module('textAngular.DOM', ['textAngular.factories'])
         listElement.remove();
         selectLi($target.find('li')[0]);
     };
+    var findListOrBlockContainer = function (element) {
+        /* since <li> is neither block nor inline element */
+           if (element.tagName && element.tagName.match(/li/i)) {
+               return element;
+           } else if (element.tagName && element.tagName.match(BLOCKELEMENTS)) {
+               return element;
+           } else if (angular.element(element).parent().hasClass('ta-bind')) {
+               return element;
+           } else {
+               return findListOrBlockContainer(element.parentNode);
+           }
+    };
+       /** finds the child node of container that contains the selection element
+     * if container is the same as the selectrion element, return selElement */
+    var findChildContainer = function(container, selElement) {
+           if (!selElement.parentNode) {
+            return null;
+        } else if (container === selElement) {
+            return selElement;
+        } else if (container === selElement.parentNode) {
+               return selElement;
+           } else {
+               return findChildContainer(container, selElement.parentNode);
+           }
+       };
+       var wrapElement = function (defaultWrap, itemElement) {
+           var elem = angular.element('<' + defaultWrap + '>');
+           if (itemElement.childNodes && itemElement.childNodes.length > 0) {
+               while (itemElement.childNodes.length > 0) {
+                   elem[0].appendChild(itemElement.childNodes[0]);
+               }
+           } else {
+               elem[0].innerHTML = itemElement.innerHTML;
+           }
+           return elem[0];
+       };
+    /** moves contents of itemElement after the anchor element */
+    var moveChildNodesAfter = function (anchor, itemElement) {
+        var last, current;
+        if (!itemElement.childNodes){
+            last = document.createTextNode(itemElement.textContent || itemElement.innerText);
+            angular.element(anchor).after(last);
+        } else {
+            last = anchor;
+            while (itemElement.childNodes && itemElement.childNodes.length > 0) {
+                current = itemElement.childNodes[0];
+                angular.element(last).after(current);
+                last = current;
+            }
+        }
+        return last;
+    };
+    var indentListItem = function (itemElement) {
+        var newContainer, tagName, prev, parent;
+        tagName = itemElement.tagName;
+        prev = itemElement.previousSibling;
+        parent = itemElement.parentNode;
+        if (!tagName || !tagName.match(/li/i)) {
+            newContainer = wrapElement("blockquote", itemElement);
+            angular.element(itemElement).after(newContainer);
+            angular.element(itemElement).remove();
+            taSelection.setSelectionToElementStart(itemElement);
+            return;
+           } else if (!prev ){
+            /* if the element is the first of a list, it can not be indented */
+            return;
+        } else if ( prev && prev.lastChild && prev.lastChild.tagName && prev.lastChild.tagName.match(/[ou]l/gi) && prev.lastChild.tagName.match(parent.tagName)) {
+            /* only if the lastChild of the previous element has the same tagName as current parent */
+            prev.lastChild.appendChild(itemElement);
+            taSelection.setSelectionToElementStart(itemElement);
+            return;
+        } else {
+            /* add a complete list container with the current item to the previous sibling.*/
+            newContainer = document.createElement(parent.tagName.toLowerCase());
+            prev.appendChild(newContainer);
+            newContainer.appendChild(itemElement);
+            taSelection.setSelectionToElementStart(itemElement);
+            return;
+        }
+    };
+    var indentBlock = function (defaultWrap, $selected) {
+        var sel, beginElement, endElement, items, current, done ;
+        sel = taSelection.getSelection();
+        sel.container = findListOrBlockContainer(sel.container);
+        sel.start.element = findListOrBlockContainer(sel.start.element);
+        sel.end.element = findListOrBlockContainer(sel.end.element);
+        beginElement = findChildContainer(sel.container, sel.start.element);
+        endElement = findChildContainer(sel.container, sel.end.element);
+        done = false;
+        items = [beginElement];
+        while (items.slice(-1)[0].nextSibling  && !done ) {
+            if (items.slice(-1)[0] === endElement){
+                done = true;
+            } else {
+                items.push(items.slice(-1)[0].nextSibling);
+            }
+        }
+        angular.forEach(items, indentListItem);
+    };
+       var isDefaultWrap = function (element, defaultWrap) {
+        var wrap = angular.element("<" + defaultWrap + ">");
+        angular.forEach(wrap[0].className.split(' '), function (className) {
+            if (!element.className && element.className.match(className)) {
+                return false;
+            }
+        });
+        if (wrap.tagName && (!element.tagName ||
+            element.tagName.toLowerCase.match(wrap.tagName.toLowerCase() ) )
+        ) { return false; }
+        return true;
+    };
+    var outdentListItem = function (itemElement, defaultWrap, options) {
+        var newContainer, tagName, prev, parent, wrapElem;
+        tagName = itemElement.tagName;
+        prev = itemElement.previousSibling;
+        parent = itemElement.parentNode;
+        if (!tagName || !tagName.match(/li/gi) || !parent.tagName || !parent.tagName.match(/[ou]l/gi)) {
+            //console.log("parent is not list container");
+            newContainer = wrapElement(defaultWrap, itemElement);
+            angular.element(itemElement).after(newContainer);
+            angular.element(itemElement).remove();
+            taSelection.setSelectionToElementStart(itemElement);
+            return;
+        } else if (angular.element(parent).hasClass('ta-bind')) {
+            //console.log("parent is editor, won't outdent");
+            return;
+        } else if (parent.parentNode.tagName.match(/li/i)) {
+            //console.log('parent.parentNode is <li>');
+            if (itemElement !== parent.lastChild) {
+                newContainer = angular.element('<' + parent.tagName + ' class="' + parent.className + '">');
+                while (itemElement.nextSibling) {
+                    newContainer.append(itemElement.nextSibling);
+                }
+                itemElement.appendChild(newContainer[0]);
+            }
+            /* suppose parent of parent is <li>. This adds the new outdented element after it */
+            angular.element(parent.parentNode).after(itemElement);
+            if (parent.childNodes.length === 0) parent.remove();
+            taSelection.setSelectionToElementStart(itemElement);
+            return;
+        } else if (angular.element(parent.parentNode).hasClass('ta-bind')) {
+            /* use default wrap to wrap the item content */
+            //console.log('parent  of parent is not a list element');
+            if (itemElement !== parent.lastChild) {
+                newContainer = angular.element('<' + parent.tagName + ' class="' + parent.className + '">');
+                while (itemElement.nextSibling) {
+                    newContainer.append(itemElement.nextSibling);
+                }
+                wrapElem = wrapElement(defaultWrap, itemElement);
+                angular.element(parent).after(wrapElem);
+                /* not appending here, but add after the new root element */
+                angular.element(wrapElem).after(newContainer[0]);
+            } else {
+                wrapElem = wrapElement(defaultWrap, itemElement);
+                angular.element(parent).after(wrapElem);
+            }
+            angular.element(itemElement).remove();
+            if (angular.element(parent).children().length === 0) angular.element(parent).remove();
+            taSelection.setSelectionToElementStart(wrapElem);
+            return;
+        } else if ( !options || !options.preserveList ) {
+            /* when the parent of list container ol is a DIV, we can chose to preserve list or outdent
+             * list item.
+             * this case we outdent the list item
+             * */
+            // console.log('outdent list');
+                if (itemElement !== parent.lastChild) {
+                /* move all nextSiblings to new list container */
+                newContainer = angular.element('<' + parent.tagName + ' class="' + parent.className + '">');
+                while (itemElement.nextSibling) {
+                    newContainer.append(itemElement.nextSibling);
+                }
+                /* wrapElem here is the last childNode of itemElement */
+                wrapElem = moveChildNodesAfter(parent, itemElement);
+                angular.element(wrapElem).after(newContainer[0]);
+            } else {
+                wrapElem = moveChildNodesAfter(parent, itemElement);
+            }
+            angular.element(itemElement).remove();
+            if (angular.element(parent).children().length === 0) angular.element(parent).remove();
+            taSelection.setSelectionToElementStart(wrapElem);
+            return;
+        } else if ( options.preserveList ) {
+            /* when the parent of list container ol is a DIV, we can chose to preserve list or outdent
+             * list item.
+             * this case we preserve the list.
+             * */
+            //console.log('preserve list');
+            if (parent !== parent.parentNode.lastChild) {
+                /* move all nextSiblings of parent to new list container */
+                newContainer = angular.element("<" + defaultWrap + ">");
+                while (parent.nextSibling) {
+                    newContainer.append(parent.nextSibling);
+                }
+            } else { newContainer = false; }
+            /* move list container after grand parent */
+            var paragraphContainer = angular.element(parent.parentNode);
+            var newParent = paragraphContainer.after(parent);
+            if ( newContainer ) angular.element(newParent).after(newContainer[0]);
+            if (paragraphContainer.children().length === 0) paragraphContainer.remove();
+            taSelection.setSelectionToElementStart(itemElement);
+            return;
+        }
+       };
+    var outdentBlock = function (defaultWrap, $selected, options) {
+        //console.log('outdenting block');
+        var sel, beginElement, endElement, items, current, done ;
+        sel = taSelection.getSelection();
+        /* container shows common ancester of children */
+        sel.container = findListOrBlockContainer(sel.container);
+        sel.start.element = findListOrBlockContainer(sel.start.element);
+        sel.end.element = findListOrBlockContainer(sel.end.element);
+        beginElement = findChildContainer(sel.container, sel.start.element);
+        endElement = findChildContainer(sel.container, sel.end.element);
+        done = false;
+        items = [beginElement];
+        while (items.slice(-1)[0].nextSibling  && !done ) {
+            if (items.slice(-1)[0] === endElement){
+                done = true;
+            } else {
+                items.push(items.slice(-1)[0].nextSibling);
+            }
+        }
+        angular.forEach(items, function(item) {
+            outdentListItem(item, defaultWrap, options);
+        });
+    };
     var turnBlockIntoBlocks = function(element, options) {
         for(var i = 0; i<element.childNodes.length; i++) {
             var _n = element.childNodes[i];
@@ -207,7 +434,18 @@ angular.module('textAngular.DOM', ['textAngular.factories'])
         // IF you want to modify the html the user sees, do it when the user does a switchView
         taDefaultWrap = taBrowserTag(taDefaultWrap);
         return function(command, showUI, options, defaultTagAttributes){
-            var i, $target, html, _nodes, next, optionsTagName, selectedElement, ourSelection;
+            var wrap = function ($selected) {
+                var elem = angular.element('<' + taDefaultWrap + '>');
+                if ($selected[0].childNodes && $selected[0].childNodes.length > 0) {
+                    while ($selected[0].childNodes.length > 0) {
+                        elem[0].appendChild($selected[0].childNodes[0]);
+                    }
+                } else {
+                    elem[0].innerHTML = $selected[0].innerHTML;
+                }
+                return elem;
+            };
+            var i, $target, html, _nodes, next, optionsTagName, selectedElement, ourSelection, prev, parent, listContainer, wrapElem;
             var defaultWrapper = angular.element('<' + taDefaultWrap + '>');
             try{
                 if (taSelection.getSelection) {
@@ -413,6 +651,10 @@ angular.module('textAngular.DOM', ['textAngular.factories'])
                     taSelection.setSelectionToElementEnd($target[0]);
                     return;
                 }
+            }else if(command.toLowerCase() === 'indent'){
+                return indentBlock(taDefaultWrap, $selected, options);
+            }else if(command.toLowerCase() === 'outdent'){
+                return outdentBlock(taDefaultWrap, $selected, options);
             }else if(command.toLowerCase() === 'formatblock'){
                 optionsTagName = options.toLowerCase().replace(/[<>]/ig, '');
                 if(optionsTagName.trim() === 'default') {
