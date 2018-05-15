@@ -8,7 +8,7 @@ describe('ngBindHtml', function() {
     var element = $compile('<div ng-bind-html="html"></div>')($rootScope);
     $rootScope.html = '<div unknown>hello</div>';
     $rootScope.$digest();
-    expect(angular.lowercase(element.html())).toEqual('<div>hello</div>');
+    expect(element.html().toLowerCase()).toEqual('<div>hello</div>');
   }));
 
 
@@ -18,11 +18,11 @@ describe('ngBindHtml', function() {
     angular.forEach([null, undefined, ''], function(val) {
       $rootScope.html = 'some val';
       $rootScope.$digest();
-      expect(angular.lowercase(element.html())).toEqual('some val');
+      expect(element.html().toLowerCase()).toEqual('some val');
 
       $rootScope.html = val;
       $rootScope.$digest();
-      expect(angular.lowercase(element.html())).toEqual('');
+      expect(element.html().toLowerCase()).toEqual('');
     });
   }));
 });
