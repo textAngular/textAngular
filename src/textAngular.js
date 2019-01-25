@@ -2016,7 +2016,7 @@ textAngular.directive("textAngular", [
 								pos.x = ratio > newRatio ? pos.x : pos.y / ratio;
 								pos.y = ratio > newRatio ? pos.x * ratio : pos.y;
 							}
-							el = angular.element(_el);
+							var el = angular.element(_el);
 							el.attr('height', Math.max(0, pos.y));
 							el.attr('width', Math.max(0, pos.x));
 							
