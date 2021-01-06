@@ -3,7 +3,9 @@
   "version": "1.5.16",
   "main": [
     "./dist/textAngular.js",
+    "./dist/textAngular.min.js",
     "./dist/textAngular-sanitize.js",
+    "./dist/textAngular-sanitize.min.js",
     "./dist/textAngularSetup.js",
     "./dist/textAngular.css"
   ],
