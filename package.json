@@ -1,6 +1,6 @@
 {
   "name": "@mspecs/textangular",
-  "version": "1.6.0",
+  "version": "1.7.0",
   "repository": "git://github.com/mspecs/textangular.git",
   "description": "A radically powerful Text-Editor/Wysiwyg editor for Angular.js",
   "maintainers": [
