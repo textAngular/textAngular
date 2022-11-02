@@ -506,6 +506,37 @@ var trim = (function() {
     return angular.isString(value) ? value.trim() : value;
   };
 })();
+  
+  
+
+//Style attributes used in emailsignatures;
+var specialStyles = [
+  "mso-table-lspace",
+  "mso-table-rspace",
+  "border-collapse",
+  "border-spacing",
+  "min-width",
+  "font-family",
+  "color",
+  "font-size",
+  "line-height",
+  "padding-bottom",
+  "height",
+  "width",
+  "max-width",
+  "padding-left",
+  "padding-right",
+  "border-right",
+  "font-size",
+  "padding-top",
+  "line-height",
+  "text-decoration",
+  "color","text-decoration",
+  "font-weight",
+  "display",
+  "font-style"
+];
+    
 
 // Custom logic for accepting certain style options only - textAngular
 // Currently allows only the color, background-color, text-align, float, width and height attributes
@@ -518,7 +549,9 @@ function validStyles(styleAttr){
 		if(v.length == 2){
 			var key = trim(angular.lowercase(v[0]));
 			var value = trim(angular.lowercase(v[1]));
+      
 			if(
+        specialStyles.includes(key) ||
 				(key === 'color' || key === 'background-color') && (
 					value.match(/^rgb\([0-9%,\. ]*\)$/i)
 					|| value.match(/^rgba\([0-9%,\. ]*\)$/i)
