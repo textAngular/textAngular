@@ -361,7 +361,7 @@ function htmlParser(html, handler) {
 
           if (handler.chars) handler.chars(decodeEntities(text));
 
-          return all;
+          return "";
       });
 
       parseEndTag("", stack.last());
