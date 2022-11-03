@@ -1,3 +1,8 @@
+<a name="1.14.0"></a>
+# [1.14.0](https://github.com/mspecs/textangular/compare/v1.13.0...v1.14.0) (2022-11-03)
+
+
+
 <a name="1.13.0"></a>
 # [1.13.0](https://github.com/mspecs/textangular/compare/v1.12.0...v1.13.0) (2022-11-03)
 
