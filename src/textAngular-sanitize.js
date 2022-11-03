@@ -288,7 +288,7 @@ function htmlParser(html, handler) {
     chars = true;
 
     // Make sure we're not in a script or style element
-    if (!stack.last()) {
+    if (!stack.last() || !specialElements[ stack.last() ]) {
 
       // White space
       if (WHITE_SPACE_REGEXP.test(html)) {
@@ -649,9 +649,6 @@ function htmlSanitizeWriter(buf, uriValidator) {
   return {
     start: function(tag, attrs, unary) {
       tag = angular.lowercase(tag);
-      if (!ignore) {
-        ignore = tag;
-      }
       if (!ignore && validElements[tag] === true) {
         out('<');
         out(tag);
