@@ -196,7 +196,7 @@ var optionalEndTagBlockElements = makeMap("colgroup,dd,dt,li,p,tbody,td,tfoot,th
 // Safe Block Elements - HTML5
 var blockElements = angular.extend({}, optionalEndTagBlockElements, makeMap("address,article," +
         "aside,blockquote,caption,center,del,dir,div,dl,figure,figcaption,footer,h1,h2,h3,h4,h5," +
-        "h6,header,hgroup,hr,ins,map,menu,nav,ol,pre,script,style,!--[if (gte mso 9)|(IE)],![endif]--,section,table,ul"));
+        "h6,header,hgroup,hr,ins,map,menu,nav,ol,pre,script,style,section,table,ul"));
 
 // Inline Elements - HTML5
 var inlineElements = angular.extend({}, optionalEndTagInlineElements, makeMap("a,abbr,acronym,b," +
@@ -211,7 +211,7 @@ var svgElements = makeMap("animate,animateColor,animateMotion,animateTransform,c
         "stop,svg,switch,text,title,tspan,use");
 
 // Special Elements (can contain anything)
-var specialElements = makeMap("script,style,![endif]--,!--[if (gte mso 9)|(IE)]");
+var specialElements = makeMap("script,style");
 
 var validElements = angular.extend({},
                                    voidElements,
@@ -355,14 +355,6 @@ function htmlParser(html, handler) {
       }
 
     } else {
-      html = html.replace(new RegExp("([^]*)<\\s*\\/\\s*" + stack.last() + "[^>]*>", 'i'),
-        function(all, text) {
-          text = text.replace(COMMENT_REGEXP, "$1").replace(CDATA_REGEXP, "$1");
-
-          if (handler.chars) handler.chars(decodeEntities(text));
-
-          return "";
-      });
 
       parseEndTag("", stack.last());
     }
