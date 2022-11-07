@@ -551,7 +551,7 @@ function validStyles(styleAttr){
 			var value = trim(angular.lowercase(v[1]));
       
 			if(
-        specialStyles.includes(key) ||
+        (key) ||
 				(key === 'color' || key === 'background-color') && (
 					value.match(/^rgb\([0-9%,\. ]*\)$/i)
 					|| value.match(/^rgba\([0-9%,\. ]*\)$/i)
