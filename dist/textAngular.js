@@ -677,6 +677,13 @@ angular.module('textAngular.DOM', ['textAngular.factories'])
         for(var i = 0; i < elements.length; i++){
             html += '<' + taBrowserTag('li') + '>' + elements[i].innerHTML + '</' + taBrowserTag('li') + '>';
         }
+        // removing the zero width characters
+        html = html.replace(/[\u200B-\u200D\uFEFF]/g, '');
+
+        // removing any unnecessary <li></li> tags
+		if(/^<li><\/li>(<li><\/li>)*$/.test(html)){
+			html = "<li></li>";
+		}
         var $target = angular.element('<' + newListTag + '>' + html + '</' + newListTag + '>');
         listElement.after($target);
         listElement.remove();
