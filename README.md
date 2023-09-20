@@ -66,6 +66,7 @@ loaders: [
 
 Include script tags similar to the following:
 ```html
+<link rel="stylesheet" href='http://cdnjs.cloudflare.com/ajax/libs/textAngular/1.5.0/textAngular.css'/>
 <script src='http://cdnjs.cloudflare.com/ajax/libs/textAngular/1.5.0/textAngular-rangy.min.js'></script>
 <script src='http://cdnjs.cloudflare.com/ajax/libs/textAngular/1.5.0/textAngular-sanitize.min.js'></script>
 <script src='http://cdnjs.cloudflare.com/ajax/libs/textAngular/1.5.0/textAngular.min.js'></script>
